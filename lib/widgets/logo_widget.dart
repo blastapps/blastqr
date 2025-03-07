@@ -1,4 +1,3 @@
-import 'package:blast_qr/color_scheme.dart';
 import 'package:flutter/material.dart';
 
 class LogoWidget extends StatelessWidget {

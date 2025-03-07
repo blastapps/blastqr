@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +32,7 @@ class _SendPageState extends State<SendPage> {
   }
 
   void _pickFileToEncode() async {
-    const XTypeGroup typeGroup = XTypeGroup(
-      label: 'images',
-      extensions: ['jpg', 'png', 'avif', 'gif', 'webp'],
-      uniformTypeIdentifiers: ['public.data', 'public.image', 'public.avif'],
-    );
+    const XTypeGroup typeGroup = XTypeGroup(label: 'files');
     final XFile? file = await openFile(
       acceptedTypeGroups: <XTypeGroup>[typeGroup],
     );
@@ -47,12 +43,12 @@ class _SendPageState extends State<SendPage> {
   }
 
   void _showQrPage(File file) async {
-    final fileSizeInBytes = await file.length();
+    final fileWrapper = await file.toFileWrapper();
     if (mounted) {
       Navigator.of(context).push(
         CupertinoSheetRoute(
           builder: (context) {
-            return QrPage(file: file, fileSizeInBytes: fileSizeInBytes);
+            return QrPage(file: fileWrapper);
           },
         ),
       );

@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'dart:math';
-import 'package:blast_qr/features/collection_page.dart';
 import 'package:blast_qr/features/qr_page.dart';
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_avif/flutter_avif.dart';
@@ -22,18 +21,14 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   final PageController _pageController = PageController();
-  final String _fileSize = '';
 
   bool _immersiveMode = false;
-  int _currentItem = 0;
 
   List<FileSystemEntity>? _imageFiles;
 
   @override
   void initState() {
     super.initState();
-    _currentItem = widget.index;
-
     _loadItems();
   }
 
@@ -142,8 +137,12 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   Future<void> _deleteFile() async {
+    final item = _pageController.page?.toInt();
+    if (item == null) {
+      return;
+    }
     try {
-      await _imageFiles?[_currentItem].delete();
+      await _imageFiles?[item].delete();
     } catch (error) {
       if (mounted) {
         final snackBar = SnackBar(content: Text(error.toString()));
@@ -160,13 +159,17 @@ class _GalleryPageState extends State<GalleryPage> {
     if (_imageFiles == null || _imageFiles?.isEmpty == true) {
       return;
     }
-    final file = _imageFiles![_currentItem] as File;
-    final fileSizeInBytes = await file.length();
+    final item = _pageController.page?.toInt();
+    if (item == null) {
+      return;
+    }
+    final file = _imageFiles![item] as File;
+    final wrapper = await file.toFileWrapper();
     if (mounted) {
       Navigator.of(context).push(
         CupertinoSheetRoute(
           builder: (context) {
-            return QrPage(file: file, fileSizeInBytes: fileSizeInBytes);
+            return QrPage(file: wrapper);
           },
         ),
       );
@@ -182,15 +185,5 @@ class _GalleryPageState extends State<GalleryPage> {
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
-  }
-}
-
-extension FileSizeExtension on File {
-  Future<String> fileSize({int decimals = 1}) async {
-    int bytes = await length();
-    if (bytes <= 0) return "0 B";
-    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    var i = (log(bytes) / log(1024)).floor();
-    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
   }
 }

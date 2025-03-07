@@ -16,11 +16,18 @@ class CollectionPage extends StatefulWidget {
 
 class _CollectionPageState extends State<CollectionPage> {
   List<FileSystemEntity>? _imageFiles;
-
+  double cacheWidth = 100;
   @override
   void initState() {
     super.initState();
     _loadItems();
+
+    final mediaQuery =
+        (context.getElementForInheritedWidgetOfExactType<MediaQuery>()!.widget
+                as MediaQuery)
+            .data;
+    cacheWidth =
+        mediaQuery.devicePixelRatio * ((mediaQuery.size.width / 3) - 64);
   }
 
   Future<void> _loadItems() async {
@@ -41,9 +48,6 @@ class _CollectionPageState extends State<CollectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final cacheWidth =
-        (MediaQuery.of(context).devicePixelRatio) *
-        ((MediaQuery.of(context).size.width / 2) - 64);
     return Scaffold(
       body:
           _imageFiles == null
@@ -61,16 +65,10 @@ class _CollectionPageState extends State<CollectionPage> {
                     onTap: () => _onTapItem(index),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Image.file(
+                      child: AvifImage.file(
                         file,
                         fit: BoxFit.cover,
                         cacheWidth: cacheWidth.toInt(),
-                        errorBuilder:
-                            (a, b, c) => AvifImage.file(
-                              file,
-                              fit: BoxFit.cover,
-                              cacheWidth: cacheWidth.toInt(),
-                            ),
                       ),
                     ),
                   );

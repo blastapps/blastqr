@@ -1,43 +1,30 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/widgets/raptorq_file_qr_widget.dart';
+import 'package:flutter_avif/flutter_avif.dart';
 
 class QrPage extends StatefulWidget {
-  const QrPage({super.key, required this.file, required this.fileSizeInBytes});
+  const QrPage({super.key, required this.file});
 
-  final File file;
-  final int fileSizeInBytes;
+  final FileWrapper file;
 
   @override
   State<QrPage> createState() => _QrPageState();
 }
 
 class _QrPageState extends State<QrPage> {
-  bool get _isLargeFile => widget.fileSizeInBytes > 1000000;
+  bool get _isLargeFile => widget.file.size > 1000000;
   bool _largeFileAcknowledged = false;
-
-  double get _estimatedFastestTime => (widget.fileSizeInBytes / 1000) / 20;
-  double get _estimatedSlowestTime => (widget.fileSizeInBytes / 1000) / 6;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          FileHeaderWidget(
-            file: widget.file,
-            fileSizeInBytes: widget.fileSizeInBytes,
-            estimatedFastestTime: _estimatedFastestTime,
-            estimatedSlowestTime: _estimatedSlowestTime,
-          ),
+          FileHeaderWidget(file: widget.file),
           Container(
             decoration: BoxDecoration(
               border: Border.all(color: context.color.outline, width: 2),
@@ -50,14 +37,16 @@ class _QrPageState extends State<QrPage> {
             child:
                 _isLargeFile && !_largeFileAcknowledged
                     ? FileTooLargeAlertWidget(
-                      estimatedSlowestTime: _estimatedSlowestTime,
+                      estimatedSlowestTime: widget.file.getEstimateTransferTime(
+                        6,
+                      ),
                       onAcknowledge: () {
                         setState(() {
                           _largeFileAcknowledged = true;
                         });
                       },
                     )
-                    : RaptorFileQrWidget(file: widget.file),
+                    : RaptorFileQrWidget(file: widget.file.file),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -141,30 +130,18 @@ class FileTooLargeAlertWidget extends StatelessWidget {
 }
 
 class FileHeaderWidget extends StatelessWidget {
-  const FileHeaderWidget({
-    super.key,
-    required this.file,
-    required this.fileSizeInBytes,
-    required this.estimatedFastestTime,
-    required this.estimatedSlowestTime,
-  });
+  const FileHeaderWidget({super.key, required this.file});
 
-  final File file;
-  final int fileSizeInBytes;
-  final double estimatedFastestTime;
-  final double estimatedSlowestTime;
-
-  String get fileName => file.uri.pathSegments.last;
-
-  String get fileSize => '${(fileSizeInBytes / 1000).toStringAsFixed(0)} KB';
+  final FileWrapper file;
 
   String get _estimatedTransferTime {
-    return '${estimatedFastestTime.toStringAsFixed(0)}~${estimatedSlowestTime.toStringAsFixed(0)}s to transfer';
+    final fast = file.getEstimateTransferTime(20);
+    final slow = file.getEstimateTransferTime(6);
+    return '${fast.toStringAsFixed(0)}~${slow.toStringAsFixed(0)}s to transfer';
   }
 
   @override
   Widget build(BuildContext context) {
-    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 16, 16, 24),
       child: Stack(
@@ -189,11 +166,7 @@ class FileHeaderWidget extends StatelessWidget {
                   ],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Image.file(
-                  file,
-                  fit: BoxFit.cover,
-                  cacheWidth: (72 * pixelRatio).toInt(),
-                ),
+                child: _buildFileThumbnail(context),
               ),
               Expanded(
                 child: Column(
@@ -202,14 +175,14 @@ class FileHeaderWidget extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 36),
                       child: Text(
-                        fileName,
+                        file.name,
                         style: Theme.of(context).textTheme.titleMedium,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         softWrap: false,
                       ),
                     ),
-                    Text(fileSize),
+                    Text(file.sizeInkB),
                     Text(_estimatedTransferTime),
                   ],
                 ),
@@ -230,6 +203,40 @@ class FileHeaderWidget extends StatelessWidget {
               ),
               padding: EdgeInsets.zero,
               icon: Icon(Icons.clear),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileThumbnail(BuildContext context) {
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    if (file.type.isAvifImage) {
+      return AvifImage.file(
+        file.file,
+        fit: BoxFit.cover,
+        cacheWidth: (72 * pixelRatio).toInt(),
+      );
+    } else if (file.type.isImage) {
+      return Image.file(
+        file.file,
+        fit: BoxFit.cover,
+        cacheWidth: (72 * pixelRatio).toInt(),
+      );
+    }
+    return Container(
+      color: Colors.grey,
+      alignment: Alignment.center,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(Icons.description, size: 64, color: Colors.white.withAlpha(80)),
+          FittedBox(
+            child: Text(
+              file.extension.toUpperCase(),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
