@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:blast_qr/messages/basic.pb.dart';
 
 class RaptorqDecoder {
-  final int mtu;
-  final Function(int chunks, String speed)? onProcessChunk;
+  final Function(int chunks, double speed, double estimatedProgress)?
+  onProcessChunk;
   final Function()? onTransferComplete;
   final Function(Uint8List result) onReceiveResult;
 
@@ -13,16 +13,16 @@ class RaptorqDecoder {
   bool isLoadingResult = false;
   int elapsedTime = 0;
   int count = 0;
+  double estimatedProgress = 0;
   Uint8List latestResult = Uint8List(0);
 
   RaptorqDecoder({
-    required this.mtu,
     required this.onReceiveResult,
     this.onTransferComplete,
     this.onProcessChunk,
   });
 
-  Future<void> decodeChunk(Uint8List data, int transferLength) async {
+  Future<void> decodeChunk(Uint8List data, int transferLength, int mtu) async {
     if (complete || isLoadingResult) {
       return;
     }
@@ -49,15 +49,12 @@ class RaptorqDecoder {
       final msg = signal.message;
       final bytes = msg.result;
       if (bytes.isNotEmpty && !complete) {
+        onTransferComplete?.call();
         _handleOutput(msg);
       } else {
         final speed = (msg.bytesProcessed / 1000) / (msg.time / 1000);
-        final formattedSpeed = '${speed.toStringAsFixed(1)}kB/s';
-        log(
-          'Processed: ${msg.bytesProcessed}/$transferLength Time: ${msg.time} Speed: $formattedSpeed',
-        );
-        onProcessChunk?.call(count, formattedSpeed);
-        HapticFeedback.lightImpact();
+        estimatedProgress = (count * mtu) / (transferLength * 1.25);
+        onProcessChunk?.call(count, speed, estimatedProgress);
       }
     } catch (e) {
       log(e.toString());
@@ -93,6 +90,7 @@ class RaptorqDecoder {
 
   void reset() {
     count = 0;
+    estimatedProgress = 0;
     complete = false;
     isLoadingResult = false;
     latestResult = Uint8List(0);

@@ -1,6 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:blast_qr/color_scheme.dart';
@@ -10,9 +7,10 @@ ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       textStyle: const TextStyle(
-        fontFamily: 'Roboto Condensed',
-        fontSize: 18,
+        fontFamily: 'Jersey25',
+        fontSize: 22,
         fontWeight: FontWeight.bold,
+        decoration: TextDecoration.underline,
       ),
       minimumSize: const Size.fromHeight(48),
       elevation: 0,
@@ -28,9 +26,10 @@ OutlinedButtonThemeData outlinedButtonTheme(ColorScheme colorScheme) {
   return OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       textStyle: const TextStyle(
-        fontFamily: 'Roboto Condensed',
-        fontSize: 18,
+        fontFamily: 'Jersey25',
+        fontSize: 22,
         fontWeight: FontWeight.bold,
+        decoration: TextDecoration.underline,
       ),
       minimumSize: const Size.fromHeight(48),
       elevation: 0,
@@ -46,8 +45,11 @@ AppBarTheme appBarTheme(ColorScheme colorScheme) {
   return AppBarTheme(
     actionsIconTheme: IconThemeData(color: colorScheme.onSurface),
     systemOverlayStyle: SystemUiOverlayStyle(
-      systemNavigationBarColor: colorScheme.surface,
+      statusBarColor: colorScheme.surface,
+      statusBarIconBrightness: colorScheme.brightness.opposite,
+      systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: colorScheme.brightness.opposite,
+      systemNavigationBarContrastEnforced: false,
     ),
   );
 }
@@ -61,13 +63,13 @@ TextButtonThemeData textButtonTheme = TextButtonThemeData(
 TextTheme textTheme(ColorScheme colorScheme) {
   return TextTheme(
     titleLarge: const TextStyle(
-      fontFamily: 'Roboto Condensed',
+      fontFamily: 'Jersey25',
       fontWeight: FontWeight.bold,
       fontSize: 28,
     ),
     titleMedium: const TextStyle(
       fontWeight: FontWeight.bold,
-      fontFamily: 'Roboto Condensed',
+      fontFamily: 'Jersey25',
       fontSize: 20,
     ),
     titleSmall: TextStyle(
@@ -94,9 +96,15 @@ InputDecorationTheme textFieldTheme(ColorScheme colorScheme) {
   );
 }
 
+SnackBarThemeData snackBarTheme(ColorScheme colorScheme) {
+  return SnackBarThemeData(
+    backgroundColor: colorScheme.primaryContainer,
+    contentTextStyle: TextStyle(color: colorScheme.onPrimaryContainer),
+  );
+}
+
 ThemeData lightTheme = ThemeData(
-  splashFactory:
-      Platform.isIOS ? NoSplash.splashFactory : InkRipple.splashFactory,
+  splashFactory: NoSplash.splashFactory,
   useMaterial3: true,
   colorScheme: lightColorScheme,
   sliderTheme: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
@@ -107,11 +115,11 @@ ThemeData lightTheme = ThemeData(
   inputDecorationTheme: textFieldTheme(lightColorScheme),
   outlinedButtonTheme: outlinedButtonTheme(lightColorScheme),
   elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
+  snackBarTheme: snackBarTheme(lightColorScheme),
 );
 
 ThemeData darkTheme = ThemeData(
-  splashFactory:
-      Platform.isIOS ? NoSplash.splashFactory : InkRipple.splashFactory,
+  splashFactory: NoSplash.splashFactory,
   useMaterial3: true,
   colorScheme: darkColorScheme,
   sliderTheme: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
@@ -122,6 +130,7 @@ ThemeData darkTheme = ThemeData(
   inputDecorationTheme: textFieldTheme(darkColorScheme),
   outlinedButtonTheme: outlinedButtonTheme(darkColorScheme),
   elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
+  snackBarTheme: snackBarTheme(darkColorScheme),
 );
 
 extension BrightnessExtension on Brightness {

@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:blast_qr/raptorq/raptorq_encoder.dart';
 
 class RaptorFileQrWidget extends StatefulWidget {
-  final File file;
+  final FileWrapper file;
 
   const RaptorFileQrWidget({super.key, required this.file});
 
@@ -26,8 +24,6 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
   bool _isEncoding = true;
   int _fps = defaultFpeses[2];
   int _fpsIndex = 2;
-  int _transferLength = 0;
-  List<Uint8List> _data = [];
   double _qrCodeWidth = 360;
   double _qrCodePlatformOffset = 0;
 
@@ -58,11 +54,7 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
     _qrCodes = [];
     _isEncoding = true;
 
-    log('Encoding file...');
-    _data = await _encodeFile();
-
-    log('Generating ${_data.length} QR codes...');
-    await _generateQrCodes();
+    _qrCodes = await widget.file.toQrCodeList();
 
     _initTimer(Duration(milliseconds: (1000 / _fps).toInt()));
     _isEncoding = false;
@@ -77,49 +69,9 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
     _timer = Timer.periodic(delay, _nextChunk);
   }
 
-  Future<List<Uint8List>> _encodeFile() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final bytes = await widget.file.readAsBytes();
-    final fileSize = bytes.lengthInBytes;
-    final repairPackets = fileSize < 1000000 ? fileSize / 10000 * 2 : 50;
-
-    log('Encoding with MTU: 924, repairPacketsPerBlock: $repairPackets');
-    final encoder = RaptorqEncoder(
-      mtu: 924,
-      repairPacketsPerBlock: repairPackets.toInt(),
-    );
-    final encodedData = await encoder.encode(bytes);
-
-    _transferLength = bytes.length;
-    log('Chunk size: ${encodedData.first.length}');
-    setState(() {});
-
-    return encodedData;
-  }
-
-  Future<void> _generateQrCodes() async {
-    final len = _transferLength;
-    _qrCodes =
-        _data.map((c) {
-          Uint8List sizeBytes = Uint8List(8)
-            ..buffer.asByteData().setUint64(0, len, Endian.big);
-
-          Uint8List combined = Uint8List(8 + c.length);
-
-          combined.setAll(0, sizeBytes); // Copy metadata
-          combined.setAll(8, c); // Copy file data
-
-          return QrCode.fromUint8List(
-            data: combined,
-            errorCorrectLevel: QrErrorCorrectLevel.L,
-          );
-        }).toList();
-    await Future.delayed(const Duration(milliseconds: 400));
-  }
-
   void _nextChunk(Timer t) {
     _currentIndex += 1;
-    if (_currentIndex >= _data.length) {
+    if (_currentIndex >= _qrCodes.length) {
       _currentIndex = 0;
     }
     if (mounted) {
@@ -157,9 +109,7 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
             child: QrImageView.withQr(
               qr: _qrCodes[_currentIndex],
               version: QrVersions.auto,
-              padding: EdgeInsets.all(8),
               size: _qrCodeWidth,
-              gapless: false,
             ),
           ),
           SizedBox(height: 4),
@@ -167,7 +117,7 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${_currentIndex + 1}/${_data.length}',
+                '${_currentIndex + 1}/${_qrCodes.length}',
                 style: TextStyle(color: Colors.black),
               ),
               GestureDetector(

@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:blast_qr/model/blast_qrcode_data.dart';
+import 'package:blast_qr/raptorq/raptorq_encoder.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:qr_flutter/qr_flutter.dart';
 
 class FileWrapper {
   final File file;
@@ -16,6 +21,58 @@ class FileWrapper {
 
   FileWrapper({required this.file, required this.type, required this.size});
 
+  Future<List<QrCode>> toQrCodeList({int mtu = 924}) async {
+    // Metadata bytes (header)
+    final sizeBytes = Uint8List(4)
+      ..buffer.asByteData().setUint32(0, size, Endian.big);
+    Uint8List fileExtBytes = utf8.encode(type.extension);
+    if (fileExtBytes.lengthInBytes > 8) {
+      // Set fileExtBytes to 0 if longer than 8 bytes
+      fileExtBytes = Uint8List(8)
+        ..buffer.asByteData().setUint32(0, 0, Endian.big);
+    }
+    final mtuBytes = Uint8List(2)
+      ..buffer.asByteData().setUint16(0, mtu, Endian.big);
+
+    final chunks = await _getEncodedChunks();
+    return chunks.map((c) {
+      Uint8List combined = Uint8List(4 + 8 + 2 + 2 + c.length);
+      // Encode file size in first 4 bytes
+      combined.setAll(0, sizeBytes);
+      // Encode file extension in followin 8 bytes
+      combined.setAll(4, fileExtBytes);
+      // Encode signature bytes (magic number to validate qr code) in 2 bytes
+      combined.setAll(12, BlastQrcodeData.signatureBytes);
+      // Encode mtu (chunk size) in 2 bytes
+      combined.setAll(14, mtuBytes);
+      // Encode file data
+      combined.setAll(16, c);
+
+      return QrCode.fromUint8List(
+        data: combined,
+        errorCorrectLevel: QrErrorCorrectLevel.L,
+      );
+    }).toList();
+  }
+
+  Future<List<Uint8List>> _getEncodedChunks() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final bytes = await file.readAsBytes();
+    final repairPackets = (size / 5000);
+
+    log('Encoding with MTU: 924, repairPacketsPerBlock: $repairPackets');
+
+    final encoder = RaptorqEncoder(
+      mtu: 924,
+      repairPacketsPerBlock: repairPackets.toInt(),
+    );
+
+    final encodedData = await encoder.encode(bytes);
+    log('Chunk size: ${encodedData.first.length}');
+
+    return encodedData;
+  }
+
   double getEstimateTransferTime(int speedInkBps) {
     return (size / 1000) / speedInkBps;
   }
@@ -23,14 +80,17 @@ class FileWrapper {
 
 class FileType {
   final String? mimeType;
+  final String extension;
   final bool isImage;
+  final bool isAudio;
   final bool isUnknown;
   final bool isAvifImage;
 
-  FileType({required this.mimeType})
+  FileType({required this.extension, required this.mimeType})
     : isImage = mimeType?.startsWith("image") == true,
       isUnknown = mimeType == null,
-      isAvifImage = mimeType == 'image/avif';
+      isAvifImage = mimeType == 'image/avif' || extension == 'avif',
+      isAudio = mimeType?.startsWith("audio") == true;
 }
 
 extension FileExtension on File {
@@ -43,11 +103,13 @@ extension FileExtension on File {
 
   Future<FileType> getFileType() async {
     final header = await readHeaderBytes();
+    final fileName = uri.pathSegments.last;
     final mimeType = mime.lookupMimeType(
       uri.pathSegments.last,
       headerBytes: header,
     );
-    return FileType(mimeType: mimeType);
+    final ext = fileName.split('.').last;
+    return FileType(extension: ext, mimeType: mimeType);
   }
 
   Future<FileWrapper> toFileWrapper() async {

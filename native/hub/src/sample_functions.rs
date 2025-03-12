@@ -71,6 +71,7 @@ pub async fn decode_chunk() {
             mtu = msg.mtu;
             transfer_length = msg.transfer_length;
             start = Instant::now();
+            bytes_processed = 0;
             rinf::debug_print!("Configure decoder");
         }
 
@@ -85,18 +86,11 @@ pub async fn decode_chunk() {
                 .send_signal_to_dart();
                 continue;
             }
-            //let len = msg.transfer_length;
-            //rinf::debug_print!("Decoding chunk from rust: {len:?}");
 
             // Perform the decoding
-            let elapsed = start.elapsed();
-
-            rinf::debug_print!("Before decode {elapsed:?}");
-            let result = dec.decode(EncodingPacket::deserialize(&chunk));
+            let result: Option<Vec<u8>> = dec.decode(EncodingPacket::deserialize(&chunk));
 
             let elapsed = start.elapsed();
-            rinf::debug_print!("After decode {elapsed:?}");
-
             if result.is_some() {
                 rinf::debug_print!("Decode success!");
                 DecodeOutput {

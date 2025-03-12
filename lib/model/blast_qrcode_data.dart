@@ -1,35 +1,53 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:base45/base45.dart';
 import 'package:flutter/foundation.dart';
 
 enum QrEncodingType { bytes, base45, base64 }
 
 class BlastQrcodeData {
+  static final signatureBytes = Uint8List.fromList([81, 45]);
+
   final int transferLength;
+  final String fileExtension;
   final Uint8List data;
+  final int mtu;
 
-  BlastQrcodeData({required this.transferLength, required this.data});
-
-  factory BlastQrcodeData.fromString(String stringData) {
-    final comps = stringData.split('|');
-    final headerComps = comps[0].split('/');
-    final len = int.parse(headerComps[0]);
-    final qrEncoding = QrEncodingType.values[int.parse(headerComps[1])];
-    final data = comps[1];
-    final decodeMethod =
-        qrEncoding == QrEncodingType.base64 ? base64Decode : Base45.decode;
-    final bytes = decodeMethod(data);
-    return BlastQrcodeData(transferLength: len, data: bytes);
-  }
+  BlastQrcodeData({
+    required this.transferLength,
+    required this.fileExtension,
+    required this.data,
+    required this.mtu,
+  });
 
   factory BlastQrcodeData.fromBytes(Uint8List bytes) {
-    ByteData byteData = bytes.buffer.asByteData(0, 8);
-    int extractedSize = byteData.getUint64(0, Endian.big);
-    Uint8List packetBytes = bytes.sublist(8);
-    return BlastQrcodeData(transferLength: extractedSize, data: packetBytes);
+    if (!bytesIsValidBlastQrCode(bytes)) {
+      throw Exception('Not a valid BlastQR code.');
+    }
+    ByteData sizeByteData = bytes.buffer.asByteData(0, 4);
+    Uint8List extBytes = bytes.sublist(4, 12);
+    ByteData mtuByteData = bytes.buffer.asByteData(14, 16);
+    int fileSize = sizeByteData.getUint32(0, Endian.big);
+    int mtu = mtuByteData.getUint16(0, Endian.big);
+    String ext = utf8
+        .decode(extBytes, allowMalformed: false)
+        .replaceAll('\x00', '');
+    Uint8List packetBytes = bytes.sublist(16);
+    return BlastQrcodeData(
+      transferLength: fileSize,
+      fileExtension: ext,
+      data: packetBytes,
+      mtu: mtu,
+    );
+  }
+
+  static bool bytesIsValidBlastQrCode(Uint8List? bytes) {
+    if (bytes == null) {
+      return false;
+    }
+    Uint8List signature = bytes.sublist(12, 14);
+    return (signature[0] == signatureBytes[0] &&
+        signature[1] == signatureBytes[1]);
   }
 }
 

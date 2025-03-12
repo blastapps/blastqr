@@ -1,51 +1,51 @@
+import 'package:blast_qr/widgets/is_text_field.dart';
 import 'package:flutter/material.dart';
 
-class ISPickerSheet extends StatelessWidget {
-  const ISPickerSheet({
+class TextInputSheet extends StatelessWidget {
+  const TextInputSheet({
     super.key,
-    required this.items,
-    this.onItemTap,
-    this.icons,
-    this.itemHeight,
+    required this.title,
+    required this.inputHintText,
+    required this.confirmText,
+    required this.onConfirm,
+    required this.controller,
   });
 
-  final List<String> items;
-  final List<Widget>? icons;
-  final double? itemHeight;
-  final void Function(int index)? onItemTap;
-
-  double? get _height => itemHeight != null ? itemHeight! * items.length : null;
-
-  ScrollPhysics? get scrollPhysics {
-    if (itemHeight != null && items.length < 7) {
-      return const NeverScrollableScrollPhysics();
-    }
-    return null;
-  }
+  final String title;
+  final String inputHintText;
+  final String confirmText;
+  final void Function(String text) onConfirm;
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _height ?? MediaQuery.of(context).size.height / 2,
-      child: Scrollbar(
-        child: ListView.builder(
-          physics: scrollPhysics,
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(item),
-              leading: icons?.elementAtOrNull(index),
-              onTap: () {
-                Navigator.of(context).pop();
-                onItemTap?.call(index);
-              },
-            );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ISTextField(
+          hintText: inputHintText,
+          controller: controller,
+          autofocus: true,
+          onSubmitted: (val) {
+            _confirm(context);
           },
         ),
-      ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: () {
+            _confirm(context);
+          },
+          child: Text(confirmText),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
+  }
+
+  void _confirm(BuildContext context) {
+    Navigator.of(context).pop();
+    onConfirm(controller.text);
   }
 }
 
@@ -66,32 +66,35 @@ Future<void> showMessage({
     context: context,
     title: title,
     backgroundColor: backgroundColor,
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(message),
-        const SizedBox(height: 16),
-        if (confirmTitle != null)
-          ElevatedButton(
-            onPressed: () {
-              onConfirmTap?.call();
-              Navigator.of(context).pop();
-            },
-            style: confirmButtonStyle,
-            child: Text(confirmTitle.toUpperCase()),
-          ),
-        const SizedBox(height: 8),
-        if (secondaryTitle != null)
-          OutlinedButton(
-            onPressed:
-                onSecondaryTap ??
-                () {
-                  Navigator.of(context).pop();
-                },
-            style: secondaryButtonStyle,
-            child: Text(secondaryTitle.toUpperCase()),
-          ),
-      ],
+    body: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(message),
+          const SizedBox(height: 16),
+          if (confirmTitle != null)
+            ElevatedButton(
+              onPressed: () {
+                onConfirmTap?.call();
+                Navigator.of(context).pop();
+              },
+              style: confirmButtonStyle,
+              child: Text(confirmTitle),
+            ),
+          const SizedBox(height: 8),
+          if (secondaryTitle != null)
+            OutlinedButton(
+              onPressed:
+                  onSecondaryTap ??
+                  () {
+                    Navigator.of(context).pop();
+                  },
+              style: secondaryButtonStyle,
+              child: Text(secondaryTitle),
+            ),
+        ],
+      ),
     ),
   );
 }
@@ -118,9 +121,9 @@ Future<void> showSheet({
     builder: (BuildContext context) {
       return Padding(
         padding: EdgeInsets.fromLTRB(
-          16,
           0,
-          16,
+          0,
+          0,
           MediaQuery.of(context).viewInsets.bottom +
               MediaQuery.of(context).viewPadding.bottom,
         ),
@@ -128,7 +131,10 @@ Future<void> showSheet({
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            ),
             const SizedBox(height: 24),
             body,
           ],
@@ -138,22 +144,30 @@ Future<void> showSheet({
   );
 }
 
-Future<void> showPickerWidget(
+Future<void> showTextInputSheet(
   BuildContext context, {
   required title,
-  required List<String> items,
-  List<Widget>? icons,
-  double? itemHeight,
-  required void Function(int index) onItemTap,
+  String prefilledText = "",
+  String? confirmText,
+  TextSelection? selection,
+  required hintText,
+  required void Function(String text) onConfirm,
 }) {
+  final controller = TextEditingController(text: prefilledText);
+  controller.selection =
+      selection ?? TextSelection(baseOffset: 0, extentOffset: 0);
   return showSheet(
     context: context,
     title: title,
-    body: ISPickerSheet(
-      items: items,
-      onItemTap: onItemTap,
-      icons: icons,
-      itemHeight: itemHeight,
+    body: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: TextInputSheet(
+        title: title,
+        controller: controller,
+        inputHintText: hintText,
+        confirmText: confirmText ?? 'Save',
+        onConfirm: onConfirm,
+      ),
     ),
   );
 }

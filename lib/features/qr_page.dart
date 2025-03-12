@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/widgets/raptorq_file_qr_widget.dart';
@@ -46,7 +45,7 @@ class _QrPageState extends State<QrPage> {
                         });
                       },
                     )
-                    : RaptorFileQrWidget(file: widget.file.file),
+                    : RaptorFileQrWidget(file: widget.file),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -57,7 +56,7 @@ class _QrPageState extends State<QrPage> {
               child: Row(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [Text('Done')],
+                children: [Text(context.l10n.done)],
               ),
             ),
           ),
@@ -94,7 +93,7 @@ class FileTooLargeAlertWidget extends StatelessWidget {
             children: [
               Icon(Icons.info_outline),
               Text(
-                'Large file',
+                context.l10n.large_file,
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
@@ -105,23 +104,21 @@ class FileTooLargeAlertWidget extends StatelessWidget {
             text: TextSpan(
               style: Theme.of(context).textTheme.bodyMedium,
               children: [
-                TextSpan(
-                  text: 'The file you selected is large and could take up to ',
-                ),
+                TextSpan(text: context.l10n.large_file_msg_1),
                 TextSpan(
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                  text: '$estimateInMinutes minutes ',
+                  text: ' $estimateInMinutes ${context.l10n.minutes} ',
                 ),
-                TextSpan(text: 'to transfer.'),
+                TextSpan(text: context.l10n.large_file_msg_2),
               ],
             ),
           ),
           SizedBox(height: 8),
           ElevatedButton(
             onPressed: onAcknowledge,
-            child: Text('Continue anyway'),
+            child: Text(context.l10n.continue_anyway),
           ),
         ],
       ),
@@ -137,7 +134,7 @@ class FileHeaderWidget extends StatelessWidget {
   String get _estimatedTransferTime {
     final fast = file.getEstimateTransferTime(20);
     final slow = file.getEstimateTransferTime(6);
-    return '${fast.toStringAsFixed(0)}~${slow.toStringAsFixed(0)}s to transfer';
+    return '${fast.toStringAsFixed(0)}~${slow.toStringAsFixed(0)}s';
   }
 
   @override
@@ -166,7 +163,7 @@ class FileHeaderWidget extends StatelessWidget {
                   ],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: _buildFileThumbnail(context),
+                child: file.buildThumbnail(context),
               ),
               Expanded(
                 child: Column(
@@ -183,7 +180,7 @@ class FileHeaderWidget extends StatelessWidget {
                       ),
                     ),
                     Text(file.sizeInkB),
-                    Text(_estimatedTransferTime),
+                    Text('$_estimatedTransferTime ${context.l10n.to_transfer}'),
                   ],
                 ),
               ),
@@ -194,7 +191,6 @@ class FileHeaderWidget extends StatelessWidget {
             width: 36,
             child: IconButton(
               onPressed: () {
-                log('pressed');
                 Navigator.of(context).pop();
               },
               style: IconButton.styleFrom(
@@ -209,33 +205,47 @@ class FileHeaderWidget extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildFileThumbnail(BuildContext context) {
+extension FileWrapperExtension on FileWrapper {
+  Widget buildThumbnail(BuildContext context) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (file.type.isAvifImage) {
+    if (type.isAvifImage) {
       return AvifImage.file(
-        file.file,
+        file,
         fit: BoxFit.cover,
         cacheWidth: (72 * pixelRatio).toInt(),
       );
-    } else if (file.type.isImage) {
+    } else if (type.isImage) {
       return Image.file(
-        file.file,
+        file,
         fit: BoxFit.cover,
         cacheWidth: (72 * pixelRatio).toInt(),
       );
     }
     return Container(
-      color: Colors.grey,
+      color: type.isAudio ? Colors.blueAccent : Colors.grey,
       alignment: Alignment.center,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(Icons.description, size: 64, color: Colors.white.withAlpha(80)),
+          if (type.isAudio) ...[
+            Icon(Icons.audio_file, size: 64, color: Colors.white.withAlpha(80)),
+          ] else ...[
+            Icon(
+              Icons.description,
+              size: 64,
+              color: Colors.white.withAlpha(80),
+            ),
+          ],
           FittedBox(
             child: Text(
-              file.extension.toUpperCase(),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              extension.toUpperCase(),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

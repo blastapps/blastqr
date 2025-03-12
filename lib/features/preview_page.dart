@@ -1,16 +1,15 @@
-import 'dart:developer';
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
+import 'package:blast_qr/features/qr_page.dart';
+import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_avif/flutter_avif.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 class PreviewPage extends StatefulWidget {
-  const PreviewPage({super.key, required this.data, required this.time});
+  const PreviewPage({super.key, required this.file, required this.time});
 
-  final Uint8List data;
+  final FileWrapper file;
   final String? time;
 
   @override
@@ -22,28 +21,73 @@ class _PreviewPageState extends State<PreviewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Result: ${widget.time}'),
-        actions: [
-          IconButton(onPressed: _tryToSave, icon: const Icon(Icons.save)),
-        ],
+        title: Text('${context.l10n.received_in} ${widget.time}'),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
+      body: Column(
+        spacing: 8,
         children: [
-          Center(
-            child: InteractiveViewer(
-              panEnabled: true,
-              boundaryMargin: const EdgeInsets.all(100),
-              minScale: 0.5,
-              maxScale: 8,
-              child: _buildImage(),
+          SizedBox(height: 32),
+          GestureDetector(
+            onTap: () {
+              _onTapOpen(widget.file);
+            },
+            child: Container(
+              width: 150,
+              height: 150,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(60),
+                    spreadRadius: 0,
+                    blurRadius: 1,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: widget.file.buildThumbnail(context),
             ),
           ),
+          Text(widget.file.name),
+          Spacer(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-            child: ElevatedButton(
-              onPressed: _onTapOpen,
-              child: Text('Open file'),
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          Provider.of<FileBadgeCount>(
+                            context,
+                            listen: false,
+                          ).subtract();
+                          await widget.file.file.delete();
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: Text(context.l10n.discard),
+                      ),
+                    ),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(context.l10n.save),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -51,68 +95,13 @@ class _PreviewPageState extends State<PreviewPage> {
     );
   }
 
-  Widget _buildImage() {
-    return Image.memory(
-      widget.data,
-      errorBuilder: (context, error, stackTrace) {
-        return AvifImage.memory(
-          widget.data,
-          errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          fit: BoxFit.contain,
-        );
-      },
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      fit: BoxFit.contain,
-    );
-  }
-
-  Future<void> _tryToSave() async {
+  void _onTapOpen(FileWrapper file) async {
     try {
-      await _saveToCollection();
-      const snackBar = SnackBar(content: Text('Saved successfully!'));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
+      OpenFile.open(file.file.path, type: file.type.mimeType ?? '');
     } catch (error) {
-      final snackBar = SnackBar(content: Text('Error: ${error.toString()}'));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
+      Navigator.of(context).pop();
+      final snackBar = SnackBar(content: Text(error.toString()));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
-  }
-
-  Future<void> _saveToCollection() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final itemsDirectory = Directory('${directory.path}/treasures');
-
-    if (await itemsDirectory.exists() == false) {
-      await itemsDirectory.create();
-    }
-
-    final millis = DateTime.now().millisecondsSinceEpoch;
-    final file = await File(
-      '${itemsDirectory.path}/$millis-item.txqrfile',
-    ).writeAsBytes(widget.data);
-
-    log('Saved to: ${file.path}');
-  }
-
-  void _onTapOpen() async {
-    final directory = await getApplicationCacheDirectory();
-    final tempDir = Directory('${directory.path}/temp');
-
-    if (await tempDir.exists() == false) {
-      await tempDir.create();
-    }
-
-    final millis = DateTime.now().millisecondsSinceEpoch;
-    final file = await File(
-      '${tempDir.path}/$millis-item.p8.png',
-    ).writeAsBytes(widget.data);
-
-    OpenFile.open(file.path, type: "image/png");
   }
 }

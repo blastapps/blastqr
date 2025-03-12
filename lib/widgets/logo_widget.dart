@@ -1,3 +1,4 @@
+import 'package:blast_qr/color_scheme.dart';
 import 'package:flutter/material.dart';
 
 class LogoWidget extends StatelessWidget {
@@ -7,13 +8,18 @@ class LogoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: Theme.of(context).textTheme.titleLarge,
+        style: Theme.of(
+          context,
+        ).textTheme.displayMedium?.copyWith(fontFamily: 'Jersey25'),
         children: [
           TextSpan(
             text: 'BLAST',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          TextSpan(text: 'QR', style: TextStyle(fontWeight: FontWeight.w300)),
+          TextSpan(
+            text: 'QR',
+            style: TextStyle(color: context.color.primary.withAlpha(255)),
+          ),
         ],
       ),
     );
