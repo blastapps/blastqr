@@ -103,6 +103,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _validateMtu(String val) {
     final mtu = int.tryParse(val) ?? 924;
+    if (mtu < 100) {
+      final snackBar = SnackBar(
+        content: Text('Invalid value (must be larger than 100)'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
     Provider.of<EncodeSettings>(context, listen: false).updateMtu(mtu);
   }
 }

@@ -7,8 +7,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class RaptorFileQrWidget extends StatefulWidget {
   final FileWrapper file;
+  final int mtu;
 
-  const RaptorFileQrWidget({super.key, required this.file});
+  const RaptorFileQrWidget({super.key, required this.file, required this.mtu});
 
   @override
   State<RaptorFileQrWidget> createState() => _RaptorFileQrWidgetState();
@@ -54,7 +55,7 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
     _qrCodes = [];
     _isEncoding = true;
 
-    _qrCodes = await widget.file.toQrCodeList();
+    _qrCodes = await widget.file.toQrCodeList(mtu: widget.mtu);
 
     _initTimer(Duration(milliseconds: (1000 / _fps).toInt()));
     _isEncoding = false;

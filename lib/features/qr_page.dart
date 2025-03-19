@@ -1,9 +1,11 @@
+import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/widgets/raptorq_file_qr_widget.dart';
 import 'package:flutter_avif/flutter_avif.dart';
+import 'package:provider/provider.dart';
 
 class QrPage extends StatefulWidget {
   const QrPage({super.key, required this.file});
@@ -46,7 +48,14 @@ class _QrPageState extends State<QrPage> {
                         });
                       },
                     )
-                    : RaptorFileQrWidget(file: widget.file),
+                    : Consumer<EncodeSettings>(
+                      builder: (context, state, child) {
+                        return RaptorFileQrWidget(
+                          file: widget.file,
+                          mtu: state.mtu,
+                        );
+                      },
+                    ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),

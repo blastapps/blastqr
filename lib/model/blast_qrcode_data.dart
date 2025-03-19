@@ -53,16 +53,3 @@ class BlastQrcodeData {
         signature[1] == signatureBytes[1]);
   }
 }
-
-extension QrEncodingTypeExt on QrEncodingType {
-  int get mtu {
-    switch (this) {
-      case QrEncodingType.bytes:
-        return 924;
-      case QrEncodingType.base45:
-        return 820;
-      case QrEncodingType.base64:
-        return 700;
-    }
-  }
-}
