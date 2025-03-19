@@ -1,5 +1,6 @@
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
+import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:flutter/foundation.dart';
@@ -54,7 +55,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'blastqr',
             theme: lightTheme,
-            darkTheme: darkTheme,
+            darkTheme: state.theme.themeData ?? darkTheme(darkColorScheme),
             themeMode: state.theme.themeMode,
             locale: state.locale,
             home: MainPage(),

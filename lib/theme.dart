@@ -41,6 +41,19 @@ enum BlastTheme {
     }
     return ThemeMode.system;
   }
+
+  ThemeData? get themeData {
+    switch (this) {
+      case BlastTheme.system:
+        return null;
+      case BlastTheme.light:
+        return null;
+      case BlastTheme.dark:
+        return darkTheme(darkColorScheme);
+      case BlastTheme.black:
+        return darkTheme(blackColorScheme);
+    }
+  }
 }
 
 ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
@@ -158,20 +171,22 @@ ThemeData lightTheme = ThemeData(
   snackBarTheme: snackBarTheme(lightColorScheme),
 );
 
-ThemeData darkTheme = ThemeData(
-  splashFactory: NoSplash.splashFactory,
-  useMaterial3: true,
-  colorScheme: darkColorScheme,
-  sliderTheme: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
-  textTheme: textTheme(darkColorScheme),
-  textButtonTheme: textButtonTheme,
-  appBarTheme: appBarTheme(darkColorScheme),
-  listTileTheme: listTileTheme(darkColorScheme),
-  inputDecorationTheme: textFieldTheme(darkColorScheme),
-  outlinedButtonTheme: outlinedButtonTheme(darkColorScheme),
-  elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
-  snackBarTheme: snackBarTheme(darkColorScheme),
-);
+ThemeData darkTheme(ColorScheme colorScheme) {
+  return ThemeData(
+    splashFactory: NoSplash.splashFactory,
+    useMaterial3: true,
+    colorScheme: colorScheme,
+    sliderTheme: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
+    textTheme: textTheme(colorScheme),
+    textButtonTheme: textButtonTheme,
+    appBarTheme: appBarTheme(colorScheme),
+    listTileTheme: listTileTheme(colorScheme),
+    inputDecorationTheme: textFieldTheme(colorScheme),
+    outlinedButtonTheme: outlinedButtonTheme(colorScheme),
+    elevatedButtonTheme: elevatedButtonTheme(colorScheme),
+    snackBarTheme: snackBarTheme(colorScheme),
+  );
+}
 
 extension BrightnessExtension on Brightness {
   Brightness get opposite =>

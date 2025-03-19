@@ -12,7 +12,7 @@ class _HelpPageState extends State<HelpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('How to use BLASTQR')),
+      appBar: AppBar(title: Text(context.l10n.help_title)),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
           16,
@@ -27,19 +27,15 @@ class _HelpPageState extends State<HelpPage> {
               tilePadding: EdgeInsets.zero,
               initiallyExpanded: true,
               title: Text(
-                '1. Download the BLASTQR app',
+                '1. ${context.l10n.help_title_1}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               children: [
-                Text(
-                  'Download the BLASTQR app on any device where you want to receive or send files. Both devices need to have the BLASTQR app.',
-                ),
-                const SizedBox(height: 8),
-                const Placeholder(fallbackHeight: 300),
-                const SizedBox(height: 8),
-                Text(
-                  'Scan this QR code to download BLASTQR on another device.',
-                ),
+                Text(context.l10n.help_message_1_1),
+                const SizedBox(height: 16),
+                Image.asset('assets/download-qr.png', height: 250),
+                const SizedBox(height: 16),
+                Text(context.l10n.help_message_1_2),
                 const SizedBox(height: 12),
               ],
             ),
@@ -47,13 +43,11 @@ class _HelpPageState extends State<HelpPage> {
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
               title: Text(
-                '2. Transfering a file',
+                '2. ${context.l10n.help_title_2}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               children: [
-                Text(
-                  'From the app\'s main screen, select the file or picture that you want to send.\n\nThe file will be encoded into an animated sequence of QR codes that you can then scan from another device that has BLASTQR installed.',
-                ),
+                Text(context.l10n.help_message_2),
                 const SizedBox(height: 12),
               ],
             ),
@@ -61,13 +55,11 @@ class _HelpPageState extends State<HelpPage> {
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
               title: Text(
-                '3. Receiving a file',
+                '3. ${context.l10n.help_title_3}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               children: [
-                Text(
-                  'On another device, scan the animated QR code using the BLASTQR app by selecting the \'Receive\' tab.\n\nThe files you receive are stored in the \'Files\' tab within the app.',
-                ),
+                Text(context.l10n.help_message_3),
                 const SizedBox(height: 12),
               ],
             ),
@@ -75,13 +67,11 @@ class _HelpPageState extends State<HelpPage> {
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
               title: Text(
-                '4. Additional information',
+                '4. ${context.l10n.help_title_4}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               children: [
-                Text(
-                  'BLASTQR file transfers work completely offline.\n\nDue to the nature of the technology BLASTQR file transfers are slow (peaking at around 40kB/s). I recommend transferring small files or compressing them in advance.\n\nFor higher speeds you can play with the \'Chunk length\' setting in the Settings screen. A higher value can result in higher speeds but not all devices might be able to handle it.',
-                ),
+                Text(context.l10n.help_message_4),
                 const SizedBox(height: 12),
               ],
             ),
