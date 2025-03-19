@@ -103,9 +103,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _validateMtu(String val) {
     final mtu = int.tryParse(val) ?? 924;
-    if (mtu < 100) {
+    if (mtu < 100 || mtu > 2930) {
       final snackBar = SnackBar(
-        content: Text('Invalid value (must be larger than 100)'),
+        content: Text('Invalid value (must be between 100 and 2930)'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
