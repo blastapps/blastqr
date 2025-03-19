@@ -21,7 +21,7 @@ class FileWrapper {
 
   FileWrapper({required this.file, required this.type, required this.size});
 
-  Future<List<QrCode>> toQrCodeList({int mtu = 924}) async {
+  Future<List<QrCode>> toQrCodeList({required int mtu}) async {
     // Metadata bytes (header)
     final sizeBytes = Uint8List(4)
       ..buffer.asByteData().setUint32(0, size, Endian.big);
@@ -57,7 +57,7 @@ class FileWrapper {
     final bytes = await file.readAsBytes();
     final repairPackets = (size / 5000);
 
-    log('Encoding with MTU: 924, repairPacketsPerBlock: $repairPackets');
+    log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
 
     final encoder = RaptorqEncoder(
       mtu: mtu,

@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
+  static const int defaultMtu = 1252;
+
   static String? _localeId;
   static BlastTheme? _theme;
   static int? _mtu;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static BlastTheme get theme => _theme ?? BlastTheme.system;
-  static int get mtu => _mtu ?? 924;
+  static int get mtu => _mtu ?? defaultMtu;
 
   static setLocale(String? localeId) async {
     if (localeId == null) {
@@ -36,6 +38,6 @@ class AppPreferences {
     SharedPreferences sp = await SharedPreferences.getInstance();
     _localeId = sp.getString('locale_id');
     _theme = BlastTheme.values.byName(sp.getString('theme') ?? 'system');
-    _mtu = sp.getInt('mtu') ?? 924;
+    _mtu = sp.getInt('mtu') ?? defaultMtu;
   }
 }

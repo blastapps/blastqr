@@ -1,3 +1,4 @@
+import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/theme.dart';
@@ -102,7 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _validateMtu(String val) {
-    final mtu = int.tryParse(val) ?? 924;
+    final mtu = int.tryParse(val) ?? AppPreferences.defaultMtu;
     if (mtu < 100 || mtu > 2930) {
       final snackBar = SnackBar(
         content: Text('Invalid value (must be between 100 and 2930)'),
