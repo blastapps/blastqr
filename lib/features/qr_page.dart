@@ -21,6 +21,7 @@ class _QrPageState extends State<QrPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.color.primaryContainer,
       body: Column(
         children: [
           FileHeaderWidget(file: widget.file),
@@ -163,7 +164,7 @@ class FileHeaderWidget extends StatelessWidget {
                   ],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: file.buildThumbnail(context),
+                child: file.buildThumbnail(context, showsAvifThumbnail: true),
               ),
               Expanded(
                 child: Column(
@@ -208,15 +209,18 @@ class FileHeaderWidget extends StatelessWidget {
 }
 
 extension FileWrapperExtension on FileWrapper {
-  Widget buildThumbnail(BuildContext context) {
+  Widget buildThumbnail(
+    BuildContext context, {
+    bool showsAvifThumbnail = false,
+  }) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (type.isAvifImage) {
+    if (type.isAvifImage && showsAvifThumbnail) {
       return AvifImage.file(
         file,
         fit: BoxFit.cover,
         cacheWidth: (72 * pixelRatio).toInt(),
       );
-    } else if (type.isImage) {
+    } else if (type.isImage && !type.isAvifImage) {
       return Image.file(
         file,
         fit: BoxFit.cover,
@@ -224,20 +228,12 @@ extension FileWrapperExtension on FileWrapper {
       );
     }
     return Container(
-      color: type.isAudio ? Colors.blueAccent : Colors.grey,
+      color: type.color,
       alignment: Alignment.center,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (type.isAudio) ...[
-            Icon(Icons.audio_file, size: 64, color: Colors.white.withAlpha(80)),
-          ] else ...[
-            Icon(
-              Icons.description,
-              size: 64,
-              color: Colors.white.withAlpha(80),
-            ),
-          ],
+          Icon(type.icon, size: 64, color: Colors.white.withAlpha(80)),
           FittedBox(
             child: Text(
               extension.toUpperCase(),
@@ -252,5 +248,29 @@ extension FileWrapperExtension on FileWrapper {
         ],
       ),
     );
+  }
+}
+
+extension FileTypeExtension on FileType {
+  IconData get icon {
+    if (isImage) {
+      return Icons.image;
+    } else if (isVideo) {
+      return Icons.video_file;
+    } else if (isAudio) {
+      return Icons.audio_file;
+    }
+    return Icons.description;
+  }
+
+  Color get color {
+    if (isImage) {
+      return Colors.deepOrangeAccent;
+    } else if (isVideo) {
+      return Colors.deepPurpleAccent;
+    } else if (isAudio) {
+      return Colors.blueAccent;
+    }
+    return Colors.grey;
   }
 }

@@ -9,6 +9,7 @@ class TextInputSheet extends StatelessWidget {
     required this.confirmText,
     required this.onConfirm,
     required this.controller,
+    this.keyboardType,
   });
 
   final String title;
@@ -16,6 +17,7 @@ class TextInputSheet extends StatelessWidget {
   final String confirmText;
   final void Function(String text) onConfirm;
   final TextEditingController controller;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class TextInputSheet extends StatelessWidget {
           hintText: inputHintText,
           controller: controller,
           autofocus: true,
+          keyboardType: keyboardType,
           onSubmitted: (val) {
             _confirm(context);
           },
@@ -46,6 +49,54 @@ class TextInputSheet extends StatelessWidget {
   void _confirm(BuildContext context) {
     Navigator.of(context).pop();
     onConfirm(controller.text);
+  }
+}
+
+class PickerSheet extends StatelessWidget {
+  const PickerSheet({
+    super.key,
+    required this.items,
+    this.onItemTap,
+    this.icons,
+    this.itemHeight,
+  });
+
+  final List<String> items;
+  final List<Widget>? icons;
+  final double? itemHeight;
+  final void Function(int index)? onItemTap;
+
+  double? get _height => itemHeight != null ? itemHeight! * items.length : null;
+
+  ScrollPhysics? get scrollPhysics {
+    if (itemHeight != null && items.length < 7) {
+      return const NeverScrollableScrollPhysics();
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _height ?? MediaQuery.of(context).size.height / 2,
+      child: Scrollbar(
+        child: ListView.builder(
+          physics: scrollPhysics,
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return ListTile(
+              title: Text(item),
+              leading: icons?.elementAtOrNull(index),
+              onTap: () {
+                Navigator.of(context).pop();
+                onItemTap?.call(index);
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -109,7 +160,8 @@ Future<void> showSheet({
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
+    backgroundColor:
+        backgroundColor ?? Theme.of(context).colorScheme.primaryContainer,
     enableDrag: true,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -150,6 +202,7 @@ Future<void> showTextInputSheet(
   String prefilledText = "",
   String? confirmText,
   TextSelection? selection,
+  TextInputType? keyboardType,
   required hintText,
   required void Function(String text) onConfirm,
 }) {
@@ -166,8 +219,29 @@ Future<void> showTextInputSheet(
         controller: controller,
         inputHintText: hintText,
         confirmText: confirmText ?? 'Save',
+        keyboardType: keyboardType,
         onConfirm: onConfirm,
       ),
+    ),
+  );
+}
+
+Future<void> showPickerSheet(
+  BuildContext context, {
+  required title,
+  required List<String> items,
+  List<Widget>? icons,
+  double? itemHeight = 56,
+  required void Function(int index) onItemTap,
+}) {
+  return showSheet(
+    context: context,
+    title: title,
+    body: PickerSheet(
+      items: items,
+      onItemTap: onItemTap,
+      icons: icons,
+      itemHeight: itemHeight,
     ),
   );
 }

@@ -1,7 +1,47 @@
+import 'package:blast_qr/l10n/extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:blast_qr/color_scheme.dart';
 import 'package:flutter/services.dart';
+
+enum BlastTheme {
+  system,
+  light,
+  dark,
+  black;
+
+  String title(BuildContext context) {
+    switch (this) {
+      case BlastTheme.system:
+        return context.l10n.theme_system;
+      case BlastTheme.light:
+        return context.l10n.theme_light;
+      case BlastTheme.dark:
+        return context.l10n.theme_dark;
+      case BlastTheme.black:
+        return context.l10n.theme_black;
+    }
+  }
+
+  static List<String> titles(BuildContext context) {
+    return [
+      context.l10n.theme_system,
+      context.l10n.theme_light,
+      context.l10n.theme_dark,
+      context.l10n.theme_black,
+    ];
+  }
+
+  ThemeMode get themeMode {
+    if (this == BlastTheme.dark || this == BlastTheme.black) {
+      return ThemeMode.dark;
+    }
+    if (this == BlastTheme.light) {
+      return ThemeMode.light;
+    }
+    return ThemeMode.system;
+  }
+}
 
 ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
   return ElevatedButtonThemeData(

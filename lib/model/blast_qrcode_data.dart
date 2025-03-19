@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
@@ -7,6 +6,8 @@ enum QrEncodingType { bytes, base45, base64 }
 
 class BlastQrcodeData {
   static final signatureBytes = Uint8List.fromList([81, 45]);
+  static final reserved = Uint8List.fromList([0, 1]);
+  static final int headerLength = 16;
 
   final int transferLength;
   final String fileExtension;
@@ -26,13 +27,15 @@ class BlastQrcodeData {
     }
     ByteData sizeByteData = bytes.buffer.asByteData(0, 4);
     Uint8List extBytes = bytes.sublist(4, 12);
-    ByteData mtuByteData = bytes.buffer.asByteData(14, 16);
     int fileSize = sizeByteData.getUint32(0, Endian.big);
-    int mtu = mtuByteData.getUint16(0, Endian.big);
+    int mtu = bytes.length - headerLength;
+    debugPrint(
+      'MTU: $mtu; Chunk byte len: ${bytes.lengthInBytes}, Chunk len: ${bytes.length}',
+    );
     String ext = utf8
         .decode(extBytes, allowMalformed: false)
         .replaceAll('\x00', '');
-    Uint8List packetBytes = bytes.sublist(16);
+    Uint8List packetBytes = bytes.sublist(headerLength);
     return BlastQrcodeData(
       transferLength: fileSize,
       fileExtension: ext,

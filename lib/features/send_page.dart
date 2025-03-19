@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
@@ -8,6 +9,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/features/qr_page.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class SendPage extends StatefulWidget {
   const SendPage({super.key});
@@ -27,6 +29,23 @@ class _SendPageState extends State<SendPage> {
         centerTitle: true,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return SettingsPage();
+                  },
+                ),
+              );
+            },
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedSettings01,
+              color: context.color.onSurface,
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Padding(

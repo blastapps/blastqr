@@ -74,7 +74,7 @@ class _MainPageState extends State<MainPage> {
                           offset: Offset(0, 1),
                         ),
                       ],
-                      color: context.color.surface,
+                      color: context.color.primaryContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: BottomNavigationBar(

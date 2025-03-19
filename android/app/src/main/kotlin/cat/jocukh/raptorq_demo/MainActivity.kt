@@ -1,4 +1,4 @@
-package cat.jocukh.blast_qr
+package cat.cukha.blastqr
 
 import io.flutter.embedding.android.FlutterActivity
 

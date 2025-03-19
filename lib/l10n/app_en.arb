@@ -30,5 +30,15 @@
   "minutes": "minutes",
   "continue_anyway": "Continue anyway",
   "to_transfer": "to transfer",
-  "generating_codes": "Generating codes..."
+  "generating_codes": "Generating codes...",
+  "settings": "Settings",
+  "appearance": "Appearance",
+  "language": "Language",
+  "theme": "Theme",
+  "theme_system": "System",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "theme_black": "Black (OLED)",
+  "data_encoding": "Data encoding",
+  "licenses": "Licenses"
 }

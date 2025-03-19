@@ -2,12 +2,6 @@ syntax = "proto3";
 package basic;
 
 // [DART-SIGNAL]
-message SmallText { string text = 1; }
-
-// [RUST-SIGNAL]
-message SmallNumber { int32 number = 1; }
-
-// [DART-SIGNAL]
 message EncodeInput { 
     bytes data = 1;
     int32 mtu = 2;
@@ -29,12 +23,5 @@ message DecodeChunkInput {
 message DecodeOutput { 
     bytes result = 1;
     int32 time = 2;
-    int32 bytes_processed = 3;
-}
-
-// [DART-SIGNAL]
-message DemoInput {
-    int32 mtu = 1;
-    int32 transfer_length = 2;
-    bytes data = 3;
+    int32 chunk_len = 3;
 }

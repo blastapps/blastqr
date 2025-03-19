@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:blast_qr/messages/basic.pb.dart';
 
 class RaptorqDecoder {
-  final Function(int chunks, double speed, double estimatedProgress)?
+  final Function(int chunkLen, int totalChunks, double estimatedProgress)?
   onProcessChunk;
   final Function()? onTransferComplete;
   final Function(Uint8List result) onReceiveResult;
@@ -52,9 +52,8 @@ class RaptorqDecoder {
         onTransferComplete?.call();
         _handleOutput(msg);
       } else {
-        final speed = (msg.bytesProcessed / 1000) / (msg.time / 1000);
         estimatedProgress = (count * mtu) / (transferLength * 1.25);
-        onProcessChunk?.call(count, speed, estimatedProgress);
+        onProcessChunk?.call(msg.chunkLen, count, estimatedProgress);
       }
     } catch (e) {
       log(e.toString());

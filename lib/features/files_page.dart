@@ -68,6 +68,7 @@ class _FilesPageState extends State<FilesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: LogoWidget(),
         centerTitle: true,
@@ -117,28 +118,6 @@ class _FilesPageState extends State<FilesPage> {
     );
   }
 
-  /*void _onTapItem(int index) {
-    if (widget.onPickFile != null) {
-      Navigator.of(context).pop();
-      final file = _files.elementAtOrNull(index) as File?;
-      widget.onPickFile!(file);
-      return;
-    }
-    Navigator.of(context)
-        .push<bool>(
-          MaterialPageRoute(
-            builder: (context) {
-              return GalleryPage(index: index);
-            },
-          ),
-        )
-        .then((shouldReload) {
-          if (shouldReload == true) {
-            _loadItems();
-          }
-        });
-  }*/
-
   void _onTapItem(FileWrapper file) {
     showSheet(
       context: context,
@@ -165,7 +144,7 @@ class _FilesPageState extends State<FilesPage> {
                 ],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: file.buildThumbnail(context),
+              child: file.buildThumbnail(context, showsAvifThumbnail: true),
             ),
           ),
           Text(file.name),
@@ -278,6 +257,9 @@ class _FilesPageState extends State<FilesPage> {
       final path = file.path;
       final lastSeparator = path.lastIndexOf(Platform.pathSeparator);
       final newPath = path.substring(0, lastSeparator + 1) + newName;
+      if (await File(newPath).exists()) {
+        throw Exception('File with that name already exists.');
+      }
       await file.rename(newPath);
       await _loadItems();
     } catch (error) {
@@ -306,9 +288,6 @@ class _FilesPageState extends State<FilesPage> {
     try {
       await file.delete();
       await _loadItems();
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
     } catch (error) {
       if (mounted) {
         final snackBar = SnackBar(content: Text(error.toString()));

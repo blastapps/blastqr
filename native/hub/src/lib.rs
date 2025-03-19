@@ -1,8 +1,8 @@
 //! This `hub` crate is the
 //! entry point of the Rust logic.
 
+mod functions;
 mod messages;
-mod sample_functions;
 
 // Uncomment below to target the web.
 // use tokio_with_wasm::alias as tokio;
@@ -16,11 +16,8 @@ async fn main() {
     // Always use non-blocking async functions like `tokio::fs::File::open`.
     // If you must use blocking code, use `tokio::task::spawn_blocking`
     // or the equivalent provided by your async library.
-    tokio::spawn(sample_functions::communicate());
-    tokio::spawn(sample_functions::encode_data());
-    //tokio::spawn(sample_functions::decode_data());
-    tokio::spawn(sample_functions::decode_chunk());
-    tokio::spawn(sample_functions::run_demo());
+    tokio::spawn(functions::encode_data());
+    tokio::spawn(functions::decode_chunk());
 
     // Keep the main function running until Dart shutdown.
     rinf::dart_shutdown().await;

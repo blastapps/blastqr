@@ -31,10 +31,8 @@ class FileWrapper {
       fileExtBytes = Uint8List(8)
         ..buffer.asByteData().setUint32(0, 0, Endian.big);
     }
-    final mtuBytes = Uint8List(2)
-      ..buffer.asByteData().setUint16(0, mtu, Endian.big);
 
-    final chunks = await _getEncodedChunks();
+    final chunks = await _getEncodedChunks(mtu: mtu);
     return chunks.map((c) {
       Uint8List combined = Uint8List(4 + 8 + 2 + 2 + c.length);
       // Encode file size in first 4 bytes
@@ -43,11 +41,10 @@ class FileWrapper {
       combined.setAll(4, fileExtBytes);
       // Encode signature bytes (magic number to validate qr code) in 2 bytes
       combined.setAll(12, BlastQrcodeData.signatureBytes);
-      // Encode mtu (chunk size) in 2 bytes
-      combined.setAll(14, mtuBytes);
+      // Reserve 2 bytes for future use
+      combined.setAll(14, BlastQrcodeData.reserved);
       // Encode file data
       combined.setAll(16, c);
-
       return QrCode.fromUint8List(
         data: combined,
         errorCorrectLevel: QrErrorCorrectLevel.L,
@@ -55,7 +52,7 @@ class FileWrapper {
     }).toList();
   }
 
-  Future<List<Uint8List>> _getEncodedChunks() async {
+  Future<List<Uint8List>> _getEncodedChunks({required int mtu}) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final bytes = await file.readAsBytes();
     final repairPackets = (size / 5000);
@@ -63,7 +60,7 @@ class FileWrapper {
     log('Encoding with MTU: 924, repairPacketsPerBlock: $repairPackets');
 
     final encoder = RaptorqEncoder(
-      mtu: 924,
+      mtu: mtu,
       repairPacketsPerBlock: repairPackets.toInt(),
     );
 
@@ -83,6 +80,7 @@ class FileType {
   final String extension;
   final bool isImage;
   final bool isAudio;
+  final bool isVideo;
   final bool isUnknown;
   final bool isAvifImage;
 
@@ -90,7 +88,8 @@ class FileType {
     : isImage = mimeType?.startsWith("image") == true,
       isUnknown = mimeType == null,
       isAvifImage = mimeType == 'image/avif' || extension == 'avif',
-      isAudio = mimeType?.startsWith("audio") == true;
+      isAudio = mimeType?.startsWith("audio") == true,
+      isVideo = mimeType?.startsWith("video") == true;
 }
 
 extension FileExtension on File {
