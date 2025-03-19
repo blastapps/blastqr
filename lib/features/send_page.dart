@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/help_page.dart';
 import 'package:blast_qr/features/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
@@ -47,34 +48,55 @@ class _SendPageState extends State<SendPage> {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: _pickFileToEncode,
-            child: Container(
-              height: 240,
-              width: double.infinity,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border.all(color: context.color.outline, width: 1),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    context.color.surface.withAlpha(0),
-                    context.color.primaryContainer,
-                  ],
+      body: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          spacing: 16,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: _pickFileToEncode,
+              child: Container(
+                height: 240,
+                width: double.infinity,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border.all(color: context.color.outline, width: 1),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      context.color.surface.withAlpha(0),
+                      context.color.primaryContainer,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                context.l10n.pick_file_msg,
-                style: Theme.of(context).textTheme.titleLarge,
+                child: Text(
+                  context.l10n.pick_file_msg,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
-          ),
+            OutlinedButton(
+              onPressed: _onTapHelp,
+              style: OutlinedButton.styleFrom(minimumSize: Size(0, 48)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedHelpCircle,
+                    color: context.color.onSurface,
+                  ),
+                  Text(context.l10n.help),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -102,5 +124,16 @@ class _SendPageState extends State<SendPage> {
         ),
       );
     }
+  }
+
+  void _onTapHelp() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) {
+          return HelpPage();
+        },
+      ),
+    );
   }
 }

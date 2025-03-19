@@ -30,5 +30,6 @@
   "minutes": "minuts",
   "continue_anyway": "Continua igualment",
   "to_transfer": "a transferir",
-  "generating_codes": "Generant codis..."
+  "generating_codes": "Generant codis...",
+  "help": "Ajuda"
 }

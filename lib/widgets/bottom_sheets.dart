@@ -208,7 +208,8 @@ Future<void> showTextInputSheet(
 }) {
   final controller = TextEditingController(text: prefilledText);
   controller.selection =
-      selection ?? TextSelection(baseOffset: 0, extentOffset: 0);
+      selection ??
+      TextSelection(baseOffset: 0, extentOffset: prefilledText.length);
   return showSheet(
     context: context,
     title: title,
