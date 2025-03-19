@@ -81,7 +81,20 @@ class _FilesPageState extends State<FilesPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (_files.isEmpty) {
-            return Center(child: Text(context.l10n.no_files_msg));
+            return Center(
+              child: Column(
+                spacing: 16,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedFileSearch,
+                    color: context.color.onSurface,
+                    size: 36,
+                  ),
+                  Text(context.l10n.no_files_msg),
+                ],
+              ),
+            );
           }
           return ListView.builder(
             itemCount: _files.length,

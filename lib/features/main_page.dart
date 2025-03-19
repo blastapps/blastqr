@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
@@ -58,88 +60,91 @@ class _MainPageState extends State<MainPage> {
           extendBody: true,
           backgroundColor: Colors.transparent,
 
-          bottomNavigationBar: Consumer<FileBadgeCount>(
-            builder: (context, count, child) {
-              return SafeArea(
-                child: Container(
-                  padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
-                  child: Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(30),
-                          spreadRadius: 0,
-                          blurRadius: 2,
-                          offset: Offset(0, 1),
-                        ),
-                      ],
-                      color: context.color.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: BottomNavigationBar(
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      selectedLabelStyle: TextStyle(
-                        fontFamily: 'Jersey25',
-                        fontSize: 18,
-                      ),
-                      unselectedLabelStyle: TextStyle(
-                        fontFamily: 'Jersey25',
-                        fontSize: 14,
-                      ),
-                      enableFeedback: false,
-                      onTap: (index) {
-                        setState(() {
-                          _currentTab = index;
-                        });
-                      },
-                      currentIndex: _currentTab,
-                      items: [
-                        BottomNavigationBarItem(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedQrCode,
-                            color: context.color.onSurface,
-                          ),
-                          activeIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedQrCode,
-                            color: context.color.primary,
-                          ),
-                          label: context.l10n.send,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCamera02,
-                            color: context.color.onSurface,
-                          ),
-                          activeIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedCamera02,
-                            color: context.color.primary,
-                          ),
-                          label: context.l10n.receive,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Badge(
-                            label: Text('${count.value ?? ''}'),
-                            isLabelVisible: count.value != null,
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedFolder01,
-                              color: context.color.onSurface,
+          bottomNavigationBar:
+              (Platform.isIOS || Platform.isAndroid)
+                  ? Consumer<FileBadgeCount>(
+                    builder: (context, count, child) {
+                      return SafeArea(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
+                          child: Container(
+                            height: 90,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(30),
+                                  spreadRadius: 0,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                              color: context.color.primaryContainer,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: BottomNavigationBar(
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              selectedLabelStyle: TextStyle(
+                                fontFamily: 'Jersey25',
+                                fontSize: 18,
+                              ),
+                              unselectedLabelStyle: TextStyle(
+                                fontFamily: 'Jersey25',
+                                fontSize: 14,
+                              ),
+                              enableFeedback: false,
+                              onTap: (index) {
+                                setState(() {
+                                  _currentTab = index;
+                                });
+                              },
+                              currentIndex: _currentTab,
+                              items: [
+                                BottomNavigationBarItem(
+                                  icon: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedQrCode,
+                                    color: context.color.onSurface,
+                                  ),
+                                  activeIcon: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedQrCode,
+                                    color: context.color.primary,
+                                  ),
+                                  label: context.l10n.send,
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCamera02,
+                                    color: context.color.onSurface,
+                                  ),
+                                  activeIcon: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCamera02,
+                                    color: context.color.primary,
+                                  ),
+                                  label: context.l10n.receive,
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Badge(
+                                    label: Text('${count.value ?? ''}'),
+                                    isLabelVisible: count.value != null,
+                                    child: HugeIcon(
+                                      icon: HugeIcons.strokeRoundedFolder01,
+                                      color: context.color.onSurface,
+                                    ),
+                                  ),
+                                  activeIcon: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedFolder01,
+                                    color: context.color.primary,
+                                  ),
+                                  label: context.l10n.my_files,
+                                ),
+                              ],
                             ),
                           ),
-                          activeIcon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedFolder01,
-                            color: context.color.primary,
-                          ),
-                          label: context.l10n.my_files,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+                      );
+                    },
+                  )
+                  : null,
           body: Builder(
             builder: (context) {
               switch (_currentTab) {

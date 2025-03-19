@@ -97,6 +97,16 @@ class _SendPageState extends State<SendPage> {
                 ],
               ),
             ),
+            if (!Platform.isAndroid && !Platform.isIOS)
+              Column(
+                spacing: 16,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '* Receiving files is not supported on the desktop app yet.',
+                  ),
+                ],
+              ),
           ],
         ),
       ),
