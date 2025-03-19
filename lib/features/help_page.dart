@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
 
+  static const String projectUrl = 'https://github.com/cu-kha/blastqr';
+
   @override
   State<HelpPage> createState() => _HelpPageState();
 }
@@ -71,7 +73,7 @@ class _HelpPageState extends State<HelpPage> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               children: [
-                Text(context.l10n.help_message_4),
+                Text('${context.l10n.help_message_4} ${HelpPage.projectUrl}'),
                 const SizedBox(height: 12),
               ],
             ),

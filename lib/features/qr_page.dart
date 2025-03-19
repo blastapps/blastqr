@@ -40,7 +40,7 @@ class _QrPageState extends State<QrPage> {
                 _isLargeFile && !_largeFileAcknowledged
                     ? FileTooLargeAlertWidget(
                       estimatedSlowestTime: widget.file.getEstimateTransferTime(
-                        6,
+                        8,
                       ),
                       onAcknowledge: () {
                         setState(() {
@@ -142,8 +142,8 @@ class FileHeaderWidget extends StatelessWidget {
   final FileWrapper file;
 
   String get _estimatedTransferTime {
-    final fast = file.getEstimateTransferTime(20);
-    final slow = file.getEstimateTransferTime(6);
+    final fast = file.getEstimateTransferTime(30);
+    final slow = file.getEstimateTransferTime(8);
     return '${fast.toStringAsFixed(0)}~${slow.toStringAsFixed(0)}s';
   }
 

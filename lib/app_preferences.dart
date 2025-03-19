@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
-  static const int defaultMtu = 1252;
+  static const int defaultMtu = 1750;
 
   static String? _localeId;
   static BlastTheme? _theme;

@@ -13,6 +13,9 @@ PODS:
     - FlutterMacOS
   - rinf (0.1.0):
     - FlutterMacOS
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
@@ -25,6 +28,7 @@ DEPENDENCIES:
   - open_file_mac (from `Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - rinf (from `Flutter/ephemeral/.symlinks/plugins/rinf/macos`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin`)
 
 EXTERNAL SOURCES:
@@ -42,6 +46,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   rinf:
     :path: Flutter/ephemeral/.symlinks/plugins/rinf/macos
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
   sqflite_darwin:
     :path: Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin
 
@@ -53,6 +59,7 @@ SPEC CHECKSUMS:
   open_file_mac: 01874b6d6a2c1485ac9b126d7105b99102dea2cf
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   rinf: 508cb5436e14f383f8d7d510f18e1c8c95a322b5
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
 PODFILE CHECKSUM: 83c493776e796ff1f7045418a0799f83b55f1c21

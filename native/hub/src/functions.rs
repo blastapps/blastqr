@@ -7,7 +7,6 @@ pub async fn encode_data() {
 
     while let Some(dart_signal) = receiver.recv().await {
         let message: EncodeInput = dart_signal.message;
-        rinf::debug_print!("{message:?}");
 
         let data = message.data;
         let mtu = message.mtu as u16;

@@ -38,7 +38,11 @@ class _RaptorFileQrWidgetState extends State<RaptorFileQrWidget> {
                 as MediaQuery)
             .data;
     _qrCodePlatformOffset = Platform.isIOS ? 0 : 16;
-    _qrCodeWidth = mediaQuery.size.width - _qrCodePlatformOffset;
+    if (mediaQuery.size.height > mediaQuery.size.width) {
+      _qrCodeWidth = mediaQuery.size.width - _qrCodePlatformOffset;
+    } else {
+      _qrCodeWidth = mediaQuery.size.height - 112 - 80 - 16 - 28;
+    }
   }
 
   @override

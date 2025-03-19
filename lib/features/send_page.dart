@@ -58,6 +58,7 @@ class _SendPageState extends State<SendPage> {
               borderRadius: BorderRadius.circular(16),
               onTap: _pickFileToEncode,
               child: Container(
+                padding: EdgeInsets.all(16),
                 height: 240,
                 width: double.infinity,
                 alignment: Alignment.center,
@@ -117,11 +118,18 @@ class _SendPageState extends State<SendPage> {
     final fileWrapper = await file.toFileWrapper();
     if (mounted) {
       Navigator.of(context).push(
-        CupertinoSheetRoute(
-          builder: (context) {
-            return QrPage(file: fileWrapper);
-          },
-        ),
+        (Platform.isIOS || Platform.isAndroid)
+            ? CupertinoSheetRoute(
+              builder: (context) {
+                return QrPage(file: fileWrapper);
+              },
+            )
+            : MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) {
+                return QrPage(file: fileWrapper);
+              },
+            ),
       );
     }
   }
