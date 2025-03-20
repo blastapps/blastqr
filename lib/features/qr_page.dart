@@ -17,6 +17,7 @@ class QrPage extends StatefulWidget {
 }
 
 class _QrPageState extends State<QrPage> {
+  final _qrController = RaptorQrWidgetController();
   bool get _isLargeFile => widget.file.size > 1000000;
   bool _largeFileAcknowledged = false;
 
@@ -26,7 +27,7 @@ class _QrPageState extends State<QrPage> {
       backgroundColor: context.color.primaryContainer,
       body: Column(
         children: [
-          FileHeaderWidget(file: widget.file),
+          FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
           Container(
             decoration: BoxDecoration(
               border: Border.all(color: context.color.outline, width: 2),
@@ -50,7 +51,8 @@ class _QrPageState extends State<QrPage> {
                     )
                     : Consumer<EncodeSettings>(
                       builder: (context, state, child) {
-                        return RaptorFileQrWidget(
+                        return RaptorQrWidget(
+                          controller: _qrController,
                           file: widget.file,
                           mtu: state.mtu,
                         );
@@ -60,9 +62,7 @@ class _QrPageState extends State<QrPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: _dismiss,
               child: Row(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -73,6 +73,11 @@ class _QrPageState extends State<QrPage> {
         ],
       ),
     );
+  }
+
+  void _dismiss() {
+    _qrController.stopAnimation();
+    Navigator.of(context).pop();
   }
 }
 
@@ -137,9 +142,14 @@ class FileTooLargeAlertWidget extends StatelessWidget {
 }
 
 class FileHeaderWidget extends StatelessWidget {
-  const FileHeaderWidget({super.key, required this.file});
+  const FileHeaderWidget({
+    super.key,
+    required this.file,
+    required this.onTapDismiss,
+  });
 
   final FileWrapper file;
+  final void Function() onTapDismiss;
 
   String get _estimatedTransferTime {
     final fast = file.getEstimateTransferTime(30);
@@ -200,9 +210,7 @@ class FileHeaderWidget extends StatelessWidget {
             height: 36,
             width: 36,
             child: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: onTapDismiss,
               style: IconButton.styleFrom(
                 backgroundColor: context.color.primaryContainer,
                 foregroundColor: context.color.onSurface,

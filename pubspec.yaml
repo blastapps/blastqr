@@ -30,6 +30,7 @@ dependencies:
   hugeicons: ^0.0.7
   flutter_native_splash: ^2.4.5
   shared_preferences: ^2.5.2
+  share_handler: ^0.0.22
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:blast_qr/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
-  static const int defaultMtu = 1750;
+  static int defaultMtu = Platform.isAndroid || Platform.isIOS ? 1750 : 2930;
 
   static String? _localeId;
   static BlastTheme? _theme;

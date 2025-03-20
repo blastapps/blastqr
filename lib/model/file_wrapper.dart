@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/raptorq/raptorq_encoder.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -33,6 +33,15 @@ class FileWrapper {
     }
 
     final chunks = await _getEncodedChunks(mtu: mtu);
+    final List<dynamic> args = [chunks, sizeBytes, fileExtBytes];
+    final result = compute(_encodeChunksToQr, args);
+    return result;
+  }
+
+  List<QrCode> _encodeChunksToQr(List<dynamic> args) {
+    final List<Uint8List> chunks = args[0];
+    final Uint8List sizeBytes = args[1];
+    final Uint8List fileExtBytes = args[2];
     return chunks.map((c) {
       Uint8List combined = Uint8List(4 + 8 + 2 + 2 + c.length);
       // Encode file size in first 4 bytes
