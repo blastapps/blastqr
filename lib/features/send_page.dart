@@ -8,11 +8,11 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/features/qr_page.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:share_handler/share_handler.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class SendPage extends StatefulWidget {
   const SendPage({super.key});
@@ -86,33 +86,52 @@ class _SendPageState extends State<SendPage> {
           spacing: 16,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: _pickFileToEncode,
-              child: Container(
-                padding: EdgeInsets.all(16),
-                height: 240,
-                width: double.infinity,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border.all(color: context.color.outline, width: 1),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      context.color.surface.withAlpha(0),
-                      context.color.primaryContainer,
-                    ],
+            DropRegion(
+              // Formats this region can accept.
+              formats: Formats.standardFormats,
+              hitTestBehavior: HitTestBehavior.opaque,
+              onDropOver: (event) {
+                return DropOperation.copy;
+              },
+              onPerformDrop: (event) async {
+                final item = event.session.items.first;
+                final reader = item.dataReader!;
+                reader.getValue<Uri>(Formats.fileUri, (fileUri) {
+                  debugPrint('Dropped file: $fileUri');
+                  if (fileUri != null) {
+                    _showQrPage(File(fileUri.path));
+                  }
+                });
+              },
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: _pickFileToEncode,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  height: 240,
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: context.color.outline, width: 1),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        context.color.surface.withAlpha(0),
+                        context.color.primaryContainer,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  context.l10n.pick_file_msg,
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.center,
+                  child: Text(
+                    context.l10n.pick_file_msg,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
+
             OutlinedButton(
               onPressed: _onTapHelp,
               style: OutlinedButton.styleFrom(minimumSize: Size(0, 48)),
@@ -161,18 +180,12 @@ class _SendPageState extends State<SendPage> {
     final fileWrapper = await file.toFileWrapper();
     if (mounted) {
       Navigator.of(context).push(
-        (Platform.isIOS || Platform.isAndroid)
-            ? CupertinoSheetRoute(
-              builder: (context) {
-                return QrPage(file: fileWrapper);
-              },
-            )
-            : MaterialPageRoute(
-              fullscreenDialog: true,
-              builder: (context) {
-                return QrPage(file: fileWrapper);
-              },
-            ),
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) {
+            return QrPage(file: fileWrapper);
+          },
+        ),
       );
     }
   }

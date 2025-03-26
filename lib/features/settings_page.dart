@@ -101,6 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: Text('Losless compression'),
                 subtitle: Text('Compress data before sending'),
                 activeColor: context.color.primary,
+                inactiveThumbColor: context.color.secondary,
                 value: state.compress,
                 onChanged: (value) {
                   Provider.of<EncodeSettings>(

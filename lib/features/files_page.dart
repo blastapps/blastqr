@@ -7,7 +7,6 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
@@ -75,6 +74,20 @@ class _FilesPageState extends State<FilesPage> {
         centerTitle: true,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.9, 1.0],
+              colors: [
+                context.color.surface,
+                context.color.surface.withAlpha(0),
+              ],
+            ),
+          ),
+        ),
       ),
       body: Builder(
         builder: (context) {
@@ -252,7 +265,8 @@ class _FilesPageState extends State<FilesPage> {
 
   void _onTapSend(FileWrapper file) {
     Navigator.of(context).push(
-      CupertinoSheetRoute(
+      MaterialPageRoute(
+        fullscreenDialog: true,
         builder: (context) {
           return QrPage(file: file);
         },

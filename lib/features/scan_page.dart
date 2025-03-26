@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
@@ -309,7 +308,9 @@ class _ScanPageState extends State<ScanPage> {
       body: Column(
         children: [
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              _onTapOpen(file);
+            },
             child: Container(
               width: 150,
               height: 150,

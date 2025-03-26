@@ -28,87 +28,89 @@ class _QrPageState extends State<QrPage> {
     final qrBoxHeight = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
-      body: Column(
-        children: [
-          FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
-          Expanded(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: context.color.outline, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                  color:
-                      _isLargeFile && !_largeFileAcknowledged
-                          ? context.color.primaryContainer
-                          : Colors.white,
-                ),
-                child: SizedBox(
-                  height: qrBoxHeight + 16,
-                  child:
-                      _isLargeFile && !_largeFileAcknowledged
-                          ? FileTooLargeAlertWidget(
-                            estimatedSlowestTime: widget.file
-                                .getEstimateTransferTime(8),
-                            onAcknowledge: () {
-                              setState(() {
-                                _largeFileAcknowledged = true;
-                              });
-                            },
-                          )
-                          : Consumer<EncodeSettings>(
-                            builder: (context, state, child) {
-                              return RaptorQrWidget(
-                                controller: _qrController,
-                                file: widget.file,
-                                mtu: state.mtu,
-                                compress: state.compress,
-                              );
-                            },
-                          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: context.color.outline, width: 2),
+                    borderRadius: BorderRadius.circular(12),
+                    color:
+                        _isLargeFile && !_largeFileAcknowledged
+                            ? context.color.primaryContainer
+                            : Colors.white,
+                  ),
+                  child: SizedBox(
+                    height: qrBoxHeight + 16,
+                    child:
+                        _isLargeFile && !_largeFileAcknowledged
+                            ? FileTooLargeAlertWidget(
+                              estimatedSlowestTime: widget.file
+                                  .getEstimateTransferTime(8),
+                              onAcknowledge: () {
+                                setState(() {
+                                  _largeFileAcknowledged = true;
+                                });
+                              },
+                            )
+                            : Consumer<EncodeSettings>(
+                              builder: (context, state, child) {
+                                return RaptorQrWidget(
+                                  controller: _qrController,
+                                  file: widget.file,
+                                  mtu: state.mtu,
+                                  compress: state.compress,
+                                );
+                              },
+                            ),
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: ElevatedButton(
-              onPressed: _dismiss,
-              child: Row(
-                spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Text(context.l10n.done)],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: ElevatedButton(
+                onPressed: _dismiss,
+                child: Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text(context.l10n.done)],
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    fullscreenDialog: true,
-                    builder: (context) => const HelpPage(),
-                  ),
-                );
-              },
-              child: Row(
-                spacing: 8,
-                children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedInformationCircle,
-                    color: context.color.onSurface,
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Scan the QR code using the BLASTQR app on the device where you want to receive the file.',
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => const HelpPage(),
                     ),
-                  ),
-                ],
+                  );
+                },
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedInformationCircle,
+                      color: context.color.onSurface,
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Scan the QR code using the BLASTQR app on the device where you want to receive the file.',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
