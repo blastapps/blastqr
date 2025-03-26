@@ -34,6 +34,8 @@ class ScanPage extends StatefulWidget {
 class _ScanPageState extends State<ScanPage> {
   static const speedPollingMs = 200;
 
+  final _renameController = TextEditingController();
+
   Timer? _speedTimer;
   late RaptorqDecoder _decoder;
 
@@ -289,21 +291,25 @@ class _ScanPageState extends State<ScanPage> {
     HapticFeedback.heavyImpact();
 
     _showResultSheet(fileWrapper, timeInSeconds).then((_) {
+      if (mounted && _renameController.text.isNotEmpty) {
+        // Should rename file
+        final newFilename = _renameController.text;
+        resultFile.rename('${itemsDirectory.path}/$newFilename');
+      }
+
       _reset();
     });
   }
 
   Future<void> _showResultSheet(FileWrapper file, double timeInSeconds) async {
+    _renameController.text = file.name;
     return showSheet(
       context: context,
       title: '${context.l10n.received_in} ${timeInSeconds.toStringAsFixed(1)}s',
       body: Column(
-        spacing: 8,
         children: [
           GestureDetector(
-            onTap: () {
-              _onTapOpen(file);
-            },
+            onTap: () {},
             child: Container(
               width: 150,
               height: 150,
@@ -322,10 +328,32 @@ class _ScanPageState extends State<ScanPage> {
               child: file.buildThumbnail(context, showsAvifThumbnail: true),
             ),
           ),
-          Text(file.name),
-          SizedBox(height: 16),
+
+          //Text(file.name),ion(contentPadding: EdgeInsets.all(8)),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _renameController,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                suffixIcon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedEdit01,
+                  color: context.color.onSurface,
+                ),
+                contentPadding: EdgeInsets.fromLTRB(48, 0, 0, 8),
+              ),
+              onTap: () {
+                final dotIndex = _renameController.text.indexOf('.');
+                final selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: dotIndex > 0 ? dotIndex : 0,
+                );
+                _renameController.selection = selection;
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
             child: Row(
               spacing: 8,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -392,6 +420,7 @@ class _ScanPageState extends State<ScanPage> {
     _decodedChunkCount = 0;
     _transferComplete = false;
     _fileMetadata = null;
+    _renameController.text = '';
     setState(() {});
 
     // Wait a second to start scanning again

@@ -10,6 +10,7 @@ import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -121,7 +122,11 @@ class _FilesPageState extends State<FilesPage> {
                   ),
                   child: file.buildThumbnail(context),
                 ),
-                title: Text(file.name),
+                title: Text(
+                  file.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 subtitle: Text(file.sizeInkB),
               );
             },
@@ -132,11 +137,12 @@ class _FilesPageState extends State<FilesPage> {
   }
 
   void _onTapItem(FileWrapper file) {
+    final date = file.file.statSync().modified;
+    final dateString = DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
     showSheet(
       context: context,
       title: context.l10n.file_options,
       body: Column(
-        spacing: 8,
         children: [
           GestureDetector(
             onTap: () {
@@ -160,7 +166,14 @@ class _FilesPageState extends State<FilesPage> {
               child: file.buildThumbnail(context, showsAvifThumbnail: true),
             ),
           ),
-          Text(file.name),
+          const SizedBox(height: 8),
+          Text(file.name, textAlign: TextAlign.center),
+          const SizedBox(height: 4),
+          Text(
+            dateString,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.color.secondary),
+          ),
           SizedBox(height: 8),
           ListTile(
             dense: true,
