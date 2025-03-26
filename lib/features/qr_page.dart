@@ -25,46 +25,49 @@ class _QrPageState extends State<QrPage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final qrBoxSize =
-        size.width < (size.height - 204) ? size.width : (size.height - 204);
+    final qrBoxHeight = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: Column(
         children: [
           FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: context.color.outline, width: 2),
-              borderRadius: BorderRadius.circular(12),
-              color:
-                  _isLargeFile && !_largeFileAcknowledged
-                      ? context.color.primaryContainer
-                      : Colors.white,
-            ),
-            child: SizedBox(
-              height: qrBoxSize + 20,
-              child:
-                  _isLargeFile && !_largeFileAcknowledged
-                      ? FileTooLargeAlertWidget(
-                        estimatedSlowestTime: widget.file
-                            .getEstimateTransferTime(8),
-                        onAcknowledge: () {
-                          setState(() {
-                            _largeFileAcknowledged = true;
-                          });
-                        },
-                      )
-                      : Consumer<EncodeSettings>(
-                        builder: (context, state, child) {
-                          return RaptorQrWidget(
-                            controller: _qrController,
-                            file: widget.file,
-                            mtu: state.mtu,
-                            compress: state.compress,
-                          );
-                        },
-                      ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: context.color.outline, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  color:
+                      _isLargeFile && !_largeFileAcknowledged
+                          ? context.color.primaryContainer
+                          : Colors.white,
+                ),
+                child: SizedBox(
+                  height: qrBoxHeight + 16,
+                  child:
+                      _isLargeFile && !_largeFileAcknowledged
+                          ? FileTooLargeAlertWidget(
+                            estimatedSlowestTime: widget.file
+                                .getEstimateTransferTime(8),
+                            onAcknowledge: () {
+                              setState(() {
+                                _largeFileAcknowledged = true;
+                              });
+                            },
+                          )
+                          : Consumer<EncodeSettings>(
+                            builder: (context, state, child) {
+                              return RaptorQrWidget(
+                                controller: _qrController,
+                                file: widget.file,
+                                mtu: state.mtu,
+                                compress: state.compress,
+                              );
+                            },
+                          ),
+                ),
+              ),
             ),
           ),
           Padding(

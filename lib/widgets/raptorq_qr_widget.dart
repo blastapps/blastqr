@@ -129,48 +129,51 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
         ),
       );
     }
-    return ListenableBuilder(
-      listenable: widget.controller,
-      builder: (context, child) {
-        final index = widget.controller.currentChunkIndex;
-        return Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              height: MediaQuery.of(context).size.width - 12,
-              width: MediaQuery.of(context).size.width,
-              child: Builder(
-                builder: (context) {
-                  final painter = QrPainter.withQr(
-                    qrImage: _qrImages[index],
-                    qr: _qrCodes[index],
-                  );
-                  return CustomPaint(painter: painter);
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${index + 1}/${_qrCodes.length}',
-                    style: TextStyle(color: Colors.black),
+    return LayoutBuilder(
+      builder: (context, c) {
+        final qrSize = c.maxWidth > c.maxHeight ? c.maxHeight : c.maxWidth;
+        final hOffset = c.maxWidth > (c.maxHeight - 20) ? 12 : 0;
+        final vOffset = c.maxWidth > (c.maxHeight - 20) ? 20 : 8;
+        return ListenableBuilder(
+          listenable: widget.controller,
+          builder: (context, child) {
+            final index = widget.controller.currentChunkIndex;
+            final painter = QrPainter.withQr(
+              qrImage: _qrImages[index],
+              qr: _qrCodes[index],
+            );
+            return Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  height: qrSize - vOffset,
+                  width: qrSize - hOffset,
+                  child: CustomPaint(painter: painter),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${index + 1}/${_qrCodes.length}',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          _setNextFps();
+                        },
+                        child: Text(
+                          '${_fps}FPS',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      _setNextFps();
-                    },
-                    child: Text(
-                      '${_fps}FPS',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         );
       },
     );
