@@ -1,10 +1,12 @@
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/help_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/widgets/raptorq_qr_widget.dart';
 import 'package:flutter_avif/flutter_avif.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 
 class QrPage extends StatefulWidget {
@@ -66,13 +68,40 @@ class _QrPageState extends State<QrPage> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: ElevatedButton(
               onPressed: _dismiss,
               child: Row(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [Text(context.l10n.done)],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (context) => const HelpPage(),
+                  ),
+                );
+              },
+              child: Row(
+                spacing: 8,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedInformationCircle,
+                    color: context.color.onSurface,
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Scan the QR code using the BLASTQR app on the device where you want to receive the file.',
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -166,7 +195,7 @@ class FileHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(12, 16, 16, 16),
       child: Stack(
         alignment: Alignment.topRight,
         children: [
