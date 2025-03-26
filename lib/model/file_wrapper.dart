@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:blast_qr/extensions.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/raptorq/raptorq_encoder.dart';
 import 'package:flutter/foundation.dart';
@@ -94,6 +95,14 @@ class FileWrapper {
     await Future.delayed(const Duration(milliseconds: 500));
     var bytes = await file.readAsBytes();
 
+    // Append filename in first 128 bytes
+    final filenameBytes = name.encodeFixed128();
+    bytes = Uint8List.fromList([...filenameBytes, ...bytes]);
+    debugPrint('Appended filename: $name in ${filenameBytes.length} bytes');
+    actualTransferSize = bytes.length;
+    debugPrint('Transfer length/original: $actualTransferSize / $size');
+
+    // Compression
     if (compressFile) {
       final compressedBytes = await compute(_compressFile, bytes);
       bytes = compressedBytes;

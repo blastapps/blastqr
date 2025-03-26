@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io';
@@ -260,10 +261,21 @@ class _ScanPageState extends State<ScanPage> {
       bytes = gzip.decode(data) as Uint8List;
     }
 
-    String timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-    final resultFile = await File(
-      '${itemsDirectory.path}/$timestamp.${_fileMetadata!.extension}',
-    ).writeAsBytes(bytes);
+    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+    final fileExtension = '.${_fileMetadata!.extension}';
+    final fileNameBytes = bytes.sublist(0, 128);
+    String fileName = utf8.decode(fileNameBytes).replaceAll('\x00', '');
+
+    if (fileName.contains(fileExtension) == false) {
+      fileName += fileExtension;
+    }
+
+    var resultFile = File('${itemsDirectory.path}/$fileName');
+    if (await resultFile.exists()) {
+      resultFile = File('${itemsDirectory.path}/${timestamp}_$fileName');
+    }
+    await resultFile.writeAsBytes(bytes.sublist(128));
+
     final fileWrapper = await resultFile.toFileWrapper();
     final timeInSeconds = _decoder.elapsedTime / 1000;
 
