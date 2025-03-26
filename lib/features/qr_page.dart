@@ -3,7 +3,7 @@ import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:blast_qr/widgets/raptorq_file_qr_widget.dart';
+import 'package:blast_qr/widgets/raptorq_qr_widget.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +23,9 @@ class _QrPageState extends State<QrPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final qrBoxSize =
+        size.width < (size.height - 204) ? size.width : (size.height - 204);
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: Column(
@@ -37,30 +40,32 @@ class _QrPageState extends State<QrPage> {
                       ? context.color.primaryContainer
                       : Colors.white,
             ),
-            child:
-                _isLargeFile && !_largeFileAcknowledged
-                    ? FileTooLargeAlertWidget(
-                      estimatedSlowestTime: widget.file.getEstimateTransferTime(
-                        8,
+            child: SizedBox(
+              height: qrBoxSize + 36,
+              child:
+                  _isLargeFile && !_largeFileAcknowledged
+                      ? FileTooLargeAlertWidget(
+                        estimatedSlowestTime: widget.file
+                            .getEstimateTransferTime(8),
+                        onAcknowledge: () {
+                          setState(() {
+                            _largeFileAcknowledged = true;
+                          });
+                        },
+                      )
+                      : Consumer<EncodeSettings>(
+                        builder: (context, state, child) {
+                          return RaptorQrWidget(
+                            controller: _qrController,
+                            file: widget.file,
+                            mtu: state.mtu,
+                          );
+                        },
                       ),
-                      onAcknowledge: () {
-                        setState(() {
-                          _largeFileAcknowledged = true;
-                        });
-                      },
-                    )
-                    : Consumer<EncodeSettings>(
-                      builder: (context, state, child) {
-                        return RaptorQrWidget(
-                          controller: _qrController,
-                          file: widget.file,
-                          mtu: state.mtu,
-                        );
-                      },
-                    ),
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
             child: ElevatedButton(
               onPressed: _dismiss,
               child: Row(

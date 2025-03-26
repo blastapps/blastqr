@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/my_qr_painter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -50,6 +52,7 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
   static const List<int> defaultFpeses = [15, 16, 20, 22, 25, 30];
 
   List<QrCode> _qrCodes = [];
+  List<QrImage> _qrImages = [];
   bool _isEncoding = true;
   int _fps = defaultFpeses[2];
   int _fpsIndex = 2;
@@ -86,7 +89,13 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
     _qrCodes = [];
     _isEncoding = true;
 
+    debugPrint('Generating QR codes..');
     _qrCodes = await widget.file.toQrCodeList(mtu: widget.mtu);
+
+    debugPrint('Generting QR images');
+    _qrImages = await compute(_generateQrImagesFrom, _qrCodes);
+
+    // TODO: Optimization - discrd qr code list keeping type and error correction level.
 
     _initTimer(Duration(milliseconds: (1000 / _fps).toInt()));
     _isEncoding = false;
@@ -94,6 +103,10 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  static List<QrImage> _generateQrImagesFrom(List<QrCode> codes) {
+    return codes.map((c) => QrImage.withMaskPattern(c, 3)).toList();
   }
 
   void _initTimer(Duration delay) {
@@ -126,23 +139,29 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
         ),
       );
     }
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: ListenableBuilder(
-        listenable: widget.controller,
-        builder: (context, child) {
-          final index = widget.controller.currentChunkIndex;
-          return Column(
-            children: [
-              FittedBox(
-                child: QrImageView.withQr(
-                  qr: _qrCodes[index],
-                  version: QrVersions.auto,
-                  size: _qrCodeWidth,
-                ),
+    return ListenableBuilder(
+      listenable: widget.controller,
+      builder: (context, child) {
+        final index = widget.controller.currentChunkIndex;
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              height: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width,
+              child: Builder(
+                builder: (context) {
+                  final painter = MyQrPainter.withQr(
+                    qrImage: _qrImages[index],
+                    qr: _qrCodes[index],
+                  );
+                  return CustomPaint(painter: painter);
+                },
               ),
-              SizedBox(height: 4),
-              Row(
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
@@ -160,10 +179,10 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
                   ),
                 ],
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 

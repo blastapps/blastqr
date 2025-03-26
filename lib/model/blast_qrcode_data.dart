@@ -29,9 +29,7 @@ class BlastQrcodeData {
     Uint8List extBytes = bytes.sublist(4, 12);
     int fileSize = sizeByteData.getUint32(0, Endian.big);
     int mtu = bytes.length - headerLength;
-    debugPrint(
-      'MTU: $mtu; Chunk byte len: ${bytes.lengthInBytes}, Chunk len: ${bytes.length}',
-    );
+
     String ext = utf8
         .decode(extBytes, allowMalformed: false)
         .replaceAll('\x00', '');

@@ -112,7 +112,7 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          ListTile(title: Text('v0.01')),
+          ListTile(title: Text('v1.0.0')),
         ],
       ),
     );

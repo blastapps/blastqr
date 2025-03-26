@@ -48,6 +48,8 @@ class _SendPageState extends State<SendPage> {
     if (path != null) {
       _showQrPage(File(path));
     }
+
+    handler.resetInitialSharedMedia();
   }
 
   @override
