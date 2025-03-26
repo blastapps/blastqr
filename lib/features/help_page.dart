@@ -44,6 +44,7 @@ class _HelpPageState extends State<HelpPage> {
 
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
+              initiallyExpanded: true,
               title: Text(
                 '2. ${context.l10n.help_title_2}',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -56,6 +57,7 @@ class _HelpPageState extends State<HelpPage> {
 
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
+              initiallyExpanded: true,
               title: Text(
                 '3. ${context.l10n.help_title_3}',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -68,6 +70,7 @@ class _HelpPageState extends State<HelpPage> {
 
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
+              initiallyExpanded: true,
               title: Text(
                 '4. ${context.l10n.help_title_4}',
                 style: Theme.of(context).textTheme.titleLarge,
