@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
@@ -36,11 +35,13 @@ class RaptorQrWidget extends StatefulWidget {
   final RaptorQrWidgetController controller;
   final FileWrapper file;
   final int mtu;
+  final bool compress;
 
   const RaptorQrWidget({
     super.key,
     required this.file,
     required this.mtu,
+    required this.compress,
     required this.controller,
   });
 
@@ -56,24 +57,11 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
   bool _isEncoding = true;
   int _fps = defaultFpeses[2];
   int _fpsIndex = 2;
-  double _qrCodeWidth = 360;
-  double _qrCodePlatformOffset = 0;
 
   @override
   void initState() {
     init();
     super.initState();
-
-    final mediaQuery =
-        (context.getElementForInheritedWidgetOfExactType<MediaQuery>()!.widget
-                as MediaQuery)
-            .data;
-    _qrCodePlatformOffset = Platform.isIOS ? 0 : 16;
-    if (mediaQuery.size.height > mediaQuery.size.width) {
-      _qrCodeWidth = mediaQuery.size.width - _qrCodePlatformOffset;
-    } else {
-      _qrCodeWidth = mediaQuery.size.height - 112 - 80 - 16 - 28;
-    }
   }
 
   @override
@@ -90,7 +78,10 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
     _isEncoding = true;
 
     debugPrint('Generating QR codes..');
-    _qrCodes = await widget.file.toQrCodeList(mtu: widget.mtu);
+    _qrCodes = await widget.file.toQrCodeList(
+      mtu: widget.mtu,
+      compressFile: widget.compress,
+    );
 
     debugPrint('Generting QR images');
     _qrImages = await compute(_generateQrImagesFrom, _qrCodes);
@@ -125,7 +116,6 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
     if (_isEncoding) {
       return SizedBox(
         width: double.infinity,
-        height: _qrCodeWidth + 24 + _qrCodePlatformOffset,
         child: Column(
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.center,

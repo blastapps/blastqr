@@ -25,12 +25,21 @@ class AppSettings extends ChangeNotifier {
 
 class EncodeSettings extends ChangeNotifier {
   int mtu;
+  bool compress;
 
-  EncodeSettings() : mtu = AppPreferences.mtu;
+  EncodeSettings()
+    : mtu = AppPreferences.mtu,
+      compress = AppPreferences.compress;
 
   void updateMtu(int mtu) {
     AppPreferences.setMtu(mtu); // Persist
     this.mtu = mtu;
+    notifyListeners();
+  }
+
+  void updateCompress(bool compress) {
+    AppPreferences.setCompress(compress); // Persist
+    this.compress = compress;
     notifyListeners();
   }
 }

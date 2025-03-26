@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:blast_qr/my_qr_painter.dart';
+import 'package:blast_qr/qr_painter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';

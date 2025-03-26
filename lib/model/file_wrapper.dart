@@ -19,9 +19,15 @@ class FileWrapper {
   String get sizeInkB => '${(size / 1000).toStringAsFixed(0)} KB';
   String get extension => name.split('.').last;
 
+  bool get isCompressable =>
+      !type.isVideo && !type.isWebpImage && !type.isAvifImage;
+
   FileWrapper({required this.file, required this.type, required this.size});
 
-  Future<List<QrCode>> toQrCodeList({required int mtu}) async {
+  Future<List<QrCode>> toQrCodeList({
+    required int mtu,
+    required bool compressFile,
+  }) async {
     // Metadata bytes (header)
     final sizeBytes = Uint8List(4)
       ..buffer.asByteData().setUint32(0, size, Endian.big);
@@ -32,8 +38,22 @@ class FileWrapper {
         ..buffer.asByteData().setUint32(0, 0, Endian.big);
     }
 
-    final chunks = await _getEncodedChunks(mtu: mtu);
-    final List<dynamic> args = [chunks, sizeBytes, fileExtBytes];
+    final willCompressFile = compressFile && isCompressable;
+    log('Splitting file. Compression enabled: $willCompressFile');
+    final chunks = await _getEncodedChunks(
+      mtu: mtu,
+      compressFile: willCompressFile,
+    );
+    final transferType =
+        willCompressFile
+            ? BlastQRTransferType.compressedFile
+            : BlastQRTransferType.rawFile;
+    final List<dynamic> args = [
+      chunks,
+      sizeBytes,
+      fileExtBytes,
+      transferType.header,
+    ];
     final result = compute(_encodeChunksToQr, args);
     return result;
   }
@@ -42,6 +62,7 @@ class FileWrapper {
     final List<Uint8List> chunks = args[0];
     final Uint8List sizeBytes = args[1];
     final Uint8List fileExtBytes = args[2];
+    final Uint8List transferTypeBytes = args[3];
     return chunks.map((c) {
       Uint8List combined = Uint8List(4 + 8 + 2 + 2 + c.length);
       // Encode file size in first 4 bytes
@@ -50,8 +71,8 @@ class FileWrapper {
       combined.setAll(4, fileExtBytes);
       // Encode signature bytes (magic number to validate qr code) in 2 bytes
       combined.setAll(12, BlastQrcodeData.signatureBytes);
-      // Reserve 2 bytes for future use
-      combined.setAll(14, BlastQrcodeData.reserved);
+      // Encode 2 bytes for tranfsfer type (raw file, compressed file, etc)
+      combined.setAll(14, transferTypeBytes);
       // Encode file data
       combined.setAll(16, c);
       return QrCode.fromUint8List(
@@ -61,10 +82,22 @@ class FileWrapper {
     }).toList();
   }
 
-  Future<List<Uint8List>> _getEncodedChunks({required int mtu}) async {
+  Future<List<Uint8List>> _getEncodedChunks({
+    required int mtu,
+    required bool compressFile,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    final bytes = await file.readAsBytes();
-    final repairPackets = (size / 5000);
+    var bytes = await file.readAsBytes();
+
+    var fileSize = size;
+    if (compressFile) {
+      final compressedBytes = await compute(_compressFile, bytes);
+      bytes = compressedBytes;
+      fileSize = compressedBytes.length;
+      log('Compressed file: $size -> $fileSize');
+    }
+
+    final repairPackets = (fileSize / 5000);
 
     log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
 
@@ -77,6 +110,10 @@ class FileWrapper {
     log('Chunk size: ${encodedData.first.length}');
 
     return encodedData;
+  }
+
+  Uint8List _compressFile(Uint8List original) {
+    return gzip.encode(original) as Uint8List;
   }
 
   double getEstimateTransferTime(int speedInkBps) {
@@ -92,11 +129,13 @@ class FileType {
   final bool isVideo;
   final bool isUnknown;
   final bool isAvifImage;
+  final bool isWebpImage;
 
   FileType({required this.extension, required this.mimeType})
     : isImage = mimeType?.startsWith("image") == true,
       isUnknown = mimeType == null,
       isAvifImage = mimeType == 'image/avif' || extension == 'avif',
+      isWebpImage = mimeType == 'image/webp' || extension == 'webp',
       isAudio = mimeType?.startsWith("audio") == true,
       isVideo = mimeType?.startsWith("video") == true;
 }

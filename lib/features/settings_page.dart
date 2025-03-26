@@ -95,6 +95,22 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
+          Consumer<EncodeSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                title: Text('Losless compression'),
+                subtitle: Text('Compress data before sending'),
+                activeColor: context.color.primary,
+                value: state.compress,
+                onChanged: (value) {
+                  Provider.of<EncodeSettings>(
+                    context,
+                    listen: false,
+                  ).updateCompress(value);
+                },
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Text(

@@ -59,6 +59,7 @@ class _QrPageState extends State<QrPage> {
                             controller: _qrController,
                             file: widget.file,
                             mtu: state.mtu,
+                            compress: state.compress,
                           );
                         },
                       ),

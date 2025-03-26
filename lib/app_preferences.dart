@@ -10,10 +10,12 @@ class AppPreferences {
   static String? _localeId;
   static BlastTheme? _theme;
   static int? _mtu;
+  static bool? _compress;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static BlastTheme get theme => _theme ?? BlastTheme.system;
   static int get mtu => _mtu ?? defaultMtu;
+  static bool get compress => _compress ?? false;
 
   static setLocale(String? localeId) async {
     if (localeId == null) {
@@ -34,6 +36,12 @@ class AppPreferences {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setInt('mtu', mtu);
     _mtu = mtu;
+  }
+
+  static setCompress(bool compress) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('compress', compress);
+    _compress = compress;
   }
 
   static Future<void> read() async {

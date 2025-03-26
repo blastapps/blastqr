@@ -4,9 +4,25 @@ import 'package:flutter/foundation.dart';
 
 enum QrEncodingType { bytes, base45, base64 }
 
+enum BlastQRTransferType {
+  rawFile,
+  compressedFile;
+
+  static final rawFileHeader = Uint8List.fromList([0, 1]);
+  static final compressedFileHeader = Uint8List.fromList([0, 2]);
+
+  Uint8List get header {
+    switch (this) {
+      case BlastQRTransferType.rawFile:
+        return rawFileHeader;
+      case BlastQRTransferType.compressedFile:
+        return compressedFileHeader;
+    }
+  }
+}
+
 class BlastQrcodeData {
   static final signatureBytes = Uint8List.fromList([81, 45]);
-  static final reserved = Uint8List.fromList([0, 1]);
   static final int headerLength = 16;
 
   final int transferLength;
