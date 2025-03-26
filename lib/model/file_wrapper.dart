@@ -13,6 +13,8 @@ class FileWrapper {
   final FileType type;
   final int size;
 
+  int actualTransferSize;
+
   String get name => file.uri.pathSegments.last;
   double get estimatedFastestTime => (size / 1000) / 20;
   double get estimatedSlowestTime => (size / 1000) / 6;
@@ -22,15 +24,14 @@ class FileWrapper {
   bool get isCompressable =>
       !type.isVideo && !type.isWebpImage && !type.isAvifImage;
 
-  FileWrapper({required this.file, required this.type, required this.size});
+  FileWrapper({required this.file, required this.type, required this.size})
+    : actualTransferSize = size;
 
   Future<List<QrCode>> toQrCodeList({
     required int mtu,
     required bool compressFile,
   }) async {
     // Metadata bytes (header)
-    final sizeBytes = Uint8List(4)
-      ..buffer.asByteData().setUint32(0, size, Endian.big);
     Uint8List fileExtBytes = utf8.encode(type.extension);
     if (fileExtBytes.lengthInBytes > 8) {
       // Set fileExtBytes to 0 if longer than 8 bytes
@@ -39,7 +40,7 @@ class FileWrapper {
     }
 
     final willCompressFile = compressFile && isCompressable;
-    log('Splitting file. Compression enabled: $willCompressFile');
+    debugPrint('Splitting file. Compression enabled: $willCompressFile');
     final chunks = await _getEncodedChunks(
       mtu: mtu,
       compressFile: willCompressFile,
@@ -48,6 +49,10 @@ class FileWrapper {
         willCompressFile
             ? BlastQRTransferType.compressedFile
             : BlastQRTransferType.rawFile;
+
+    final sizeBytes = Uint8List(4)
+      ..buffer.asByteData().setUint32(0, actualTransferSize, Endian.big);
+
     final List<dynamic> args = [
       chunks,
       sizeBytes,
@@ -89,15 +94,14 @@ class FileWrapper {
     await Future.delayed(const Duration(milliseconds: 500));
     var bytes = await file.readAsBytes();
 
-    var fileSize = size;
     if (compressFile) {
       final compressedBytes = await compute(_compressFile, bytes);
       bytes = compressedBytes;
-      fileSize = compressedBytes.length;
-      log('Compressed file: $size -> $fileSize');
+      actualTransferSize = compressedBytes.length;
+      debugPrint('Compressed file: $size -> $actualTransferSize');
     }
 
-    final repairPackets = (fileSize / 5000);
+    final repairPackets = (actualTransferSize / 5000);
 
     log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
 

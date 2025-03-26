@@ -15,7 +15,7 @@ class AppPreferences {
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static BlastTheme get theme => _theme ?? BlastTheme.system;
   static int get mtu => _mtu ?? defaultMtu;
-  static bool get compress => _compress ?? false;
+  static bool get compress => _compress ?? true;
 
   static setLocale(String? localeId) async {
     if (localeId == null) {
@@ -49,5 +49,6 @@ class AppPreferences {
     _localeId = sp.getString('locale_id');
     _theme = BlastTheme.values.byName(sp.getString('theme') ?? 'system');
     _mtu = sp.getInt('mtu') ?? defaultMtu;
+    _compress = sp.getBool('compress') ?? true;
   }
 }

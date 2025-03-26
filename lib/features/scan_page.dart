@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
@@ -7,6 +8,7 @@ import 'package:blast_qr/features/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/model/receiving_file_metadata.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +39,6 @@ class _ScanPageState extends State<ScanPage> {
   bool _shouldScan = true;
   bool _loadingResult = false;
   String _infoString = '';
-  String _fileExt = '';
   double _progress = 0;
   double _speed = 0;
   int _decodedChunkCount = 0;
@@ -45,6 +46,7 @@ class _ScanPageState extends State<ScanPage> {
   bool _showsReaderWidget = true;
   bool _hapticFeedback = true;
   bool _transferComplete = false;
+  ReceivingFileMetadata? _fileMetadata;
 
   @override
   void initState() {
@@ -110,7 +112,7 @@ class _ScanPageState extends State<ScanPage> {
           ScanProgressWidget(
             info: _infoString,
             progress: _progress,
-            fileExtension: _fileExt,
+            fileExtension: _fileMetadata?.extension ?? '',
             complete: _transferComplete,
             onTapCancel: _reset,
           ),
@@ -178,8 +180,15 @@ class _ScanPageState extends State<ScanPage> {
 
     if (BlastQrcodeData.bytesIsValidBlastQrCode(result.rawBytes)) {
       final blastQr = _parseQrCode(result)!;
-      _fileExt = blastQr.fileExtension;
       _decoder.decodeChunk(blastQr.data, blastQr.transferLength, blastQr.mtu);
+      if (_fileMetadata == null) {
+        _fileMetadata = ReceivingFileMetadata(
+          extension: blastQr.fileExtension,
+          size: blastQr.transferLength,
+          isCompressed: blastQr.isCompressedData,
+        );
+        debugPrint('Scanning file with: ${_fileMetadata.toString()}');
+      }
     } else {
       _handleRegularQRCodeResult(result.text);
     }
@@ -229,6 +238,9 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _handleResult(Uint8List data) async {
+    if (_fileMetadata == null) {
+      return;
+    }
     _loadingResult = false;
 
     setState(() {
@@ -242,10 +254,16 @@ class _ScanPageState extends State<ScanPage> {
       await itemsDirectory.create();
     }
 
+    var bytes = data;
+    if (_fileMetadata!.isCompressed) {
+      debugPrint('Decompressing data');
+      bytes = gzip.decode(data) as Uint8List;
+    }
+
     String timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
     final resultFile = await File(
-      '${itemsDirectory.path}/$timestamp.$_fileExt',
-    ).writeAsBytes(data);
+      '${itemsDirectory.path}/$timestamp.${_fileMetadata!.extension}',
+    ).writeAsBytes(bytes);
     final fileWrapper = await resultFile.toFileWrapper();
     final timeInSeconds = _decoder.elapsedTime / 1000;
 
@@ -361,6 +379,7 @@ class _ScanPageState extends State<ScanPage> {
     _speed = 0;
     _decodedChunkCount = 0;
     _transferComplete = false;
+    _fileMetadata = null;
     setState(() {});
 
     // Wait a second to start scanning again

@@ -8,16 +8,24 @@ enum BlastQRTransferType {
   rawFile,
   compressedFile;
 
-  static final rawFileHeader = Uint8List.fromList([0, 1]);
-  static final compressedFileHeader = Uint8List.fromList([0, 2]);
+  static final _rawFileHeader = Uint8List.fromList([0, 1]);
+  static final _compressedFileHeader = Uint8List.fromList([0, 2]);
 
   Uint8List get header {
     switch (this) {
       case BlastQRTransferType.rawFile:
-        return rawFileHeader;
+        return _rawFileHeader;
       case BlastQRTransferType.compressedFile:
-        return compressedFileHeader;
+        return _compressedFileHeader;
     }
+  }
+
+  static BlastQRTransferType fromBytes(Uint8List bytes) {
+    if (bytes[0] == _compressedFileHeader[0] &&
+        bytes[1] == _compressedFileHeader[1]) {
+      return BlastQRTransferType.compressedFile;
+    }
+    return BlastQRTransferType.rawFile;
   }
 }
 
@@ -29,12 +37,14 @@ class BlastQrcodeData {
   final String fileExtension;
   final Uint8List data;
   final int mtu;
+  final bool isCompressedData;
 
   BlastQrcodeData({
     required this.transferLength,
     required this.fileExtension,
     required this.data,
     required this.mtu,
+    required this.isCompressedData,
   });
 
   factory BlastQrcodeData.fromBytes(Uint8List bytes) {
@@ -44,17 +54,21 @@ class BlastQrcodeData {
     ByteData sizeByteData = bytes.buffer.asByteData(0, 4);
     Uint8List extBytes = bytes.sublist(4, 12);
     int fileSize = sizeByteData.getUint32(0, Endian.big);
+    Uint8List transferTypeBytes = bytes.sublist(14, 16);
     int mtu = bytes.length - headerLength;
 
+    final transferType = BlastQRTransferType.fromBytes(transferTypeBytes);
     String ext = utf8
         .decode(extBytes, allowMalformed: false)
         .replaceAll('\x00', '');
     Uint8List packetBytes = bytes.sublist(headerLength);
+
     return BlastQrcodeData(
       transferLength: fileSize,
       fileExtension: ext,
       data: packetBytes,
       mtu: mtu,
+      isCompressedData: transferType == BlastQRTransferType.compressedFile,
     );
   }
 
