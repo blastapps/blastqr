@@ -4,7 +4,7 @@ import 'package:blast_qr/my_qr_painter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qr/qr.dart';
 
 class QrCodePageOptimized extends StatefulWidget {
   const QrCodePageOptimized({super.key});
@@ -122,7 +122,7 @@ class _QrCodePageOptimizedState extends State<QrCodePageOptimized>
   }
 
   Widget _qrWidget(QrImage image, QrCode qr) {
-    final painter = MyQrPainter.withQr(qrImage: image, qr: qr);
+    final painter = QrPainter.withQr(qrImage: image, qr: qr);
     return CustomPaint(painter: painter);
   }
 }

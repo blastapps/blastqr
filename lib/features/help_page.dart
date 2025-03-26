@@ -76,7 +76,9 @@ class _HelpPageState extends State<HelpPage> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               children: [
-                Text('${context.l10n.help_message_4} ${HelpPage.projectUrl}'),
+                SelectableText(
+                  '${context.l10n.help_message_4} ${HelpPage.projectUrl}',
+                ),
                 const SizedBox(height: 12),
               ],
             ),

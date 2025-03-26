@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
-import 'package:blast_qr/my_qr_painter.dart';
+import 'package:blast_qr/qr_painter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qr/qr.dart';
 
 class RaptorQrWidgetController with ChangeNotifier {
   Timer? _timer;
@@ -95,7 +95,7 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
     debugPrint('Generting QR images');
     _qrImages = await compute(_generateQrImagesFrom, _qrCodes);
 
-    // TODO: Optimization - discrd qr code list keeping type and error correction level.
+    // TODO: Optimization - discard qr code list keeping type and error correction level.
 
     _initTimer(Duration(milliseconds: (1000 / _fps).toInt()));
     _isEncoding = false;
@@ -147,11 +147,11 @@ class _RaptorQrWidgetState extends State<RaptorQrWidget> {
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              height: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.width - 12,
               width: MediaQuery.of(context).size.width,
               child: Builder(
                 builder: (context) {
-                  final painter = MyQrPainter.withQr(
+                  final painter = QrPainter.withQr(
                     qrImage: _qrImages[index],
                     qr: _qrCodes[index],
                   );

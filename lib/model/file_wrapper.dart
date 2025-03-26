@@ -6,7 +6,7 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/raptorq/raptorq_encoder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart' as mime;
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qr/qr.dart';
 
 class FileWrapper {
   final File file;

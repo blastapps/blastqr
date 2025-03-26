@@ -41,7 +41,7 @@ class _QrPageState extends State<QrPage> {
                       : Colors.white,
             ),
             child: SizedBox(
-              height: qrBoxSize + 36,
+              height: qrBoxSize + 20,
               child:
                   _isLargeFile && !_largeFileAcknowledged
                       ? FileTooLargeAlertWidget(

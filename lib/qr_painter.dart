@@ -42,11 +42,11 @@ enum FinderPatternPosition {
 const int _finderPatternLimit = 7;
 
 /// A [CustomPainter] object that you can use to paint a QR code.
-class MyQrPainter extends CustomPainter {
+class QrPainter extends CustomPainter {
   /// Create a new QrPainter with a pre-validated/created [QrCode] object. This
   /// constructor is useful when you have a custom validation / error handling
   /// flow or for when you need to pre-validate the QR data.
-  MyQrPainter.withQr({required QrImage qrImage, required QrCode qr})
+  QrPainter.withQr({required QrImage qrImage, required QrCode qr})
     : _qrImage = qrImage,
       _qr = qr,
       version = qr.typeNumber,
@@ -156,8 +156,8 @@ class MyQrPainter extends CustomPainter {
           continue;
         }
         // paint a pixel
-        left = paintMetrics.inset + (x * (paintMetrics.pixelSize));
-        top = paintMetrics.inset + (y * (paintMetrics.pixelSize));
+        left = (x * (paintMetrics.pixelSize));
+        top = (y * (paintMetrics.pixelSize));
         var pixelHTweak = 0.0;
         var pixelVTweak = 0.0;
         if (_hasAdjacentHorizontalPixel(x, y, _qr.moduleCount)) {
@@ -216,19 +216,15 @@ class MyQrPainter extends CustomPainter {
     final radius =
         (_finderPatternLimit * metrics.pixelSize) - metrics.pixelSize;
     final strokeAdjust = metrics.pixelSize / 2.0;
-    final edgePos =
-        (metrics.inset + metrics.innerContentSize) - (radius + strokeAdjust);
+    final edgePos = (metrics.innerContentSize) - (radius + strokeAdjust);
 
     Offset offset;
     if (position == FinderPatternPosition.topLeft) {
-      offset = Offset(
-        metrics.inset + strokeAdjust,
-        metrics.inset + strokeAdjust,
-      );
+      offset = Offset(strokeAdjust, strokeAdjust);
     } else if (position == FinderPatternPosition.bottomLeft) {
-      offset = Offset(metrics.inset + strokeAdjust, edgePos);
+      offset = Offset(strokeAdjust, edgePos);
     } else {
-      offset = Offset(edgePos, metrics.inset + strokeAdjust);
+      offset = Offset(edgePos, strokeAdjust);
     }
 
     // configure the paints
@@ -280,7 +276,7 @@ class MyQrPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldPainter) {
-    if (oldPainter is MyQrPainter) {
+    if (oldPainter is QrPainter) {
       return errorCorrectionLevel != oldPainter.errorCorrectionLevel ||
           _qr != oldPainter._qr;
     }
@@ -302,14 +298,9 @@ class _PaintMetrics {
   late final double _innerContentSize;
   double get innerContentSize => _innerContentSize;
 
-  late final double _inset;
-  double get inset => _inset;
-
   void _calculateMetrics() {
     _pixelSize = (containerSize) / moduleCount;
-    //_pixelSize = (pixelSize * 2).roundToDouble() / 2;
     _innerContentSize = (_pixelSize * moduleCount);
-    _inset = (containerSize - _innerContentSize) / 2;
   }
 }
 
