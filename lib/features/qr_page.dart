@@ -72,18 +72,7 @@ class _QrPageState extends State<QrPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: ElevatedButton(
-                onPressed: _dismiss,
-                child: Row(
-                  spacing: 8,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text(context.l10n.done)],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
@@ -100,12 +89,19 @@ class _QrPageState extends State<QrPage> {
                       icon: HugeIcons.strokeRoundedInformationCircle,
                       color: context.color.onSurface,
                     ),
-                    Expanded(
-                      child: Text(
-                        'Scan the QR code using the BLASTQR app on the device where you want to receive the file.',
-                      ),
-                    ),
+                    Expanded(child: Text(context.l10n.send_help_message)),
                   ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: _dismiss,
+                child: Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text(context.l10n.done)],
                 ),
               ),
             ),

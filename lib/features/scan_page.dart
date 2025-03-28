@@ -39,6 +39,7 @@ class _ScanPageState extends State<ScanPage> {
   late RaptorqDecoder _decoder;
 
   bool _shouldScan = true;
+  bool _isReceivingData = false;
   bool _loadingResult = false;
   String _infoString = '';
   double _progress = 0;
@@ -111,6 +112,36 @@ class _ScanPageState extends State<ScanPage> {
                     )
                     : SizedBox(),
           ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: context.color.surface.withAlpha(80),
+                  ),
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedInformationCircle,
+                        color: Colors.white,
+                      ),
+                      Expanded(
+                        child: Text(
+                          context.l10n.scan_help_message,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ).animate(target: _isReceivingData ? 0 : 1).fade(),
           ScanProgressWidget(
             info: _infoString,
             progress: _progress,
@@ -189,6 +220,9 @@ class _ScanPageState extends State<ScanPage> {
           size: blastQr.transferLength,
           isCompressed: blastQr.isCompressedData,
         );
+        setState(() {
+          _isReceivingData = true;
+        });
         debugPrint('Scanning file with: ${_fileMetadata.toString()}');
       }
     } else {
@@ -270,12 +304,13 @@ class _ScanPageState extends State<ScanPage> {
     if (fileName.contains(fileExtension) == false) {
       fileName += fileExtension;
     }
-
-    var resultFile = File('${itemsDirectory.path}/$fileName');
-    if (await resultFile.exists()) {
-      resultFile = File('${itemsDirectory.path}/${timestamp}_$fileName');
+    if (await File('${itemsDirectory.path}/$fileName').exists()) {
+      fileName = '${timestamp}_$fileName';
     }
-    await resultFile.writeAsBytes(bytes.sublist(128));
+
+    final resultFile = await File(
+      '${itemsDirectory.path}/$fileName',
+    ).writeAsBytes(bytes.sublist(128));
 
     final fileWrapper = await resultFile.toFileWrapper();
     final timeInSeconds = _decoder.elapsedTime / 1000;
@@ -289,13 +324,17 @@ class _ScanPageState extends State<ScanPage> {
 
     HapticFeedback.heavyImpact();
 
-    _showResultSheet(fileWrapper, timeInSeconds).then((_) {
-      if (mounted && _renameController.text.isNotEmpty) {
+    _showResultSheet(fileWrapper, timeInSeconds).then((_) async {
+      if (mounted && _renameController.text != fileName) {
         // Should rename file
         final newFilename = _renameController.text;
-        resultFile.rename('${itemsDirectory.path}/$newFilename');
+        if (!await File('${itemsDirectory.path}/$newFilename').exists()) {
+          resultFile.rename('${itemsDirectory.path}/$newFilename');
+        } else {
+          // If file exists prepend timestamp
+          resultFile.rename('${itemsDirectory.path}/${timestamp}_$newFilename');
+        }
       }
-
       _reset();
     });
   }
@@ -429,6 +468,7 @@ class _ScanPageState extends State<ScanPage> {
     if (mounted) {
       setState(() {
         _shouldScan = true;
+        _isReceivingData = false;
       });
     }
   }
