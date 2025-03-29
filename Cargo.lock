@@ -534,9 +534,9 @@ checksum = "90b1b1fad69672f0b901b5004863ea4307f03d168a3db5f2bcba4d3dfed88e97"
 
 [[package]]
 name = "rinf"
-version = "7.3.0"
+version = "7.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3888a5a5adcdbf4cb416741a7d3bbee20a9f9b935bd7aed61d93a2c7db048835"
+checksum = "7d3bbc0847b5d975a5fc5a7b7e6aad4d70b482d32af79f4b2e1e70f09f29b2ca"
 dependencies = [
  "allo-isolate",
  "home",

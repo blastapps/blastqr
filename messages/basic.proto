@@ -2,14 +2,17 @@ syntax = "proto3";
 package basic;
 
 // [DART-SIGNAL]
-message EncodeInput { 
+message StreamEncodeInput { 
     bytes data = 1;
     int32 mtu = 2;
     uint32 repair_packets_per_block = 3;
 }
 
 // [RUST-SIGNAL]
-message EncodeOutput { repeated bytes result = 1; }
+message StreamEncodeOutput { 
+    bytes result = 1;
+    bool is_complete = 2;
+}
 
 // [DART-SIGNAL]
 message DecodeChunkInput { 

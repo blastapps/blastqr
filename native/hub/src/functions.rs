@@ -2,11 +2,11 @@ use crate::messages::*;
 use raptorq::{Decoder, Encoder, EncodingPacket, ObjectTransmissionInformation};
 use std::time::Instant;
 
-pub async fn encode_data() {
-    let receiver = EncodeInput::get_dart_signal_receiver();
+pub async fn stream_encode_data() {
+    let receiver = StreamEncodeInput::get_dart_signal_receiver();
 
     while let Some(dart_signal) = receiver.recv().await {
-        let message: EncodeInput = dart_signal.message;
+        let message: StreamEncodeInput = dart_signal.message;
 
         let data = message.data;
         let mtu = message.mtu as u16;
@@ -15,16 +15,17 @@ pub async fn encode_data() {
         let encoder = Encoder::with_defaults(&data, mtu);
 
         // Perform the encoding, and serialize to Vec<u8> for transmission
-        let packets: Vec<Vec<u8>> = encoder
-            .get_encoded_packets(message.repair_packets_per_block)
-            .iter()
-            .map(|packet| packet.serialize())
-            .collect();
+        let packets = encoder.get_encoded_packets(message.repair_packets_per_block);
+        let last_index = packets.len() - 1; // Get last index
 
-        let length = packets.len();
-        rinf::debug_print!("Encoded packet count: {length:?}");
-
-        EncodeOutput { result: packets }.send_signal_to_dart(); // GENERATED
+        for (index, packet) in packets.iter().enumerate() {
+            StreamEncodeOutput {
+                result: packet.serialize(),
+                is_complete: index == last_index, // True on last iteration
+            }
+            .send_signal_to_dart();
+        }
+        rinf::debug_print!("All packets sent!");
     }
 }
 

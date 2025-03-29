@@ -15,7 +15,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  rinf: ^7.3.0
+  rinf: ^7.3.1
   protobuf: ^3.1.0
   flutter_zxing: ^1.8.2
   flutter_avif: ^3.0.0

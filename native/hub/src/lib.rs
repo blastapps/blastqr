@@ -16,7 +16,7 @@ async fn main() {
     // Always use non-blocking async functions like `tokio::fs::File::open`.
     // If you must use blocking code, use `tokio::task::spawn_blocking`
     // or the equivalent provided by your async library.
-    tokio::spawn(functions::encode_data());
+    tokio::spawn(functions::stream_encode_data());
     tokio::spawn(functions::decode_chunk());
 
     // Keep the main function running until Dart shutdown.

@@ -3,8 +3,8 @@ import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:blast_qr/widgets/raptorq_qr_widget.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +19,7 @@ class QrPage extends StatefulWidget {
 }
 
 class _QrPageState extends State<QrPage> {
-  final _qrController = RaptorQrWidgetController();
+  final _qrController = RaptorQrStreamingWidgetController();
   bool get _isLargeFile => widget.file.size > 1000000;
   bool _largeFileAcknowledged = false;
 
@@ -59,7 +59,7 @@ class _QrPageState extends State<QrPage> {
                             )
                             : Consumer<EncodeSettings>(
                               builder: (context, state, child) {
-                                return RaptorQrWidget(
+                                return RaptorQrStreamingWidget(
                                   controller: _qrController,
                                   file: widget.file,
                                   mtu: state.mtu,

@@ -46,22 +46,21 @@ class QrPainter extends CustomPainter {
   /// Create a new QrPainter with a pre-validated/created [QrCode] object. This
   /// constructor is useful when you have a custom validation / error handling
   /// flow or for when you need to pre-validate the QR data.
-  QrPainter.withQr({required QrImage qrImage, required QrCode qr})
+  QrPainter.withQr({required QrImage qrImage})
     : _qrImage = qrImage,
-      _qr = qr,
-      version = qr.typeNumber,
-      errorCorrectionLevel = qr.errorCorrectLevel {
+      version = qrImage.typeNumber,
+      qrModuleCount = qrImage.moduleCount,
+      errorCorrectionLevel = QrErrorCorrectLevel.L {
     _initPaints();
   }
+
+  final int qrModuleCount;
 
   /// The QR code version.
   final int version; // the qr code version
 
   /// The error correction level of the QR code.
   final int errorCorrectionLevel; // the qr code error correction level
-
-  /// The base QR code data
-  final QrCode _qr;
 
   /// QR Image renderer
   late final QrImage _qrImage;
@@ -116,7 +115,7 @@ class QrPainter extends CustomPainter {
 
     final paintMetrics = _PaintMetrics(
       containerSize: size.shortestSide,
-      moduleCount: _qr.moduleCount,
+      moduleCount: qrModuleCount,
     );
 
     // draw the finder pattern elements
@@ -146,8 +145,8 @@ class QrPainter extends CustomPainter {
     int rectCount = 0;
     final pixelPath = Path();
     final pixelPath2 = Path();
-    for (var x = 0; x < _qr.moduleCount; x++) {
-      for (var y = 0; y < _qr.moduleCount; y++) {
+    for (var x = 0; x < qrModuleCount; x++) {
+      for (var y = 0; y < qrModuleCount; y++) {
         // draw the finder patterns independently
         if (_isFinderPatternPosition(x, y)) {
           continue;
@@ -160,10 +159,10 @@ class QrPainter extends CustomPainter {
         top = (y * (paintMetrics.pixelSize));
         var pixelHTweak = 0.0;
         var pixelVTweak = 0.0;
-        if (_hasAdjacentHorizontalPixel(x, y, _qr.moduleCount)) {
+        if (_hasAdjacentHorizontalPixel(x, y, qrModuleCount)) {
           pixelHTweak = 0.5;
         }
-        if (_hasAdjacentVerticalPixel(x, y, _qr.moduleCount)) {
+        if (_hasAdjacentVerticalPixel(x, y, qrModuleCount)) {
           pixelVTweak = 0.5;
         }
         final squareRect = Rect.fromLTWH(
@@ -202,9 +201,9 @@ class QrPainter extends CustomPainter {
   bool _isFinderPatternPosition(int x, int y) {
     final isTopLeft = y < _finderPatternLimit && x < _finderPatternLimit;
     final isBottomLeft =
-        y < _finderPatternLimit && (x >= _qr.moduleCount - _finderPatternLimit);
+        y < _finderPatternLimit && (x >= qrModuleCount - _finderPatternLimit);
     final isTopRight =
-        y >= _qr.moduleCount - _finderPatternLimit && (x < _finderPatternLimit);
+        y >= qrModuleCount - _finderPatternLimit && (x < _finderPatternLimit);
     return isTopLeft || isBottomLeft || isTopRight;
   }
 
@@ -278,7 +277,7 @@ class QrPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldPainter) {
     if (oldPainter is QrPainter) {
       return errorCorrectionLevel != oldPainter.errorCorrectionLevel ||
-          _qr != oldPainter._qr;
+          qrModuleCount != oldPainter.qrModuleCount;
     }
     return true;
   }

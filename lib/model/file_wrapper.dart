@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:blast_qr/extensions.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
-import 'package:blast_qr/raptorq/raptorq_encoder.dart';
+import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:qr/qr.dart';
@@ -14,7 +14,7 @@ class FileWrapper {
   final FileType type;
   final int size;
 
-  int actualTransferSize;
+  int _actualTransferSize;
 
   String get name => file.uri.pathSegments.last;
   double get estimatedFastestTime => (size / 1000) / 20;
@@ -26,12 +26,41 @@ class FileWrapper {
       !type.isVideo && !type.isWebpImage && !type.isAvifImage;
 
   FileWrapper({required this.file, required this.type, required this.size})
-    : actualTransferSize = size;
+    : _actualTransferSize = size;
 
-  Future<List<QrCode>> toQrCodeList({
-    required int mtu,
-    required bool compressFile,
-  }) async {
+  Uint8List _compressFile(Uint8List original) {
+    return gzip.encode(original) as Uint8List;
+  }
+
+  double getEstimateTransferTime(int speedInkBps) {
+    return (size / 1000) / speedInkBps;
+  }
+
+  QrCode _encodeChunkToQr(List<dynamic> args) {
+    final Uint8List chunk = args[0];
+    final Uint8List sizeBytes = args[1];
+    final Uint8List fileExtBytes = args[2];
+    final Uint8List transferTypeBytes = args[3];
+
+    Uint8List combined = Uint8List(4 + 8 + 2 + 2 + chunk.length);
+    // Encode file size in first 4 bytes
+    combined.setAll(0, sizeBytes);
+    // Encode file extension in followin 8 bytes
+    combined.setAll(4, fileExtBytes);
+    // Encode signature bytes (magic number to validate qr code) in 2 bytes
+    combined.setAll(12, BlastQrcodeData.signatureBytes);
+    // Encode 2 bytes for tranfsfer type (raw file, compressed file, etc)
+    combined.setAll(14, transferTypeBytes);
+    // Encode file data
+    combined.setAll(16, chunk);
+
+    return QrCode.fromUint8List(
+      data: combined,
+      errorCorrectLevel: QrErrorCorrectLevel.L,
+    );
+  }
+
+  Stream<QrImage> qrImageStream(int mtu) async* {
     // Metadata bytes (header)
     Uint8List fileExtBytes = utf8.encode(type.extension);
     if (fileExtBytes.lengthInBytes > 8) {
@@ -40,97 +69,53 @@ class FileWrapper {
         ..buffer.asByteData().setUint32(0, 0, Endian.big);
     }
 
-    final willCompressFile = compressFile && isCompressable;
-    debugPrint('Splitting file. Compression enabled: $willCompressFile');
-    final chunks = await _getEncodedChunks(
-      mtu: mtu,
-      compressFile: willCompressFile,
-    );
-    final transferType =
-        willCompressFile
-            ? BlastQRTransferType.compressedFile
-            : BlastQRTransferType.rawFile;
-
-    final sizeBytes = Uint8List(4)
-      ..buffer.asByteData().setUint32(0, actualTransferSize, Endian.big);
-
-    final List<dynamic> args = [
-      chunks,
-      sizeBytes,
-      fileExtBytes,
-      transferType.header,
-    ];
-    final result = compute(_encodeChunksToQr, args);
-    return result;
-  }
-
-  List<QrCode> _encodeChunksToQr(List<dynamic> args) {
-    final List<Uint8List> chunks = args[0];
-    final Uint8List sizeBytes = args[1];
-    final Uint8List fileExtBytes = args[2];
-    final Uint8List transferTypeBytes = args[3];
-    return chunks.map((c) {
-      Uint8List combined = Uint8List(4 + 8 + 2 + 2 + c.length);
-      // Encode file size in first 4 bytes
-      combined.setAll(0, sizeBytes);
-      // Encode file extension in followin 8 bytes
-      combined.setAll(4, fileExtBytes);
-      // Encode signature bytes (magic number to validate qr code) in 2 bytes
-      combined.setAll(12, BlastQrcodeData.signatureBytes);
-      // Encode 2 bytes for tranfsfer type (raw file, compressed file, etc)
-      combined.setAll(14, transferTypeBytes);
-      // Encode file data
-      combined.setAll(16, c);
-      return QrCode.fromUint8List(
-        data: combined,
-        errorCorrectLevel: QrErrorCorrectLevel.L,
-      );
-    }).toList();
-  }
-
-  Future<List<Uint8List>> _getEncodedChunks({
-    required int mtu,
-    required bool compressFile,
-  }) async {
-    await Future.delayed(const Duration(milliseconds: 500));
     var bytes = await file.readAsBytes();
 
-    // Append filename in first 128 bytes
+    // Append filename in first 128 bytes of file data
     final filenameBytes = name.encodeFixed128();
     bytes = Uint8List.fromList([...filenameBytes, ...bytes]);
     debugPrint('Appended filename: $name in ${filenameBytes.length} bytes');
-    actualTransferSize = bytes.length;
-    debugPrint('Transfer length/original: $actualTransferSize / $size');
+    _actualTransferSize = bytes.length;
+    debugPrint('Transfer length/original: $_actualTransferSize / $size');
 
     // Compression
-    if (compressFile) {
-      final compressedBytes = await compute(_compressFile, bytes);
-      bytes = compressedBytes;
-      actualTransferSize = compressedBytes.length;
-      debugPrint('Compressed file: $size -> $actualTransferSize');
-    }
+    final compressedBytes = await compute(_compressFile, bytes);
+    bytes = compressedBytes;
+    _actualTransferSize = compressedBytes.length;
+    debugPrint('Compressed file: $size -> $_actualTransferSize');
 
-    final repairPackets = (actualTransferSize / 5000);
+    final repairPackets = (_actualTransferSize / 5000);
 
     log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
 
-    final encoder = RaptorqEncoder(
+    final encoder = RaptorqStreamingEncoder(
       mtu: mtu,
       repairPacketsPerBlock: repairPackets.toInt(),
     );
 
-    final encodedData = await encoder.encode(bytes);
-    log('Chunk size: ${encodedData.first.length}');
+    final transferType = BlastQRTransferType.compressedFile;
 
-    return encodedData;
-  }
+    final sizeBytes = Uint8List(4)
+      ..buffer.asByteData().setUint32(0, _actualTransferSize, Endian.big);
 
-  Uint8List _compressFile(Uint8List original) {
-    return gzip.encode(original) as Uint8List;
-  }
+    await for (RaptorqTransfer transfer in encoder.encode(bytes)) {
+      final qr = _encodeChunkToQr([
+        transfer.data,
+        sizeBytes,
+        fileExtBytes,
+        transferType.header,
+      ]);
+      await Future.delayed(
+        const Duration(milliseconds: 1),
+      ); // Allows  UI to update
+      final qrImage = QrImage.withMaskPattern(qr, 3);
+      yield qrImage;
 
-  double getEstimateTransferTime(int speedInkBps) {
-    return (size / 1000) / speedInkBps;
+      if (transfer.isComplete) {
+        debugPrint('Transfer finalized!!');
+        break;
+      }
+    }
   }
 }
 
