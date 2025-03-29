@@ -22,6 +22,10 @@ void main() async {
     final license = await rootBundle.loadString('fonts/Jersey25/OFL.txt');
     yield LicenseEntryWithLineBreaks(['Jersey 25'], license);
   });
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/licenses/raptorq.txt');
+    yield LicenseEntryWithLineBreaks(['raptorq'], license);
+  });
 
   //Setting SystmeUIMode
   SystemChrome.setEnabledSystemUIMode(

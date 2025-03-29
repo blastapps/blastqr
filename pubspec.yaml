@@ -46,6 +46,7 @@ flutter:
     - assets/bg_qr.webp 
     - assets/download-qr.png 
     - fonts/Jersey25/OFL.txt
+    - assets/licenses/raptorq.txt
   fonts:
     - family: Jersey25
       fonts:
