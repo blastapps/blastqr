@@ -80,30 +80,30 @@ class _SendPageState extends State<SendPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          spacing: 16,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            DropRegion(
-              // Formats this region can accept.
-              formats: Formats.standardFormats,
-              hitTestBehavior: HitTestBehavior.opaque,
-              onDropOver: (event) {
-                return DropOperation.copy;
-              },
-              onPerformDrop: (event) async {
-                final item = event.session.items.first;
-                final reader = item.dataReader!;
-                reader.getValue<Uri>(Formats.fileUri, (fileUri) {
-                  debugPrint('Dropped file: $fileUri');
-                  if (fileUri != null) {
-                    _showQrPage(File(fileUri.path));
-                  }
-                });
-              },
-              child: InkWell(
+      body: DropRegion(
+        // Formats this region can accept.
+        formats: Formats.standardFormats,
+        hitTestBehavior: HitTestBehavior.opaque,
+        onDropOver: (event) {
+          return DropOperation.copy;
+        },
+        onPerformDrop: (event) async {
+          final item = event.session.items.first;
+          final reader = item.dataReader!;
+          reader.getValue<Uri>(Formats.fileUri, (fileUri) {
+            debugPrint('Dropped file: $fileUri');
+            if (fileUri != null) {
+              _showQrPage(File(fileUri.path));
+            }
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            spacing: 16,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: _pickFileToEncode,
                 child: Container(
@@ -123,42 +123,52 @@ class _SendPageState extends State<SendPage> {
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text(
-                    context.l10n.pick_file_msg,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 16,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedFileAdd,
+                        color: context.color.onSurface,
+                        size: 72,
+                      ),
+                      Text(
+                        context.l10n.pick_file_msg,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-
-            OutlinedButton(
-              onPressed: _onTapHelp,
-              style: OutlinedButton.styleFrom(minimumSize: Size(0, 48)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedHelpCircle,
-                    color: context.color.onSurface,
-                  ),
-                  Text(context.l10n.help),
-                ],
+              OutlinedButton(
+                onPressed: _onTapHelp,
+                style: OutlinedButton.styleFrom(minimumSize: Size(0, 48)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8,
+                  children: [
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedHelpCircle,
+                      color: context.color.onSurface,
+                    ),
+                    Text(context.l10n.help),
+                  ],
+                ),
               ),
-            ),
-            if (!Platform.isAndroid && !Platform.isIOS)
-              Column(
-                spacing: 16,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '* Receiving files is not supported on the desktop app yet.',
-                  ),
-                ],
-              ),
-          ],
+              if (!Platform.isAndroid && !Platform.isIOS)
+                Column(
+                  spacing: 16,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '* Receiving files is not supported on the desktop app yet.',
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );

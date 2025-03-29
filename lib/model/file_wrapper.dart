@@ -17,7 +17,7 @@ class FileWrapper {
   int _actualTransferSize;
 
   String get name => file.uri.pathSegments.last;
-  double get estimatedFastestTime => (size / 1000) / 20;
+  double get estimatedFastestTime => (size / 1000) / 40; // 40kb/s
   double get estimatedSlowestTime => (size / 1000) / 6;
   String get sizeInkB => '${(size / 1000).toStringAsFixed(0)} KB';
   String get extension => name.split('.').last;
