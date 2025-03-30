@@ -188,7 +188,7 @@ class FileHeaderWidget extends StatelessWidget {
   final void Function() onTapDismiss;
 
   String get _estimatedTransferTime {
-    final fast = file.getEstimateTransferTime(30);
+    final fast = file.getEstimateTransferTime(40);
     final slow = file.getEstimateTransferTime(8);
     return '${fast.toStringAsFixed(0)}~${slow.toStringAsFixed(0)}s';
   }

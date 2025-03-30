@@ -120,11 +120,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _validateMtu(String val) {
     final mtu = int.tryParse(val) ?? AppPreferences.defaultMtu;
-    if (mtu < 100 || mtu > 2930) {
+    if (mtu < 100 || mtu > 2935) {
       showMessage(
         context: context,
         title: 'Error',
-        message: 'Invalid value (must be between 100 and 2930)',
+        message: 'Invalid value (must be between 100 and 2935)',
       );
       return;
     }

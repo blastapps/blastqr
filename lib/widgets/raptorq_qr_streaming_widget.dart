@@ -58,8 +58,8 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
 
   List<QrImage> _qrImages = [];
   bool _isEncoding = true;
-  int _fps = defaultFpeses[3];
-  int _fpsIndex = 3;
+  int _fps = defaultFpeses[2];
+  int _fpsIndex = 2;
   late StreamSubscription _imageStream;
 
   @override
