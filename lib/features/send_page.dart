@@ -58,7 +58,7 @@ class _SendPageState extends State<SendPage> {
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: LogoWidget(),
+        title: const LogoWidget(),
         centerTitle: true,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
@@ -68,7 +68,7 @@ class _SendPageState extends State<SendPage> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return SettingsPage();
+                    return const SettingsPage();
                   },
                 ),
               );
@@ -107,7 +107,7 @@ class _SendPageState extends State<SendPage> {
                 borderRadius: BorderRadius.circular(16),
                 onTap: _pickFileToEncode,
                 child: Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   height: 240,
                   width: double.infinity,
                   alignment: Alignment.center,
@@ -143,7 +143,7 @@ class _SendPageState extends State<SendPage> {
               ),
               OutlinedButton(
                 onPressed: _onTapHelp,
-                style: OutlinedButton.styleFrom(minimumSize: Size(0, 48)),
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
@@ -158,7 +158,7 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               if (!Platform.isAndroid && !Platform.isIOS)
-                Column(
+                const Column(
                   spacing: 16,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -205,7 +205,7 @@ class _SendPageState extends State<SendPage> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (context) {
-          return HelpPage();
+          return const HelpPage();
         },
       ),
     );

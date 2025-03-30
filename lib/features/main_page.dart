@@ -37,7 +37,7 @@ class _MainPageState extends State<MainPage> {
               fit: BoxFit.cover,
               opacity:
                   Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.1,
-              image: AssetImage('assets/bg_qr.webp'),
+              image: const AssetImage('assets/bg_qr.webp'),
             ),
           ),
           height: 400,
@@ -45,8 +45,8 @@ class _MainPageState extends State<MainPage> {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: FractionalOffset(0.5, 0.0),
-              end: FractionalOffset(0.5, 1.5),
+              begin: const FractionalOffset(0.5, 0.0),
+              end: const FractionalOffset(0.5, 1.5),
               colors: [
                 context.color.surface,
                 context.color.surface.withAlpha(0),
@@ -66,7 +66,7 @@ class _MainPageState extends State<MainPage> {
                     builder: (context, count, child) {
                       return SafeArea(
                         child: Container(
-                          padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                           child: Container(
                             height: 90,
                             decoration: BoxDecoration(
@@ -75,7 +75,7 @@ class _MainPageState extends State<MainPage> {
                                   color: Colors.black.withAlpha(30),
                                   spreadRadius: 0,
                                   blurRadius: 2,
-                                  offset: Offset(0, 1),
+                                  offset: const Offset(0, 1),
                                 ),
                               ],
                               color: context.color.primaryContainer,
@@ -84,11 +84,11 @@ class _MainPageState extends State<MainPage> {
                             child: BottomNavigationBar(
                               backgroundColor: Colors.transparent,
                               elevation: 0,
-                              selectedLabelStyle: TextStyle(
+                              selectedLabelStyle: const TextStyle(
                                 fontFamily: 'Jersey25',
                                 fontSize: 18,
                               ),
-                              unselectedLabelStyle: TextStyle(
+                              unselectedLabelStyle: const TextStyle(
                                 fontFamily: 'Jersey25',
                                 fontSize: 14,
                               ),
@@ -149,13 +149,13 @@ class _MainPageState extends State<MainPage> {
             builder: (context) {
               switch (_currentTab) {
                 case 0:
-                  return SendPage();
+                  return const SendPage();
                 case 1:
-                  return ScanPage();
+                  return const ScanPage();
                 case 2:
-                  return FilesPage();
+                  return const FilesPage();
               }
-              return SizedBox();
+              return const SizedBox();
             },
           ),
         ),

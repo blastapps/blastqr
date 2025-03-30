@@ -142,7 +142,7 @@ class FileTooLargeAlertWidget extends StatelessWidget {
             spacing: 4,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.info_outline),
+              const Icon(Icons.info_outline),
               Text(
                 context.l10n.large_file,
                 style: Theme.of(context).textTheme.titleLarge,
@@ -166,7 +166,7 @@ class FileTooLargeAlertWidget extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ElevatedButton(
             onPressed: onAcknowledge,
             child: Text(context.l10n.continue_anyway),
@@ -214,7 +214,7 @@ class FileHeaderWidget extends StatelessWidget {
                       color: Colors.black.withAlpha(60),
                       spreadRadius: 0,
                       blurRadius: 5,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                   borderRadius: BorderRadius.circular(12),
@@ -252,7 +252,7 @@ class FileHeaderWidget extends StatelessWidget {
                 foregroundColor: context.color.onSurface,
               ),
               padding: EdgeInsets.zero,
-              icon: Icon(Icons.clear),
+              icon: const Icon(Icons.clear),
             ),
           ),
         ],
@@ -290,7 +290,7 @@ extension FileWrapperExtension on FileWrapper {
           FittedBox(
             child: Text(
               extension.toUpperCase(),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,

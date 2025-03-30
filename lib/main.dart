@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
             darkTheme: state.theme.themeData ?? darkTheme(darkColorScheme),
             themeMode: state.theme.themeMode,
             locale: state.locale,
-            home: MainPage(),
+            home: const MainPage(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           );

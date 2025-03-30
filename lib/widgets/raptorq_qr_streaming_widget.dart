@@ -115,10 +115,12 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator.adaptive(backgroundColor: Colors.black),
+            const CircularProgressIndicator.adaptive(
+              backgroundColor: Colors.black,
+            ),
             Text(
               context.l10n.generating_codes,
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
             ),
           ],
         ),
@@ -149,7 +151,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
                     children: [
                       Text(
                         '${index + 1}/${_qrImages.length}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
@@ -160,7 +162,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
                         },
                         child: Text(
                           '${_fps}FPS',
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                         ),
                       ),
                     ],

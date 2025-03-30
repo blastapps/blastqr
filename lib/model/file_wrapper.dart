@@ -128,12 +128,12 @@ class FileType {
   final bool isWebpImage;
 
   FileType({required this.extension, required this.mimeType})
-    : isImage = mimeType?.startsWith("image") == true,
+    : isImage = mimeType?.startsWith('image') == true,
       isUnknown = mimeType == null,
       isAvifImage = mimeType == 'image/avif' || extension == 'avif',
       isWebpImage = mimeType == 'image/webp' || extension == 'webp',
-      isAudio = mimeType?.startsWith("audio") == true,
-      isVideo = mimeType?.startsWith("video") == true;
+      isAudio = mimeType?.startsWith('audio') == true,
+      isVideo = mimeType?.startsWith('video') == true;
 }
 
 extension FileExtension on File {

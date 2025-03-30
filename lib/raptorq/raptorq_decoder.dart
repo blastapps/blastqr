@@ -43,7 +43,7 @@ class RaptorqDecoder {
         onTimeout: () {
           isLoadingResult = true;
           _waitForResult();
-          throw TimeoutException("Signal stream timed out");
+          throw TimeoutException('Signal stream timed out');
         },
       );
       final msg = signal.message;

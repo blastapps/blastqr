@@ -12,7 +12,7 @@ class LogoWidget extends StatelessWidget {
           context,
         ).textTheme.displayMedium?.copyWith(fontFamily: 'Jersey25'),
         children: [
-          TextSpan(text: 'blast'),
+          const TextSpan(text: 'blast'),
           TextSpan(text: 'QR', style: TextStyle(color: context.color.primary)),
         ],
       ),

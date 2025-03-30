@@ -1,8 +1,8 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:flutter/material.dart';
 
-class ISTextField extends StatefulWidget {
-  const ISTextField({
+class BlastTextField extends StatefulWidget {
+  const BlastTextField({
     super.key,
     this.obscureText = false,
     this.keyboardType,
@@ -34,10 +34,10 @@ class ISTextField extends StatefulWidget {
   final int? maxLines;
 
   @override
-  State<ISTextField> createState() => _ISTextFieldState();
+  State<BlastTextField> createState() => _BlastTextFieldState();
 }
 
-class _ISTextFieldState extends State<ISTextField> {
+class _BlastTextFieldState extends State<BlastTextField> {
   bool _obscureTextIsVisible = false;
   bool _hasText = false;
 

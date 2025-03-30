@@ -1,4 +1,4 @@
-import 'package:blast_qr/widgets/is_text_field.dart';
+import 'package:blast_qr/widgets/blast_text_field.dart';
 import 'package:flutter/material.dart';
 
 class TextInputSheet extends StatelessWidget {
@@ -25,7 +25,8 @@ class TextInputSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ISTextField(
+        const Text('Hello'),
+        BlastTextField(
           hintText: inputHintText,
           controller: controller,
           autofocus: true,
@@ -199,7 +200,7 @@ Future<void> showSheet({
 Future<void> showTextInputSheet(
   BuildContext context, {
   required title,
-  String prefilledText = "",
+  String prefilledText = '',
   String? confirmText,
   TextSelection? selection,
   TextInputType? keyboardType,

@@ -69,7 +69,7 @@ class _ScanPageState extends State<ScanPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: LogoWidget(),
+        title: const LogoWidget(),
         centerTitle: true,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
@@ -110,7 +110,7 @@ class _ScanPageState extends State<ScanPage> {
                       showFlashlight: false,
                       onScan: _handleScan,
                     )
-                    : SizedBox(),
+                    : const SizedBox(),
           ),
           Align(
             alignment: Alignment.topCenter,
@@ -126,14 +126,14 @@ class _ScanPageState extends State<ScanPage> {
                   child: Row(
                     spacing: 8,
                     children: [
-                      HugeIcon(
+                      const HugeIcon(
                         icon: HugeIcons.strokeRoundedInformationCircle,
                         color: Colors.white,
                       ),
                       Expanded(
                         child: Text(
                           context.l10n.scan_help_message,
-                          style: TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ],
@@ -167,12 +167,12 @@ class _ScanPageState extends State<ScanPage> {
               child: Container(
                 width: 80,
                 height: 80,
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   color: Theme.of(context).colorScheme.surface,
                 ),
-                child: CircularProgressIndicator.adaptive(),
+                child: const CircularProgressIndicator.adaptive(),
               ),
             ),
         ],
@@ -249,7 +249,7 @@ class _ScanPageState extends State<ScanPage> {
 
   BlastQrcodeData? _parseQrCode(Code result) {
     if (result.rawBytes == null) {
-      log("null bytes");
+      log('null bytes');
       return null;
     }
     try {
@@ -360,7 +360,7 @@ class _ScanPageState extends State<ScanPage> {
                     color: Colors.black.withAlpha(60),
                     spreadRadius: 0,
                     blurRadius: 1,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
                 borderRadius: BorderRadius.circular(12),
@@ -380,7 +380,7 @@ class _ScanPageState extends State<ScanPage> {
                   icon: HugeIcons.strokeRoundedEdit01,
                   color: context.color.onSurface,
                 ),
-                contentPadding: EdgeInsets.fromLTRB(48, 0, 0, 8),
+                contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
               ),
               onTap: () {
                 final dotIndex = _renameController.text.indexOf('.');
@@ -524,7 +524,7 @@ class ScanProgressWidget extends StatelessWidget {
                 height: 84,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                     bottomLeft: Radius.zero,
@@ -552,7 +552,7 @@ class ScanProgressWidget extends StatelessWidget {
                           ),
                           if (!complete) ...[
                             Container(
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.grey,
                               ),
@@ -573,7 +573,7 @@ class ScanProgressWidget extends StatelessWidget {
                                   padding: const EdgeInsets.all(16),
                                   child: Text(
                                     fileExtension.toUpperCase(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -584,14 +584,14 @@ class ScanProgressWidget extends StatelessWidget {
                           ],
                           if (complete) ...[
                             Container(
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.green,
                               ),
                               width: 36,
                               height: 36,
                             ),
-                            HugeIcon(
+                            const HugeIcon(
                               icon: HugeIcons.strokeRoundedTick01,
                               size: 24,
                               color: Colors.white,
@@ -645,7 +645,7 @@ class ScanProgressWidget extends StatelessWidget {
                               foregroundColor: context.color.onSurface,
                             ),
                             padding: EdgeInsets.zero,
-                            icon: Icon(Icons.clear, size: 16),
+                            icon: const Icon(Icons.clear, size: 16),
                           ),
                         ),
                       ],

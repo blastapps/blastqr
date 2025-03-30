@@ -88,7 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: context.l10n.chunk_length,
                     hintText: context.l10n.chunk_length,
                     prefilledText: state.mtu.toString(),
-                    keyboardType: TextInputType.numberWithOptions(),
+                    keyboardType: const TextInputType.numberWithOptions(),
                     onConfirm: _validateMtu,
                   );
                 },
@@ -107,12 +107,12 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () {
               showLicensePage(
                 applicationName: '',
-                applicationIcon: LogoWidget(),
+                applicationIcon: const LogoWidget(),
                 context: context,
               );
             },
           ),
-          ListTile(title: Text('v1.0.0')),
+          const ListTile(title: Text('v1.0.0')),
         ],
       ),
     );

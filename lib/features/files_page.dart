@@ -70,7 +70,7 @@ class _FilesPageState extends State<FilesPage> {
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: LogoWidget(),
+        title: const LogoWidget(),
         centerTitle: true,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
@@ -128,7 +128,7 @@ class _FilesPageState extends State<FilesPage> {
                         color: Colors.black.withAlpha(60),
                         spreadRadius: 0,
                         blurRadius: 2,
-                        offset: Offset(0, 2),
+                        offset: const Offset(0, 2),
                       ),
                     ],
                     borderRadius: BorderRadius.circular(12),
@@ -171,7 +171,7 @@ class _FilesPageState extends State<FilesPage> {
                     color: Colors.black.withAlpha(60),
                     spreadRadius: 0,
                     blurRadius: 1,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
                 borderRadius: BorderRadius.circular(12),
@@ -187,7 +187,7 @@ class _FilesPageState extends State<FilesPage> {
             textAlign: TextAlign.center,
             style: TextStyle(color: context.color.secondary),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ListTile(
             dense: true,
             onTap: () {
@@ -247,7 +247,7 @@ class _FilesPageState extends State<FilesPage> {
               color: context.color.primary,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -346,7 +346,7 @@ class _FilesPageState extends State<FilesPage> {
       if (mounted) {
         Navigator.of(context).pop();
         final snackBar = SnackBar(
-          content: Text("${context.l10n.saved_to} $newPath"),
+          content: Text('${context.l10n.saved_to} $newPath'),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
