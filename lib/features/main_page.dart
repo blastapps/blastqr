@@ -1,14 +1,17 @@
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/features/files_page.dart';
 import 'package:blast_qr/features/send_page.dart';
 import 'package:blast_qr/features/scan_page.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
+import 'package:share_handler/share_handler.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -19,6 +22,35 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentTab = 0;
+  SharedMedia? media;
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    final handler = ShareHandlerPlatform.instance;
+    media = await handler.getInitialSharedMedia();
+
+    handler.sharedMediaStream.listen((SharedMedia media) {
+      if (!mounted) return;
+      final path = media.attachments?.first?.path;
+      if (path != null) {
+        _showQrPage(File(path));
+      }
+    });
+    if (!mounted) return;
+
+    final path = media?.attachments?.first?.path;
+    if (path != null) {
+      _showQrPage(File(path));
+    }
+
+    handler.resetInitialSharedMedia();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,5 +193,20 @@ class _MainPageState extends State<MainPage> {
         ),
       ],
     );
+  }
+
+  void _showQrPage(File file) async {
+    Navigator.of(context).popUntil((r) => r.isFirst); // Go back to main screen
+    final fileWrapper = await file.toFileWrapper();
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) {
+            return QrPage(file: fileWrapper);
+          },
+        ),
+      );
+    }
   }
 }

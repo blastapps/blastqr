@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
@@ -11,7 +10,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:blast_qr/features/qr_page.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:share_handler/share_handler.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class SendPage extends StatefulWidget {
@@ -22,36 +20,6 @@ class SendPage extends StatefulWidget {
 }
 
 class _SendPageState extends State<SendPage> {
-  SharedMedia? media;
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    final handler = ShareHandlerPlatform.instance;
-    media = await handler.getInitialSharedMedia();
-
-    handler.sharedMediaStream.listen((SharedMedia media) {
-      if (!mounted) return;
-      final path = media.attachments?.first?.path;
-      if (path != null) {
-        _showQrPage(File(path));
-      }
-    });
-    if (!mounted) return;
-
-    final path = media?.attachments?.first?.path;
-    if (path != null) {
-      _showQrPage(File(path));
-    }
-
-    handler.resetInitialSharedMedia();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,7 +154,6 @@ class _SendPageState extends State<SendPage> {
   }
 
   void _showQrPage(File file) async {
-    // TODO: Close QR page if already open (possible with share intent)
     final fileWrapper = await file.toFileWrapper();
     if (mounted) {
       Navigator.of(context).push(
