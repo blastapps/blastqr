@@ -25,7 +25,6 @@ class TextInputSheet extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Hello'),
         BlastTextField(
           hintText: inputHintText,
           controller: controller,

@@ -26,14 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!-- Open files (any type) -->
-            <intent-filter>
-              <action android:name="android.intent.action.VIEW" />
-              <category android:name="android.intent.category.DEFAULT" />
-              <data
-                   android:mimeType="*/*"
-                   android:scheme="content" />
-            </intent-filter>
             <!-- Receive shared files (any type) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
