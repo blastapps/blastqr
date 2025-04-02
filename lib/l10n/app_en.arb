@@ -51,7 +51,11 @@
   "theme_system": "System",
   "theme_light": "Light",
   "theme_dark": "Dark",
-  "theme_black": "Black (OLED)",
+  "pure_black": "Use pure black color",
+  "accent_color": "Accent color",
+  "animations": "Animations",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
   "data_encoding": "Data encoding",
   "chunk_length": "Chunk length",
   "licenses": "Licenses"

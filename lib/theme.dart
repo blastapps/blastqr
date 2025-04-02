@@ -1,39 +1,14 @@
-import 'package:blast_qr/l10n/extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:blast_qr/color_scheme.dart';
 import 'package:flutter/services.dart';
 
 enum BlastTheme {
-  system,
   light,
-  dark,
-  black;
-
-  String title(BuildContext context) {
-    switch (this) {
-      case BlastTheme.system:
-        return context.l10n.theme_system;
-      case BlastTheme.light:
-        return context.l10n.theme_light;
-      case BlastTheme.dark:
-        return context.l10n.theme_dark;
-      case BlastTheme.black:
-        return context.l10n.theme_black;
-    }
-  }
-
-  static List<String> titles(BuildContext context) {
-    return [
-      context.l10n.theme_system,
-      context.l10n.theme_light,
-      context.l10n.theme_dark,
-      context.l10n.theme_black,
-    ];
-  }
+  dark;
 
   ThemeMode get themeMode {
-    if (this == BlastTheme.dark || this == BlastTheme.black) {
+    if (this == BlastTheme.dark) {
       return ThemeMode.dark;
     }
     if (this == BlastTheme.light) {
@@ -42,17 +17,36 @@ enum BlastTheme {
     return ThemeMode.system;
   }
 
-  ThemeData? get themeData {
+  ColorScheme buildColorScheme(Color primaryColor, bool pureBlack) {
     switch (this) {
-      case BlastTheme.system:
-        return null;
       case BlastTheme.light:
-        return null;
+        return lightColorScheme(primaryColor);
       case BlastTheme.dark:
-        return darkTheme(darkColorScheme);
-      case BlastTheme.black:
-        return darkTheme(blackColorScheme);
+        if (pureBlack) {
+          return blackColorScheme(primaryColor);
+        }
+        return darkColorScheme(primaryColor);
     }
+  }
+
+  ThemeData buildTheme(Color primaryColor, bool pureBlack) {
+    final colorScheme = buildColorScheme(primaryColor, pureBlack);
+    return ThemeData(
+      splashFactory: NoSplash.splashFactory,
+      useMaterial3: true,
+      colorScheme: colorScheme,
+      sliderTheme: SliderThemeData(
+        overlayShape: SliderComponentShape.noOverlay,
+      ),
+      textTheme: textTheme(colorScheme),
+      textButtonTheme: textButtonTheme,
+      appBarTheme: appBarTheme(colorScheme),
+      listTileTheme: listTileTheme(colorScheme),
+      inputDecorationTheme: textFieldTheme(colorScheme),
+      outlinedButtonTheme: outlinedButtonTheme(colorScheme),
+      elevatedButtonTheme: elevatedButtonTheme(colorScheme),
+      snackBarTheme: snackBarTheme(colorScheme),
+    );
   }
 }
 
@@ -153,38 +147,6 @@ SnackBarThemeData snackBarTheme(ColorScheme colorScheme) {
   return SnackBarThemeData(
     backgroundColor: colorScheme.primaryContainer,
     contentTextStyle: TextStyle(color: colorScheme.onPrimaryContainer),
-  );
-}
-
-ThemeData lightTheme = ThemeData(
-  splashFactory: NoSplash.splashFactory,
-  useMaterial3: true,
-  colorScheme: lightColorScheme,
-  sliderTheme: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
-  textTheme: textTheme(lightColorScheme),
-  textButtonTheme: textButtonTheme,
-  appBarTheme: appBarTheme(lightColorScheme),
-  listTileTheme: listTileTheme(lightColorScheme),
-  inputDecorationTheme: textFieldTheme(lightColorScheme),
-  outlinedButtonTheme: outlinedButtonTheme(lightColorScheme),
-  elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
-  snackBarTheme: snackBarTheme(lightColorScheme),
-);
-
-ThemeData darkTheme(ColorScheme colorScheme) {
-  return ThemeData(
-    splashFactory: NoSplash.splashFactory,
-    useMaterial3: true,
-    colorScheme: colorScheme,
-    sliderTheme: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
-    textTheme: textTheme(colorScheme),
-    textButtonTheme: textButtonTheme,
-    appBarTheme: appBarTheme(colorScheme),
-    listTileTheme: listTileTheme(colorScheme),
-    inputDecorationTheme: textFieldTheme(colorScheme),
-    outlinedButtonTheme: outlinedButtonTheme(colorScheme),
-    elevatedButtonTheme: elevatedButtonTheme(colorScheme),
-    snackBarTheme: snackBarTheme(colorScheme),
   );
 }
 

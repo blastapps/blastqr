@@ -58,9 +58,12 @@ class MyApp extends StatelessWidget {
         builder: (context, state, child) {
           return MaterialApp(
             title: 'blastqr',
-            theme: lightTheme,
-            darkTheme: state.theme.themeData ?? darkTheme(darkColorScheme),
-            themeMode: state.theme.themeMode,
+            theme: BlastTheme.light.buildTheme(state.accentColor, false),
+            darkTheme: BlastTheme.dark.buildTheme(
+              state.accentColor,
+              state.pureBlack,
+            ),
+            themeMode: state.theme,
             locale: state.locale,
             home: const MainPage(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,

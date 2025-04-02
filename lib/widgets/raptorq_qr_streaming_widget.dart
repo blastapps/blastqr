@@ -38,13 +38,11 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final RaptorQrStreamingWidgetController controller;
   final FileWrapper file;
   final int mtu;
-  final bool compress;
 
   const RaptorQrStreamingWidget({
     super.key,
     required this.file,
     required this.mtu,
-    required this.compress,
     required this.controller,
   });
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
@@ -58,21 +59,30 @@ class _MainPageState extends State<MainPage> {
       alignment: Alignment.bottomCenter,
       children: [
         Container(color: context.color.surface),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            image: DecorationImage(
-              colorFilter: ColorFilter.mode(
-                context.color.primary,
-                BlendMode.srcATop,
-              ),
-              fit: BoxFit.cover,
-              opacity:
-                  Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.1,
-              image: const AssetImage('assets/bg_qr.webp'),
-            ),
-          ),
-          height: 400,
+        Consumer<AppSettings>(
+          builder: (context, state, child) {
+            if (state.animations) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                    colorFilter: ColorFilter.mode(
+                      context.color.primary,
+                      BlendMode.srcATop,
+                    ),
+                    fit: BoxFit.cover,
+                    opacity:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 0.4
+                            : 0.1,
+                    image: const AssetImage('assets/bg_qr.webp'),
+                  ),
+                ),
+                height: 400,
+              );
+            }
+            return const SizedBox();
+          },
         ),
         Container(
           decoration: BoxDecoration(
