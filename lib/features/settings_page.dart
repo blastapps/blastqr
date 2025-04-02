@@ -51,15 +51,14 @@ class _SettingsPageState extends State<SettingsPage> {
               color: context.color.onSurface,
             ),
             title: Text(context.l10n.language),
-            subtitle: Text(AppLocalizations.of(context)?.localeName ?? ''),
+            subtitle: Text(
+              languageNames[AppLocalizations.of(context)?.localeName] ?? '',
+            ),
             onTap: () {
               showPickerSheet(
                 context,
                 title: context.l10n.language,
-                items:
-                    AppLocalizations.supportedLocales
-                        .map((l) => l.toLanguageTag())
-                        .toList(),
+                items: languageNames.values.toList(),
                 onItemTap: (item) {
                   appSettings.updateLocale(
                     AppLocalizations.supportedLocales[item].languageCode,
