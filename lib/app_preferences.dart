@@ -65,6 +65,8 @@ class AppPreferences {
     _mtu = sp.getInt('mtu') ?? defaultMtu;
     _animations = sp.getBool('animations') ?? true;
     _pureBlack = sp.getBool('pureBlack') ?? false;
-    _accentColor = Color(sp.getInt('accentColor') ?? 0xFF000000);
+    _accentColor = Color(
+      sp.getInt('accentColor') ?? accentColorOptions[0].toARGB32(),
+    );
   }
 }

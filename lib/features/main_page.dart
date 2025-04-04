@@ -73,8 +73,8 @@ class _MainPageState extends State<MainPage> {
                     fit: BoxFit.cover,
                     opacity:
                         Theme.of(context).brightness == Brightness.dark
-                            ? 0.4
-                            : 0.1,
+                            ? 0.6
+                            : 0.25,
                     image: const AssetImage('assets/bg_qr.webp'),
                   ),
                 ),
