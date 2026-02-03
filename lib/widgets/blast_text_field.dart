@@ -77,7 +77,7 @@ class _BlastTextFieldState extends State<BlastTextField> {
         hintText: widget.hintText,
         hintStyle: _hintStyle,
         prefixIcon: widget.leading,
-        suffixIcon: _buildSuffix(),
+        suffixIcon: ExcludeSemantics(child: _buildSuffix()),
       ),
     );
   }

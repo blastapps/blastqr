@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:blast_qr/extensions.dart';
+import 'package:blast_qr/helpers/qr_lookup_table.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
 import 'package:flutter/foundation.dart';
@@ -34,7 +35,7 @@ class FileWrapper {
     return (size / 1000) / speedInkBps;
   }
 
-  QrCode _encodeChunkToQr(List<dynamic> args) {
+  QrCode _encodeChunkToQr(List<dynamic> args, {int typeNumber = 40}) {
     final Uint8List chunk = args[0];
     final Uint8List sizeBytes = args[1];
     final Uint8List fileExtBytes = args[2];
@@ -52,10 +53,9 @@ class FileWrapper {
     // Encode file data
     combined.setAll(16, chunk);
 
-    return QrCode.fromUint8List(
-      data: combined,
-      errorCorrectLevel: QrErrorCorrectLevel.L,
-    );
+    final qrCode = QrCode(typeNumber, QrErrorCorrectLevel.L);
+    qrCode.addByteData(combined.buffer.asByteData());
+    return qrCode;
   }
 
   Stream<QrImage> qrImageStream(int mtu) async* {
@@ -91,29 +91,45 @@ class FileWrapper {
       repairPacketsPerBlock: repairPackets.toInt(),
     );
 
+    encoder.initialize();
+
     final transferType = BlastQRTransferType.compressedFile;
 
     final sizeBytes = Uint8List(4)
       ..buffer.asByteData().setUint32(0, _actualTransferSize, Endian.big);
 
-    await for (RaptorqTransfer transfer in encoder.encode(bytes)) {
+    final qrVersion = _pickQrVersionForPayload(mtu);
+    debugPrint('Picked QR version: $qrVersion for mtu $mtu');
+
+    final startTime = DateTime.now().millisecondsSinceEpoch;
+
+    await for (Uint8List data in encoder.encode(bytes)) {
       final qr = _encodeChunkToQr([
-        transfer.data,
+        data,
         sizeBytes,
         fileExtBytes,
         transferType.header,
-      ]);
-      await Future.delayed(
-        const Duration(milliseconds: 1),
-      ); // Allows  UI to update
+      ], typeNumber: qrVersion);
+
+      // Allows  UI to update
+      await Future.delayed(const Duration(microseconds: 500));
+
       final qrImage = QrImage.withMaskPattern(qr, 3);
       yield qrImage;
+    }
 
-      if (transfer.isComplete) {
-        debugPrint('Transfer finalized!!');
-        break;
+    final elapsedTime = DateTime.now().millisecondsSinceEpoch - startTime;
+    final elapsedSeconds = (elapsedTime / 1000).toStringAsFixed(2);
+    debugPrint('Encoding finalized in ${elapsedSeconds}s!!');
+  }
+
+  int _pickQrVersionForPayload(int payloadBytes) {
+    for (final entry in qrByteCapacityL.entries) {
+      if (payloadBytes <= entry.value) {
+        return entry.key < 40 ? entry.key + 1 : 40;
       }
     }
+    return 40;
   }
 }
 

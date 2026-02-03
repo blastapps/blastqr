@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
+
+import 'package:blast_qr/src/bindings/signals/signals.dart';
 import 'package:flutter/services.dart';
-import 'package:blast_qr/messages/basic.pb.dart';
 
 class RaptorqDecoder {
   final Function(int chunkLen, int totalChunks, double estimatedProgress)?

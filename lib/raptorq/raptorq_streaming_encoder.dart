@@ -1,7 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:blast_qr/messages/basic.pb.dart';
+import 'package:blast_qr/src/bindings/signals/signals.dart';
 
 class RaptorqStreamingEncoder {
   final int repairPacketsPerBlock;
@@ -9,24 +10,31 @@ class RaptorqStreamingEncoder {
 
   RaptorqStreamingEncoder({this.repairPacketsPerBlock = 15, this.mtu = 700});
 
-  Stream<RaptorqTransfer> encode(Uint8List data) {
-    StreamEncodeInput(
-      data: data,
+  void initialize() {
+    StreamEncodeConfig(
       mtu: mtu,
       repairPacketsPerBlock: repairPacketsPerBlock,
     ).sendSignalToRust();
-
-    return StreamEncodeOutput.rustSignalStream.map(
-      (data) => RaptorqTransfer(
-        data: data.message.result as Uint8List,
-        isComplete: data.message.isComplete,
-      ),
-    );
   }
-}
 
-class RaptorqTransfer {
-  final bool isComplete;
-  final Uint8List data;
-  RaptorqTransfer({required this.isComplete, required this.data});
+  Stream<Uint8List> encode(Uint8List data) {
+    StreamController<Uint8List> ctrl = StreamController();
+
+    final chunkSub = StreamEncodeOutput.rustSignalStream.listen((data) {
+      ctrl.add(data.binary);
+    });
+
+    final completionSub = StreamEncodeComplete.rustSignalStream.listen((_) {
+      ctrl.close();
+    });
+
+    const StreamEncodeInput().sendSignalToRust(data);
+
+    ctrl.onCancel = () {
+      chunkSub.cancel();
+      completionSub.cancel();
+    };
+
+    return ctrl.stream;
+  }
 }

@@ -1,17 +1,15 @@
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
-import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/main_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/l10n/app_localizations.dart';
+import 'package:blast_qr/src/bindings/signals/signals.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:blast_qr/features/main_page.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:rinf/rinf.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import './messages/all.dart';
 
 void main() async {
   await initializeRust(assignRustSignal);

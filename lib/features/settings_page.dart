@@ -1,14 +1,13 @@
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

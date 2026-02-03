@@ -1,37 +1,68 @@
-use crate::messages::*;
+use rinf::DartSignal;
+use rinf::{RustSignalBinary, RustSignal, DartSignalBinary};
 use raptorq::{Decoder, Encoder, EncodingPacket, ObjectTransmissionInformation};
 use std::time::Instant;
+
+use crate::signals::{DecodeChunkInput, StreamEncodeComplete};
+use crate::signals::DecodeOutput;
+use crate::signals::StreamEncodeInput;
+use crate::signals::StreamEncodeConfig;
+use crate::signals::StreamEncodeOutput;
+use std::sync::{Arc, Mutex};
+use once_cell::sync::Lazy;
+
+#[derive(Default)]
+struct EncodeState {
+    config: Option<StreamEncodeConfig>,
+}
+
+static ENCODE_STATE: Lazy<Arc<Mutex<EncodeState>>> =
+    Lazy::new(|| Arc::new(Mutex::new(EncodeState::default())));
+
+pub async fn listen_for_config() {
+    let receiver = StreamEncodeConfig::get_dart_signal_receiver();
+
+    while let Some(dart_signal) = receiver.recv().await {
+        let mut state = ENCODE_STATE.lock().unwrap();
+        state.config = Some(dart_signal.message);
+
+        rinf::debug_print!("Configuration set!");
+    }
+}
 
 pub async fn stream_encode_data() {
     let receiver = StreamEncodeInput::get_dart_signal_receiver();
 
     while let Some(dart_signal) = receiver.recv().await {
-        let message: StreamEncodeInput = dart_signal.message;
+        let state = ENCODE_STATE.lock().unwrap();
+        let config = state
+            .config
+            .as_ref()
+            .expect("StreamEncodeConfig must be sent first");
 
-        let data = message.data;
-        let mtu = message.mtu as u16;
+        let data = dart_signal.binary;
+
+        let mtu = config.mtu as u16;
 
         // Create the Encoder
         let encoder = Encoder::with_defaults(&data, mtu);
 
         // Perform the encoding, and serialize to Vec<u8> for transmission
-        let packets = encoder.get_encoded_packets(message.repair_packets_per_block);
+        let packets = encoder.get_encoded_packets(config.repair_packets_per_block);
         let last_index = packets.len() - 1; // Get last index
 
         for (index, packet) in packets.iter().enumerate() {
-            StreamEncodeOutput {
-                result: packet.serialize(),
-                is_complete: index == last_index, // True on last iteration
+            StreamEncodeOutput {}.send_signal_to_dart(packet.serialize());
+            if index == last_index {
+                StreamEncodeComplete{}.send_signal_to_dart();
             }
-            .send_signal_to_dart();
         }
         rinf::debug_print!("All packets sent!");
     }
 }
 
 pub async fn decode_chunk() {
-    let receiver: rinf::SignalReceiver<rinf::DartSignal<DecodeChunkInput>> =
-        DecodeChunkInput::get_dart_signal_receiver();
+    let receiver= DecodeChunkInput::get_dart_signal_receiver();
 
     let mut decoder: Option<Decoder> = None;
     let mut mtu: i32 = 924;
