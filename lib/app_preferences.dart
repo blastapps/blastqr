@@ -19,7 +19,7 @@ class AppPreferences {
   static bool get pureBlack => _pureBlack ?? false;
   static Color get accentColor => _accentColor ?? accentColorOptions[0];
 
-  static setLocale(String? localeId) async {
+  static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
       return;
     }
@@ -28,31 +28,31 @@ class AppPreferences {
     _localeId = localeId;
   }
 
-  static setTheme(ThemeMode theme) async {
+  static Future<void> setTheme(ThemeMode theme) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setString('theme', theme.name);
     _theme = theme;
   }
 
-  static setMtu(int mtu) async {
+  static Future<void> setMtu(int mtu) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setInt('mtu', mtu);
     _mtu = mtu;
   }
 
-  static setPureBlackEnabled(bool pureBlack) async {
+  static Future<void> setPureBlackEnabled(bool pureBlack) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('pureBlack', pureBlack);
     _pureBlack = pureBlack;
   }
 
-  static setAnimationsEnabled(bool animations) async {
+  static Future<void> setAnimationsEnabled(bool animations) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('animations', animations);
     _animations = animations;
   }
 
-  static setAccentColor(Color accentColor) async {
+  static Future<void> setAccentColor(Color accentColor) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setInt('accentColor', accentColor.toARGB32());
     _accentColor = accentColor;

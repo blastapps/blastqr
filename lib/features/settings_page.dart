@@ -155,7 +155,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         : context.l10n.disabled,
                   ),
                   inactiveThumbColor: context.color.secondary,
-                  activeColor: context.color.primary,
+                  activeTrackColor: context.color.primary,
                 );
               },
             ),
@@ -177,7 +177,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       : context.l10n.disabled,
                 ),
                 inactiveThumbColor: context.color.secondary,
-                activeColor: context.color.primary,
+                activeTrackColor: context.color.primary,
               );
             },
           ),

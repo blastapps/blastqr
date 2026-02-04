@@ -1,6 +1,6 @@
 import 'dart:developer';
+
 import 'package:blast_qr/app_preferences.dart';
-import 'package:blast_qr/theme.dart';
 import 'package:flutter/material.dart';
 
 class AppSettings extends ChangeNotifier {
