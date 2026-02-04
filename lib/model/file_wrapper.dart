@@ -5,11 +5,13 @@ import 'dart:io';
 import 'package:blast_qr/extensions.dart';
 import 'package:blast_qr/helpers/qr_lookup_table.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
+import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:qr/qr.dart';
 
+/// Wrapper class to make handling files easier.
 class FileWrapper {
   final File file;
   final FileType type;
@@ -33,29 +35,6 @@ class FileWrapper {
 
   double getEstimateTransferTime(int speedInkBps) {
     return (size / 1000) / speedInkBps;
-  }
-
-  QrCode _encodeChunkToQr(List<dynamic> args, {int typeNumber = 40}) {
-    final Uint8List chunk = args[0];
-    final Uint8List sizeBytes = args[1];
-    final Uint8List fileExtBytes = args[2];
-    final Uint8List transferTypeBytes = args[3];
-
-    Uint8List combined = Uint8List(4 + 8 + 2 + 2 + chunk.length);
-    // Encode file size in first 4 bytes
-    combined.setAll(0, sizeBytes);
-    // Encode file extension in followin 8 bytes
-    combined.setAll(4, fileExtBytes);
-    // Encode signature bytes (magic number to validate qr code) in 2 bytes
-    combined.setAll(12, BlastQrcodeData.signatureBytes);
-    // Encode 2 bytes for tranfsfer type (raw file, compressed file, etc)
-    combined.setAll(14, transferTypeBytes);
-    // Encode file data
-    combined.setAll(16, chunk);
-
-    final qrCode = QrCode(typeNumber, QrErrorCorrectLevel.L);
-    qrCode.addByteData(combined.buffer.asByteData());
-    return qrCode;
   }
 
   Stream<QrImage> qrImageStream(int mtu) async* {
@@ -103,13 +82,13 @@ class FileWrapper {
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
 
-    await for (Uint8List data in encoder.encode(bytes)) {
-      final qr = _encodeChunkToQr([
-        data,
+    await for (Uint8List chunk in encoder.encode(bytes)) {
+      final qr = _buildQrCodeFromChunk([
+        chunk,
         sizeBytes,
         fileExtBytes,
         transferType.header,
-      ], typeNumber: qrVersion);
+      ], qrVersion: qrVersion);
 
       // Allows  UI to update
       await Future.delayed(const Duration(microseconds: 500));
@@ -123,6 +102,29 @@ class FileWrapper {
     debugPrint('Encoding finalized in ${elapsedSeconds}s!!');
   }
 
+  QrCode _buildQrCodeFromChunk(List<dynamic> args, {int qrVersion = 40}) {
+    final Uint8List chunk = args[0];
+    final Uint8List sizeBytes = args[1];
+    final Uint8List fileExtBytes = args[2];
+    final Uint8List transferTypeBytes = args[3];
+
+    Uint8List combined = Uint8List(4 + 8 + 2 + 2 + chunk.length);
+    // Encode file size in first 4 bytes
+    combined.setAll(0, sizeBytes);
+    // Encode file extension in followin 8 bytes
+    combined.setAll(4, fileExtBytes);
+    // Encode signature bytes (magic number to validate qr code) in 2 bytes
+    combined.setAll(12, BlastQrcodeData.signatureBytes);
+    // Encode 2 bytes for tranfsfer type (raw file, compressed file, etc)
+    combined.setAll(14, transferTypeBytes);
+    // Encode file data
+    combined.setAll(16, chunk);
+
+    final qrCode = QrCode(qrVersion, QrErrorCorrectLevel.L);
+    qrCode.addByteData(combined.buffer.asByteData());
+    return qrCode;
+  }
+
   int _pickQrVersionForPayload(int payloadBytes) {
     for (final entry in qrByteCapacityL.entries) {
       if (payloadBytes <= entry.value) {
@@ -131,25 +133,6 @@ class FileWrapper {
     }
     return 40;
   }
-}
-
-class FileType {
-  final String? mimeType;
-  final String extension;
-  final bool isImage;
-  final bool isAudio;
-  final bool isVideo;
-  final bool isUnknown;
-  final bool isAvifImage;
-  final bool isWebpImage;
-
-  FileType({required this.extension, required this.mimeType})
-    : isImage = mimeType?.startsWith('image') == true,
-      isUnknown = mimeType == null,
-      isAvifImage = mimeType == 'image/avif' || extension == 'avif',
-      isWebpImage = mimeType == 'image/webp' || extension == 'webp',
-      isAudio = mimeType?.startsWith('audio') == true,
-      isVideo = mimeType?.startsWith('video') == true;
 }
 
 extension FileExtension on File {

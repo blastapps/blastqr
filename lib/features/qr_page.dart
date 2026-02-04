@@ -2,6 +2,7 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:flutter/material.dart';
@@ -300,29 +301,5 @@ extension FileWrapperExtension on FileWrapper {
         ],
       ),
     );
-  }
-}
-
-extension FileTypeExtension on FileType {
-  IconData get icon {
-    if (isImage) {
-      return Icons.image;
-    } else if (isVideo) {
-      return Icons.video_file;
-    } else if (isAudio) {
-      return Icons.audio_file;
-    }
-    return Icons.description;
-  }
-
-  Color get color {
-    if (isImage) {
-      return Colors.deepOrangeAccent;
-    } else if (isVideo) {
-      return Colors.deepPurpleAccent;
-    } else if (isAudio) {
-      return Colors.blueAccent;
-    }
-    return Colors.grey;
   }
 }

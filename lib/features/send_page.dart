@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help_page.dart';
+import 'package:blast_qr/features/qr_page.dart';
 import 'package:blast_qr/features/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:blast_qr/features/qr_page.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
