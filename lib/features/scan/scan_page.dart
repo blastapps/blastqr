@@ -379,6 +379,7 @@ class _ScanPageState extends State<ScanPage> {
                 suffixIcon: HugeIcon(
                   icon: HugeIcons.strokeRoundedEdit01,
                   color: context.color.onSurface,
+                  size: 20,
                 ),
                 contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
               ),

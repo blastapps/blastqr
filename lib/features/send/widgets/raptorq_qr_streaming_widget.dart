@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:blast_qr/qr_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:qr/qr.dart';
@@ -38,16 +39,14 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final RaptorQrStreamingWidgetController controller;
   final FileWrapper file;
   final int mtu;
-  final bool shouldCompressImage;
-  final int imageQuality;
+  final ImageCompressionSettings? imageCompressionSettings;
 
   const RaptorQrStreamingWidget({
     super.key,
     required this.file,
     required this.mtu,
     required this.controller,
-    required this.shouldCompressImage,
-    required this.imageQuality,
+    required this.imageCompressionSettings,
   });
 
   @override
@@ -86,11 +85,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     debugPrint('Generating QR codes..');
 
     _imageStream = widget.file
-        .qrImageStream(
-          widget.mtu,
-          useImageCompression: widget.shouldCompressImage,
-          imageQuality: widget.imageQuality,
-        )
+        .qrImageStream(widget.mtu, icSettings: widget.imageCompressionSettings)
         .listen((image) {
           _qrImages.add(image);
           widget.controller.setLength(_qrImages.length);

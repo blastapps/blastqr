@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:blast_qr/l10n/app_localizations.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class ImageCompressionSettings {
   final ImageCompressionOutputFormat outputFormat;
@@ -61,8 +62,19 @@ class ImageCompressionSettings {
 enum ImageCompressionOutputFormat {
   keepOriginal,
   jpeg,
-  heic,
-  webp;
+  heic;
+
+  CompressFormat toCompressFormat() {
+    switch (this) {
+      case ImageCompressionOutputFormat.keepOriginal:
+        // TODO: Implement
+        return CompressFormat.jpeg;
+      case ImageCompressionOutputFormat.jpeg:
+        return CompressFormat.jpeg;
+      case ImageCompressionOutputFormat.heic:
+        return CompressFormat.heic;
+    }
+  }
 
   String title(AppLocalizations loc) {
     switch (this) {
@@ -72,8 +84,17 @@ enum ImageCompressionOutputFormat {
         return name.toUpperCase();
       case ImageCompressionOutputFormat.heic:
         return name.toUpperCase();
-      case ImageCompressionOutputFormat.webp:
-        return name.toUpperCase();
+    }
+  }
+
+  String? get extension {
+    switch (this) {
+      case ImageCompressionOutputFormat.keepOriginal:
+        return null;
+      case ImageCompressionOutputFormat.jpeg:
+        return 'jpg';
+      case ImageCompressionOutputFormat.heic:
+        return 'heic';
     }
   }
 

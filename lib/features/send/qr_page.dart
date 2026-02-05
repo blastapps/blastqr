@@ -30,6 +30,8 @@ class _QrPageState extends State<QrPage> {
   @override
   Widget build(BuildContext context) {
     final qrBoxHeight = MediaQuery.of(context).size.width;
+    final appSettings = Provider.of<AppSettings>(context, listen: false);
+
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: SafeArea(
@@ -75,8 +77,8 @@ class _QrPageState extends State<QrPage> {
                                   controller: _qrController,
                                   file: widget.file,
                                   mtu: state.mtu,
-                                  shouldCompressImage: _shouldCompressImage,
-                                  imageQuality: _imageQuality,
+                                  imageCompressionSettings:
+                                      appSettings.imageCompressionSettings,
                                 );
                               },
                             ),
