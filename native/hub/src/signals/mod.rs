@@ -25,9 +25,21 @@ pub struct DecodeChunkInput {
     pub reset: bool,
 }
 
+#[derive(Serialize, RustSignalBinary)]
+pub struct DecodeOutput {}
+
 #[derive(Serialize, RustSignal)]
-pub struct DecodeOutput { 
-    pub result: Vec<u8>,
-    pub time: i32,
+pub struct DecodeProgress {
     pub chunk_len: i32
 }
+
+#[derive(Serialize, RustSignal)]
+pub struct DecodeComplete {
+    pub time: i32
+}
+
+#[derive(Serialize, RustSignal)]
+pub struct DecodeError {
+    pub message: String
+}
+

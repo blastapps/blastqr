@@ -2,26 +2,26 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/qr_page.dart';
+import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:blast_qr/features/files_page.dart';
-import 'package:blast_qr/features/send_page.dart';
-import 'package:blast_qr/features/scan_page.dart';
+import 'package:blast_qr/features/files_received/files_page.dart';
+import 'package:blast_qr/features/send/send_page.dart';
+import 'package:blast_qr/features/scan/scan_page.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:share_handler/share_handler.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class HomeTabsPage extends StatefulWidget {
+  const HomeTabsPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<HomeTabsPage> createState() => _HomeTabsPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _HomeTabsPageState extends State<HomeTabsPage> {
   int _currentTab = 0;
   SharedMedia? media;
 

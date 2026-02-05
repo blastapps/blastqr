@@ -1,10 +1,10 @@
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/help_page.dart';
+import 'package:blast_qr/features/help/help_page.dart';
+import 'package:blast_qr/features/send/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
-import 'package:blast_qr/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:hugeicons/hugeicons.dart';

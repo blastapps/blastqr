@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:blast_qr/extensions.dart';
-import 'package:blast_qr/helpers/qr_lookup_table.dart';
+import 'package:blast_qr/features/send/helpers/qr_lookup_table.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
@@ -83,6 +83,8 @@ class FileWrapper {
     final startTime = DateTime.now().millisecondsSinceEpoch;
 
     await for (Uint8List chunk in encoder.encode(bytes)) {
+      final start = DateTime.now();
+
       final qr = _buildQrCodeFromChunk([
         chunk,
         sizeBytes,
@@ -90,10 +92,13 @@ class FileWrapper {
         transferType.header,
       ], qrVersion: qrVersion);
 
-      // Allows  UI to update
-      await Future.delayed(const Duration(microseconds: 500));
-
       final qrImage = QrImage.withMaskPattern(qr, 3);
+
+      // Delay to keep around 20fps while generating qr images in bulk
+      final time = DateTime.now().difference(start).inMilliseconds;
+      final delay = 17 - 8 - time;
+      await Future.delayed(Duration(milliseconds: delay));
+
       yield qrImage;
     }
 

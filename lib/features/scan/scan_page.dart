@@ -4,23 +4,23 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/qr_page.dart';
+import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
+import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
-import 'package:blast_qr/model/blast_qrcode_data.dart';
-import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ScanPage extends StatefulWidget {
@@ -546,7 +546,7 @@ class ScanProgressWidget extends StatelessWidget {
                             height: 48,
                             child: CircularProgressIndicator(
                               value: progress > 1 ? null : progress,
-                              color: Colors.green,
+                              color: context.color.primary,
                               backgroundColor: context.color.outline,
                             ),
                           ),
@@ -584,9 +584,9 @@ class ScanProgressWidget extends StatelessWidget {
                           ],
                           if (complete) ...[
                             Container(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.green,
+                                color: context.color.primary,
                               ),
                               width: 36,
                               height: 36,

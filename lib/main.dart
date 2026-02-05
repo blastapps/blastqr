@@ -1,6 +1,6 @@
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
-import 'package:blast_qr/features/main_page.dart';
+import 'package:blast_qr/features/home_tabs_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/src/bindings/signals/signals.dart';
@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
             ),
             themeMode: state.theme,
             locale: state.locale,
-            home: const MainPage(),
+            home: const HomeTabsPage(),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           );

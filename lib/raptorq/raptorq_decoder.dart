@@ -39,26 +39,40 @@ class RaptorqDecoder {
     log('Decoding $count');
 
     try {
-      final signal = await DecodeOutput.rustSignalStream.first.timeout(
-        const Duration(milliseconds: 100),
-        onTimeout: () {
-          isLoadingResult = true;
-          _waitForResult();
-          throw TimeoutException('Signal stream timed out');
-        },
-      );
-      final msg = signal.message;
-      final bytes = msg.result;
-      if (bytes.isNotEmpty && !complete) {
-        onTransferComplete?.call();
-        _handleOutput(msg);
-      } else {
+      final result = await Future.any([
+        // Progress path
+        DecodeProgress.rustSignalStream.first.then((progress) {
+          return _ProgressResult(progress.message);
+        }),
+
+        // Completion path
+        Future.wait([
+          DecodeOutput.rustSignalStream.first,
+          DecodeComplete.rustSignalStream.first,
+        ]).then((values) {
+          return _CompletionResult(
+            binary: values[0].binary,
+            time: (values[1].message as DecodeComplete).time,
+          );
+        }),
+      ]).timeout(const Duration(milliseconds: 400));
+
+      if (result is _ProgressResult) {
+        final chunkLen = result.progress.chunkLen;
         estimatedProgress = (count * mtu) / (transferLength * 1.25);
-        onProcessChunk?.call(msg.chunkLen, count, estimatedProgress);
+        onProcessChunk?.call(chunkLen, count, estimatedProgress);
+        return;
       }
+
+      if (result is _CompletionResult) {
+        _handleOutput(result.binary, result.time);
+        return;
+      }
+    } on TimeoutException {
+      isLoadingResult = true;
+      _waitForResult();
     } catch (e) {
-      log(e.toString());
-      return;
+      log('decodeChunk error: $e');
     }
   }
 
@@ -66,22 +80,24 @@ class RaptorqDecoder {
     log('Waiting for result...');
     onTransferComplete?.call();
     try {
-      final signal = await DecodeOutput.rustSignalStream.first.timeout(
-        const Duration(seconds: 30),
-      );
-      final msg = signal.message;
-      _handleOutput(msg);
+      final completionSignals = await Future.wait([
+        DecodeOutput.rustSignalStream.first,
+        DecodeComplete.rustSignalStream.first,
+      ]).timeout(const Duration(milliseconds: 400));
+
+      final binaryResult = completionSignals[0].binary;
+      final timeResult = completionSignals[1].message as DecodeComplete;
+      _handleOutput(binaryResult, timeResult.time);
     } catch (e) {
       log(e.toString());
       return;
     }
   }
 
-  void _handleOutput(DecodeOutput output) {
-    final bytes = output.result;
+  void _handleOutput(Uint8List bytes, int time) {
     if (bytes.isNotEmpty && !complete) {
-      latestResult = bytes as Uint8List;
-      elapsedTime = output.time;
+      latestResult = bytes;
+      elapsedTime = time;
       log('Complete in $elapsedTime ms!');
       complete = true;
       onReceiveResult(latestResult);
@@ -95,4 +111,17 @@ class RaptorqDecoder {
     isLoadingResult = false;
     latestResult = Uint8List(0);
   }
+}
+
+sealed class _DecodeResult {}
+
+class _ProgressResult extends _DecodeResult {
+  final DecodeProgress progress;
+  _ProgressResult(this.progress);
+}
+
+class _CompletionResult extends _DecodeResult {
+  final Uint8List binary;
+  final int time;
+  _CompletionResult({required this.binary, required this.time});
 }

@@ -246,7 +246,7 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: HugeIcons.strokeRoundedCode,
               color: context.color.onSurface,
             ),
-            title: const Text('v1.0.0'),
+            title: const Text('v1.0.1'),
           ),
         ],
       ),

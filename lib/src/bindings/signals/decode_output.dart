@@ -16,18 +16,12 @@ class DecodeOutput {
   /// It can be null if no signals have been received yet.
   static RustSignalPack<DecodeOutput>? latestRustSignal = null;
 
-  const DecodeOutput({
-    required this.result,
-    required this.time,
-    required this.chunkLen,
-  });
+  const DecodeOutput(
+  );
 
   static DecodeOutput deserialize(BinaryDeserializer deserializer) {
     deserializer.increaseContainerDepth();
     final instance = DecodeOutput(
-      result: TraitHelpers.deserializeVectorU8(deserializer),
-      time: deserializer.deserializeInt32(),
-      chunkLen: deserializer.deserializeInt32(),
     );
     deserializer.decreaseContainerDepth();
     return instance;
@@ -42,27 +36,8 @@ class DecodeOutput {
     return value;
   }
 
-  final List<int> result;
-  final int time;
-  final int chunkLen;
-
-  DecodeOutput copyWith({
-    List<int>? result,
-    int? time,
-    int? chunkLen,
-  }) {
-    return DecodeOutput(
-      result: result ?? this.result,
-      time: time ?? this.time,
-      chunkLen: chunkLen ?? this.chunkLen,
-    );
-  }
-
   void serialize(BinarySerializer serializer) {
     serializer.increaseContainerDepth();
-    TraitHelpers.serializeVectorU8(result, serializer);
-    serializer.serializeInt32(time);
-    serializer.serializeInt32(chunkLen);
     serializer.decreaseContainerDepth();
   }
 
@@ -77,18 +52,11 @@ class DecodeOutput {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
 
-    return other is DecodeOutput
-      && listEquals(result, other.result)
-      && time == other.time
-      && chunkLen == other.chunkLen;
+    return other is DecodeOutput;
   }
 
   @override
-  int get hashCode => Object.hash(
-        result,
-        time,
-        chunkLen,
-      );
+  int get hashCode => runtimeType.hashCode;
 
   @override
   String toString() {
@@ -96,9 +64,6 @@ class DecodeOutput {
 
     assert(() {
       fullString = '$runtimeType('
-        'result: $result, '
-        'time: $time, '
-        'chunkLen: $chunkLen'
         ')';
       return true;
     }());

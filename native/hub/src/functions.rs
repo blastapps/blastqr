@@ -3,7 +3,7 @@ use rinf::{RustSignalBinary, RustSignal, DartSignalBinary};
 use raptorq::{Decoder, Encoder, EncodingPacket, ObjectTransmissionInformation};
 use std::time::Instant;
 
-use crate::signals::{DecodeChunkInput, StreamEncodeComplete};
+use crate::signals::{DecodeChunkInput, DecodeComplete, DecodeError, DecodeProgress, StreamEncodeComplete};
 use crate::signals::DecodeOutput;
 use crate::signals::StreamEncodeInput;
 use crate::signals::StreamEncodeConfig;
@@ -92,12 +92,9 @@ pub async fn decode_chunk() {
         if let Some(ref mut dec) = decoder {
             if chunk.is_empty() {
                 rinf::debug_print!("chunk is empty :(");
-                DecodeOutput {
-                    result: [].to_vec(),
-                    time: 0,
-                    chunk_len: 0,
-                }
-                .send_signal_to_dart();
+                DecodeError {
+                    message: "empty chunk".to_owned()
+                }.send_signal_to_dart();
                 continue;
             }
 
@@ -107,23 +104,16 @@ pub async fn decode_chunk() {
             let elapsed = start.elapsed();
             if result.is_some() {
                 rinf::debug_print!("Decode success!");
-                DecodeOutput {
-                    result: result.unwrap(),
-                    time: elapsed.as_millis() as i32,
-                    chunk_len: 0,
-                }
-                .send_signal_to_dart();
+                DecodeOutput {}.send_signal_to_dart(result.unwrap());
+                DecodeComplete {time: elapsed.as_millis() as i32,}.send_signal_to_dart();
                 // Reset
                 decoder = None;
                 mtu = 0;
                 transfer_length = 0;
             } else {
-                DecodeOutput {
-                    result: [].to_vec(),
-                    time: elapsed.as_millis() as i32,
+                DecodeProgress {
                     chunk_len: chunk.len() as i32,
-                }
-                .send_signal_to_dart();
+                }.send_signal_to_dart();
             }
         }
     }

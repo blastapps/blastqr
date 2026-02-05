@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/help_page.dart';
-import 'package:blast_qr/features/qr_page.dart';
-import 'package:blast_qr/features/settings_page.dart';
+import 'package:blast_qr/features/help/help_page.dart';
+import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
