@@ -94,10 +94,17 @@ class AppLocalizationsCa extends AppLocalizations {
   String get large_file_msg_2 => 'a transferir-se.';
 
   @override
+  String get large_file_msg_3 =>
+      'Would you like to send a compresed, lower quality version of this image?';
+
+  @override
   String get minutes => 'minuts';
 
   @override
-  String get continue_anyway => 'Continua igualment';
+  String get send_large_file => 'Send large file anyway';
+
+  @override
+  String get send_compressed_image => 'Send compressed image file';
 
   @override
   String get to_transfer => 'a transferir';

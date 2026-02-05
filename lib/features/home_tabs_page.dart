@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/files_received/files_page.dart';
+import 'package:blast_qr/features/scan/scan_page.dart';
+import 'package:blast_qr/features/send/file_picker_page.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:blast_qr/features/files_received/files_page.dart';
-import 'package:blast_qr/features/send/send_page.dart';
-import 'package:blast_qr/features/scan/scan_page.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:share_handler/share_handler.dart';
@@ -191,7 +191,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
             builder: (context) {
               switch (_currentTab) {
                 case 0:
-                  return const SendPage();
+                  return const FilePickerPage();
                 case 1:
                   return const ScanPage();
                 case 2:

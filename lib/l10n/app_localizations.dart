@@ -270,17 +270,29 @@ abstract class AppLocalizations {
   /// **'to transfer.'**
   String get large_file_msg_2;
 
+  /// No description provided for @large_file_msg_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to send a compresed, lower quality version of this image?'**
+  String get large_file_msg_3;
+
   /// No description provided for @minutes.
   ///
   /// In en, this message translates to:
   /// **'minutes'**
   String get minutes;
 
-  /// No description provided for @continue_anyway.
+  /// No description provided for @send_large_file.
   ///
   /// In en, this message translates to:
-  /// **'Continue anyway'**
-  String get continue_anyway;
+  /// **'Send large file anyway'**
+  String get send_large_file;
+
+  /// No description provided for @send_compressed_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Send compressed image file'**
+  String get send_compressed_image;
 
   /// No description provided for @to_transfer.
   ///

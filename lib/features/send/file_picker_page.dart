@@ -12,14 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
-class SendPage extends StatefulWidget {
-  const SendPage({super.key});
+class FilePickerPage extends StatefulWidget {
+  const FilePickerPage({super.key});
 
   @override
-  State<SendPage> createState() => _SendPageState();
+  State<FilePickerPage> createState() => _FilePickerPageState();
 }
 
-class _SendPageState extends State<SendPage> {
+class _FilePickerPageState extends State<FilePickerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -17,6 +17,8 @@ class FileType {
       isWebpImage = mimeType == 'image/webp' || extension == 'webp',
       isAudio = mimeType?.startsWith('audio') == true,
       isVideo = mimeType?.startsWith('video') == true;
+
+  bool get allowsImageCompression => isImage;
 }
 
 extension FileTypeExtension on FileType {

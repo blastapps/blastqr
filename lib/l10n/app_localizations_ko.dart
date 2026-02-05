@@ -93,10 +93,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get large_file_msg_2 => '까지 시간이 걸릴 수 있습니다.';
 
   @override
+  String get large_file_msg_3 =>
+      'Would you like to send a compresed, lower quality version of this image?';
+
+  @override
   String get minutes => '분';
 
   @override
-  String get continue_anyway => '어쨌든 계속';
+  String get send_large_file => 'Send large file anyway';
+
+  @override
+  String get send_compressed_image => 'Send compressed image file';
 
   @override
   String get to_transfer => '전송';

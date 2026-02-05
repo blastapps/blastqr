@@ -52,6 +52,7 @@ class _QrPageState extends State<QrPage> {
                             ? FileTooLargeAlertWidget(
                               estimatedSlowestTime: widget.file
                                   .getEstimateTransferTime(8),
+                              fileType: widget.file.type,
                               onAcknowledge: () {
                                 setState(() {
                                   _largeFileAcknowledged = true;
@@ -122,10 +123,12 @@ class FileTooLargeAlertWidget extends StatelessWidget {
     super.key,
     required this.onAcknowledge,
     required this.estimatedSlowestTime,
+    required this.fileType,
   });
 
   final Function() onAcknowledge;
   final double estimatedSlowestTime;
+  final FileType fileType;
 
   String get estimateInMinutes =>
       (estimatedSlowestTime / 60).toStringAsFixed(0);
@@ -163,13 +166,20 @@ class FileTooLargeAlertWidget extends StatelessWidget {
                   text: ' $estimateInMinutes ${context.l10n.minutes} ',
                 ),
                 TextSpan(text: context.l10n.large_file_msg_2),
+                if (fileType.allowsImageCompression)
+                  TextSpan(text: '\n${context.l10n.large_file_msg_3}'),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          ElevatedButton(
+          if (fileType.allowsImageCompression)
+            ElevatedButton(
+              onPressed: onAcknowledge,
+              child: Text(context.l10n.send_compressed_image),
+            ),
+          OutlinedButton(
             onPressed: onAcknowledge,
-            child: Text(context.l10n.continue_anyway),
+            child: Text(context.l10n.send_large_file),
           ),
         ],
       ),
