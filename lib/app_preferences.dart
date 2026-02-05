@@ -1,4 +1,5 @@
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,7 @@ class AppPreferences {
   static bool? _animations;
   static bool? _pureBlack;
   static Color? _accentColor;
+  static ImageCompressionSettings? _imageCompressionSettings;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
@@ -18,6 +20,8 @@ class AppPreferences {
   static bool get animations => _animations ?? true;
   static bool get pureBlack => _pureBlack ?? false;
   static Color get accentColor => _accentColor ?? accentColorOptions[0];
+  static ImageCompressionSettings get imageCompressionSettings =>
+      _imageCompressionSettings ?? ImageCompressionSettings.defaultSettings;
 
   static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
@@ -58,6 +62,14 @@ class AppPreferences {
     _accentColor = accentColor;
   }
 
+  static Future<void> setImageCompressionSettings(
+    ImageCompressionSettings settings,
+  ) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setString('ic_settings', settings.toJson());
+    _accentColor = accentColor;
+  }
+
   static Future<void> read() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     _localeId = sp.getString('locale_id');
@@ -67,6 +79,9 @@ class AppPreferences {
     _pureBlack = sp.getBool('pureBlack') ?? false;
     _accentColor = Color(
       sp.getInt('accentColor') ?? accentColorOptions[0].toARGB32(),
+    );
+    _imageCompressionSettings = ImageCompressionSettings.parseSafely(
+      sp.getString('ic_settings'),
     );
   }
 }

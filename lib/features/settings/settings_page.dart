@@ -1,6 +1,7 @@
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/settings/image_compression_settings_page.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
@@ -185,7 +186,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Text(
-              context.l10n.data_encoding,
+              context.l10n.behaviour,
               style: TextStyle(
                 color: context.color.primary,
                 fontSize: 15,
@@ -214,6 +215,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
               );
             },
+          ),
+          ListTile(
+            leading: HugeIcon(
+              icon: HugeIcons.strokeRoundedImage01,
+              color: context.color.onSurface,
+            ),
+            title: Text(context.l10n.image_compression_settings),
+            onTap: _showImageCompressionSettings,
           ),
           const SizedBox(height: 16),
           Padding(
@@ -264,6 +273,16 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
     Provider.of<EncodeSettings>(context, listen: false).updateMtu(mtu);
+  }
+
+  void _showImageCompressionSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return const ImageCompressionSettingsPage();
+        },
+      ),
+    );
   }
 }
 

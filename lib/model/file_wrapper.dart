@@ -8,6 +8,7 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:qr/qr.dart';
 
@@ -29,15 +30,15 @@ class FileWrapper {
   FileWrapper({required this.file, required this.type, required this.size})
     : _actualTransferSize = size;
 
-  Uint8List _compressFile(Uint8List original) {
-    return gzip.encode(original) as Uint8List;
-  }
-
   double getEstimateTransferTime(int speedInkBps) {
     return (size / 1000) / speedInkBps;
   }
 
-  Stream<QrImage> qrImageStream(int mtu) async* {
+  Stream<QrImage> qrImageStream(
+    int mtu, {
+    bool useImageCompression = false,
+    int imageQuality = 90,
+  }) async* {
     // Metadata bytes (header)
     Uint8List fileExtBytes = utf8.encode(type.extension);
     if (fileExtBytes.lengthInBytes > 8) {
@@ -47,18 +48,28 @@ class FileWrapper {
     }
 
     var bytes = await file.readAsBytes();
+    var transferType = BlastQRTransferType.compressedFile;
+
+    // Image compression
+    if (useImageCompression && type.allowsImageCompression) {
+      final compressedImage = await _compressedImage(bytes, imageQuality);
+      if (compressedImage != null) {
+        bytes = compressedImage;
+        transferType = BlastQRTransferType.rawFile;
+      }
+    }
 
     // Append filename in first 128 bytes of file data
     final filenameBytes = name.encodeFixed128();
     bytes = Uint8List.fromList([...filenameBytes, ...bytes]);
     debugPrint('Appended filename: $name in ${filenameBytes.length} bytes');
-    _actualTransferSize = bytes.length;
-    debugPrint('Transfer length/original: $_actualTransferSize / $size');
 
-    // Compression
-    final compressedBytes = await compute(_compressFile, bytes);
-    bytes = compressedBytes;
-    _actualTransferSize = compressedBytes.length;
+    // File compression
+    if (!useImageCompression) {
+      final compressedBytes = await compute(_compressedFile, bytes);
+      bytes = compressedBytes;
+    }
+    _actualTransferSize = bytes.length;
     debugPrint('Compressed file: $size -> $_actualTransferSize');
 
     final repairPackets = (_actualTransferSize / 5000);
@@ -71,8 +82,6 @@ class FileWrapper {
     );
 
     encoder.initialize();
-
-    final transferType = BlastQRTransferType.compressedFile;
 
     final sizeBytes = Uint8List(4)
       ..buffer.asByteData().setUint32(0, _actualTransferSize, Endian.big);
@@ -137,6 +146,26 @@ class FileWrapper {
       }
     }
     return 40;
+  }
+
+  Future<Uint8List?> _compressedImage(Uint8List bytes, int quality) async {
+    try {
+      var result = await FlutterImageCompress.compressWithList(
+        bytes,
+        minHeight: 2048,
+        minWidth: 2048,
+        quality: quality,
+        format: CompressFormat.jpeg,
+      );
+      return result;
+    } catch (e) {
+      debugPrint('Image compression failed. Reverting to file compression');
+      return null;
+    }
+  }
+
+  Uint8List _compressedFile(Uint8List original) {
+    return gzip.encode(original) as Uint8List;
   }
 }
 

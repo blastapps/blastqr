@@ -100,6 +100,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get minutes => '분';
 
   @override
+  String get image_compression_settings => 'Picture compression settings';
+
+  @override
+  String get image_quality => 'Image quality';
+
+  @override
   String get send_large_file => 'Send large file anyway';
 
   @override
@@ -193,11 +199,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get disabled => 'Disabled';
 
   @override
-  String get data_encoding => '데이터 인코딩';
+  String get behaviour => 'Behaviour';
 
   @override
   String get chunk_length => '청크 길이';
 
   @override
   String get licenses => '라이선스';
+
+  @override
+  String get file_format => 'File format';
+
+  @override
+  String get keep_original_file_format => 'Keep original file format';
 }

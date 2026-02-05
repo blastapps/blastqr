@@ -38,12 +38,16 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final RaptorQrStreamingWidgetController controller;
   final FileWrapper file;
   final int mtu;
+  final bool shouldCompressImage;
+  final int imageQuality;
 
   const RaptorQrStreamingWidget({
     super.key,
     required this.file,
     required this.mtu,
     required this.controller,
+    required this.shouldCompressImage,
+    required this.imageQuality,
   });
 
   @override
@@ -81,14 +85,20 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
 
     debugPrint('Generating QR codes..');
 
-    _imageStream = widget.file.qrImageStream(widget.mtu).listen((image) {
-      _qrImages.add(image);
-      widget.controller.setLength(_qrImages.length);
-      if (_qrImages.length == 1) {
-        _initTimer();
-        setState(() {});
-      }
-    });
+    _imageStream = widget.file
+        .qrImageStream(
+          widget.mtu,
+          useImageCompression: widget.shouldCompressImage,
+          imageQuality: widget.imageQuality,
+        )
+        .listen((image) {
+          _qrImages.add(image);
+          widget.controller.setLength(_qrImages.length);
+          if (_qrImages.length == 1) {
+            _initTimer();
+            setState(() {});
+          }
+        });
   }
 
   void _initTimer() {

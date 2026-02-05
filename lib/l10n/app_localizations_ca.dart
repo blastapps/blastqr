@@ -101,6 +101,12 @@ class AppLocalizationsCa extends AppLocalizations {
   String get minutes => 'minuts';
 
   @override
+  String get image_compression_settings => 'Picture compression settings';
+
+  @override
+  String get image_quality => 'Image quality';
+
+  @override
   String get send_large_file => 'Send large file anyway';
 
   @override
@@ -195,11 +201,17 @@ class AppLocalizationsCa extends AppLocalizations {
   String get disabled => 'Desactivat';
 
   @override
-  String get data_encoding => 'Codificació de dades';
+  String get behaviour => 'Behaviour';
 
   @override
   String get chunk_length => 'Longitud per fragment';
 
   @override
   String get licenses => 'Llicències';
+
+  @override
+  String get file_format => 'File format';
+
+  @override
+  String get keep_original_file_format => 'Keep original file format';
 }

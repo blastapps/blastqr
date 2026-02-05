@@ -33,6 +33,7 @@ dependencies:
   share_handler: ^0.0.22
   qr: ^3.0.2
   super_drag_and_drop: ^0.9.1
+  flutter_image_compress: ^2.4.0
 
 dev_dependencies:
   flutter_test:

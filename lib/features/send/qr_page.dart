@@ -2,6 +2,7 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
 import 'package:blast_qr/features/send/widgets/raptorq_qr_streaming_widget.dart';
+import 'package:blast_qr/features/settings/image_compression_settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
@@ -21,8 +22,10 @@ class QrPage extends StatefulWidget {
 
 class _QrPageState extends State<QrPage> {
   final _qrController = RaptorQrStreamingWidgetController();
-  bool get _isLargeFile => widget.file.size > 1000000;
+  bool get _isLargeFile => widget.file.size > 185000;
   bool _largeFileAcknowledged = false;
+  bool _shouldCompressImage = false;
+  int _imageQuality = 90;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +61,13 @@ class _QrPageState extends State<QrPage> {
                                   _largeFileAcknowledged = true;
                                 });
                               },
+                              onRequestCompressedImage: (quality) {
+                                setState(() {
+                                  _largeFileAcknowledged = true;
+                                  _shouldCompressImage = true;
+                                  _imageQuality = quality;
+                                });
+                              },
                             )
                             : Consumer<EncodeSettings>(
                               builder: (context, state, child) {
@@ -65,6 +75,8 @@ class _QrPageState extends State<QrPage> {
                                   controller: _qrController,
                                   file: widget.file,
                                   mtu: state.mtu,
+                                  shouldCompressImage: _shouldCompressImage,
+                                  imageQuality: _imageQuality,
                                 );
                               },
                             ),
@@ -72,29 +84,30 @@ class _QrPageState extends State<QrPage> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      fullscreenDialog: true,
-                      builder: (context) => const HelpPage(),
-                    ),
-                  );
-                },
-                child: Row(
-                  spacing: 8,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedInformationCircle,
-                      color: context.color.onSurface,
-                    ),
-                    Expanded(child: Text(context.l10n.send_help_message)),
-                  ],
+            if (!_isLargeFile || _largeFileAcknowledged)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        fullscreenDialog: true,
+                        builder: (context) => const HelpPage(),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedInformationCircle,
+                        color: context.color.onSurface,
+                      ),
+                      Expanded(child: Text(context.l10n.send_help_message)),
+                    ],
+                  ),
                 ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: ElevatedButton(
@@ -118,20 +131,30 @@ class _QrPageState extends State<QrPage> {
   }
 }
 
-class FileTooLargeAlertWidget extends StatelessWidget {
+class FileTooLargeAlertWidget extends StatefulWidget {
   const FileTooLargeAlertWidget({
     super.key,
-    required this.onAcknowledge,
     required this.estimatedSlowestTime,
     required this.fileType,
+    required this.onAcknowledge,
+    required this.onRequestCompressedImage,
   });
 
-  final Function() onAcknowledge;
   final double estimatedSlowestTime;
   final FileType fileType;
+  final Function() onAcknowledge;
+  final Function(int quality) onRequestCompressedImage;
 
+  @override
+  State<FileTooLargeAlertWidget> createState() =>
+      _FileTooLargeAlertWidgetState();
+}
+
+class _FileTooLargeAlertWidgetState extends State<FileTooLargeAlertWidget> {
   String get estimateInMinutes =>
-      (estimatedSlowestTime / 60).toStringAsFixed(0);
+      (widget.estimatedSlowestTime / 60).toStringAsFixed(0);
+
+  final int _quality = 90;
 
   @override
   Widget build(BuildContext context) {
@@ -166,22 +189,51 @@ class FileTooLargeAlertWidget extends StatelessWidget {
                   text: ' $estimateInMinutes ${context.l10n.minutes} ',
                 ),
                 TextSpan(text: context.l10n.large_file_msg_2),
-                if (fileType.allowsImageCompression)
+                if (widget.fileType.allowsImageCompression)
                   TextSpan(text: '\n${context.l10n.large_file_msg_3}'),
               ],
             ),
           ),
+
           const SizedBox(height: 8),
-          if (fileType.allowsImageCompression)
-            ElevatedButton(
-              onPressed: onAcknowledge,
-              child: Text(context.l10n.send_compressed_image),
+          if (widget.fileType.allowsImageCompression)
+            Row(
+              spacing: 4,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => widget.onRequestCompressedImage(_quality),
+                    child: Text(context.l10n.send_compressed_image),
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
+                    onPressed: () => _showImageCompressionSettings(),
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedSettings01,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
           OutlinedButton(
-            onPressed: onAcknowledge,
+            onPressed: widget.onAcknowledge,
             child: Text(context.l10n.send_large_file),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showImageCompressionSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return const ImageCompressionSettingsPage();
+        },
       ),
     );
   }

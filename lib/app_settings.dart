@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:blast_qr/app_preferences.dart';
+import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:flutter/material.dart';
 
 class AppSettings extends ChangeNotifier {
@@ -9,13 +10,15 @@ class AppSettings extends ChangeNotifier {
   bool animations;
   bool pureBlack;
   Color accentColor;
+  ImageCompressionSettings imageCompressionSettings;
 
   AppSettings()
     : locale = AppPreferences.locale,
       theme = AppPreferences.theme,
       animations = AppPreferences.animations,
       pureBlack = AppPreferences.pureBlack,
-      accentColor = AppPreferences.accentColor;
+      accentColor = AppPreferences.accentColor,
+      imageCompressionSettings = AppPreferences.imageCompressionSettings;
 
   void updateLocale(String? localeId) {
     log('Setting locale to $localeId');
@@ -45,6 +48,12 @@ class AppSettings extends ChangeNotifier {
   void updateAccentColor(Color accentColor) {
     AppPreferences.setAccentColor(accentColor);
     this.accentColor = accentColor;
+    notifyListeners();
+  }
+
+  void updateImageCompressionSettings(ImageCompressionSettings settings) {
+    AppPreferences.setImageCompressionSettings(settings);
+    imageCompressionSettings = settings;
     notifyListeners();
   }
 }

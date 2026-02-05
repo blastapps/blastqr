@@ -282,6 +282,18 @@ abstract class AppLocalizations {
   /// **'minutes'**
   String get minutes;
 
+  /// No description provided for @image_compression_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Picture compression settings'**
+  String get image_compression_settings;
+
+  /// No description provided for @image_quality.
+  ///
+  /// In en, this message translates to:
+  /// **'Image quality'**
+  String get image_quality;
+
   /// No description provided for @send_large_file.
   ///
   /// In en, this message translates to:
@@ -456,11 +468,11 @@ abstract class AppLocalizations {
   /// **'Disabled'**
   String get disabled;
 
-  /// No description provided for @data_encoding.
+  /// No description provided for @behaviour.
   ///
   /// In en, this message translates to:
-  /// **'Data encoding'**
-  String get data_encoding;
+  /// **'Behaviour'**
+  String get behaviour;
 
   /// No description provided for @chunk_length.
   ///
@@ -473,6 +485,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Licenses'**
   String get licenses;
+
+  /// No description provided for @file_format.
+  ///
+  /// In en, this message translates to:
+  /// **'File format'**
+  String get file_format;
+
+  /// No description provided for @keep_original_file_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep original file format'**
+  String get keep_original_file_format;
 }
 
 class _AppLocalizationsDelegate

@@ -29,6 +29,8 @@
   "large_file_msg_2": "to transfer.",
   "large_file_msg_3": "Would you like to send a compresed, lower quality version of this image?",
   "minutes": "minutes",
+  "image_compression_settings": "Picture compression settings",
+  "image_quality": "Image quality",
   "send_large_file": "Send large file anyway",
   "send_compressed_image": "Send compressed image file",
   "to_transfer": "to transfer",
@@ -58,7 +60,9 @@
   "animations": "Animations",
   "enabled": "Enabled",
   "disabled": "Disabled",
-  "data_encoding": "Data encoding",
+  "behaviour": "Behaviour",
   "chunk_length": "Chunk length",
-  "licenses": "Licenses"
+  "licenses": "Licenses",
+  "file_format": "File format",
+  "keep_original_file_format": "Keep original file format"
 }
