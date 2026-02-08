@@ -16,9 +16,9 @@ class ImageCompressionSettings {
 
   static ImageCompressionSettings defaultSettings =
       const ImageCompressionSettings(
-        outputFormat: ImageCompressionOutputFormat.keepOriginal,
-        quality: 80,
-        minSize: 2048,
+        outputFormat: ImageCompressionOutputFormat.jpeg,
+        quality: 60,
+        minSize: 1536,
       );
 
   Map<String, dynamic> toMap() {
@@ -34,7 +34,7 @@ class ImageCompressionSettings {
       outputFormat:
           map['outputFormat'] != null
               ? ImageCompressionOutputFormat.values.byName(map['outputFormat'])
-              : ImageCompressionOutputFormat.keepOriginal,
+              : defaultSettings.outputFormat,
       quality: map['quality'] as int,
       minSize: map['minSize'] as int,
     );
@@ -60,15 +60,11 @@ class ImageCompressionSettings {
 }
 
 enum ImageCompressionOutputFormat {
-  keepOriginal,
   jpeg,
   heic;
 
   CompressFormat toCompressFormat() {
     switch (this) {
-      case ImageCompressionOutputFormat.keepOriginal:
-        // TODO: Implement
-        return CompressFormat.jpeg;
       case ImageCompressionOutputFormat.jpeg:
         return CompressFormat.jpeg;
       case ImageCompressionOutputFormat.heic:
@@ -78,8 +74,6 @@ enum ImageCompressionOutputFormat {
 
   String title(AppLocalizations loc) {
     switch (this) {
-      case ImageCompressionOutputFormat.keepOriginal:
-        return 'Keep original file format';
       case ImageCompressionOutputFormat.jpeg:
         return name.toUpperCase();
       case ImageCompressionOutputFormat.heic:
@@ -89,8 +83,6 @@ enum ImageCompressionOutputFormat {
 
   String? get extension {
     switch (this) {
-      case ImageCompressionOutputFormat.keepOriginal:
-        return null;
       case ImageCompressionOutputFormat.jpeg:
         return 'jpg';
       case ImageCompressionOutputFormat.heic:

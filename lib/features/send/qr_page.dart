@@ -78,7 +78,9 @@ class _QrPageState extends State<QrPage> {
                                   file: widget.file,
                                   mtu: state.mtu,
                                   imageCompressionSettings:
-                                      appSettings.imageCompressionSettings,
+                                      _shouldCompressImage
+                                          ? appSettings.imageCompressionSettings
+                                          : null,
                                 );
                               },
                             ),

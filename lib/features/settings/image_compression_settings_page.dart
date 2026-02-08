@@ -17,9 +17,13 @@ class ImageCompressionSettingsPage extends StatefulWidget {
 
 class _ImageCompressionSettingsPageState
     extends State<ImageCompressionSettingsPage> {
+  static int downscaleCutoff = 999999;
+
   ImageCompressionOutputFormat? _outputFormat;
   int? _quality;
-  int? _minSize;
+  late int _minSize;
+
+  bool get downscalingEnabled => _minSize < downscaleCutoff;
 
   @override
   void initState() {
@@ -48,14 +52,17 @@ class _ImageCompressionSettingsPageState
                       '${context.l10n.image_quality}: ${settings.quality}%',
                       style: Theme.of(context).listTileTheme.titleTextStyle,
                     ),
-                    Slider.adaptive(
-                      min: 0,
-                      max: 100,
-                      value: settings.quality.toDouble(),
-                      onChanged: (val) {
-                        _quality = val.toInt();
-                        _buildAndUpdateSettings();
-                      },
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Slider.adaptive(
+                        min: 0,
+                        max: 100,
+                        value: settings.quality.toDouble(),
+                        onChanged: (val) {
+                          _quality = val.toInt();
+                          _buildAndUpdateSettings();
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -80,30 +87,42 @@ class _ImageCompressionSettingsPageState
                   );
                 },
               ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSquareArrowShrink02,
-                  color: context.color.onSurface,
-                ),
-                title: const Text('Downscale'),
-                subtitle:
-                    settings.minSize < 999999
-                        ? Text('Downscaling to ${settings.minSize}px')
-                        : const Text('No downscaling'),
-                onTap: () {
-                  showTextInputSheet(
-                    context,
-                    title: context.l10n.chunk_length,
-                    hintText: context.l10n.chunk_length,
-                    prefilledText: settings.minSize.toString(),
-                    keyboardType: const TextInputType.numberWithOptions(),
-                    onConfirm: (val) {
-                      _validateMinSize(val);
-                      _buildAndUpdateSettings();
-                    },
-                  );
+              SwitchListTile.adaptive(
+                title: Text(context.l10n.downscaling),
+                value: downscalingEnabled,
+                activeTrackColor: context.color.primary,
+                onChanged: (enabled) {
+                  setState(() {
+                    _minSize =
+                        enabled
+                            ? ImageCompressionSettings.defaultSettings.minSize
+                            : downscaleCutoff;
+                    _buildAndUpdateSettings();
+                  });
                 },
               ),
+              if (downscalingEnabled)
+                ListTile(
+                  leading: HugeIcon(
+                    icon: HugeIcons.strokeRoundedSquareArrowShrink02,
+                    color: context.color.onSurface,
+                  ),
+                  title: Text(context.l10n.downscaling),
+                  subtitle: Text('Downscaling to ${settings.minSize}px'),
+                  onTap: () {
+                    showTextInputSheet(
+                      context,
+                      title: context.l10n.downscaling,
+                      hintText: context.l10n.downscaling,
+                      prefilledText: settings.minSize.toString(),
+                      keyboardType: const TextInputType.numberWithOptions(),
+                      onConfirm: (val) {
+                        _validateMinSize(val);
+                        _buildAndUpdateSettings();
+                      },
+                    );
+                  },
+                ),
             ],
           );
         },

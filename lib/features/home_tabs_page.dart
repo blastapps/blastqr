@@ -101,7 +101,6 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
           extendBodyBehindAppBar: true,
           extendBody: true,
           backgroundColor: Colors.transparent,
-
           bottomNavigationBar:
               (Platform.isIOS || Platform.isAndroid)
                   ? Consumer<FileBadgeCount>(
@@ -120,7 +119,9 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
                                   offset: const Offset(0, 1),
                                 ),
                               ],
-                              color: context.color.primaryContainer,
+                              color: context.color.primaryContainer.withAlpha(
+                                215,
+                              ),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: BottomNavigationBar(

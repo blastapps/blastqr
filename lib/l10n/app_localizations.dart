@@ -492,11 +492,11 @@ abstract class AppLocalizations {
   /// **'File format'**
   String get file_format;
 
-  /// No description provided for @keep_original_file_format.
+  /// No description provided for @downscaling.
   ///
   /// In en, this message translates to:
-  /// **'Keep original file format'**
-  String get keep_original_file_format;
+  /// **'Downscaling'**
+  String get downscaling;
 }
 
 class _AppLocalizationsDelegate

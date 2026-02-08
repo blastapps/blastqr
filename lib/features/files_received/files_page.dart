@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
@@ -75,6 +76,23 @@ class _FilesPageState extends State<FilesPage> {
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const SettingsPage();
+                  },
+                ),
+              );
+            },
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedSettings01,
+              color: context.color.onSurface,
+            ),
+          ),
+        ],
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

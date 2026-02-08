@@ -211,5 +211,5 @@ class AppLocalizationsKo extends AppLocalizations {
   String get file_format => 'File format';
 
   @override
-  String get keep_original_file_format => 'Keep original file format';
+  String get downscaling => 'Downscaling';
 }

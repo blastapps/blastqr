@@ -368,18 +368,18 @@ class _ScanPageState extends State<ScanPage> {
               child: file.buildThumbnail(context, showsAvifThumbnail: true),
             ),
           ),
-
-          //Text(file.name),ion(contentPadding: EdgeInsets.all(8)),
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _renameController,
               textAlign: TextAlign.center,
               decoration: InputDecoration(
-                suffixIcon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedEdit01,
-                  color: context.color.onSurface,
-                  size: 20,
+                suffixIcon: Padding(
+                  padding: const EdgeInsetsGeometry.all(10),
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedEdit01,
+                    color: context.color.onSurface,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
               ),

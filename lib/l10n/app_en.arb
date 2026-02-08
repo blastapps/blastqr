@@ -64,5 +64,5 @@
   "chunk_length": "Chunk length",
   "licenses": "Licenses",
   "file_format": "File format",
-  "keep_original_file_format": "Keep original file format"
+  "downscaling": "Downscaling"
 }
