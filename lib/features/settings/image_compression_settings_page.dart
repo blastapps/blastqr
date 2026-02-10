@@ -151,7 +151,7 @@ class _ImageCompressionSettingsPageState
     final settings = ImageCompressionSettings(
       outputFormat: _outputFormat ?? defaults.outputFormat,
       quality: _quality ?? defaults.quality,
-      minSize: _minSize ?? defaults.minSize,
+      minSize: _minSize,
     );
 
     appSettings.updateImageCompressionSettings(settings);

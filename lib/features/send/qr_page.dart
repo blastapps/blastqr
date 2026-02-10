@@ -25,7 +25,6 @@ class _QrPageState extends State<QrPage> {
   bool get _isLargeFile => widget.file.size > 185000;
   bool _largeFileAcknowledged = false;
   bool _shouldCompressImage = false;
-  int _imageQuality = 90;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +66,6 @@ class _QrPageState extends State<QrPage> {
                                 setState(() {
                                   _largeFileAcknowledged = true;
                                   _shouldCompressImage = true;
-                                  _imageQuality = quality;
                                 });
                               },
                             )
