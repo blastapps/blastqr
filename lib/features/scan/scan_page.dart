@@ -109,6 +109,7 @@ class _ScanPageState extends State<ScanPage> {
         children: [
           GestureDetector(
             onTap: () {
+              _multiScan = !_multiScan;
               // Temporary fix for: https://github.com/flutter/flutter/issues/152763
               _resetReaderWidget();
             },
@@ -218,7 +219,6 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _handleMultiscan(Codes codes) {
-    debugPrint('Multiscan ${codes.codes.length}');
     codes.codes.forEach(_handleScan);
   }
 
