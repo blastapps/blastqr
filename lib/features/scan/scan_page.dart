@@ -234,7 +234,6 @@ class _ScanPageState extends State<ScanPage> {
 
     if (BlastQrcodeData.bytesIsValidBlastQrCode(result.rawBytes)) {
       final blastQr = _parseQrCode(result)!;
-      debugPrint('Parsed qr code, decoding');
       _decoder.decodeChunk(blastQr.data, blastQr.transferLength, blastQr.mtu);
       if (_fileMetadata == null) {
         _fileMetadata = ReceivingFileMetadata(

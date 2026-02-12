@@ -20,7 +20,15 @@ class RaptorqDecoder {
     required this.onReceiveResult,
     this.onTransferComplete,
     this.onProcessChunk,
-  });
+  }) {
+    _listenForResult();
+  }
+
+  void _listenForResult() {
+    DecodeOutput.rustSignalStream.listen((signal) {
+      _handleOutput(signal.binary);
+    });
+  }
 
   Future<void> decodeChunk(Uint8List data, int transferLength, int mtu) async {
     if (complete || isLoadingResult) {
@@ -37,29 +45,15 @@ class RaptorqDecoder {
     count += 1;
 
     try {
-      final result = await Future.any([
-        // Progress path
-        DecodeProgress.rustSignalStream.first.then((progress) {
-          return _ProgressResult(progress.message);
-        }),
+      final result = await DecodeProgress.rustSignalStream.first
+          .then((progress) {
+            return _ProgressResult(progress.message);
+          })
+          .timeout(const Duration(milliseconds: 400));
 
-        // Completion path
-        DecodeOutput.rustSignalStream.first.then((signal) {
-          return signal.binary;
-        }),
-      ]).timeout(const Duration(milliseconds: 400));
-
-      if (result is _ProgressResult) {
-        final chunkLen = result.progress.chunkLen;
-        estimatedProgress = (count * mtu) / (transferLength * 1.25);
-        onProcessChunk?.call(chunkLen, count, estimatedProgress);
-        return;
-      }
-
-      if (result is Uint8List) {
-        _handleOutput(result);
-        return;
-      }
+      final chunkLen = result.progress.chunkLen;
+      estimatedProgress = (count * mtu) / (transferLength * 1.25);
+      onProcessChunk?.call(chunkLen, count, estimatedProgress);
     } on TimeoutException {
       isLoadingResult = true;
       _waitForResult();
