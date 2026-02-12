@@ -34,11 +34,6 @@ pub struct DecodeProgress {
 }
 
 #[derive(Serialize, RustSignal)]
-pub struct DecodeComplete {
-    pub time: i32
-}
-
-#[derive(Serialize, RustSignal)]
 pub struct DecodeError {
     pub message: String
 }

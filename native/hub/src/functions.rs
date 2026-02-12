@@ -1,9 +1,8 @@
 use rinf::DartSignal;
 use rinf::{RustSignalBinary, RustSignal, DartSignalBinary};
 use raptorq::{Decoder, Encoder, EncodingPacket, ObjectTransmissionInformation};
-use std::time::Instant;
 
-use crate::signals::{DecodeChunkInput, DecodeComplete, DecodeError, DecodeProgress, StreamEncodeComplete};
+use crate::signals::{DecodeChunkInput, DecodeError, DecodeProgress, StreamEncodeComplete};
 use crate::signals::DecodeOutput;
 use crate::signals::StreamEncodeInput;
 use crate::signals::StreamEncodeConfig;
@@ -67,7 +66,6 @@ pub async fn decode_chunk() {
     let mut decoder: Option<Decoder> = None;
     let mut mtu: i32 = 924;
     let mut transfer_length = 0;
-    let mut start = Instant::now();
 
     while let Some(dart_signal) = receiver.recv().await {
         let msg: DecodeChunkInput = dart_signal.message;
@@ -85,7 +83,6 @@ pub async fn decode_chunk() {
             decoder = Some(Decoder::new(config));
             mtu = msg.mtu;
             transfer_length = msg.transfer_length;
-            start = Instant::now();
             rinf::debug_print!("Configure decoder");
         }
 
@@ -101,11 +98,9 @@ pub async fn decode_chunk() {
             // Perform the decoding
             let result: Option<Vec<u8>> = dec.decode(EncodingPacket::deserialize(&chunk));
 
-            let elapsed = start.elapsed();
             if result.is_some() {
                 rinf::debug_print!("Decode success!");
                 DecodeOutput {}.send_signal_to_dart(result.unwrap());
-                DecodeComplete {time: elapsed.as_millis() as i32,}.send_signal_to_dart();
                 // Reset
                 decoder = None;
                 mtu = 0;

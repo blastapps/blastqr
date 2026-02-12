@@ -15,7 +15,6 @@ export '../serde/serde.dart';
 
 part 'trait_helpers.dart';
 part 'decode_chunk_input.dart';
-part 'decode_complete.dart';
 part 'decode_error.dart';
 part 'decode_output.dart';
 part 'decode_progress.dart';

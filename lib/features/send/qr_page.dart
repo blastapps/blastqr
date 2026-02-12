@@ -26,6 +26,8 @@ class _QrPageState extends State<QrPage> {
   bool _largeFileAcknowledged = false;
   bool _shouldCompressImage = false;
 
+  bool _fullscreenMode = false;
+
   @override
   Widget build(BuildContext context) {
     final qrBoxHeight = MediaQuery.of(context).size.width;
@@ -36,8 +38,10 @@ class _QrPageState extends State<QrPage> {
       body: SafeArea(
         child: Column(
           children: [
-            FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
+            if (!_fullscreenMode)
+              FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
             Expanded(
+              key: const ValueKey('qr_container'),
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Container(
@@ -50,7 +54,7 @@ class _QrPageState extends State<QrPage> {
                             : Colors.white,
                   ),
                   child: SizedBox(
-                    height: qrBoxHeight + 16,
+                    height: _fullscreenMode ? null : qrBoxHeight + 16,
                     child:
                         _isLargeFile && !_largeFileAcknowledged
                             ? FileTooLargeAlertWidget(
@@ -79,6 +83,12 @@ class _QrPageState extends State<QrPage> {
                                       _shouldCompressImage
                                           ? appSettings.imageCompressionSettings
                                           : null,
+                                  fill: _fullscreenMode,
+                                  onTap: () {
+                                    setState(() {
+                                      _fullscreenMode = !_fullscreenMode;
+                                    });
+                                  },
                                 );
                               },
                             ),
@@ -86,7 +96,7 @@ class _QrPageState extends State<QrPage> {
                 ),
               ),
             ),
-            if (!_isLargeFile || _largeFileAcknowledged)
+            if (!_fullscreenMode && (!_isLargeFile || _largeFileAcknowledged))
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: GestureDetector(
@@ -110,17 +120,18 @@ class _QrPageState extends State<QrPage> {
                   ),
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: ElevatedButton(
-                onPressed: _dismiss,
-                child: Row(
-                  spacing: 8,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text(context.l10n.done)],
+            if (!_fullscreenMode)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: ElevatedButton(
+                  onPressed: _dismiss,
+                  child: Row(
+                    spacing: 8,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [Text(context.l10n.done)],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

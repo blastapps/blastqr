@@ -48,7 +48,9 @@ class _ScanPageState extends State<ScanPage> {
   int _dataLengthInLastPeriod = 0;
   bool _showsReaderWidget = true;
   bool _hapticFeedback = true;
+  bool _multiScan = false;
   bool _transferComplete = false;
+  DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
 
   @override
@@ -74,6 +76,18 @@ class _ScanPageState extends State<ScanPage> {
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
         actions: [
+          IconButton(
+            onPressed: () async {
+              setState(() {
+                _multiScan = !_multiScan;
+              });
+            },
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedFullScreen,
+              color:
+                  _multiScan ? context.color.onSurface : context.color.outline,
+            ),
+          ),
           IconButton(
             onPressed: () async {
               setState(() {
@@ -108,6 +122,9 @@ class _ScanPageState extends State<ScanPage> {
                       showGallery: false,
                       showToggleCamera: false,
                       showFlashlight: false,
+                      tryRotate: false,
+                      isMultiScan: _multiScan,
+                      onMultiScan: _handleMultiscan,
                       onScan: _handleScan,
                     )
                     : const SizedBox(),
@@ -200,11 +217,15 @@ class _ScanPageState extends State<ScanPage> {
     });
   }
 
+  void _handleMultiscan(Codes codes) {
+    debugPrint('Multiscan ${codes.codes.length}');
+    codes.codes.forEach(_handleScan);
+  }
+
   void _handleScan(Code result) {
     if (!_shouldScan) {
       return;
     }
-    log('Found code');
 
     if (_decoder.complete) {
       _shouldScan = false;
@@ -213,6 +234,7 @@ class _ScanPageState extends State<ScanPage> {
 
     if (BlastQrcodeData.bytesIsValidBlastQrCode(result.rawBytes)) {
       final blastQr = _parseQrCode(result)!;
+      debugPrint('Parsed qr code, decoding');
       _decoder.decodeChunk(blastQr.data, blastQr.transferLength, blastQr.mtu);
       if (_fileMetadata == null) {
         _fileMetadata = ReceivingFileMetadata(
@@ -223,6 +245,7 @@ class _ScanPageState extends State<ScanPage> {
         setState(() {
           _isReceivingData = true;
         });
+        _latestScanStartTime = DateTime.now();
         debugPrint('Scanning file with: ${_fileMetadata.toString()}');
       }
     } else {
@@ -279,6 +302,9 @@ class _ScanPageState extends State<ScanPage> {
     }
     _loadingResult = false;
 
+    final elapsedTime =
+        DateTime.now().difference(_latestScanStartTime).inMilliseconds / 1000;
+
     setState(() {
       _infoString = '';
     });
@@ -313,7 +339,6 @@ class _ScanPageState extends State<ScanPage> {
     ).writeAsBytes(bytes.sublist(128));
 
     final fileWrapper = await resultFile.toFileWrapper();
-    final timeInSeconds = _decoder.elapsedTime / 1000;
 
     if (!mounted) {
       return;
@@ -324,7 +349,7 @@ class _ScanPageState extends State<ScanPage> {
 
     HapticFeedback.heavyImpact();
 
-    _showResultSheet(fileWrapper, timeInSeconds).then((_) async {
+    _showResultSheet(fileWrapper, elapsedTime).then((_) async {
       if (mounted && _renameController.text != fileName) {
         // Should rename file
         final newFilename = _renameController.text;
@@ -341,9 +366,11 @@ class _ScanPageState extends State<ScanPage> {
 
   Future<void> _showResultSheet(FileWrapper file, double timeInSeconds) async {
     _renameController.text = file.name;
+    final speed = ((file.size / 1000) / timeInSeconds).toStringAsFixed(1);
     return showSheet(
       context: context,
-      title: '${context.l10n.received_in} ${timeInSeconds.toStringAsFixed(1)}s',
+      title:
+          '${context.l10n.received_in} ${timeInSeconds.toStringAsFixed(1)}s (${speed}kB/s)',
       body: Column(
         children: [
           GestureDetector(
@@ -375,7 +402,7 @@ class _ScanPageState extends State<ScanPage> {
               textAlign: TextAlign.center,
               decoration: InputDecoration(
                 suffixIcon: Padding(
-                  padding: const EdgeInsetsGeometry.all(10),
+                  padding: const EdgeInsetsGeometry.all(12),
                   child: HugeIcon(
                     icon: HugeIcons.strokeRoundedEdit01,
                     color: context.color.onSurface,

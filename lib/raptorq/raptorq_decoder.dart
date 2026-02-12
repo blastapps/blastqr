@@ -12,7 +12,6 @@ class RaptorqDecoder {
 
   bool complete = false;
   bool isLoadingResult = false;
-  int elapsedTime = 0;
   int count = 0;
   double estimatedProgress = 0;
   Uint8List latestResult = Uint8List(0);
@@ -36,7 +35,6 @@ class RaptorqDecoder {
     ).sendSignalToRust();
 
     count += 1;
-    log('Decoding $count');
 
     try {
       final result = await Future.any([
@@ -46,14 +44,8 @@ class RaptorqDecoder {
         }),
 
         // Completion path
-        Future.wait([
-          DecodeOutput.rustSignalStream.first,
-          DecodeComplete.rustSignalStream.first,
-        ]).then((values) {
-          return _CompletionResult(
-            binary: values[0].binary,
-            time: (values[1].message as DecodeComplete).time,
-          );
+        DecodeOutput.rustSignalStream.first.then((signal) {
+          return signal.binary;
         }),
       ]).timeout(const Duration(milliseconds: 400));
 
@@ -64,8 +56,8 @@ class RaptorqDecoder {
         return;
       }
 
-      if (result is _CompletionResult) {
-        _handleOutput(result.binary, result.time);
+      if (result is Uint8List) {
+        _handleOutput(result);
         return;
       }
     } on TimeoutException {
@@ -80,25 +72,20 @@ class RaptorqDecoder {
     log('Waiting for result...');
     onTransferComplete?.call();
     try {
-      final completionSignals = await Future.wait([
-        DecodeOutput.rustSignalStream.first,
-        DecodeComplete.rustSignalStream.first,
-      ]).timeout(const Duration(milliseconds: 400));
+      final completionSignal = await DecodeOutput.rustSignalStream.first
+          .timeout(const Duration(milliseconds: 400));
 
-      final binaryResult = completionSignals[0].binary;
-      final timeResult = completionSignals[1].message as DecodeComplete;
-      _handleOutput(binaryResult, timeResult.time);
+      final binaryResult = completionSignal.binary;
+      _handleOutput(binaryResult);
     } catch (e) {
       log(e.toString());
       return;
     }
   }
 
-  void _handleOutput(Uint8List bytes, int time) {
+  void _handleOutput(Uint8List bytes) {
     if (bytes.isNotEmpty && !complete) {
       latestResult = bytes;
-      elapsedTime = time;
-      log('Complete in $elapsedTime ms!');
       complete = true;
       onReceiveResult(latestResult);
     }
@@ -118,10 +105,4 @@ sealed class _DecodeResult {}
 class _ProgressResult extends _DecodeResult {
   final DecodeProgress progress;
   _ProgressResult(this.progress);
-}
-
-class _CompletionResult extends _DecodeResult {
-  final Uint8List binary;
-  final int time;
-  _CompletionResult({required this.binary, required this.time});
 }

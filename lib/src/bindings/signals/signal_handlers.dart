@@ -1,15 +1,6 @@
 part of 'signals.dart';
 
 final assignRustSignal = <String, void Function(Uint8List, Uint8List)>{
-  'DecodeComplete': (Uint8List messageBytes, Uint8List binary) {
-    final message = DecodeComplete.bincodeDeserialize(messageBytes);
-    final rustSignal = RustSignalPack(
-      message,
-      binary,
-    );
-    _decodeCompleteStreamController.add(rustSignal);
-    DecodeComplete.latestRustSignal = rustSignal;
-  },
   'DecodeError': (Uint8List messageBytes, Uint8List binary) {
     final message = DecodeError.bincodeDeserialize(messageBytes);
     final rustSignal = RustSignalPack(
