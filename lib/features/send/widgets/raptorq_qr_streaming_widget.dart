@@ -158,15 +158,11 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
               final decIndex = _qrImages.length - 1 - _frameTick;
               final painter = QrPainter.withQr(qrImage: _qrImages[incIndex]);
               final painter2 = QrPainter.withQr(qrImage: _qrImages[decIndex]);
+              final double adaptedPadding = widget.fill ? 8 : 16;
               return Column(
                 children: [
                   Container(
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      widget.fill ? 8 : 16,
-                      16,
-                      0,
-                    ),
+                    padding: EdgeInsets.fromLTRB(16, adaptedPadding, 16, 0),
                     height: qrSize - vOffset,
                     width: qrSize - hOffset,
                     child: CustomPaint(painter: painter),

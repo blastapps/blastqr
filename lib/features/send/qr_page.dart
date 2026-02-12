@@ -7,6 +7,7 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ class QrPage extends StatefulWidget {
 
 class _QrPageState extends State<QrPage> {
   final _qrController = RaptorQrStreamingWidgetController();
-  bool get _isLargeFile => widget.file.size > 185000;
+  bool get _isLargeFile => widget.file.size > 600000;
   bool _largeFileAcknowledged = false;
   bool _shouldCompressImage = false;
 
@@ -84,11 +85,7 @@ class _QrPageState extends State<QrPage> {
                                           ? appSettings.imageCompressionSettings
                                           : null,
                                   fill: _fullscreenMode,
-                                  onTap: () {
-                                    setState(() {
-                                      _fullscreenMode = !_fullscreenMode;
-                                    });
-                                  },
+                                  onTap: _onToggleFullscreen,
                                 );
                               },
                             ),
@@ -136,6 +133,17 @@ class _QrPageState extends State<QrPage> {
         ),
       ),
     );
+  }
+
+  void _onToggleFullscreen() {
+    setState(() {
+      _fullscreenMode = !_fullscreenMode;
+    });
+    if (_fullscreenMode) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
   }
 
   void _dismiss() {
