@@ -62,7 +62,7 @@ class _ScanPageState extends State<ScanPage> {
   @override
   void dispose() {
     _speedTimer?.cancel();
-    _decoder.reset();
+    _decoder.dispose();
     super.dispose();
   }
 

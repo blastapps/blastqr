@@ -3,12 +3,15 @@ import 'dart:developer';
 
 import 'package:blast_qr/src/bindings/signals/signals.dart';
 import 'package:flutter/services.dart';
+import 'package:rinf/rinf.dart';
 
 class RaptorqDecoder {
   final Function(int chunkLen, int totalChunks, double estimatedProgress)?
   onProcessChunk;
   final Function()? onTransferComplete;
   final Function(Uint8List result) onReceiveResult;
+
+  late StreamSubscription<RustSignalPack<DecodeOutput>> _resultSub;
 
   bool complete = false;
   bool isLoadingResult = false;
@@ -25,7 +28,7 @@ class RaptorqDecoder {
   }
 
   void _listenForResult() {
-    DecodeOutput.rustSignalStream.listen((signal) {
+    _resultSub = DecodeOutput.rustSignalStream.listen((signal) {
       _handleOutput(signal.binary);
     });
   }
@@ -91,6 +94,10 @@ class RaptorqDecoder {
     complete = false;
     isLoadingResult = false;
     latestResult = Uint8List(0);
+  }
+
+  void dispose() {
+    _resultSub.cancel();
   }
 }
 
