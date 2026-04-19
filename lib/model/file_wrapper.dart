@@ -84,13 +84,11 @@ class FileWrapper {
     _actualTransferSize = bytes.length;
     debugPrint('Compressed file: $size -> $_actualTransferSize');
 
-    final repairPackets = (_actualTransferSize / 5000);
-
-    log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
+    log('Encoding with MTU: $mtu, repairPacketsPerBlock: 100');
 
     final encoder = RaptorqStreamingEncoder(
       mtu: mtu,
-      repairPacketsPerBlock: repairPackets.toInt(),
+      repairPacketsPerBlock: 100,
     );
 
     encoder.initialize();
