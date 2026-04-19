@@ -159,6 +159,21 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
               final painter = QrPainter.withQr(qrImage: _qrImages[incIndex]);
               final painter2 = QrPainter.withQr(qrImage: _qrImages[decIndex]);
               final double adaptedPadding = widget.fill ? 8 : 16;
+              if (widget.fill) {
+                return _FlexibleGrid(
+                  constraints: c,
+                  itemBuilder: (index, w, h) {
+                    return Container(
+                      padding: const EdgeInsets.all(8),
+                      height: w,
+                      width: h,
+                      child: CustomPaint(
+                        painter: index % 2 == 0 ? painter : painter2,
+                      ),
+                    );
+                  },
+                );
+              }
               return Column(
                 children: [
                   Container(
@@ -217,5 +232,52 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
       _fps = defaultFpeses[_fpsIndex];
     });
     _initTimer();
+  }
+}
+
+class _FlexibleGrid extends StatelessWidget {
+  const _FlexibleGrid({required this.constraints, required this.itemBuilder});
+
+  final BoxConstraints constraints;
+  final Widget Function(int index, double w, double h) itemBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = constraints.maxWidth;
+    final height = constraints.maxHeight;
+    final aspectRatio = width / height;
+
+    // Decide number of columns
+    int columns;
+
+    if (aspectRatio < 0.8) {
+      // Very tall (phone portrait)
+      columns = 1;
+    } else if (aspectRatio < 1.4) {
+      // Square-ish
+      columns = 2;
+    } else {
+      // Wide screen
+      columns = 3;
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(2, (rowIndex) {
+        return Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(columns, (colIndex) {
+              final index = rowIndex * columns + colIndex;
+              return Expanded(
+                child: Center(
+                  child: itemBuilder(index, width / columns, height / 2),
+                ),
+              );
+            }),
+          ),
+        );
+      }),
+    );
   }
 }

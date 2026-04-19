@@ -1,4 +1,3 @@
-import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/settings/image_compression_settings_page.dart';
@@ -7,6 +6,7 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 
@@ -202,15 +202,21 @@ class _SettingsPageState extends State<SettingsPage> {
                   color: context.color.onSurface,
                 ),
                 title: Text(context.l10n.chunk_length),
-                subtitle: Text(state.mtu.toString()),
+                subtitle: Text('${state.mtu} bytes'),
                 onTap: () {
-                  showTextInputSheet(
+                  showSliderSheet(
                     context,
                     title: context.l10n.chunk_length,
-                    hintText: context.l10n.chunk_length,
-                    prefilledText: state.mtu.toString(),
-                    keyboardType: const TextInputType.numberWithOptions(),
-                    onConfirm: _validateMtu,
+                    message: context.l10n.chunk_length,
+                    value: state.mtu,
+                    min: 100,
+                    max: 2935,
+                    onConfirm: (mtu) {
+                      Provider.of<EncodeSettings>(
+                        context,
+                        listen: false,
+                      ).updateMtu(mtu);
+                    },
                   );
                 },
               );
@@ -223,6 +229,30 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             title: Text(context.l10n.image_compression_settings),
             onTap: _showImageCompressionSettings,
+          ),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedCamera01,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.camera_resolution),
+                subtitle: Text(appSettings.cameraResolution.name),
+                onTap: () {
+                  showPickerSheet(
+                    context,
+                    title: context.l10n.camera_resolution,
+                    items: ResolutionPreset.values.map((r) => r.name).toList(),
+                    onItemTap: (index) {
+                      appSettings.updateCameraResolution(
+                        ResolutionPreset.values[index],
+                      );
+                    },
+                  );
+                },
+              );
+            },
           ),
           const SizedBox(height: 16),
           Padding(
@@ -260,19 +290,6 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
-  }
-
-  void _validateMtu(String val) {
-    final mtu = int.tryParse(val) ?? AppPreferences.defaultMtu;
-    if (mtu < 100 || mtu > 2935) {
-      showMessage(
-        context: context,
-        title: 'Error',
-        message: 'Invalid value (must be between 100 and 2935)',
-      );
-      return;
-    }
-    Provider.of<EncodeSettings>(context, listen: false).updateMtu(mtu);
   }
 
   void _showImageCompressionSettings() {

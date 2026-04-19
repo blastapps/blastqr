@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
 class AppSettings extends ChangeNotifier {
@@ -11,6 +12,7 @@ class AppSettings extends ChangeNotifier {
   bool pureBlack;
   Color accentColor;
   ImageCompressionSettings imageCompressionSettings;
+  ResolutionPreset cameraResolution;
 
   AppSettings()
     : locale = AppPreferences.locale,
@@ -18,7 +20,8 @@ class AppSettings extends ChangeNotifier {
       animations = AppPreferences.animations,
       pureBlack = AppPreferences.pureBlack,
       accentColor = AppPreferences.accentColor,
-      imageCompressionSettings = AppPreferences.imageCompressionSettings;
+      imageCompressionSettings = AppPreferences.imageCompressionSettings,
+      cameraResolution = AppPreferences.cameraResolution;
 
   void updateLocale(String? localeId) {
     log('Setting locale to $localeId');
@@ -54,6 +57,12 @@ class AppSettings extends ChangeNotifier {
   void updateImageCompressionSettings(ImageCompressionSettings settings) {
     AppPreferences.setImageCompressionSettings(settings);
     imageCompressionSettings = settings;
+    notifyListeners();
+  }
+
+  void updateCameraResolution(ResolutionPreset resolution) {
+    AppPreferences.setCameraResolution(resolution);
+    cameraResolution = resolution;
     notifyListeners();
   }
 }

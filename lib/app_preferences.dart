@@ -1,5 +1,6 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,6 +14,7 @@ class AppPreferences {
   static bool? _pureBlack;
   static Color? _accentColor;
   static ImageCompressionSettings? _imageCompressionSettings;
+  static ResolutionPreset? _cameraResolution;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
@@ -22,6 +24,8 @@ class AppPreferences {
   static Color get accentColor => _accentColor ?? accentColorOptions[0];
   static ImageCompressionSettings get imageCompressionSettings =>
       _imageCompressionSettings ?? ImageCompressionSettings.defaultSettings;
+  static ResolutionPreset get cameraResolution =>
+      _cameraResolution ?? ResolutionPreset.high;
 
   static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
@@ -67,7 +71,13 @@ class AppPreferences {
   ) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setString('ic_settings', settings.toJson());
-    _accentColor = accentColor;
+    _imageCompressionSettings = settings;
+  }
+
+  static Future<void> setCameraResolution(ResolutionPreset resolution) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setInt('camera_resolution', resolution.index);
+    _cameraResolution = cameraResolution;
   }
 
   static Future<void> read() async {
@@ -83,5 +93,9 @@ class AppPreferences {
     _imageCompressionSettings = ImageCompressionSettings.parseSafely(
       sp.getString('ic_settings'),
     );
+    _cameraResolution =
+        sp.getInt('camera_resolution') != null
+            ? ResolutionPreset.values[sp.getInt('camera_resolution')!]
+            : ResolutionPreset.high;
   }
 }

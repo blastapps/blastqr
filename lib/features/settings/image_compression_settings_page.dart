@@ -43,6 +43,26 @@ class _ImageCompressionSettingsPageState
           final settings = appSettings.imageCompressionSettings;
           return ListView(
             children: [
+              ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFileManagement,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.file_format),
+                subtitle: Text(settings.outputFormat.title(context.l10n)),
+                onTap: () {
+                  showPickerSheet(
+                    context,
+                    title: context.l10n.file_format,
+                    items: ImageCompressionOutputFormat.titles(context.l10n),
+                    onItemTap: (index) {
+                      _outputFormat =
+                          ImageCompressionOutputFormat.values[index];
+                      _buildAndUpdateSettings();
+                    },
+                  );
+                },
+              ),
               Container(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -66,26 +86,6 @@ class _ImageCompressionSettingsPageState
                     ),
                   ],
                 ),
-              ),
-              ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFileManagement,
-                  color: context.color.onSurface,
-                ),
-                title: Text(context.l10n.file_format),
-                subtitle: Text(settings.outputFormat.title(context.l10n)),
-                onTap: () {
-                  showPickerSheet(
-                    context,
-                    title: context.l10n.file_format,
-                    items: ImageCompressionOutputFormat.titles(context.l10n),
-                    onItemTap: (index) {
-                      _outputFormat =
-                          ImageCompressionOutputFormat.values[index];
-                      _buildAndUpdateSettings();
-                    },
-                  );
-                },
               ),
               SwitchListTile.adaptive(
                 title: Text(context.l10n.downscaling),

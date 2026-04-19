@@ -101,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minutes => 'minutes';
 
   @override
-  String get image_compression_settings => 'Picture compression settings';
+  String get image_compression_settings => 'Image settings';
 
   @override
   String get image_quality => 'Image quality';
@@ -204,7 +204,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get behaviour => 'Behaviour';
 
   @override
-  String get chunk_length => 'Chunk length';
+  String get chunk_length => 'QR code size';
 
   @override
   String get licenses => 'Licenses';
@@ -214,4 +214,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downscaling => 'Downscaling';
+
+  @override
+  String get camera_resolution => 'Camera resolution';
 }

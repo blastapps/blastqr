@@ -285,7 +285,7 @@ abstract class AppLocalizations {
   /// No description provided for @image_compression_settings.
   ///
   /// In en, this message translates to:
-  /// **'Picture compression settings'**
+  /// **'Image settings'**
   String get image_compression_settings;
 
   /// No description provided for @image_quality.
@@ -477,7 +477,7 @@ abstract class AppLocalizations {
   /// No description provided for @chunk_length.
   ///
   /// In en, this message translates to:
-  /// **'Chunk length'**
+  /// **'QR code size'**
   String get chunk_length;
 
   /// No description provided for @licenses.
@@ -497,6 +497,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downscaling'**
   String get downscaling;
+
+  /// No description provided for @camera_resolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera resolution'**
+  String get camera_resolution;
 }
 
 class _AppLocalizationsDelegate

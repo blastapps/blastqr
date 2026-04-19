@@ -29,7 +29,7 @@
   "large_file_msg_2": "to transfer.",
   "large_file_msg_3": "Would you like to send a compresed, lower quality version of this image?",
   "minutes": "minutes",
-  "image_compression_settings": "Picture compression settings",
+  "image_compression_settings": "Image settings",
   "image_quality": "Image quality",
   "send_large_file": "Send large file anyway",
   "send_compressed_image": "Send compressed image file",
@@ -61,8 +61,9 @@
   "enabled": "Enabled",
   "disabled": "Disabled",
   "behaviour": "Behaviour",
-  "chunk_length": "Chunk length",
+  "chunk_length": "QR code size",
   "licenses": "Licenses",
   "file_format": "File format",
-  "downscaling": "Downscaling"
+  "downscaling": "Downscaling",
+  "camera_resolution": "Camera resolution"
 }

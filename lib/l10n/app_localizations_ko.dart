@@ -100,7 +100,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get minutes => '분';
 
   @override
-  String get image_compression_settings => 'Picture compression settings';
+  String get image_compression_settings => 'Image settings';
 
   @override
   String get image_quality => 'Image quality';
@@ -212,4 +212,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get downscaling => 'Downscaling';
+
+  @override
+  String get camera_resolution => 'Camera resolution';
 }

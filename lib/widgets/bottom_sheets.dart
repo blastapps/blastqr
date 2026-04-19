@@ -1,3 +1,4 @@
+import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/blast_text_field.dart';
 import 'package:flutter/material.dart';
 
@@ -97,6 +98,77 @@ class PickerSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class SliderSheet extends StatefulWidget {
+  const SliderSheet({
+    super.key,
+    required this.title,
+    required this.message,
+    required this.confirmText,
+    required this.onConfirm,
+    required this.min,
+    required this.max,
+    required this.value,
+  });
+
+  final String title;
+  final String message;
+  final String confirmText;
+  final void Function(int val) onConfirm;
+  final int min;
+  final int max;
+  final int value;
+
+  @override
+  State<SliderSheet> createState() => _SliderSheetState();
+}
+
+class _SliderSheetState extends State<SliderSheet> {
+  int _value = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(_value.toString()),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Slider.adaptive(
+            min: widget.min.toDouble(),
+            max: widget.max.toDouble(),
+            value: _value.toDouble(),
+            onChanged: (val) {
+              setState(() {
+                _value = val.toInt();
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: () {
+            _confirm(context);
+          },
+          child: Text(widget.confirmText),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  void _confirm(BuildContext context) {
+    Navigator.of(context).pop();
+    widget.onConfirm(_value);
   }
 }
 
@@ -219,7 +291,7 @@ Future<void> showTextInputSheet(
         title: title,
         controller: controller,
         inputHintText: hintText,
-        confirmText: confirmText ?? 'Save',
+        confirmText: confirmText ?? context.l10n.save,
         keyboardType: keyboardType,
         onConfirm: onConfirm,
       ),
@@ -243,6 +315,34 @@ Future<void> showPickerSheet(
       onItemTap: onItemTap,
       icons: icons,
       itemHeight: itemHeight,
+    ),
+  );
+}
+
+Future<void> showSliderSheet(
+  BuildContext context, {
+  required String title,
+  String? confirmText,
+  String? message,
+  required int value,
+  required int min,
+  required int max,
+  required void Function(int val) onConfirm,
+}) {
+  return showSheet(
+    context: context,
+    title: title,
+    body: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      child: SliderSheet(
+        title: title,
+        message: message ?? '',
+        confirmText: confirmText ?? context.l10n.save,
+        onConfirm: onConfirm,
+        value: value,
+        min: min,
+        max: max,
+      ),
     ),
   );
 }

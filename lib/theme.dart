@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
-
 import 'package:blast_qr/color_scheme.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 enum BlastTheme {
@@ -93,7 +92,8 @@ AppBarTheme appBarTheme(ColorScheme colorScheme) {
     actionsIconTheme: IconThemeData(color: colorScheme.onSurface),
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: colorScheme.surface,
-      statusBarIconBrightness: colorScheme.brightness.opposite,
+      statusBarBrightness: colorScheme.brightness, // iOS
+      statusBarIconBrightness: colorScheme.brightness.opposite, // Android
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: colorScheme.brightness.opposite,
       systemNavigationBarContrastEnforced: false,

@@ -101,7 +101,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get minutes => 'minuts';
 
   @override
-  String get image_compression_settings => 'Picture compression settings';
+  String get image_compression_settings => 'Image settings';
 
   @override
   String get image_quality => 'Image quality';
@@ -214,4 +214,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get downscaling => 'Downscaling';
+
+  @override
+  String get camera_resolution => 'Camera resolution';
 }

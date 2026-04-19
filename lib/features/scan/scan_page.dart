@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
@@ -68,6 +69,8 @@ class _ScanPageState extends State<ScanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appSettings = Provider.of<AppSettings>(context, listen: false);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -121,12 +124,13 @@ class _ScanPageState extends State<ScanPage> {
                       codeFormat: Format.qrCode,
                       cropPercent: 1.0,
                       showGallery: false,
-                      showToggleCamera: false,
+                      showToggleCamera: true,
                       showFlashlight: false,
-                      tryRotate: false,
+                      tryRotate: true,
                       isMultiScan: _multiScan,
                       onMultiScan: _handleMultiscan,
                       onScan: _handleScan,
+                      resolution: appSettings.cameraResolution,
                     )
                     : const SizedBox(),
           ),
