@@ -68,6 +68,10 @@ class QrPainter extends CustomPainter {
   /// Cache for all of the [Paint] objects.
   final PaintCache _paintCache = PaintCache();
 
+  double? _cachedPixelSize;
+  Path? _cachedPath;
+  Path? _cachedPath2;
+
   void _initPaints() {
     // Cache the pixel paint object. For now there is only one but we might
     // expand it to multiple later (e.g.: different colours).
@@ -139,49 +143,47 @@ class QrPainter extends CustomPainter {
   }
 
   void _drawDots2(_PaintMetrics paintMetrics, Paint paint, Canvas canvas) {
-    double left;
-    double top;
-
-    int rectCount = 0;
-    final pixelPath = Path();
-    final pixelPath2 = Path();
-    for (var x = 0; x < qrModuleCount; x++) {
-      for (var y = 0; y < qrModuleCount; y++) {
-        // draw the finder patterns independently
-        if (_isFinderPatternPosition(x, y)) {
-          continue;
+    if (_cachedPath == null || _cachedPixelSize != paintMetrics.pixelSize) {
+      _cachedPixelSize = paintMetrics.pixelSize;
+      _cachedPath = Path();
+      _cachedPath2 = Path();
+      int rectCount = 0;
+      for (var x = 0; x < qrModuleCount; x++) {
+        for (var y = 0; y < qrModuleCount; y++) {
+          if (_isFinderPatternPosition(x, y)) {
+            continue;
+          }
+          if (_qrImage.isDark(y, x) == false) {
+            continue;
+          }
+          final left = x * paintMetrics.pixelSize;
+          final top = y * paintMetrics.pixelSize;
+          var pixelHTweak = 0.0;
+          var pixelVTweak = 0.0;
+          if (_hasAdjacentHorizontalPixel(x, y, qrModuleCount)) {
+            pixelHTweak = 0.5;
+          }
+          if (_hasAdjacentVerticalPixel(x, y, qrModuleCount)) {
+            pixelVTweak = 0.5;
+          }
+          final squareRect = Rect.fromLTWH(
+            left,
+            top,
+            paintMetrics.pixelSize + pixelHTweak,
+            paintMetrics.pixelSize + pixelVTweak,
+          );
+          if (rectCount >= 10000) {
+            _cachedPath2!.addRect(squareRect);
+          } else {
+            _cachedPath!.addRect(squareRect);
+          }
+          rectCount++;
         }
-        if (_qrImage.isDark(y, x) == false) {
-          continue;
-        }
-        // paint a pixel
-        left = (x * (paintMetrics.pixelSize));
-        top = (y * (paintMetrics.pixelSize));
-        var pixelHTweak = 0.0;
-        var pixelVTweak = 0.0;
-        if (_hasAdjacentHorizontalPixel(x, y, qrModuleCount)) {
-          pixelHTweak = 0.5;
-        }
-        if (_hasAdjacentVerticalPixel(x, y, qrModuleCount)) {
-          pixelVTweak = 0.5;
-        }
-        final squareRect = Rect.fromLTWH(
-          left,
-          top,
-          paintMetrics.pixelSize + pixelHTweak,
-          paintMetrics.pixelSize + pixelVTweak,
-        );
-        if (rectCount >= 10000) {
-          pixelPath2.addRect(squareRect);
-        } else {
-          pixelPath.addRect(squareRect);
-        }
-        rectCount++;
       }
     }
 
-    canvas.drawPath(pixelPath, paint);
-    canvas.drawPath(pixelPath2, paint);
+    canvas.drawPath(_cachedPath!, paint);
+    canvas.drawPath(_cachedPath2!, paint);
   }
 
   bool _hasAdjacentVerticalPixel(int x, int y, int moduleCount) {
@@ -276,8 +278,7 @@ class QrPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldPainter) {
     if (oldPainter is QrPainter) {
-      return errorCorrectionLevel != oldPainter.errorCorrectionLevel ||
-          qrModuleCount != oldPainter.qrModuleCount;
+      return !identical(_qrImage, oldPainter._qrImage);
     }
     return true;
   }

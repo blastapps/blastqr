@@ -3,16 +3,14 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/features/home_tabs_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
-import 'package:blast_qr/src/bindings/signals/signals.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:rinf/rinf.dart';
+import 'package:raptorq_flutter/raptorq_flutter.dart';
 
 void main() async {
-  await initializeRust(assignRustSignal);
   WidgetsFlutterBinding.ensureInitialized();
 
   // Additional licenses
@@ -32,6 +30,12 @@ void main() async {
   );
 
   await AppPreferences.read();
+  await RaptorQFlutter.init().timeout(
+    const Duration(seconds: 1),
+    onTimeout: () {
+      debugPrint('RaptorQFlutter.init() timed out!');
+    },
+  );
 
   runApp(const MyApp());
 }

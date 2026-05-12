@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -88,6 +88,7 @@
 		D4F2E78C2D8C04630064AC24 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4F2E79D2D8C053A0064AC24 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		D6AEF77CFD61424E5187A1A5 /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
+		D8B86AD22F947BD800B08BC4 /* rust_lib_raptorq_dart.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = rust_lib_raptorq_dart.framework; path = ../build/native_assets/ios/rust_lib_raptorq_dart.framework; sourceTree = "<group>"; };
 		DA228FCAEC225DAD963BF223 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		FB6CBC7C60AA3DD729ADFD5E /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FFEAF3F5422DDACE459103C9 /* Pods-ShareExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.profile.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.profile.xcconfig"; sourceTree = "<group>"; };
@@ -145,6 +146,7 @@
 		2D0513232FF522342681459B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D8B86AD22F947BD800B08BC4 /* rust_lib_raptorq_dart.framework */,
 				CC33A8F909CD83586A4C140E /* Pods_Runner.framework */,
 				FB6CBC7C60AA3DD729ADFD5E /* Pods_RunnerTests.framework */,
 				B226035B6E224F968295D386 /* Pods_ShareExtension.framework */,

@@ -6,8 +6,6 @@ PODS:
   - file_selector_ios (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_avif_ios (0.0.1):
-    - Flutter
   - flutter_image_compress_common (1.0.0):
     - Flutter
     - Mantle
@@ -38,7 +36,11 @@ PODS:
   - Mantle/extobjc (2.2.0)
   - open_file_ios (1.0.3):
     - Flutter
-  - rinf (0.1.0):
+  - package_info_plus (0.4.5):
+    - Flutter
+  - raptorq_flutter (0.1.0):
+    - Flutter
+  - screen_brightness_ios (2.1.3):
     - Flutter
   - SDWebImage (5.21.5):
     - SDWebImage/Core (= 5.21.5)
@@ -57,10 +59,9 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - sqflite_darwin (0.0.4):
-    - Flutter
-    - FlutterMacOS
   - super_native_extensions (0.0.1):
+    - Flutter
+  - wakelock_plus (0.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -68,19 +69,20 @@ DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_selector_ios (from `.symlinks/plugins/file_selector_ios/ios`)
   - Flutter (from `Flutter`)
-  - flutter_avif_ios (from `.symlinks/plugins/flutter_avif_ios/ios`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_zxing (from `.symlinks/plugins/flutter_zxing/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
-  - rinf (from `.symlinks/plugins/rinf/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - raptorq_flutter (from `.symlinks/plugins/raptorq_flutter/ios`)
+  - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - share_handler_ios (from `.symlinks/plugins/share_handler_ios/ios`)
   - share_handler_ios_models (from `.symlinks/plugins/share_handler_ios/ios/Models`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - super_native_extensions (from `.symlinks/plugins/super_native_extensions/ios`)
+  - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
   trunk:
@@ -98,8 +100,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_selector_ios/ios"
   Flutter:
     :path: Flutter
-  flutter_avif_ios:
-    :path: ".symlinks/plugins/flutter_avif_ios/ios"
   flutter_image_compress_common:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_native_splash:
@@ -112,25 +112,28 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/irondash_engine_context/ios"
   open_file_ios:
     :path: ".symlinks/plugins/open_file_ios/ios"
-  rinf:
-    :path: ".symlinks/plugins/rinf/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  raptorq_flutter:
+    :path: ".symlinks/plugins/raptorq_flutter/ios"
+  screen_brightness_ios:
+    :path: ".symlinks/plugins/screen_brightness_ios/ios"
   share_handler_ios:
     :path: ".symlinks/plugins/share_handler_ios/ios"
   share_handler_ios_models:
     :path: ".symlinks/plugins/share_handler_ios/ios/Models"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  sqflite_darwin:
-    :path: ".symlinks/plugins/sqflite_darwin/darwin"
   super_native_extensions:
     :path: ".symlinks/plugins/super_native_extensions/ios"
+  wakelock_plus:
+    :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
   camera_avfoundation: 5675ca25298b6f81fa0a325188e7df62cc217741
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   file_selector_ios: ec57ec07954363dd730b642e765e58f199bb621a
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_avif_ios: 2553d2aafda56339cf924e943da89ad3f40af2dd
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   flutter_zxing: e8bcc43bd3056c70c271b732ed94e7a16fd62f93
@@ -139,15 +142,17 @@ SPEC CHECKSUMS:
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   open_file_ios: 46184d802ee7959203f6392abcfa0dd49fdb5be0
-  rinf: 036857a37bd78378385653d9d8ddbd31d9d88474
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  raptorq_flutter: 54d5f65040679e54a05cc460bc6d13cd7abc3720
+  screen_brightness_ios: 212d950bb99c915eee971c884f4a6c87c92cd13d
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   share_handler_ios: e2244e990f826b2c8eaa291ac3831569438ba0fb
   share_handler_ios_models: fc638c9b4330dc7f082586c92aee9dfa0b87b871
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
+  wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
 
-PODFILE CHECKSUM: 2e90fb5fbdb73c4c9bec2bed12eb1d6a8bc058f3
+PODFILE CHECKSUM: 3dc3c59a668ead8ab7a1b45b42f80cafebdb7abe
 
 COCOAPODS: 1.16.2

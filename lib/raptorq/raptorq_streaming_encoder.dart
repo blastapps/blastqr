@@ -2,39 +2,27 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:blast_qr/src/bindings/signals/signals.dart';
+import 'package:raptorq_flutter/raptorq_flutter.dart';
 
 class RaptorqStreamingEncoder {
   final int repairPacketsPerBlock;
   final int mtu;
 
-  RaptorqStreamingEncoder({this.repairPacketsPerBlock = 15, this.mtu = 700});
+  late RaptorQEncoder _encoder;
 
-  void initialize() {
-    StreamEncodeConfig(
-      mtu: mtu,
+  RaptorqStreamingEncoder({
+    required this.repairPacketsPerBlock,
+    required this.mtu,
+  });
+
+  Future<List<Uint8List>> encode(Uint8List data) async {
+    _encoder = await RaptorQEncoder.newInstance(data: data, mtu: mtu);
+    return _encoder.getEncodedPackets(
       repairPacketsPerBlock: repairPacketsPerBlock,
-    ).sendSignalToRust();
+    );
   }
 
-  Stream<Uint8List> encode(Uint8List data) {
-    StreamController<Uint8List> ctrl = StreamController();
-
-    final chunkSub = StreamEncodeOutput.rustSignalStream.listen((data) {
-      ctrl.add(data.binary);
-    });
-
-    final completionSub = StreamEncodeComplete.rustSignalStream.listen((_) {
-      ctrl.close();
-    });
-
-    const StreamEncodeInput().sendSignalToRust(data);
-
-    ctrl.onCancel = () {
-      chunkSub.cancel();
-      completionSub.cancel();
-    };
-
-    return ctrl.stream;
+  void dispose() {
+    _encoder.dispose();
   }
 }

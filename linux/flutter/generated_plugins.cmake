@@ -4,7 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_linux
-  flutter_avif_linux
   irondash_engine_context
   open_file_linux
   super_native_extensions
@@ -12,7 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   flutter_zxing
-  rinf
+  raptorq_flutter
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

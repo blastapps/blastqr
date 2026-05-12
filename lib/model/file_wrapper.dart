@@ -14,6 +14,49 @@ import 'package:mime/mime.dart' as mime;
 import 'package:path/path.dart' as p;
 import 'package:qr/qr.dart';
 
+typedef QrPixelData = ({int moduleCount, Uint8List pixels});
+
+typedef _QrBuildArgs =
+    ({
+      List<Uint8List> chunks,
+      Uint8List sizeBytes,
+      Uint8List fileExtBytes,
+      Uint8List transferTypeHeader,
+      int qrVersion,
+    });
+
+List<QrPixelData> _buildQrPixelsList(_QrBuildArgs args) {
+  return args.chunks.map((chunk) {
+    final combined = Uint8List(4 + 8 + 2 + 2 + chunk.length);
+    combined.setAll(0, args.sizeBytes);
+    combined.setAll(4, args.fileExtBytes);
+    combined.setAll(12, BlastQrcodeData.signatureBytes);
+    combined.setAll(14, args.transferTypeHeader);
+    combined.setAll(16, chunk);
+
+    final qrCode = QrCode(args.qrVersion, QrErrorCorrectLevel.L);
+    qrCode.addByteData(combined.buffer.asByteData());
+    final qrImage = QrImage.withMaskPattern(qrCode, 3);
+
+    final moduleCount = qrImage.moduleCount;
+    final pixels = Uint8List(moduleCount * moduleCount * 4);
+    for (var row = 0; row < moduleCount; row++) {
+      for (var col = 0; col < moduleCount; col++) {
+        final offset = (row * moduleCount + col) * 4;
+        if (qrImage.isDark(row, col)) {
+          pixels[offset + 3] = 255;
+        } else {
+          pixels[offset] = 255;
+          pixels[offset + 1] = 255;
+          pixels[offset + 2] = 255;
+          pixels[offset + 3] = 255;
+        }
+      }
+    }
+    return (moduleCount: moduleCount, pixels: pixels);
+  }).toList();
+}
+
 /// Wrapper class to make handling files easier.
 class FileWrapper {
   final File file;
@@ -37,7 +80,7 @@ class FileWrapper {
     return (size / 1000) / speedInkBps;
   }
 
-  Stream<QrImage> qrImageStream(
+  Stream<QrPixelData> qrImageStream(
     int mtu, {
     ImageCompressionSettings? icSettings,
   }) async* {
@@ -84,14 +127,14 @@ class FileWrapper {
     _actualTransferSize = bytes.length;
     debugPrint('Compressed file: $size -> $_actualTransferSize');
 
-    log('Encoding with MTU: $mtu, repairPacketsPerBlock: 100');
+    final repairPackets = (_actualTransferSize / 5000).clamp(0, 110);
+
+    log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
 
     final encoder = RaptorqStreamingEncoder(
       mtu: mtu,
-      repairPacketsPerBlock: 100,
+      repairPacketsPerBlock: repairPackets.toInt(),
     );
-
-    encoder.initialize();
 
     final sizeBytes = Uint8List(4)
       ..buffer.asByteData().setUint32(0, _actualTransferSize, Endian.big);
@@ -101,52 +144,28 @@ class FileWrapper {
 
     final startTime = DateTime.now().millisecondsSinceEpoch;
 
-    await for (Uint8List chunk in encoder.encode(bytes)) {
-      final start = DateTime.now();
+    final chunks = await encoder.encode(bytes);
+    encoder.dispose();
 
-      final qr = _buildQrCodeFromChunk([
-        chunk,
-        sizeBytes,
-        fileExtBytes,
-        transferType.header,
-      ], qrVersion: qrVersion);
+    final ct = DateTime.now().millisecondsSinceEpoch - startTime;
+    final cts = (ct / 1000).toStringAsFixed(2);
+    debugPrint('Chunks finalized in ${cts}s!!');
 
-      final qrImage = QrImage.withMaskPattern(qr, 3);
+    final pixelList = await compute(_buildQrPixelsList, (
+      chunks: chunks,
+      sizeBytes: sizeBytes,
+      fileExtBytes: fileExtBytes,
+      transferTypeHeader: transferType.header,
+      qrVersion: qrVersion,
+    ));
 
-      // Delay to keep around 20fps while generating qr images in bulk
-      final time = DateTime.now().difference(start).inMilliseconds;
-      final delay = 17 - 8 - time;
-      await Future.delayed(Duration(milliseconds: delay));
-
-      yield qrImage;
+    for (final pixelData in pixelList) {
+      yield pixelData;
     }
 
     final elapsedTime = DateTime.now().millisecondsSinceEpoch - startTime;
     final elapsedSeconds = (elapsedTime / 1000).toStringAsFixed(2);
     debugPrint('Encoding finalized in ${elapsedSeconds}s!!');
-  }
-
-  QrCode _buildQrCodeFromChunk(List<dynamic> args, {int qrVersion = 40}) {
-    final Uint8List chunk = args[0];
-    final Uint8List sizeBytes = args[1];
-    final Uint8List fileExtBytes = args[2];
-    final Uint8List transferTypeBytes = args[3];
-
-    Uint8List combined = Uint8List(4 + 8 + 2 + 2 + chunk.length);
-    // Encode file size in first 4 bytes
-    combined.setAll(0, sizeBytes);
-    // Encode file extension in followin 8 bytes
-    combined.setAll(4, fileExtBytes);
-    // Encode signature bytes (magic number to validate qr code) in 2 bytes
-    combined.setAll(12, BlastQrcodeData.signatureBytes);
-    // Encode 2 bytes for tranfsfer type (raw file, compressed file, etc)
-    combined.setAll(14, transferTypeBytes);
-    // Encode file data
-    combined.setAll(16, chunk);
-
-    final qrCode = QrCode(qrVersion, QrErrorCorrectLevel.L);
-    qrCode.addByteData(combined.buffer.asByteData());
-    return qrCode;
   }
 
   int _pickQrVersionForPayload(int payloadBytes) {

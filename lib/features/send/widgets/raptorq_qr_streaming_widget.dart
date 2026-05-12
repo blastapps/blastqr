@@ -1,11 +1,10 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
-import 'package:blast_qr/qr_painter.dart';
 import 'package:flutter/material.dart';
-import 'package:qr/qr.dart';
 
 class RaptorQrStreamingWidgetController with ChangeNotifier {
   Timer? _timer;
@@ -61,7 +60,8 @@ class RaptorQrStreamingWidget extends StatefulWidget {
 class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
   static const List<int> defaultFpeses = [15, 16, 20, 22, 25, 30];
 
-  List<QrImage> _qrImages = [];
+  int _qrCount = 0;
+  final Map<int, ui.Image> _imageCache = {};
   bool _isEncoding = true;
   bool _hasReceivedAllQrCodes = false;
   int _fps = defaultFpeses[2];
@@ -85,17 +85,26 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
 
   void init() async {
     widget.controller.stopAnimation();
-    _qrImages = [];
-    _isEncoding = false;
+    _qrCount = 0;
+    for (final img in _imageCache.values) {
+      img.dispose();
+    }
+    _imageCache.clear();
+    _isEncoding = true;
+    _hasReceivedAllQrCodes = false;
+    _frameTick = 0;
 
     debugPrint('Generating QR codes..');
 
     _imageStream = widget.file
         .qrImageStream(widget.mtu, icSettings: widget.imageCompressionSettings)
-        .listen((image) {
-          _qrImages.add(image);
-          widget.controller.setLength(_qrImages.length);
-          if (_qrImages.length == 1) {
+        .listen((pixelData) {
+          final index = _qrCount;
+          _qrCount++;
+          _generateUiImage(index, pixelData);
+          widget.controller.setLength(_qrCount);
+          if (_qrCount == 1) {
+            _isEncoding = false;
             _initTimer();
             setState(() {});
           }
@@ -118,12 +127,15 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
   void dispose() {
     widget.controller.stopAnimation();
     _imageStream.cancel();
+    for (final img in _imageCache.values) {
+      img.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isEncoding || _qrImages.isEmpty) {
+    if (_isEncoding || _qrCount == 0) {
       return SizedBox(
         width: double.infinity,
         child: Column(
@@ -152,50 +164,50 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
             listenable: widget.controller,
             builder: (context, child) {
               if (_hasReceivedAllQrCodes) {
-                _frameTick = (_frameTick + 1) % _qrImages.length;
+                _frameTick = (_frameTick + 1) % _qrCount;
               }
-              final incIndex = widget.controller.currentChunkIndex;
-              final decIndex = _qrImages.length - 1 - _frameTick;
-              final painter = QrPainter.withQr(qrImage: _qrImages[incIndex]);
-              final painter2 = QrPainter.withQr(qrImage: _qrImages[decIndex]);
+
+              final index = widget.controller.currentChunkIndex;
+              final uiImage = _imageCache[index];
               final double adaptedPadding = widget.fill ? 8 : 16;
+
               if (widget.fill) {
+                final mirrorIndex = _qrCount - 1 - _frameTick;
+                final uiImage2 = _imageCache[mirrorIndex];
                 return _FlexibleGrid(
                   constraints: c,
-                  itemBuilder: (index, w, h) {
+                  itemBuilder: (gridIndex, w, h) {
+                    final img = gridIndex % 2 == 0 ? uiImage : uiImage2;
                     return Container(
                       padding: const EdgeInsets.all(8),
                       height: w,
                       width: h,
                       child: CustomPaint(
-                        painter: index % 2 == 0 ? painter : painter2,
+                        painter: img != null ? _QrImagePainter(img) : null,
                       ),
                     );
                   },
                 );
               }
+
               return Column(
                 children: [
                   Container(
                     padding: EdgeInsets.fromLTRB(16, adaptedPadding, 16, 0),
                     height: qrSize - vOffset,
                     width: qrSize - hOffset,
-                    child: CustomPaint(painter: painter),
-                  ),
-                  if (widget.fill)
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                      height: qrSize - vOffset - 26,
-                      width: qrSize - hOffset,
-                      child: CustomPaint(painter: painter2),
+                    child: CustomPaint(
+                      painter:
+                          uiImage != null ? _QrImagePainter(uiImage) : null,
                     ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '$incIndex/${_qrImages.length}',
+                          '${index + 1}/$_qrCount',
                           style: const TextStyle(
                             color: Colors.black,
                             fontFeatures: [FontFeature.tabularFigures()],
@@ -233,6 +245,22 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     });
     _initTimer();
   }
+
+  void _generateUiImage(int index, QrPixelData pixelData) {
+    ui.decodeImageFromPixels(
+      pixelData.pixels,
+      pixelData.moduleCount,
+      pixelData.moduleCount,
+      ui.PixelFormat.rgba8888,
+      (image) {
+        if (mounted) {
+          _imageCache[index] = image;
+        } else {
+          image.dispose();
+        }
+      },
+    );
+  }
 }
 
 class _FlexibleGrid extends StatelessWidget {
@@ -247,17 +275,13 @@ class _FlexibleGrid extends StatelessWidget {
     final height = constraints.maxHeight;
     final aspectRatio = width / height;
 
-    // Decide number of columns
     int columns;
 
     if (aspectRatio < 0.8) {
-      // Very tall (phone portrait)
       columns = 1;
     } else if (aspectRatio < 1.4) {
-      // Square-ish
       columns = 2;
     } else {
-      // Wide screen
       columns = 3;
     }
 
@@ -280,4 +304,23 @@ class _FlexibleGrid extends StatelessWidget {
       }),
     );
   }
+}
+
+class _QrImagePainter extends CustomPainter {
+  const _QrImagePainter(this.image);
+
+  final ui.Image image;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      Offset.zero & size,
+      Paint()..filterQuality = FilterQuality.none,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_QrImagePainter old) => !identical(old.image, image);
 }

@@ -4,14 +4,14 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
-  flutter_avif_windows
   irondash_engine_context
+  screen_brightness_windows
   super_native_extensions
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   flutter_zxing
-  rinf
+  raptorq_flutter
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

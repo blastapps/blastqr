@@ -14,6 +14,7 @@ import 'package:blast_qr/model/receiving_file_metadata.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -53,6 +54,8 @@ class _ScanPageState extends State<ScanPage> {
   bool _transferComplete = false;
   DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
+  CameraController? _cameraController;
+  bool _focusLocked = false;
 
   @override
   void initState() {
@@ -126,10 +129,12 @@ class _ScanPageState extends State<ScanPage> {
                       showGallery: false,
                       showToggleCamera: true,
                       showFlashlight: false,
-                      tryRotate: true,
+                      tryRotate: false,
+                      maxNumberOfSymbols: _multiScan ? 10 : 1,
                       isMultiScan: _multiScan,
                       onMultiScan: _handleMultiscan,
                       onScan: _handleScan,
+                      onControllerCreated: _onCameraControllerCreated,
                       resolution: appSettings.cameraResolution,
                     )
                     : const SizedBox(),
@@ -250,6 +255,7 @@ class _ScanPageState extends State<ScanPage> {
         });
         _latestScanStartTime = DateTime.now();
         debugPrint('Scanning file with: ${_fileMetadata.toString()}');
+        _lockFocus();
       }
     } else {
       _handleRegularQRCodeResult(result.text);
@@ -492,6 +498,7 @@ class _ScanPageState extends State<ScanPage> {
     _transferComplete = false;
     _fileMetadata = null;
     _renameController.text = '';
+    _unlockFocus();
     setState(() {});
 
     // Wait a second to start scanning again
@@ -514,6 +521,31 @@ class _ScanPageState extends State<ScanPage> {
       setState(() {
         _showsReaderWidget = true;
       });
+    }
+  }
+
+  void _onCameraControllerCreated(
+    CameraController? controller,
+    Exception? error,
+  ) {
+    _cameraController = controller;
+    _focusLocked = false;
+  }
+
+  void _lockFocus() {
+    if (_focusLocked || _cameraController == null) return;
+    _focusLocked = true;
+    unawaited(_cameraController!.setFocusMode(FocusMode.locked));
+    unawaited(_cameraController!.setExposureMode(ExposureMode.auto));
+    unawaited(_cameraController!.setExposureOffset(-0.5));
+  }
+
+  void _unlockFocus() {
+    _focusLocked = false;
+    if (_cameraController != null) {
+      unawaited(_cameraController!.setFocusMode(FocusMode.auto));
+      unawaited(_cameraController!.setExposureMode(ExposureMode.auto));
+      unawaited(_cameraController!.setExposureOffset(0.0));
     }
   }
 
@@ -576,6 +608,7 @@ class ScanProgressWidget extends StatelessWidget {
                             width: 48,
                             height: 48,
                             child: CircularProgressIndicator(
+                              strokeCap: StrokeCap.round,
                               value: progress > 1 ? null : progress,
                               color: context.color.primary,
                               backgroundColor: context.color.outline,

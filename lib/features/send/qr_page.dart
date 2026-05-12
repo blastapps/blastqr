@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
@@ -8,9 +10,10 @@ import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_avif/flutter_avif.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
+import 'package:screen_brightness/screen_brightness.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class QrPage extends StatefulWidget {
   const QrPage({super.key, required this.file});
@@ -28,6 +31,34 @@ class _QrPageState extends State<QrPage> {
   bool _shouldCompressImage = false;
 
   bool _fullscreenMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WakelockPlus.enable();
+    unawaited(_boostBrightnessIfNeeded());
+  }
+
+  Future<void> _boostBrightnessIfNeeded() async {
+    // Use system brightness as an ambient light proxy — both iOS and Android
+    // auto-adjust it based on ambient light, so a low value means a dark room.
+    // Only boost to max if the system brightness suggests a bright environment.
+    const threshold = 0.5;
+    final systemBrightness = await ScreenBrightness.instance.system;
+    debugPrint('Ambient brightness: $systemBrightness');
+    if (systemBrightness >= threshold) {
+      await ScreenBrightness.instance.setApplicationScreenBrightness(1.0);
+    } else {
+      await ScreenBrightness.instance.setApplicationScreenBrightness(0.55);
+    }
+  }
+
+  @override
+  void dispose() {
+    WakelockPlus.disable();
+    unawaited(ScreenBrightness.instance.resetApplicationScreenBrightness());
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -350,13 +381,7 @@ extension FileWrapperExtension on FileWrapper {
     bool showsAvifThumbnail = false,
   }) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (type.isAvifImage && showsAvifThumbnail) {
-      return AvifImage.file(
-        file,
-        fit: BoxFit.cover,
-        cacheWidth: (72 * pixelRatio).toInt(),
-      );
-    } else if (type.isImage && !type.isAvifImage) {
+    if (type.isImage) {
       return Image.file(
         file,
         fit: BoxFit.cover,
