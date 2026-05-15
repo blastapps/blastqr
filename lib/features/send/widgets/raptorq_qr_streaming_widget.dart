@@ -155,6 +155,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     }
     return GestureDetector(
       onTap: widget.onTap,
+      behavior: HitTestBehavior.opaque,
       child: LayoutBuilder(
         builder: (context, c) {
           final qrSize = c.maxWidth > c.maxHeight ? c.maxHeight : c.maxWidth;

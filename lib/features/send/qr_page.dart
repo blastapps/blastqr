@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
@@ -8,17 +6,18 @@ import 'package:blast_qr/features/settings/image_compression_settings_page.dart'
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/file_type_icon_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class QrPage extends StatefulWidget {
-  const QrPage({super.key, required this.file});
+  const QrPage({super.key, required this.file, this.onNext});
 
   final FileWrapper file;
+  final VoidCallback? onNext;
 
   @override
   State<QrPage> createState() => _QrPageState();
@@ -36,27 +35,11 @@ class _QrPageState extends State<QrPage> {
   void initState() {
     super.initState();
     WakelockPlus.enable();
-    unawaited(_boostBrightnessIfNeeded());
-  }
-
-  Future<void> _boostBrightnessIfNeeded() async {
-    // Use system brightness as an ambient light proxy — both iOS and Android
-    // auto-adjust it based on ambient light, so a low value means a dark room.
-    // Only boost to max if the system brightness suggests a bright environment.
-    const threshold = 0.5;
-    final systemBrightness = await ScreenBrightness.instance.system;
-    debugPrint('Ambient brightness: $systemBrightness');
-    if (systemBrightness >= threshold) {
-      await ScreenBrightness.instance.setApplicationScreenBrightness(1.0);
-    } else {
-      await ScreenBrightness.instance.setApplicationScreenBrightness(0.55);
-    }
   }
 
   @override
   void dispose() {
     WakelockPlus.disable();
-    unawaited(ScreenBrightness.instance.resetApplicationScreenBrightness());
     super.dispose();
   }
 
@@ -152,11 +135,17 @@ class _QrPageState extends State<QrPage> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
-                  onPressed: _dismiss,
+                  onPressed: widget.onNext != null ? _onTapNext : _dismiss,
                   child: Row(
                     spacing: 8,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text(context.l10n.done)],
+                    children: [
+                      Text(
+                        widget.onNext != null
+                            ? context.l10n.next
+                            : context.l10n.done,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -180,6 +169,11 @@ class _QrPageState extends State<QrPage> {
   void _dismiss() {
     _qrController.stopAnimation();
     Navigator.of(context).pop();
+  }
+
+  void _onTapNext() {
+    _qrController.stopAnimation();
+    widget.onNext!();
   }
 }
 
@@ -333,7 +327,7 @@ class FileHeaderWidget extends StatelessWidget {
                   ],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: file.buildThumbnail(context, showsAvifThumbnail: true),
+                child: file.buildThumbnail(context, size: 72),
               ),
               Expanded(
                 child: Column(
@@ -376,38 +370,23 @@ class FileHeaderWidget extends StatelessWidget {
 }
 
 extension FileWrapperExtension on FileWrapper {
-  Widget buildThumbnail(
-    BuildContext context, {
-    bool showsAvifThumbnail = false,
-  }) {
-    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    if (type.isImage) {
-      return Image.file(
-        file,
-        fit: BoxFit.cover,
-        cacheWidth: (72 * pixelRatio).toInt(),
-      );
-    }
-    return Container(
-      color: type.color,
-      alignment: Alignment.center,
-      child: Stack(
+  Widget buildThumbnail(BuildContext context, {required double size}) {
+    if (type.isImage && !type.isAvifImage) {
+      final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+      return Stack(
         alignment: Alignment.center,
         children: [
-          Icon(type.icon, size: 64, color: Colors.white.withAlpha(80)),
-          FittedBox(
-            child: Text(
-              extension.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-            ),
+          Icon(Icons.image, size: size / 2),
+          Image.file(
+            file,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            cacheWidth: (size * pixelRatio).toInt(),
           ),
         ],
-      ),
-    );
+      );
+    }
+    return FileTypeIconWidget(type: type);
   }
 }

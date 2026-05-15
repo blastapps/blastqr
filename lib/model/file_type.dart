@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 class FileType {
+  static const documentExtensions = ['pdf', 'docx', 'doc', 'odt', 'hwp'];
+
   final String? mimeType;
   final String extension;
   final bool isImage;
   final bool isAudio;
+  final bool isDocument;
   final bool isVideo;
   final bool isUnknown;
   final bool isAvifImage;
@@ -15,6 +18,7 @@ class FileType {
       isUnknown = mimeType == null,
       isAvifImage = mimeType == 'image/avif' || extension == 'avif',
       isWebpImage = mimeType == 'image/webp' || extension == 'webp',
+      isDocument = documentExtensions.contains(extension),
       isAudio = mimeType?.startsWith('audio') == true,
       isVideo = mimeType?.startsWith('video') == true;
 

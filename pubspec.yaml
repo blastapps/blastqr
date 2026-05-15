@@ -35,7 +35,6 @@ dependencies:
   path: ^1.9.1
   camera: ^0.11.4
   wakelock_plus: ^1.5.2
-  screen_brightness: ^2.1.8
   flutter_soloud: ^4.0.5
   raptorq_flutter:
     path: ../raptorq_flutter

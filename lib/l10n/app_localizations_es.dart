@@ -124,7 +124,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get scan_help_message =>
-      'Para recibir un archivo, escanea la secuencia de códigos QR desde la pantalla de otro dispositivo que use blastQR.';
+      'Para recibir un archivo, escanea la secuencia de códigos QR desde la pantalla de otro dispositivo';
 
   @override
   String get help => 'Ayuda';
@@ -226,4 +226,47 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sound_feedback => 'Respuesta de sonido';
+
+  @override
+  String get today => 'Hoy';
+
+  @override
+  String get yesterday => 'Ayer';
+
+  @override
+  String get filter_all => 'Todo';
+
+  @override
+  String get filter_images => 'Imágenes';
+
+  @override
+  String get filter_videos => 'Vídeos';
+
+  @override
+  String get filter_audio => 'Audio';
+
+  @override
+  String get filter_document => 'Documentos';
+
+  @override
+  String get filter_other => 'Otros';
+
+  @override
+  String get older => 'Anteriores';
+
+  @override
+  String get select_all => 'Seleccionar todo';
+
+  @override
+  String get selected => 'seleccionados';
+
+  @override
+  String get delete_files_msg =>
+      '¿Estás seguro de que deseas eliminar los archivos seleccionados?';
+
+  @override
+  String get selected_options => 'Archivos seleccionados';
+
+  @override
+  String get next => 'Siguiente';
 }

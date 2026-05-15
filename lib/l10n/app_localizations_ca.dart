@@ -88,7 +88,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get large_file_msg_1 =>
-      'El fitxer que has seleccionat és gran i podria trigar fins a';
+      'El fitxer que has seleccionat és gran i podria tardar fins a';
 
   @override
   String get large_file_msg_2 => 'a transferir-se.';
@@ -120,11 +120,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get send_help_message =>
-      'Escaneja aquest codi QR amb l\'app blastQR al dispositiu on vols rebre el fitxer.';
+      'Escaneja aquest codi QR amb l\'app blastQR al dispositiu on vols rebre el fitxer';
 
   @override
   String get scan_help_message =>
-      'Per rebre un fitxer, escaneja la seqüència de codis QR de la pantalla d\'un altre dispositiu que utilitzi blastQR.';
+      'Per rebre un fitxer, escaneja una seqüència de codis QR compatible';
 
   @override
   String get help => 'Ajuda';
@@ -226,4 +226,47 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get sound_feedback => 'So';
+
+  @override
+  String get today => 'Avui';
+
+  @override
+  String get yesterday => 'Ahir';
+
+  @override
+  String get filter_all => 'Tot';
+
+  @override
+  String get filter_images => 'Imatges';
+
+  @override
+  String get filter_videos => 'Vídeos';
+
+  @override
+  String get filter_audio => 'Àudio';
+
+  @override
+  String get filter_document => 'Documents';
+
+  @override
+  String get filter_other => 'Altres';
+
+  @override
+  String get older => 'Anteriors';
+
+  @override
+  String get select_all => 'Seleccionar tot';
+
+  @override
+  String get selected => 'seleccionats';
+
+  @override
+  String get delete_files_msg =>
+      'Segur que vols suprimir els fitxers seleccionats?';
+
+  @override
+  String get selected_options => 'Fitxers seleccionats';
+
+  @override
+  String get next => 'Següent';
 }

@@ -224,4 +224,46 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get sound_feedback => '소리 피드백';
+
+  @override
+  String get today => '오늘';
+
+  @override
+  String get yesterday => '어제';
+
+  @override
+  String get filter_all => '전체';
+
+  @override
+  String get filter_images => '이미지';
+
+  @override
+  String get filter_videos => '동영상';
+
+  @override
+  String get filter_audio => '오디오';
+
+  @override
+  String get filter_document => '문서';
+
+  @override
+  String get filter_other => '기타';
+
+  @override
+  String get older => '이전 파일';
+
+  @override
+  String get select_all => '전체 선택';
+
+  @override
+  String get selected => '선택됨';
+
+  @override
+  String get delete_files_msg => '선택한 파일을 삭제하시겠습니까?';
+
+  @override
+  String get selected_options => '선택된 파일';
+
+  @override
+  String get next => '다음';
 }

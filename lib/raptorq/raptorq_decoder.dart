@@ -48,7 +48,7 @@ class RaptorqDecoder {
     count += 1;
 
     final chunkLen = data.length;
-    estimatedProgress = (count * mtu) / (transferLength * 1.25);
+    estimatedProgress = (count * mtu) / (transferLength * 1.45);
     onProcessChunk?.call(chunkLen, count, estimatedProgress);
   }
 

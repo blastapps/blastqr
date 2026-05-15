@@ -7,12 +7,15 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
+import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/sound_feedback.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:camera/camera.dart';
@@ -21,7 +24,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -44,15 +46,15 @@ class _ScanPageState extends State<ScanPage> {
   bool _shouldScan = true;
   bool _isReceivingData = false;
   bool _loadingResult = false;
-  String _infoString = '';
+  String _statusMessage = '';
   double _progress = 0;
   double _speed = 0;
   int _decodedChunkCount = 0;
   int _dataLengthInLastPeriod = 0;
   bool _showsReaderWidget = true;
+  bool _cameraLoaded = false;
   late SoundFeedbackService _soundService;
   late AppSettings _appSettings;
-  bool _transferComplete = false;
   DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
   CameraController? _cameraController;
@@ -63,6 +65,9 @@ class _ScanPageState extends State<ScanPage> {
     super.initState();
     _createDecoder();
     _soundService = SoundFeedbackService();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() => _cameraLoaded = true);
+    });
   }
 
   @override
@@ -82,135 +87,134 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Widget build(BuildContext context) {
     final appSettings = _appSettings;
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const LogoWidget(),
-        centerTitle: true,
-        toolbarHeight: 80,
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          IconButton(
-            onPressed: () {
-              appSettings.updateHapticFeedback(!appSettings.hapticFeedback);
-            },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedSmartPhone03,
-              color:
-                  appSettings.hapticFeedback
-                      ? context.color.onSurface
-                      : context.color.outline,
+    final darkColors = darkColorScheme(context.color.primary);
+    return Theme(
+      data: BlastTheme.dark.buildTheme(context.color.primary, false),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: const LogoWidget(),
+          centerTitle: true,
+          toolbarHeight: 80,
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: Colors.transparent,
+          actions: [
+            IconButton(
+              onPressed: () {
+                appSettings.updateHapticFeedback(!appSettings.hapticFeedback);
+              },
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedSmartPhone03,
+                color:
+                    appSettings.hapticFeedback
+                        ? darkColors.onSurface
+                        : darkColors.outline,
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              appSettings.updateSoundFeedback(!appSettings.soundFeedback);
-            },
-            icon: HugeIcon(
-              icon:
-                  appSettings.soundFeedback
-                      ? HugeIcons.strokeRoundedVolumeLow
-                      : HugeIcons.strokeRoundedVolumeOff,
-              color:
-                  appSettings.soundFeedback
-                      ? context.color.onSurface
-                      : context.color.outline,
+            IconButton(
+              onPressed: () {
+                appSettings.updateSoundFeedback(!appSettings.soundFeedback);
+              },
+              icon: HugeIcon(
+                icon:
+                    appSettings.soundFeedback
+                        ? HugeIcons.strokeRoundedVolumeLow
+                        : HugeIcons.strokeRoundedVolumeOff,
+                color:
+                    appSettings.soundFeedback
+                        ? darkColors.onSurface
+                        : darkColors.outline,
+              ),
             ),
-          ),
-        ],
-      ),
-      body: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          GestureDetector(
-            onTap: () {
-              // Temporary fix for: https://github.com/flutter/flutter/issues/152763
-              _resetReaderWidget();
-            },
-            child:
-                _showsReaderWidget
-                    ? ReaderWidget(
-                      scanDelay: Duration.zero,
-                      scanDelaySuccess: Duration.zero,
-                      codeFormat: Format.qrCode,
-                      cropPercent: 1.0,
-                      showGallery: false,
-                      showToggleCamera: false,
-                      showFlashlight: false,
-                      tryRotate: false,
-                      isMultiScan: true,
-                      onMultiScan: _handleMultiscan,
-                      onScan: _handleScan,
-                      onControllerCreated: _onCameraControllerCreated,
-                      resolution: appSettings.cameraResolution,
-                    )
-                    : const SizedBox(),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          ],
+        ),
+        body: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            GestureDetector(
+              onTap: () {
+                // Temporary fix for: https://github.com/flutter/flutter/issues/152763
+                _resetReaderWidget();
+              },
+              child:
+                  _showsReaderWidget && _cameraLoaded
+                      ? ReaderWidget(
+                        scanDelay: Duration.zero,
+                        scanDelaySuccess: Duration.zero,
+                        codeFormat: Format.qrCode,
+                        cropPercent: 1.0,
+                        showGallery: false,
+                        showToggleCamera: false,
+                        showFlashlight: false,
+                        tryRotate: false,
+                        isMultiScan: true,
+                        onMultiScan: _handleMultiscan,
+                        onScan: _handleScan,
+                        onControllerCreated: _onCameraControllerCreated,
+                        resolution: appSettings.cameraResolution,
+                      )
+                      : const SizedBox(),
+            ),
+            // Top gradient
+            Container(
+              height: 92 + MediaQuery.of(context).viewPadding.top,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black, Colors.transparent],
+                ),
+              ),
+            ),
+            Align(
+                  alignment: Alignment.topCenter,
+                  child: SafeArea(
+                    child: _HelpMessageWidget(
+                      message: context.l10n.scan_help_message,
+                    ),
+                  ),
+                )
+                .animate(target: _isReceivingData ? 0 : 1)
+                .fade(delay: const Duration(seconds: 1), begin: -0.5)
+                .moveY(delay: const Duration(seconds: 1)),
+            ScanProgressWidget(
+              chunkCount: _decodedChunkCount,
+              speed: '${_speed.toStringAsFixed(1)}kB/s',
+              show: _decodedChunkCount > 0,
+              info: _statusMessage,
+              progress: _progress,
+              fileExtension: _fileMetadata?.extension ?? '',
+              onTapCancel: _reset,
+            ),
+            // Speed bar
+            if (_speed > 0)
+              Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 80,
+                ),
+                child: AnimatedContainer(
+                  duration: 300.milliseconds,
+                  curve: Curves.easeInOut,
+                  height: 3,
+                  width: MediaQuery.of(context).size.width * (_speed / 100),
+                  color: context.color.primary,
+                ),
+              ),
+            if (_loadingResult)
+              Center(
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 80,
+                  height: 80,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: context.color.surface.withAlpha(80),
+                    color: Theme.of(context).colorScheme.surface,
                   ),
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedInformationCircle,
-                        color: Colors.white,
-                      ),
-                      Expanded(
-                        child: Text(
-                          context.l10n.scan_help_message,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: const CircularProgressIndicator.adaptive(),
                 ),
               ),
-            ),
-          ).animate(target: _isReceivingData ? 0 : 1).fade(),
-          ScanProgressWidget(
-            info: _infoString,
-            progress: _progress,
-            fileExtension: _fileMetadata?.extension ?? '',
-            complete: _transferComplete,
-            onTapCancel: _reset,
-          ),
-          // Speed bar
-          Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 80,
-            ),
-            child: AnimatedContainer(
-              duration: 300.milliseconds,
-              curve: Curves.easeInOut,
-              height: 3,
-              width: MediaQuery.of(context).size.width * (_speed / 20),
-              color: context.color.primary,
-            ),
-          ),
-          if (_loadingResult)
-            Center(
-              child: Container(
-                width: 80,
-                height: 80,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: const CircularProgressIndicator.adaptive(),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -229,9 +233,6 @@ class _ScanPageState extends State<ScanPage> {
     ) {
       _speed = _dataLengthInLastPeriod / speedPollingMs;
       _dataLengthInLastPeriod = 0;
-      setState(() {
-        _infoString = '$_decodedChunkCount | ${_speed.toStringAsFixed(1)}kB/s';
-      });
     });
   }
 
@@ -260,6 +261,7 @@ class _ScanPageState extends State<ScanPage> {
         );
         setState(() {
           _isReceivingData = true;
+          _statusMessage = 'Receiving ${blastQr.fileExtension} file...';
         });
         _latestScanStartTime = DateTime.now();
         debugPrint('Scanning file with: ${_fileMetadata.toString()}');
@@ -275,8 +277,10 @@ class _ScanPageState extends State<ScanPage> {
       _progress = progress;
       _dataLengthInLastPeriod += chunkLen;
       _decodedChunkCount = chunkCount;
-      _infoString = '$_decodedChunkCount | ${_speed.toStringAsFixed(1)}kB/s';
     });
+
+    // Hide bottom bar
+    context.read<NavBarVisibility>().hide();
 
     if (_appSettings.hapticFeedback) {
       HapticFeedback.lightImpact();
@@ -312,7 +316,6 @@ class _ScanPageState extends State<ScanPage> {
     _shouldScan = false;
     _loadingResult = true;
     _speedTimer?.cancel();
-    _transferComplete = true;
     setState(() {});
   }
 
@@ -324,10 +327,6 @@ class _ScanPageState extends State<ScanPage> {
 
     final elapsedTime =
         DateTime.now().difference(_latestScanStartTime).inMilliseconds / 1000;
-
-    setState(() {
-      _infoString = '';
-    });
 
     final directory = await getApplicationDocumentsDirectory();
     final itemsDirectory = Directory('${directory.path}/docs');
@@ -342,7 +341,6 @@ class _ScanPageState extends State<ScanPage> {
       bytes = gzip.decode(data) as Uint8List;
     }
 
-    final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
     final fileExtension = '.${_fileMetadata!.extension}';
     final fileNameBytes = bytes.sublist(0, 128);
     String fileName = utf8.decode(fileNameBytes).replaceAll('\x00', '');
@@ -350,9 +348,7 @@ class _ScanPageState extends State<ScanPage> {
     if (fileName.contains(fileExtension) == false) {
       fileName += fileExtension;
     }
-    if (await File('${itemsDirectory.path}/$fileName').exists()) {
-      fileName = '${timestamp}_$fileName';
-    }
+    fileName = await resolveUniqueFileName(itemsDirectory, fileName);
 
     final resultFile = await File(
       '${itemsDirectory.path}/$fileName',
@@ -378,12 +374,11 @@ class _ScanPageState extends State<ScanPage> {
       if (mounted && _renameController.text != fileName) {
         // Should rename file
         final newFilename = _renameController.text;
-        if (!await File('${itemsDirectory.path}/$newFilename').exists()) {
-          resultFile.rename('${itemsDirectory.path}/$newFilename');
-        } else {
-          // If file exists prepend timestamp
-          resultFile.rename('${itemsDirectory.path}/${timestamp}_$newFilename');
-        }
+        final uniqueName = await resolveUniqueFileName(
+          itemsDirectory,
+          newFilename,
+        );
+        resultFile.rename('${itemsDirectory.path}/$uniqueName');
       }
       _reset();
     });
@@ -417,7 +412,7 @@ class _ScanPageState extends State<ScanPage> {
                 ],
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: file.buildThumbnail(context, showsAvifThumbnail: true),
+              child: file.buildThumbnail(context, size: 150),
             ),
           ),
           Padding(
@@ -508,19 +503,23 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _reset() async {
-    _speedTimer?.cancel();
     _shouldScan = false;
-    _decoder.reset();
     _loadingResult = false;
-    _infoString = '';
+    _statusMessage = '';
     _progress = 0;
     _speed = 0;
     _decodedChunkCount = 0;
-    _transferComplete = false;
     _fileMetadata = null;
     _renameController.text = '';
-    _unlockFocus();
     setState(() {});
+
+    _speedTimer?.cancel();
+    _decoder.reset();
+
+    _unlockFocus();
+
+    // Re-show bottom navigation
+    context.read<NavBarVisibility>().show();
 
     // Wait a second to start scanning again
     await Future.delayed(const Duration(seconds: 1));
@@ -581,20 +580,64 @@ class _ScanPageState extends State<ScanPage> {
   }
 }
 
+class _HelpMessageWidget extends StatelessWidget {
+  const _HelpMessageWidget({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          color: Colors.black.withAlpha(140),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(75),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          spacing: 12,
+          children: [
+            const HugeIcon(
+              icon: HugeIcons.strokeRoundedInformationCircle,
+              color: Colors.white,
+            ),
+            Expanded(
+              child: Text(message, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class ScanProgressWidget extends StatelessWidget {
   const ScanProgressWidget({
     super.key,
     required this.progress,
     required this.fileExtension,
     required this.info,
-    required this.complete,
     required this.onTapCancel,
+    required this.chunkCount,
+    required this.speed,
+    required this.show,
   });
 
   final double progress;
   final String fileExtension;
   final String info;
-  final bool complete;
+  final int chunkCount;
+  final String speed;
+  final bool show;
   final void Function() onTapCancel;
 
   @override
@@ -605,19 +648,22 @@ class ScanProgressWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
           child: Container(
-                height: 84,
+                height: 72,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                    bottomLeft: Radius.zero,
-                    bottomRight: Radius.zero,
-                  ),
+                  borderRadius: BorderRadius.circular(36),
                   color: context.color.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(45),
+                      spreadRadius: 0,
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
                   child: Row(
                     spacing: 8,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -635,110 +681,76 @@ class ScanProgressWidget extends StatelessWidget {
                               backgroundColor: context.color.outline,
                             ),
                           ),
-                          if (!complete) ...[
-                            Container(
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey,
-                              ),
-                              width: 44,
-                              height: 44,
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: context.color.surface,
                             ),
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedQrCode,
-                              size: 32,
-                              color: Colors.white.withAlpha(60),
-                            ),
-                            SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Text(
-                                    fileExtension.toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                            width: 44,
+                            height: 44,
+                          ),
+                          HugeIcon(
+                            icon: HugeIcons.strokeRoundedFile01,
+                            size: 24,
+                            color: context.color.onSurface.withAlpha(80),
+                          ),
+                          SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text(
+                                  fileExtension.toUpperCase(),
+                                  style: TextStyle(
+                                    color: context.color.onSurface,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                          if (complete) ...[
-                            Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: context.color.primary,
-                              ),
-                              width: 36,
-                              height: 36,
-                            ),
-                            const HugeIcon(
-                              icon: HugeIcons.strokeRoundedTick01,
-                              size: 24,
-                              color: Colors.white,
-                            ),
-                          ],
+                          ),
                         ],
                       ),
-                      if (complete)
-                        Expanded(
-                          child: Text(
-                            context.l10n.done,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            progress > 1
+                                ? context.l10n.keep_scanning_msg
+                                : info,
+                            textAlign: TextAlign.end,
                             style: TextStyle(
                               fontSize: 18,
                               fontFamily: 'Jersey25',
                               color: context.color.onSurface,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      if (!complete && progress > 1) ...[
-                        Expanded(
-                          child: FittedBox(
-                            alignment: Alignment.centerLeft,
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              context.l10n.keep_scanning_msg,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Jersey25',
-                                color: context.color.onSurface,
-                              ),
-                              maxLines: 1,
-                              textAlign: TextAlign.start,
+                              height: 1,
                             ),
                           ),
-                        ),
-                      ],
-                      if (!complete) ...[
-                        Text(
-                          info,
-                          style: TextStyle(color: context.color.onSurface),
-                          textAlign: TextAlign.end,
-                        ),
-                        SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: IconButton(
-                            onPressed: onTapCancel,
-                            style: IconButton.styleFrom(
-                              backgroundColor: context.color.primaryContainer,
-                              foregroundColor: context.color.onSurface,
-                            ),
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.clear, size: 16),
+                          Text(
+                            '$chunkCount | $speed',
+                            style: TextStyle(color: context.color.onSurface),
+                            textAlign: TextAlign.end,
                           ),
+                        ],
+                      ),
+                      IconButton(
+                        onPressed: onTapCancel,
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(24, 24),
+                          maximumSize: const Size(32, 32),
+                          backgroundColor: context.color.primaryContainer,
+                          foregroundColor: context.color.onSurface,
                         ),
-                      ],
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.clear, size: 16),
+                      ),
                     ],
                   ),
                 ),
               )
-              .animate(target: info.isNotEmpty ? 1 : 0)
+              .animate(target: show ? 1 : 0)
               .fade()
               .slideY(
                 begin: 0.75,
@@ -747,7 +759,7 @@ class ScanProgressWidget extends StatelessWidget {
                 curve: Curves.easeOutBack,
               ),
         ),
-        SizedBox(height: MediaQuery.of(context).padding.bottom - 12 - 16),
+        SizedBox(height: MediaQuery.of(context).padding.bottom - 64),
       ],
     );
   }

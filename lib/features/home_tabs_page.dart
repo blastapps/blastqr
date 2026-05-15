@@ -4,11 +4,13 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/files_page.dart';
 import 'package:blast_qr/features/scan/scan_page.dart';
-import 'package:blast_qr/features/send/file_picker_page.dart';
+import 'package:blast_qr/features/send/send_page.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/nav_bar_visibility.dart';
+import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -55,6 +57,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final darkTheme = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -71,17 +74,23 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
                       BlendMode.srcATop,
                     ),
                     fit: BoxFit.cover,
-                    opacity:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? 0.6
-                            : 0.25,
+                    opacity: darkTheme ? 0.6 : 0.25,
                     image: const AssetImage('assets/bg_qr.webp'),
                   ),
                 ),
                 height: 400,
               );
             }
-            return const SizedBox();
+            return Container(
+              height: 400,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: const Alignment(0.5, 4),
+                  colors: [context.color.surface, context.color.primary],
+                ),
+              ),
+            );
           },
         ),
         Container(
@@ -103,84 +112,52 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
           backgroundColor: Colors.transparent,
           bottomNavigationBar:
               (Platform.isIOS || Platform.isAndroid)
-                  ? Consumer<FileBadgeCount>(
-                    builder: (context, count, child) {
-                      return SafeArea(
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                          child: Container(
-                            height: 90,
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withAlpha(30),
-                                  spreadRadius: 0,
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                              color: context.color.primaryContainer.withAlpha(
-                                215,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: BottomNavigationBar(
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              selectedLabelStyle: const TextStyle(
-                                fontFamily: 'Jersey25',
-                                fontSize: 18,
-                              ),
-                              unselectedLabelStyle: const TextStyle(
-                                fontFamily: 'Jersey25',
-                                fontSize: 14,
-                              ),
-                              enableFeedback: false,
-                              onTap: (index) {
-                                setState(() {
-                                  _currentTab = index;
-                                });
-                              },
-                              currentIndex: _currentTab,
-                              items: [
-                                BottomNavigationBarItem(
-                                  icon: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedQrCode,
-                                    color: context.color.onSurface,
-                                  ),
-                                  activeIcon: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedQrCode,
-                                    color: context.color.primary,
-                                  ),
-                                  label: context.l10n.send,
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedCamera02,
-                                    color: context.color.onSurface,
-                                  ),
-                                  activeIcon: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedCamera02,
-                                    color: context.color.primary,
-                                  ),
-                                  label: context.l10n.receive,
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: Badge(
-                                    label: Text('${count.value ?? ''}'),
-                                    isLabelVisible: count.value != null,
-                                    child: HugeIcon(
-                                      icon: HugeIcons.strokeRoundedFolder01,
-                                      color: context.color.onSurface,
+                  ? Consumer2<FileBadgeCount, NavBarVisibility>(
+                    builder: (context, count, navBar, child) {
+                      return AnimatedSlide(
+                        offset:
+                            navBar.visible ? Offset.zero : const Offset(0, 1),
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: AnimatedOpacity(
+                          opacity: navBar.visible ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: SafeArea(
+                            child: Container(
+                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                              child: NavigationTabs(
+                                onTap: (index) {
+                                  setState(() {
+                                    _currentTab = index;
+                                  });
+                                },
+                                currentIndex: _currentTab,
+                                items: [
+                                  BottomNavigationBarItem(
+                                    icon: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedSent02,
                                     ),
+                                    label: context.l10n.send,
                                   ),
-                                  activeIcon: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedFolder01,
-                                    color: context.color.primary,
+                                  BottomNavigationBarItem(
+                                    icon: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedQrCode,
+                                    ),
+                                    label: context.l10n.receive,
                                   ),
-                                  label: context.l10n.my_files,
-                                ),
-                              ],
+                                  BottomNavigationBarItem(
+                                    icon: Badge(
+                                      label: Text('${count.value ?? ''}'),
+                                      isLabelVisible: count.value != null,
+                                      child: const HugeIcon(
+                                        icon: HugeIcons.strokeRoundedFolder01,
+                                      ),
+                                    ),
+                                    label: context.l10n.my_files,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -192,7 +169,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
             builder: (context) {
               switch (_currentTab) {
                 case 0:
-                  return const FilePickerPage();
+                  return const SendPage();
                 case 1:
                   return const ScanPage();
                 case 2:

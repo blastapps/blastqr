@@ -120,11 +120,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get send_help_message =>
-      'Scan this QR code using the blastQR app on the device where you want to receive the file.';
+      'Scan this QR code using the blastQR app on the device where you want to receive the file';
 
   @override
   String get scan_help_message =>
-      'To receive a file, scan a QR code sequence from the screen of another device that uses blastQR.';
+      'To receive a file, scan a compatible QR code sequence';
 
   @override
   String get help => 'Help';
@@ -226,4 +226,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sound_feedback => 'Sound feedback';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get yesterday => 'Yesterday';
+
+  @override
+  String get filter_all => 'All';
+
+  @override
+  String get filter_images => 'Images';
+
+  @override
+  String get filter_videos => 'Videos';
+
+  @override
+  String get filter_audio => 'Audio';
+
+  @override
+  String get filter_document => 'Documents';
+
+  @override
+  String get filter_other => 'Other';
+
+  @override
+  String get older => 'Older';
+
+  @override
+  String get select_all => 'Select all';
+
+  @override
+  String get selected => 'selected';
+
+  @override
+  String get delete_files_msg =>
+      'Are you sure you want to delete the selected files?';
+
+  @override
+  String get selected_options => 'Selected files';
+
+  @override
+  String get next => 'Next';
 }

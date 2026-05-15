@@ -57,5 +57,19 @@
   "licenses": "라이선스",
   "feedback": "피드백",
   "haptic_feedback": "햅틱 피드백",
-  "sound_feedback": "소리 피드백"
+  "sound_feedback": "소리 피드백",
+  "today": "오늘",
+  "yesterday": "어제",
+  "filter_all": "전체",
+  "filter_images": "이미지",
+  "filter_videos": "동영상",
+  "filter_audio": "오디오",
+  "filter_document": "문서",
+  "filter_other": "기타",
+  "older": "이전 파일",
+  "select_all": "전체 선택",
+  "selected": "선택됨",
+  "delete_files_msg": "선택한 파일을 삭제하시겠습니까?",
+  "selected_options": "선택된 파일",
+  "next": "다음"
 }

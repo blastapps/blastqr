@@ -45,6 +45,7 @@ enum BlastTheme {
       outlinedButtonTheme: outlinedButtonTheme(colorScheme),
       elevatedButtonTheme: elevatedButtonTheme(colorScheme),
       snackBarTheme: snackBarTheme(colorScheme),
+      chipTheme: chipTheme(colorScheme),
     );
   }
 }
@@ -147,6 +148,23 @@ SnackBarThemeData snackBarTheme(ColorScheme colorScheme) {
   return SnackBarThemeData(
     backgroundColor: colorScheme.primaryContainer,
     contentTextStyle: TextStyle(color: colorScheme.onPrimaryContainer),
+  );
+}
+
+ChipThemeData chipTheme(ColorScheme colorScheme) {
+  return ChipThemeData(
+    color: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
+        return colorScheme.primary;
+      }
+      return Colors.transparent;
+    }),
+    selectedColor: colorScheme.primary,
+    checkmarkColor: colorScheme.onPrimary,
+    labelStyle: TextStyle(fontFamily: 'Jersey25', color: colorScheme.onPrimary),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadiusGeometry.circular(24),
+    ),
   );
 }
 

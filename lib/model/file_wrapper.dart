@@ -73,8 +73,14 @@ class FileWrapper {
   bool get isCompressable =>
       !type.isVideo && !type.isWebpImage && !type.isAvifImage;
 
-  FileWrapper({required this.file, required this.type, required this.size})
-    : _actualTransferSize = size;
+  final DateTime modified;
+
+  FileWrapper({
+    required this.file,
+    required this.type,
+    required this.size,
+    required this.modified,
+  }) : _actualTransferSize = size;
 
   double getEstimateTransferTime(int speedInkBps) {
     return (size / 1000) / speedInkBps;
@@ -211,19 +217,29 @@ extension FileExtension on File {
   }
 
   Future<FileType> getFileType() async {
-    final header = await readHeaderBytes();
     final fileName = uri.pathSegments.last;
-    final mimeType = mime.lookupMimeType(
-      uri.pathSegments.last,
+    final ext = fileName.split('.').last.toLowerCase();
+    // Try extension-based lookup first — no file I/O needed
+    final mimeType = mime.lookupMimeType(fileName);
+    if (mimeType != null) {
+      return FileType(extension: ext, mimeType: mimeType);
+    }
+    // Fall back to reading magic bytes for unknown extensions
+    final header = await readHeaderBytes();
+    final mimeTypeFromHeader = mime.lookupMimeType(
+      fileName,
       headerBytes: header,
     );
-    final ext = fileName.split('.').last;
-    return FileType(extension: ext, mimeType: mimeType);
+    return FileType(extension: ext, mimeType: mimeTypeFromHeader);
   }
 
   Future<FileWrapper> toFileWrapper() async {
-    final size = await length();
-    final type = await getFileType();
-    return FileWrapper(file: this, type: type, size: size);
+    final results = await Future.wait([length(), getFileType()]);
+    return FileWrapper(
+      file: this,
+      size: results[0] as int,
+      type: results[1] as FileType,
+      modified: statSync().modified,
+    );
   }
 }

@@ -321,13 +321,13 @@ abstract class AppLocalizations {
   /// No description provided for @send_help_message.
   ///
   /// In en, this message translates to:
-  /// **'Scan this QR code using the blastQR app on the device where you want to receive the file.'**
+  /// **'Scan this QR code using the blastQR app on the device where you want to receive the file'**
   String get send_help_message;
 
   /// No description provided for @scan_help_message.
   ///
   /// In en, this message translates to:
-  /// **'To receive a file, scan a QR code sequence from the screen of another device that uses blastQR.'**
+  /// **'To receive a file, scan a compatible QR code sequence'**
   String get scan_help_message;
 
   /// No description provided for @help.
@@ -521,6 +521,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sound feedback'**
   String get sound_feedback;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterday;
+
+  /// No description provided for @filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filter_all;
+
+  /// No description provided for @filter_images.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get filter_images;
+
+  /// No description provided for @filter_videos.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get filter_videos;
+
+  /// No description provided for @filter_audio.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get filter_audio;
+
+  /// No description provided for @filter_document.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get filter_document;
+
+  /// No description provided for @filter_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get filter_other;
+
+  /// No description provided for @older.
+  ///
+  /// In en, this message translates to:
+  /// **'Older'**
+  String get older;
+
+  /// No description provided for @select_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get select_all;
+
+  /// No description provided for @selected.
+  ///
+  /// In en, this message translates to:
+  /// **'selected'**
+  String get selected;
+
+  /// No description provided for @delete_files_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the selected files?'**
+  String get delete_files_msg;
+
+  /// No description provided for @selected_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected files'**
+  String get selected_options;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
 }
 
 class _AppLocalizationsDelegate
