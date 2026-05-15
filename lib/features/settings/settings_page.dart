@@ -258,6 +258,68 @@ class _SettingsPageState extends State<SettingsPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Text(
+              context.l10n.feedback,
+              style: TextStyle(
+                color: context.color.primary,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                value: state.hapticFeedback,
+                onChanged: (val) {
+                  Provider.of<AppSettings>(
+                    context,
+                    listen: false,
+                  ).updateHapticFeedback(val);
+                },
+                secondary: HugeIcon(
+                  icon: HugeIcons.strokeRoundedSmartPhone03,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.haptic_feedback),
+                subtitle: Text(
+                  state.hapticFeedback
+                      ? context.l10n.enabled
+                      : context.l10n.disabled,
+                ),
+                inactiveThumbColor: context.color.secondary,
+                activeTrackColor: context.color.primary,
+              );
+            },
+          ),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                value: state.soundFeedback,
+                onChanged: (val) {
+                  Provider.of<AppSettings>(
+                    context,
+                    listen: false,
+                  ).updateSoundFeedback(val);
+                },
+                secondary: HugeIcon(
+                  icon: HugeIcons.strokeRoundedVolumeLow,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.sound_feedback),
+                subtitle: Text(
+                  state.soundFeedback
+                      ? context.l10n.enabled
+                      : context.l10n.disabled,
+                ),
+                inactiveThumbColor: context.color.secondary,
+                activeTrackColor: context.color.primary,
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Text(
               'blastqr',
               style: TextStyle(
                 color: context.color.primary,

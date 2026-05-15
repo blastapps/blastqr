@@ -65,5 +65,8 @@
   "licenses": "Licenses",
   "file_format": "File format",
   "downscaling": "Downscaling",
-  "camera_resolution": "Camera resolution"
+  "camera_resolution": "Camera resolution",
+  "feedback": "Feedback",
+  "haptic_feedback": "Haptic feedback",
+  "sound_feedback": "Sound feedback"
 }

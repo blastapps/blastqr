@@ -503,6 +503,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Camera resolution'**
   String get camera_resolution;
+
+  /// No description provided for @feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedback;
+
+  /// No description provided for @haptic_feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic feedback'**
+  String get haptic_feedback;
+
+  /// No description provided for @sound_feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound feedback'**
+  String get sound_feedback;
 }
 
 class _AppLocalizationsDelegate

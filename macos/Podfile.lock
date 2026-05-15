@@ -3,9 +3,9 @@ PODS:
     - FlutterMacOS
   - file_selector_macos (0.0.1):
     - FlutterMacOS
-  - flutter_avif_macos (0.0.1):
-    - FlutterMacOS
   - flutter_image_compress_macos (1.0.0):
+    - FlutterMacOS
+  - flutter_soloud (0.0.1):
     - FlutterMacOS
   - flutter_zxing (0.0.1):
     - FlutterMacOS
@@ -14,40 +14,45 @@ PODS:
     - FlutterMacOS
   - open_file_mac (1.0.3):
     - FlutterMacOS
-  - rinf (0.1.0):
+  - package_info_plus (0.0.1):
+    - FlutterMacOS
+  - raptorq_flutter (0.1.0):
+    - FlutterMacOS
+  - screen_brightness_macos (0.1.0):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - sqflite_darwin (0.0.4):
-    - Flutter
-    - FlutterMacOS
   - super_native_extensions (0.0.1):
+    - FlutterMacOS
+  - wakelock_plus (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
-  - flutter_avif_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_avif_macos/macos`)
   - flutter_image_compress_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos`)
+  - flutter_soloud (from `Flutter/ephemeral/.symlinks/plugins/flutter_soloud/macos`)
   - flutter_zxing (from `Flutter/ephemeral/.symlinks/plugins/flutter_zxing/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
   - open_file_mac (from `Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos`)
-  - rinf (from `Flutter/ephemeral/.symlinks/plugins/rinf/macos`)
+  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
+  - raptorq_flutter (from `Flutter/ephemeral/.symlinks/plugins/raptorq_flutter/macos`)
+  - screen_brightness_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_brightness_macos/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqflite_darwin (from `Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin`)
   - super_native_extensions (from `Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos`)
+  - wakelock_plus (from `Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos`)
 
 EXTERNAL SOURCES:
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   file_selector_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
-  flutter_avif_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_avif_macos/macos
   flutter_image_compress_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos
+  flutter_soloud:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_soloud/macos
   flutter_zxing:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_zxing/macos
   FlutterMacOS:
@@ -56,29 +61,35 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos
   open_file_mac:
     :path: Flutter/ephemeral/.symlinks/plugins/open_file_mac/macos
-  rinf:
-    :path: Flutter/ephemeral/.symlinks/plugins/rinf/macos
+  package_info_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
+  raptorq_flutter:
+    :path: Flutter/ephemeral/.symlinks/plugins/raptorq_flutter/macos
+  screen_brightness_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/screen_brightness_macos/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
-  sqflite_darwin:
-    :path: Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin
   super_native_extensions:
     :path: Flutter/ephemeral/.symlinks/plugins/super_native_extensions/macos
+  wakelock_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos
 
 SPEC CHECKSUMS:
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
   file_selector_macos: 9e9e068e90ebee155097d00e89ae91edb2374db7
-  flutter_avif_macos: 9ed61d67adfbd6964eccb59971020fb55c31fc11
   flutter_image_compress_macos: e68daf54bb4bf2144c580fd4d151c949cbf492f0
+  flutter_soloud: 0ecc9bf977d5db4321530dd732e0690e60e5f76e
   flutter_zxing: 91e9d17c79c60860450e8879cced0ec54f6a2601
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
   open_file_mac: 76f06c8597551249bdb5e8fd8827a98eae0f4585
-  rinf: 262f44da111bc09a28138d438caf7b9a29e9b411
+  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
+  raptorq_flutter: 82643cb6c42d38b50c3b2d12414ddbc7bf1c9adb
+  screen_brightness_macos: 1058c18b5e0570f48f93016487a5ed66d6977fe0
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   super_native_extensions: c2795d6d9aedf4a79fae25cb6160b71b50549189
+  wakelock_plus: 917609be14d812ddd9e9528876538b2263aaa03b
 
-PODFILE CHECKSUM: 83c493776e796ff1f7045418a0799f83b55f1c21
+PODFILE CHECKSUM: e2676e21a3ac7180c665539f2e7aa1c172721580
 
 COCOAPODS: 1.16.2

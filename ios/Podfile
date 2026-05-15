@@ -3,6 +3,8 @@
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+# Exclude OGG/Opus/Vorbis/FLAC libs — app only uses in-memory WAV synthesis
+ENV['NO_XIPH_LIBS'] = '1'
 
 project 'Runner', {
   'Debug' => :debug,

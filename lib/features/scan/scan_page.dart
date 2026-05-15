@@ -12,6 +12,7 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
+import 'package:blast_qr/sound_feedback.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:camera/camera.dart';
@@ -49,8 +50,8 @@ class _ScanPageState extends State<ScanPage> {
   int _decodedChunkCount = 0;
   int _dataLengthInLastPeriod = 0;
   bool _showsReaderWidget = true;
-  bool _hapticFeedback = true;
-  bool _multiScan = false;
+  late SoundFeedbackService _soundService;
+  late AppSettings _appSettings;
   bool _transferComplete = false;
   DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
@@ -61,18 +62,26 @@ class _ScanPageState extends State<ScanPage> {
   void initState() {
     super.initState();
     _createDecoder();
+    _soundService = SoundFeedbackService();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _appSettings = Provider.of<AppSettings>(context, listen: true);
   }
 
   @override
   void dispose() {
     _speedTimer?.cancel();
     _decoder.dispose();
+    _soundService.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final appSettings = Provider.of<AppSettings>(context, listen: false);
+    final appSettings = _appSettings;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -83,27 +92,28 @@ class _ScanPageState extends State<ScanPage> {
         surfaceTintColor: Colors.transparent,
         actions: [
           IconButton(
-            onPressed: () async {
-              setState(() {
-                _multiScan = !_multiScan;
-              });
-            },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedFullScreen,
-              color:
-                  _multiScan ? context.color.onSurface : context.color.outline,
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              setState(() {
-                _hapticFeedback = !_hapticFeedback;
-              });
+            onPressed: () {
+              appSettings.updateHapticFeedback(!appSettings.hapticFeedback);
             },
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedSmartPhone03,
               color:
-                  _hapticFeedback
+                  appSettings.hapticFeedback
+                      ? context.color.onSurface
+                      : context.color.outline,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              appSettings.updateSoundFeedback(!appSettings.soundFeedback);
+            },
+            icon: HugeIcon(
+              icon:
+                  appSettings.soundFeedback
+                      ? HugeIcons.strokeRoundedVolumeLow
+                      : HugeIcons.strokeRoundedVolumeOff,
+              color:
+                  appSettings.soundFeedback
                       ? context.color.onSurface
                       : context.color.outline,
             ),
@@ -115,7 +125,6 @@ class _ScanPageState extends State<ScanPage> {
         children: [
           GestureDetector(
             onTap: () {
-              _multiScan = !_multiScan;
               // Temporary fix for: https://github.com/flutter/flutter/issues/152763
               _resetReaderWidget();
             },
@@ -127,11 +136,10 @@ class _ScanPageState extends State<ScanPage> {
                       codeFormat: Format.qrCode,
                       cropPercent: 1.0,
                       showGallery: false,
-                      showToggleCamera: true,
+                      showToggleCamera: false,
                       showFlashlight: false,
                       tryRotate: false,
-                      maxNumberOfSymbols: _multiScan ? 10 : 1,
-                      isMultiScan: _multiScan,
+                      isMultiScan: true,
                       onMultiScan: _handleMultiscan,
                       onScan: _handleScan,
                       onControllerCreated: _onCameraControllerCreated,
@@ -270,8 +278,11 @@ class _ScanPageState extends State<ScanPage> {
       _infoString = '$_decodedChunkCount | ${_speed.toStringAsFixed(1)}kB/s';
     });
 
-    if (_hapticFeedback) {
+    if (_appSettings.hapticFeedback) {
       HapticFeedback.lightImpact();
+    }
+    if (_appSettings.soundFeedback) {
+      _soundService.playChunkReceived(_progress, _speed);
     }
 
     if (_speedTimer?.isActive == false || _speedTimer == null) {
@@ -356,7 +367,12 @@ class _ScanPageState extends State<ScanPage> {
     // Increment file badge
     Provider.of<FileBadgeCount>(context, listen: false).add();
 
-    HapticFeedback.heavyImpact();
+    if (_appSettings.hapticFeedback) {
+      HapticFeedback.heavyImpact();
+    }
+    if (_appSettings.soundFeedback) {
+      _soundService.playTransferComplete();
+    }
 
     _showResultSheet(fileWrapper, elapsedTime).then((_) async {
       if (mounted && _renameController.text != fileName) {
@@ -468,7 +484,12 @@ class _ScanPageState extends State<ScanPage> {
 
   void _handleRegularQRCodeResult(String? text) async {
     _shouldScan = false;
-    HapticFeedback.heavyImpact();
+    if (_appSettings.hapticFeedback) {
+      HapticFeedback.heavyImpact();
+    }
+    if (_appSettings.soundFeedback) {
+      _soundService.playQRCodeResult();
+    }
 
     showMessage(
       context: context,

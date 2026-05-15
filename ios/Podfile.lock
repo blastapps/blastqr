@@ -13,6 +13,8 @@ PODS:
     - SDWebImageWebPCoder
   - flutter_native_splash (2.4.3):
     - Flutter
+  - flutter_soloud (0.0.1):
+    - Flutter
   - flutter_zxing (0.0.1):
     - Flutter
   - image_picker_ios (0.0.1):
@@ -42,9 +44,9 @@ PODS:
     - Flutter
   - screen_brightness_ios (2.1.3):
     - Flutter
-  - SDWebImage (5.21.5):
-    - SDWebImage/Core (= 5.21.5)
-  - SDWebImage/Core (5.21.5)
+  - SDWebImage (5.21.7):
+    - SDWebImage/Core (= 5.21.7)
+  - SDWebImage/Core (5.21.7)
   - SDWebImageWebPCoder (0.15.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
@@ -71,6 +73,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
+  - flutter_soloud (from `.symlinks/plugins/flutter_soloud/ios`)
   - flutter_zxing (from `.symlinks/plugins/flutter_zxing/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
@@ -104,6 +107,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
+  flutter_soloud:
+    :path: ".symlinks/plugins/flutter_soloud/ios"
   flutter_zxing:
     :path: ".symlinks/plugins/flutter_zxing/ios"
   image_picker_ios:
@@ -136,6 +141,7 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
+  flutter_soloud: f67f3434183455e94c2ada8af1ee77281a3362f5
   flutter_zxing: e8bcc43bd3056c70c271b732ed94e7a16fd62f93
   image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
@@ -145,7 +151,7 @@ SPEC CHECKSUMS:
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   raptorq_flutter: 54d5f65040679e54a05cc460bc6d13cd7abc3720
   screen_brightness_ios: 212d950bb99c915eee971c884f4a6c87c92cd13d
-  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
+  SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   share_handler_ios: e2244e990f826b2c8eaa291ac3831569438ba0fb
   share_handler_ios_models: fc638c9b4330dc7f082586c92aee9dfa0b87b871
@@ -153,6 +159,6 @@ SPEC CHECKSUMS:
   super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
 
-PODFILE CHECKSUM: 3dc3c59a668ead8ab7a1b45b42f80cafebdb7abe
+PODFILE CHECKSUM: 6ef84697428d5cdab1cbec4d4d490f980ae6e473
 
 COCOAPODS: 1.16.2

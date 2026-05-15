@@ -7,19 +7,22 @@
         {
             "name": "blast_qr",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "env": { "NO_XIPH_LIBS": "1" }
         },
         {
             "name": "blast_qr (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "env": { "NO_XIPH_LIBS": "1" }
         },
         {
             "name": "blast_qr (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "env": { "NO_XIPH_LIBS": "1" }
         }
     ]
 }

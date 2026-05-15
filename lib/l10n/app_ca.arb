@@ -58,5 +58,8 @@
   "disabled": "Desactivat",
   "data_encoding": "Codificació de dades",
   "chunk_length": "Longitud per fragment",
-  "licenses": "Llicències"
+  "licenses": "Llicències",
+  "feedback": "Retroacció",
+  "haptic_feedback": "Vibració",
+  "sound_feedback": "So"
 }

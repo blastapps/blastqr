@@ -13,6 +13,8 @@ class AppSettings extends ChangeNotifier {
   Color accentColor;
   ImageCompressionSettings imageCompressionSettings;
   ResolutionPreset cameraResolution;
+  bool hapticFeedback;
+  bool soundFeedback;
 
   AppSettings()
     : locale = AppPreferences.locale,
@@ -21,7 +23,9 @@ class AppSettings extends ChangeNotifier {
       pureBlack = AppPreferences.pureBlack,
       accentColor = AppPreferences.accentColor,
       imageCompressionSettings = AppPreferences.imageCompressionSettings,
-      cameraResolution = AppPreferences.cameraResolution;
+      cameraResolution = AppPreferences.cameraResolution,
+      hapticFeedback = AppPreferences.hapticFeedback,
+      soundFeedback = AppPreferences.soundFeedback;
 
   void updateLocale(String? localeId) {
     log('Setting locale to $localeId');
@@ -63,6 +67,18 @@ class AppSettings extends ChangeNotifier {
   void updateCameraResolution(ResolutionPreset resolution) {
     AppPreferences.setCameraResolution(resolution);
     cameraResolution = resolution;
+    notifyListeners();
+  }
+
+  void updateHapticFeedback(bool value) {
+    AppPreferences.setHapticFeedback(value);
+    hapticFeedback = value;
+    notifyListeners();
+  }
+
+  void updateSoundFeedback(bool value) {
+    AppPreferences.setSoundFeedback(value);
+    soundFeedback = value;
     notifyListeners();
   }
 }

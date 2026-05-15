@@ -15,6 +15,8 @@ class AppPreferences {
   static Color? _accentColor;
   static ImageCompressionSettings? _imageCompressionSettings;
   static ResolutionPreset? _cameraResolution;
+  static bool? _hapticFeedback;
+  static bool? _soundFeedback;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
@@ -26,6 +28,8 @@ class AppPreferences {
       _imageCompressionSettings ?? ImageCompressionSettings.defaultSettings;
   static ResolutionPreset get cameraResolution =>
       _cameraResolution ?? ResolutionPreset.high;
+  static bool get hapticFeedback => _hapticFeedback ?? true;
+  static bool get soundFeedback => _soundFeedback ?? true;
 
   static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
@@ -80,6 +84,18 @@ class AppPreferences {
     _cameraResolution = cameraResolution;
   }
 
+  static Future<void> setHapticFeedback(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('hapticFeedback', value);
+    _hapticFeedback = value;
+  }
+
+  static Future<void> setSoundFeedback(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('soundFeedback', value);
+    _soundFeedback = value;
+  }
+
   static Future<void> read() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     _localeId = sp.getString('locale_id');
@@ -97,5 +113,7 @@ class AppPreferences {
         sp.getInt('camera_resolution') != null
             ? ResolutionPreset.values[sp.getInt('camera_resolution')!]
             : ResolutionPreset.high;
+    _hapticFeedback = sp.getBool('hapticFeedback') ?? true;
+    _soundFeedback = sp.getBool('soundFeedback') ?? true;
   }
 }

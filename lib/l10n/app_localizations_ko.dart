@@ -215,4 +215,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get camera_resolution => 'Camera resolution';
+
+  @override
+  String get feedback => '피드백';
+
+  @override
+  String get haptic_feedback => '햅틱 피드백';
+
+  @override
+  String get sound_feedback => '소리 피드백';
 }

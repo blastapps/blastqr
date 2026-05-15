@@ -54,5 +54,8 @@
   "theme_black": "Negro (OLED)",
   "data_encoding": "Codificación de datos",
   "chunk_length": "Longitud del fragmento",
-  "licenses": "Licencias"
+  "licenses": "Licencias",
+  "feedback": "Retroalimentación",
+  "haptic_feedback": "Respuesta háptica",
+  "sound_feedback": "Respuesta de sonido"
 }

@@ -217,4 +217,13 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get camera_resolution => 'Camera resolution';
+
+  @override
+  String get feedback => 'Retroacció';
+
+  @override
+  String get haptic_feedback => 'Vibració';
+
+  @override
+  String get sound_feedback => 'So';
 }
