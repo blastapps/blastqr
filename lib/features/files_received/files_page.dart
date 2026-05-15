@@ -12,6 +12,7 @@ import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:media_scanner/media_scanner.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -630,6 +631,7 @@ class _FilesPageState extends State<FilesPage> {
         '${directory.path}/${newName ?? file.uri.pathSegments.last}';
     try {
       await file.copy(newPath);
+      MediaScanner.loadMedia(path: newPath);
     } catch (error) {
       if (error is PathExistsException) {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
