@@ -54,6 +54,8 @@ class _ScanPageState extends State<ScanPage> {
   int _dataLengthInLastPeriod = 0;
   bool _showsReaderWidget = true;
   bool _cameraLoaded = false;
+  bool _showLowSpeedWarning = false;
+  DateTime? _lowSpeedStartTime;
   late SoundFeedbackService _soundService;
   late AppSettings _appSettings;
   DateTime _latestScanStartTime = DateTime.now();
@@ -176,8 +178,19 @@ class _ScanPageState extends State<ScanPage> {
                   ),
                 )
                 .animate(target: _isReceivingData ? 0 : 1)
-                .fade(delay: const Duration(seconds: 1), begin: -0.5)
-                .moveY(delay: const Duration(seconds: 1)),
+                .fade(delay: 1.seconds, begin: -0.5)
+                .moveY(delay: 1.seconds),
+            Align(
+                  alignment: Alignment.topCenter,
+                  child: SafeArea(
+                    child: _HelpMessageWidget(
+                      message: context.l10n.low_speed_warning,
+                    ),
+                  ),
+                )
+                .animate(target: _showLowSpeedWarning ? 1 : 0)
+                .fade(delay: 300.ms, begin: -0.5)
+                .moveY(delay: 300.ms),
             ScanProgressWidget(
               chunkCount: _decodedChunkCount,
               speed: '${_speed.toStringAsFixed(1)}kB/s',
@@ -234,7 +247,24 @@ class _ScanPageState extends State<ScanPage> {
     ) {
       _speed = _dataLengthInLastPeriod / speedPollingMs;
       _dataLengthInLastPeriod = 0;
+      _updateLowSpeedWarning();
     });
+  }
+
+  void _updateLowSpeedWarning() {
+    if (!_isReceivingData) return;
+    if (_speed >= 40) {
+      _lowSpeedStartTime = null;
+      if (_showLowSpeedWarning) {
+        setState(() => _showLowSpeedWarning = false);
+      }
+    } else {
+      _lowSpeedStartTime ??= DateTime.now();
+      if (DateTime.now().difference(_lowSpeedStartTime!).inSeconds >= 2 &&
+          !_showLowSpeedWarning) {
+        setState(() => _showLowSpeedWarning = true);
+      }
+    }
   }
 
   void _handleMultiscan(Codes codes) {
@@ -512,6 +542,8 @@ class _ScanPageState extends State<ScanPage> {
     _decodedChunkCount = 0;
     _fileMetadata = null;
     _renameController.text = '';
+    _showLowSpeedWarning = false;
+    _lowSpeedStartTime = null;
     setState(() {});
 
     _speedTimer?.cancel();
@@ -593,7 +625,7 @@ class _HelpMessageWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(64),
           color: Colors.black.withAlpha(140),
           boxShadow: [
             BoxShadow(
