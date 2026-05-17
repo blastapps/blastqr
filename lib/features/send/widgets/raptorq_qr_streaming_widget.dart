@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
@@ -63,10 +64,8 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
   int _qrCount = 0;
   final Map<int, ui.Image> _imageCache = {};
   bool _isEncoding = true;
-  bool _hasReceivedAllQrCodes = false;
   int _fps = defaultFpeses[2];
   int _fpsIndex = 2;
-  int _frameTick = 0;
   late StreamSubscription _imageStream;
 
   @override
@@ -91,30 +90,26 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     }
     _imageCache.clear();
     _isEncoding = true;
-    _hasReceivedAllQrCodes = false;
-    _frameTick = 0;
 
     debugPrint('Generating QR codes..');
 
-    _imageStream = widget.file
-        .qrImageStream(widget.mtu, icSettings: widget.imageCompressionSettings)
-        .listen((pixelData) {
-          final index = _qrCount;
-          _qrCount++;
-          _generateUiImage(index, pixelData);
-          widget.controller.setLength(_qrCount);
-          if (_qrCount == 1) {
-            _isEncoding = false;
-            _initTimer();
-            setState(() {});
-          }
-        });
-
-    _imageStream.onDone(() {
-      setState(() {
-        _hasReceivedAllQrCodes = true;
-      });
+    _imageStream = FileQrEncoder.encode(
+      widget.file,
+      widget.mtu,
+      icSettings: widget.imageCompressionSettings,
+    ).listen((pixelData) {
+      final index = _qrCount;
+      _qrCount++;
+      _generateUiImage(index, pixelData);
+      widget.controller.setLength(_qrCount);
+      if (_qrCount == 1) {
+        _isEncoding = false;
+        _initTimer();
+        setState(() {});
+      }
     });
+
+    _imageStream.onDone(() {});
   }
 
   void _initTimer() {
@@ -164,21 +159,17 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
           return ListenableBuilder(
             listenable: widget.controller,
             builder: (context, child) {
-              if (_hasReceivedAllQrCodes) {
-                _frameTick = (_frameTick + 1) % _qrCount;
-              }
-
               final index = widget.controller.currentChunkIndex;
               final uiImage = _imageCache[index];
               final double adaptedPadding = widget.fill ? 8 : 16;
 
               if (widget.fill) {
-                final mirrorIndex = _qrCount - 1 - _frameTick;
-                final uiImage2 = _imageCache[mirrorIndex];
                 return _FlexibleGrid(
                   constraints: c,
-                  itemBuilder: (gridIndex, w, h) {
-                    final img = gridIndex % 2 == 0 ? uiImage : uiImage2;
+                  itemBuilder: (gridIndex, totalCount, w, h) {
+                    final step = _qrCount ~/ totalCount;
+                    final imgIndex = (index + gridIndex * step) % _qrCount;
+                    final img = _imageCache[imgIndex];
                     return Container(
                       padding: const EdgeInsets.all(8),
                       height: w,
@@ -268,7 +259,8 @@ class _FlexibleGrid extends StatelessWidget {
   const _FlexibleGrid({required this.constraints, required this.itemBuilder});
 
   final BoxConstraints constraints;
-  final Widget Function(int index, double w, double h) itemBuilder;
+  final Widget Function(int index, int totalCount, double w, double h)
+  itemBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +288,12 @@ class _FlexibleGrid extends StatelessWidget {
               final index = rowIndex * columns + colIndex;
               return Expanded(
                 child: Center(
-                  child: itemBuilder(index, width / columns, height / 2),
+                  child: itemBuilder(
+                    index,
+                    2 * columns,
+                    width / columns,
+                    height / 2,
+                  ),
                 ),
               );
             }),

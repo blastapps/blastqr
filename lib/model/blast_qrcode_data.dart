@@ -4,34 +4,36 @@ import 'package:flutter/foundation.dart';
 
 enum QrEncodingType { bytes, base45, base64 }
 
-enum BlastQRTransferType {
-  rawFile,
-  compressedFile;
+enum BlastQrCompression {
+  none,
+  gzip;
 
   static final _rawFileHeader = Uint8List.fromList([0, 1]);
   static final _compressedFileHeader = Uint8List.fromList([0, 2]);
 
   Uint8List get header {
     switch (this) {
-      case BlastQRTransferType.rawFile:
+      case BlastQrCompression.none:
         return _rawFileHeader;
-      case BlastQRTransferType.compressedFile:
+      case BlastQrCompression.gzip:
         return _compressedFileHeader;
     }
   }
 
-  static BlastQRTransferType fromBytes(Uint8List bytes) {
+  static BlastQrCompression fromBytes(Uint8List bytes) {
     if (bytes[0] == _compressedFileHeader[0] &&
         bytes[1] == _compressedFileHeader[1]) {
-      return BlastQRTransferType.compressedFile;
+      return BlastQrCompression.gzip;
     }
-    return BlastQRTransferType.rawFile;
+    return BlastQrCompression.none;
   }
 }
 
 class BlastQrcodeData {
-  static final signatureBytes = Uint8List.fromList([81, 45]);
-  static final int headerLength = 16;
+  // "BQR" — 3-byte magic at offset 0 for fast frame identification
+  static final signatureBytes = Uint8List.fromList([0x42, 0x51, 0x52]);
+  static const int protocolVersion = 1;
+  static final int headerLength = 14;
 
   final int transferLength;
   final String fileExtension;
@@ -51,13 +53,13 @@ class BlastQrcodeData {
     if (!bytesIsValidBlastQrCode(bytes)) {
       throw Exception('Not a valid BlastQR code.');
     }
-    ByteData sizeByteData = bytes.buffer.asByteData(0, 4);
-    Uint8List extBytes = bytes.sublist(4, 12);
+    ByteData sizeByteData = bytes.buffer.asByteData(4, 4);
+    Uint8List extBytes = bytes.sublist(8, 12);
     int fileSize = sizeByteData.getUint32(0, Endian.big);
-    Uint8List transferTypeBytes = bytes.sublist(14, 16);
+    Uint8List transferTypeBytes = bytes.sublist(12, 14);
     int mtu = bytes.length - headerLength;
 
-    final transferType = BlastQRTransferType.fromBytes(transferTypeBytes);
+    final transferType = BlastQrCompression.fromBytes(transferTypeBytes);
     String ext = utf8
         .decode(extBytes, allowMalformed: false)
         .replaceAll('\x00', '');
@@ -68,16 +70,16 @@ class BlastQrcodeData {
       fileExtension: ext,
       data: packetBytes,
       mtu: mtu,
-      isCompressedData: transferType == BlastQRTransferType.compressedFile,
+      isCompressedData: transferType == BlastQrCompression.gzip,
     );
   }
 
   static bool bytesIsValidBlastQrCode(Uint8List? bytes) {
-    if (bytes == null) {
+    if (bytes == null || bytes.length < headerLength) {
       return false;
     }
-    Uint8List signature = bytes.sublist(12, 14);
-    return (signature[0] == signatureBytes[0] &&
-        signature[1] == signatureBytes[1]);
+    return bytes[0] == signatureBytes[0] &&
+        bytes[1] == signatureBytes[1] &&
+        bytes[2] == signatureBytes[2];
   }
 }

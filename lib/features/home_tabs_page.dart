@@ -4,11 +4,11 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/files_page.dart';
 import 'package:blast_qr/features/scan/scan_page.dart';
-import 'package:blast_qr/features/send/send_page.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/send/send_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +35,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
+    if (Platform.isMacOS) return;
     final handler = ShareHandlerPlatform.instance;
     media = await handler.getInitialSharedMedia();
 

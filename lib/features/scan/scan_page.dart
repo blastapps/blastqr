@@ -10,6 +10,7 @@ import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
+import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';

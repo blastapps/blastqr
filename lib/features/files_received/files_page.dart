@@ -5,6 +5,7 @@ import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/blast_chip.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
