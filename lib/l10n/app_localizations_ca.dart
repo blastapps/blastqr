@@ -269,4 +269,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get next => 'Següent';
+
+  @override
+  String get file_too_large => 'Fitxer massa gran';
+
+  @override
+  String get file_too_large_msg =>
+      'Aquest fitxer supera el límit de 4 GB i no es pot enviar.';
 }

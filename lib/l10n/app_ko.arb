@@ -71,5 +71,7 @@
   "selected": "선택됨",
   "delete_files_msg": "선택한 파일을 삭제하시겠습니까?",
   "selected_options": "선택된 파일",
-  "next": "다음"
+  "next": "다음",
+  "file_too_large": "파일이 너무 큽니다",
+  "file_too_large_msg": "이 파일은 4GB 제한을 초과하여 전송할 수 없습니다."
 }

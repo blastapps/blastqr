@@ -266,4 +266,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get next => '다음';
+
+  @override
+  String get file_too_large => '파일이 너무 큽니다';
+
+  @override
+  String get file_too_large_msg => '이 파일은 4GB 제한을 초과하여 전송할 수 없습니다.';
 }

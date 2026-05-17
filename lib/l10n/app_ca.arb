@@ -75,5 +75,7 @@
   "selected": "seleccionats",
   "delete_files_msg": "Segur que vols suprimir els fitxers seleccionats?",
   "selected_options": "Fitxers seleccionats",
-  "next": "Següent"
+  "next": "Següent",
+  "file_too_large": "Fitxer massa gran",
+  "file_too_large_msg": "Aquest fitxer supera el límit de 4 GB i no es pot enviar."
 }

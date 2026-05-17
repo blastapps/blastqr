@@ -605,6 +605,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next'**
   String get next;
+
+  /// No description provided for @file_too_large.
+  ///
+  /// In en, this message translates to:
+  /// **'File too large'**
+  String get file_too_large;
+
+  /// No description provided for @file_too_large_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This file exceeds the 4 GB limit and cannot be sent.'**
+  String get file_too_large_msg;
 }
 
 class _AppLocalizationsDelegate

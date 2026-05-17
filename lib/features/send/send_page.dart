@@ -218,16 +218,35 @@ class _SendPageState extends State<SendPage> {
 
   void _showQrPage(File file) async {
     final fileWrapper = await file.toFileWrapper();
-    if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (context) {
-            return QrPage(file: fileWrapper);
-          },
-        ),
+    if (!mounted) return;
+
+    const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
+    if (fileWrapper.size > maxFileSize) {
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(context.l10n.file_too_large),
+              content: Text(context.l10n.file_too_large_msg),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(context.l10n.ok),
+                ),
+              ],
+            ),
       );
+      return;
     }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) {
+          return QrPage(file: fileWrapper);
+        },
+      ),
+    );
   }
 
   void _onTapHelp() {

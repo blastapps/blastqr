@@ -269,4 +269,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get next => 'Siguiente';
+
+  @override
+  String get file_too_large => 'Archivo demasiado grande';
+
+  @override
+  String get file_too_large_msg =>
+      'Este archivo supera el límite de 4 GB y no se puede enviar.';
 }

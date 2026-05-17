@@ -82,5 +82,7 @@
   "selected": "selected",
   "delete_files_msg": "Are you sure you want to delete the selected files?",
   "selected_options": "Selected files",
-  "next": "Next"
+  "next": "Next",
+  "file_too_large": "File too large",
+  "file_too_large_msg": "This file exceeds the 4 GB limit and cannot be sent."
 }
