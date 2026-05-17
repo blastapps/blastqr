@@ -23,6 +23,8 @@ class FileType {
       isVideo = mimeType?.startsWith('video') == true;
 
   bool get allowsImageCompression => isImage;
+
+  bool get isPrecompressed => isAudio || isVideo;
 }
 
 extension FileTypeExtension on FileType {

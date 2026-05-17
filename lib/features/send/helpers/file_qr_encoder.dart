@@ -20,7 +20,7 @@ typedef _QrBuildArgs =
       List<Uint8List> chunks,
       Uint8List sizeBytes,
       Uint8List fileExtBytes,
-      Uint8List transferTypeHeader,
+      int compressionByte,
       int qrVersion,
     });
 
@@ -29,13 +29,13 @@ void _buildQrPixelsBatched(({_QrBuildArgs args, SendPort sendPort}) message) {
   final sendPort = message.sendPort;
 
   for (final chunk in args.chunks) {
-    final combined = Uint8List(3 + 1 + 4 + 4 + 2 + chunk.length);
+    final combined = Uint8List(3 + 1 + 4 + 4 + 1 + chunk.length);
     combined.setAll(0, BlastQrcodeData.signatureBytes);
     combined[3] = BlastQrcodeData.protocolVersion;
     combined.setAll(4, args.sizeBytes);
     combined.setAll(8, args.fileExtBytes);
-    combined.setAll(12, args.transferTypeHeader);
-    combined.setAll(14, chunk);
+    combined[12] = args.compressionByte;
+    combined.setAll(13, chunk);
 
     final qrCode = QrCode(args.qrVersion, QrErrorCorrectLevel.L);
     qrCode.addByteData(combined.buffer.asByteData());
@@ -101,9 +101,10 @@ class FileQrEncoder {
     }
 
     var bytes = await file.file.readAsBytes();
-    // Videos are already codec-compressed; gzip yields negligible savings.
     var compression =
-        file.type.isVideo ? BlastQrCompression.none : BlastQrCompression.gzip;
+        file.type.isPrecompressed
+            ? BlastQrCompression.none
+            : BlastQrCompression.gzip;
 
     // Image compression
     if (usesImageCompression && file.type.allowsImageCompression) {
@@ -162,7 +163,7 @@ class FileQrEncoder {
         chunks: chunks,
         sizeBytes: sizeBytes,
         fileExtBytes: fileExtBytes,
-        transferTypeHeader: compression.header,
+        compressionByte: compression.headerByte,
         qrVersion: qrVersion,
       ),
       sendPort: receivePort.sendPort,

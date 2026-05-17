@@ -8,24 +8,22 @@ enum BlastQrCompression {
   none,
   gzip;
 
-  static final _rawFileHeader = Uint8List.fromList([0, 1]);
-  static final _compressedFileHeader = Uint8List.fromList([0, 2]);
+  static const _noneValue = 0x01;
+  static const _gzipValue = 0x02;
 
-  Uint8List get header {
+  int get headerByte {
     switch (this) {
       case BlastQrCompression.none:
-        return _rawFileHeader;
+        return _noneValue;
       case BlastQrCompression.gzip:
-        return _compressedFileHeader;
+        return _gzipValue;
     }
   }
 
-  static BlastQrCompression fromBytes(Uint8List bytes) {
-    if (bytes[0] == _compressedFileHeader[0] &&
-        bytes[1] == _compressedFileHeader[1]) {
-      return BlastQrCompression.gzip;
-    }
-    return BlastQrCompression.none;
+  static BlastQrCompression fromByte(int byte) {
+    return byte == _gzipValue
+        ? BlastQrCompression.gzip
+        : BlastQrCompression.none;
   }
 }
 
@@ -33,7 +31,7 @@ class BlastQrcodeData {
   // "BQR" — 3-byte magic at offset 0 for fast frame identification
   static final signatureBytes = Uint8List.fromList([0x42, 0x51, 0x52]);
   static const int protocolVersion = 1;
-  static final int headerLength = 14;
+  static final int headerLength = 13;
 
   final int transferLength;
   final String fileExtension;
@@ -56,10 +54,9 @@ class BlastQrcodeData {
     ByteData sizeByteData = bytes.buffer.asByteData(4, 4);
     Uint8List extBytes = bytes.sublist(8, 12);
     int fileSize = sizeByteData.getUint32(0, Endian.big);
-    Uint8List transferTypeBytes = bytes.sublist(12, 14);
     int mtu = bytes.length - headerLength;
 
-    final transferType = BlastQrCompression.fromBytes(transferTypeBytes);
+    final transferType = BlastQrCompression.fromByte(bytes[12]);
     String ext = utf8
         .decode(extBytes, allowMalformed: false)
         .replaceAll('\x00', '');
