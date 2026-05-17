@@ -101,10 +101,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get minutes => 'minutos';
 
   @override
-  String get image_compression_settings => 'Image settings';
+  String get image_compression => 'Image compression';
 
   @override
-  String get image_quality => 'Image quality';
+  String get image_quality => 'Quality';
 
   @override
   String get send_large_file => 'Send large file anyway';
@@ -207,6 +207,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chunk_length => 'Longitud del fragmento';
 
   @override
+  String get playback_fps => 'Velocidad de reproducción de secuencia';
+
+  @override
   String get licenses => 'Licencias';
 
   @override
@@ -216,7 +219,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get downscaling => 'Downscaling';
 
   @override
-  String get camera_resolution => 'Camera resolution';
+  String get camera_resolution => 'Camera preview resolution';
 
   @override
   String get feedback => 'Retroalimentación';

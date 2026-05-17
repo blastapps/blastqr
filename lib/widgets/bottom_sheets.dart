@@ -1,6 +1,8 @@
+import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/blast_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class TextInputSheet extends StatelessWidget {
   const TextInputSheet({
@@ -105,7 +107,6 @@ class SliderSheet extends StatefulWidget {
   const SliderSheet({
     super.key,
     required this.title,
-    required this.message,
     required this.confirmText,
     required this.onConfirm,
     required this.min,
@@ -114,7 +115,6 @@ class SliderSheet extends StatefulWidget {
   });
 
   final String title;
-  final String message;
   final String confirmText;
   final void Function(int val) onConfirm;
   final int min;
@@ -127,11 +127,39 @@ class SliderSheet extends StatefulWidget {
 
 class _SliderSheetState extends State<SliderSheet> {
   int _value = 0;
+  late final TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
     _value = widget.value;
+    _textController = TextEditingController(text: widget.value.toString());
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged(String text) {
+    final parsed = int.tryParse(text);
+    if (parsed == null) return;
+    final clamped = parsed.clamp(widget.min, widget.max);
+    setState(() {
+      _value = clamped;
+    });
+  }
+
+  void _onSliderChanged(double val) {
+    final intVal = val.toInt();
+    setState(() {
+      _value = intVal;
+      _textController.text = intVal.toString();
+      _textController.selection = TextSelection.collapsed(
+        offset: _textController.text.length,
+      );
+    });
   }
 
   @override
@@ -140,23 +168,32 @@ class _SliderSheetState extends State<SliderSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(_value.toString()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: BlastTextField(
+            controller: _textController,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            onSubmitted: _onTextChanged,
+            textAlign: TextAlign.center,
+            autofocus: false,
+            style: const TextStyle(fontFamily: 'Jersey25', fontSize: 32),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Slider.adaptive(
+          child: Slider(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
             min: widget.min.toDouble(),
             max: widget.max.toDouble(),
             value: _value.toDouble(),
-            onChanged: (val) {
-              setState(() {
-                _value = val.toInt();
-              });
-            },
+            onChanged: _onSliderChanged,
           ),
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           onPressed: () {
+            _onTextChanged(_textController.text);
             _confirm(context);
           },
           child: Text(widget.confirmText),
@@ -225,6 +262,7 @@ Future<void> showMessage({
 Future<void> showSheet({
   required BuildContext context,
   required String title,
+  String? message,
   required Widget body,
   Color? backgroundColor,
 }) {
@@ -259,7 +297,29 @@ Future<void> showSheet({
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Text(title, style: Theme.of(context).textTheme.titleLarge),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            if (message?.isNotEmpty == true)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: context.color.surfaceContainer,
+                    border: Border.all(color: context.color.outline),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 12,
+                    children: [
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedInformationCircle,
+                      ),
+                      Expanded(child: Text(message!)),
+                    ],
+                  ),
+                ),
+              ),
             body,
           ],
         ),
@@ -302,6 +362,7 @@ Future<void> showTextInputSheet(
 Future<void> showPickerSheet(
   BuildContext context, {
   required title,
+  String? message,
   required List<String> items,
   List<Widget>? icons,
   double? itemHeight = 56,
@@ -310,6 +371,7 @@ Future<void> showPickerSheet(
   return showSheet(
     context: context,
     title: title,
+    message: message,
     body: PickerSheet(
       items: items,
       onItemTap: onItemTap,
@@ -332,11 +394,11 @@ Future<void> showSliderSheet(
   return showSheet(
     context: context,
     title: title,
+    message: message,
     body: Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: SliderSheet(
         title: title,
-        message: message ?? '',
         confirmText: confirmText ?? context.l10n.save,
         onConfirm: onConfirm,
         value: value,

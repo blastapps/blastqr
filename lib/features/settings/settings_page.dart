@@ -1,14 +1,15 @@
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/settings/behaviour_page.dart';
-import 'package:blast_qr/features/settings/lang_appearance_page.dart';
-import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
+import 'package:blast_qr/features/settings/appearance_page.dart';
+import 'package:blast_qr/features/settings/receiving_settings_page.dart';
+import 'package:blast_qr/features/settings/send_settings_page.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -27,10 +28,40 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text(context.l10n.settings),
         surfaceTintColor: Colors.transparent,
       ),
+      bottomNavigationBar: SafeArea(
+        child: SizedBox(
+          height: 80,
+          child: Column(
+            children: [
+              TextButton(
+                onPressed: () {
+                  showLicensePage(
+                    applicationName: '',
+                    applicationIcon: const LogoWidget(),
+                    context: context,
+                  );
+                },
+                child: Text(context.l10n.licenses),
+              ),
+              FutureBuilder(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, s) {
+                  if (s.hasData) {
+                    return Text(
+                      'blastQR version ${s.data?.version}.${s.data?.buildNumber}',
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           16,
-          16,
+          0,
           16,
           MediaQuery.of(context).padding.bottom,
         ),
@@ -67,53 +98,48 @@ class _SettingsPageState extends State<SettingsPage> {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return const LangAppearancePage();
+                    return const AppearancePage();
                   },
                 ),
               );
             },
-            trailing: Icon(Icons.adaptive.arrow_forward_rounded, size: 16),
+            trailing: const Icon(Icons.chevron_right_rounded),
           ),
           ListTile(
             leading: HugeIcon(
-              icon: HugeIcons.strokeRoundedSettings04,
+              icon: HugeIcons.strokeRoundedSent02,
               color: context.color.onSurface,
             ),
-            title: Text(context.l10n.behaviour),
+            title: const Text('Sending'),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return const BehaviourPage();
+                    return const SendSettingsPage();
                   },
                 ),
               );
             },
-            trailing: Icon(Icons.adaptive.arrow_forward_rounded, size: 16),
+            trailing: const Icon(Icons.chevron_right_rounded),
           ),
-          const SizedBox(height: 16),
-          const SettingGroupTitle(title: 'blastQR'),
           ListTile(
             leading: HugeIcon(
-              icon: HugeIcons.strokeRoundedLicense,
+              icon: HugeIcons.strokeRoundedQrCode01,
               color: context.color.onSurface,
             ),
-            title: Text(context.l10n.licenses),
+            title: const Text('Receiving'),
             onTap: () {
-              showLicensePage(
-                applicationName: '',
-                applicationIcon: const LogoWidget(),
-                context: context,
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const ReceivingSettingsPage();
+                  },
+                ),
               );
             },
+            trailing: const Icon(Icons.chevron_right_rounded),
           ),
-          ListTile(
-            leading: HugeIcon(
-              icon: HugeIcons.strokeRoundedCode,
-              color: context.color.onSurface,
-            ),
-            title: const Text('v1.0.1'),
-          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

@@ -282,16 +282,16 @@ abstract class AppLocalizations {
   /// **'minutes'**
   String get minutes;
 
-  /// No description provided for @image_compression_settings.
+  /// No description provided for @image_compression.
   ///
   /// In en, this message translates to:
-  /// **'Image settings'**
-  String get image_compression_settings;
+  /// **'Image compression'**
+  String get image_compression;
 
   /// No description provided for @image_quality.
   ///
   /// In en, this message translates to:
-  /// **'Image quality'**
+  /// **'Quality'**
   String get image_quality;
 
   /// No description provided for @send_large_file.
@@ -480,6 +480,12 @@ abstract class AppLocalizations {
   /// **'QR code size'**
   String get chunk_length;
 
+  /// No description provided for @playback_fps.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequence playback speed'**
+  String get playback_fps;
+
   /// No description provided for @licenses.
   ///
   /// In en, this message translates to:
@@ -501,7 +507,7 @@ abstract class AppLocalizations {
   /// No description provided for @camera_resolution.
   ///
   /// In en, this message translates to:
-  /// **'Camera resolution'**
+  /// **'Camera preview resolution'**
   String get camera_resolution;
 
   /// No description provided for @feedback.

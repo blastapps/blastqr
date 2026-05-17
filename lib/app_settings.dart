@@ -85,12 +85,21 @@ class AppSettings extends ChangeNotifier {
 
 class EncodeSettings extends ChangeNotifier {
   int mtu;
+  int playbackFps;
 
-  EncodeSettings() : mtu = AppPreferences.mtu;
+  EncodeSettings()
+    : mtu = AppPreferences.mtu,
+      playbackFps = AppPreferences.playbackFps;
 
   void updateMtu(int mtu) {
-    AppPreferences.setMtu(mtu); // Persist
+    AppPreferences.setMtu(mtu);
     this.mtu = mtu;
+    notifyListeners();
+  }
+
+  void updatePlaybackFps(int fps) {
+    AppPreferences.setPlaybackFps(fps);
+    playbackFps = fps;
     notifyListeners();
   }
 }

@@ -37,7 +37,7 @@ class _ImageCompressionSettingsPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.image_compression_settings)),
+      appBar: AppBar(title: Text(context.l10n.image_compression)),
       body: Consumer<AppSettings>(
         builder: (context, appSettings, child) {
           final settings = appSettings.imageCompressionSettings;
@@ -63,29 +63,26 @@ class _ImageCompressionSettingsPageState
                   );
                 },
               ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${context.l10n.image_quality}: ${settings.quality}%',
-                      style: Theme.of(context).listTileTheme.titleTextStyle,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: Slider.adaptive(
-                        min: 0,
-                        max: 100,
-                        value: settings.quality.toDouble(),
-                        onChanged: (val) {
-                          _quality = val.toInt();
-                          _buildAndUpdateSettings();
-                        },
-                      ),
-                    ),
-                  ],
+              ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedImageComposition,
+                  color: context.color.onSurface,
                 ),
+                title: Text(context.l10n.image_quality),
+                subtitle: Text('${settings.quality}%'),
+                onTap: () {
+                  showSliderSheet(
+                    context,
+                    title: context.l10n.image_quality,
+                    value: settings.quality,
+                    min: 0,
+                    max: 100,
+                    onConfirm: (val) {
+                      _quality = val;
+                      _buildAndUpdateSettings();
+                    },
+                  );
+                },
               ),
               SwitchListTile.adaptive(
                 title: Text(context.l10n.downscaling),

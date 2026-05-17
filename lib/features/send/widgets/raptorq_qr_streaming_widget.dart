@@ -39,6 +39,7 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final RaptorQrStreamingWidgetController controller;
   final FileWrapper file;
   final int mtu;
+  final int fps;
   final ImageCompressionSettings? imageCompressionSettings;
   final bool fill;
   final Function()? onTap;
@@ -47,6 +48,7 @@ class RaptorQrStreamingWidget extends StatefulWidget {
     super.key,
     required this.file,
     required this.mtu,
+    required this.fps,
     required this.controller,
     required this.imageCompressionSettings,
     this.fill = true,
@@ -59,18 +61,31 @@ class RaptorQrStreamingWidget extends StatefulWidget {
 }
 
 class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
-  static const List<int> defaultFpeses = [15, 16, 20, 22, 25, 30];
+  static const List<int> _hardcodedFpses = [15, 16, 20, 22, 25, 30];
 
   int _qrCount = 0;
   final Map<int, ui.Image> _imageCache = {};
   bool _isEncoding = true;
-  int _fps = defaultFpeses[2];
-  int _fpsIndex = 2;
+  late int _fps;
+  late int _fpsIndex;
+  late List<int> _fpsList;
   late StreamSubscription _imageStream;
+
+  List<int> _buildFpsList(int settingsFps) {
+    final list = [..._hardcodedFpses];
+    if (!list.contains(settingsFps)) {
+      list.add(settingsFps);
+      list.sort();
+    }
+    return list;
+  }
 
   @override
   void initState() {
     super.initState();
+    _fpsList = _buildFpsList(widget.fps);
+    _fps = widget.fps;
+    _fpsIndex = _fpsList.indexOf(_fps);
     init();
   }
 
@@ -78,6 +93,12 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
   void didUpdateWidget(covariant RaptorQrStreamingWidget oldWidget) {
     if (oldWidget.file != widget.file) {
       init();
+    }
+    if (oldWidget.fps != widget.fps) {
+      _fpsList = _buildFpsList(widget.fps);
+      _fps = widget.fps;
+      _fpsIndex = _fpsList.indexOf(_fps);
+      _initTimer();
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -206,9 +227,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
-                            _setNextFps();
-                          },
+                          onTap: _cycleNextFps,
                           child: Text(
                             '${_fps}FPS',
                             style: const TextStyle(color: Colors.black),
@@ -226,14 +245,10 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     );
   }
 
-  void _setNextFps() {
-    if (_fpsIndex > defaultFpeses.length - 2) {
-      _fpsIndex = 0;
-    } else {
-      _fpsIndex += 1;
-    }
+  void _cycleNextFps() {
+    _fpsIndex = (_fpsIndex + 1) % _fpsList.length;
     setState(() {
-      _fps = defaultFpeses[_fpsIndex];
+      _fps = _fpsList[_fpsIndex];
     });
     _initTimer();
   }

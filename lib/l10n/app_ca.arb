@@ -58,6 +58,7 @@
   "disabled": "Desactivat",
   "data_encoding": "Codificació de dades",
   "chunk_length": "Longitud per fragment",
+  "playback_fps": "Velocitat de reproducció de seqüència",
   "licenses": "Llicències",
   "feedback": "Retroacció",
   "haptic_feedback": "Vibració",

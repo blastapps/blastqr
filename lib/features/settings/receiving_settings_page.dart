@@ -1,6 +1,6 @@
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/settings/image_compression_settings_page.dart';
+import 'package:blast_qr/extensions/string_extension.dart';
 import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
@@ -9,19 +9,36 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 
-class BehaviourPage extends StatefulWidget {
-  const BehaviourPage({super.key});
+class ReceivingSettingsPage extends StatefulWidget {
+  const ReceivingSettingsPage({super.key});
 
   @override
-  State<BehaviourPage> createState() => _BehaviourPageState();
+  State<ReceivingSettingsPage> createState() => _ReceivingSettingsPageState();
 }
 
-class _BehaviourPageState extends State<BehaviourPage> {
+class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.behaviour)),
+      appBar: AppBar(title: const Text('Receiving')),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          height: 56,
+          child: OutlinedButton(
+            onPressed: _restoreDefaults,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                Text('Restore'),
+                HugeIcon(icon: HugeIcons.strokeRoundedUndo),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           16,
@@ -30,43 +47,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
           MediaQuery.of(context).padding.bottom,
         ),
         children: [
-          SettingGroupTitle(title: context.l10n.behaviour),
-          Consumer<EncodeSettings>(
-            builder: (context, state, child) {
-              return ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedArrowDataTransferHorizontal,
-                  color: context.color.onSurface,
-                ),
-                title: Text(context.l10n.chunk_length),
-                subtitle: Text('${state.mtu} bytes'),
-                onTap: () {
-                  showSliderSheet(
-                    context,
-                    title: context.l10n.chunk_length,
-                    message: context.l10n.chunk_length,
-                    value: state.mtu,
-                    min: 100,
-                    max: 2935,
-                    onConfirm: (mtu) {
-                      Provider.of<EncodeSettings>(
-                        context,
-                        listen: false,
-                      ).updateMtu(mtu);
-                    },
-                  );
-                },
-              );
-            },
-          ),
-          ListTile(
-            leading: HugeIcon(
-              icon: HugeIcons.strokeRoundedImage01,
-              color: context.color.onSurface,
-            ),
-            title: Text(context.l10n.image_compression_settings),
-            onTap: _showImageCompressionSettings,
-          ),
+          const SettingGroupTitle(title: 'Camera'),
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return ListTile(
@@ -75,12 +56,17 @@ class _BehaviourPageState extends State<BehaviourPage> {
                   color: context.color.onSurface,
                 ),
                 title: Text(context.l10n.camera_resolution),
-                subtitle: Text(appSettings.cameraResolution.name),
+                subtitle: Text(appSettings.cameraResolution.name.capitalize()),
                 onTap: () {
                   showPickerSheet(
                     context,
                     title: context.l10n.camera_resolution,
-                    items: ResolutionPreset.values.map((r) => r.name).toList(),
+                    message:
+                        'Most devices will perform better with this setting set to "High"',
+                    items:
+                        ResolutionPreset.values
+                            .map((r) => r.name.capitalize())
+                            .toList(),
                     onItemTap: (index) {
                       appSettings.updateCameraResolution(
                         ResolutionPreset.values[index],
@@ -148,14 +134,11 @@ class _BehaviourPageState extends State<BehaviourPage> {
     );
   }
 
-  void _showImageCompressionSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return const ImageCompressionSettingsPage();
-        },
-      ),
-    );
+  void _restoreDefaults() {
+    final appSettings = Provider.of<AppSettings>(context, listen: false);
+    appSettings.updateCameraResolution(ResolutionPreset.high);
+    appSettings.updateHapticFeedback(false);
+    appSettings.updateSoundFeedback(true);
   }
 }
 

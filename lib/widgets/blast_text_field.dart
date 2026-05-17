@@ -17,6 +17,8 @@ class BlastTextField extends StatefulWidget {
     this.trailingHintText,
     this.minLines,
     this.maxLines = 1,
+    this.style,
+    this.textAlign,
   });
 
   final TextEditingController? controller;
@@ -32,6 +34,8 @@ class BlastTextField extends StatefulWidget {
   final String? trailingHintText;
   final int? minLines;
   final int? maxLines;
+  final TextStyle? style;
+  final TextAlign? textAlign;
 
   @override
   State<BlastTextField> createState() => _BlastTextFieldState();
@@ -72,8 +76,15 @@ class _BlastTextFieldState extends State<BlastTextField> {
       scrollPadding: widget.scrollPadding ?? const EdgeInsets.all(20),
       minLines: widget.minLines,
       maxLines: widget.maxLines,
+      style: widget.style,
+      textAlign: widget.textAlign ?? TextAlign.start,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+        contentPadding: EdgeInsets.fromLTRB(
+          widget.textAlign == TextAlign.center ? 48 : 12,
+          0,
+          8,
+          0,
+        ),
         hintText: widget.hintText,
         hintStyle: _hintStyle,
         prefixIcon: widget.leading,

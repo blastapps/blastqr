@@ -54,6 +54,7 @@
   "theme_black": "블랙 (OLED)",
   "data_encoding": "데이터 인코딩",
   "chunk_length": "청크 길이",
+  "playback_fps": "시퀀스 재생 속도",
   "licenses": "라이선스",
   "feedback": "피드백",
   "haptic_feedback": "햅틱 피드백",

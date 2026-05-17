@@ -17,7 +17,7 @@ class ImageCompressionSettings {
   static ImageCompressionSettings defaultSettings =
       const ImageCompressionSettings(
         outputFormat: ImageCompressionOutputFormat.jpeg,
-        quality: 60,
+        quality: 75,
         minSize: 1536,
       );
 
@@ -56,6 +56,14 @@ class ImageCompressionSettings {
     } catch (e) {
       return ImageCompressionSettings.defaultSettings;
     }
+  }
+
+  @override
+  String toString() {
+    if (minSize < 999999) {
+      return '${outputFormat.name.toUpperCase()} | $quality% | ${minSize}px';
+    }
+    return '${outputFormat.name.toUpperCase()} | $quality%';
   }
 }
 

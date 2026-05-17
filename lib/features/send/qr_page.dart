@@ -94,6 +94,7 @@ class _QrPageState extends State<QrPage> {
                                   controller: _qrController,
                                   file: widget.file,
                                   mtu: state.mtu,
+                                  fps: state.playbackFps,
                                   imageCompressionSettings:
                                       _shouldCompressImage
                                           ? appSettings.imageCompressionSettings

@@ -395,9 +395,7 @@ class _FilesPageState extends State<FilesPage> {
                   }, childCount: listItems.length),
                 ),
               SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom + 80,
-                ),
+                child: SizedBox(height: MediaQuery.of(context).padding.bottom),
               ),
             ],
           );

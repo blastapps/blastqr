@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 
-class LangAppearancePage extends StatefulWidget {
-  const LangAppearancePage({super.key});
+class AppearancePage extends StatefulWidget {
+  const AppearancePage({super.key});
 
   @override
-  State<LangAppearancePage> createState() => _LangAppearancePageState();
+  State<AppearancePage> createState() => _AppearancePageState();
 }
 
-class _LangAppearancePageState extends State<LangAppearancePage> {
+class _AppearancePageState extends State<AppearancePage> {
   @override
   Widget build(BuildContext context) {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
