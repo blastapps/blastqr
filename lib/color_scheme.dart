@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 const accentColorOptions = [
   Color(0xFF9D0000),
   Color(0xFFFF0000),
-  Color(0xFFFF6A00),
-  Color(0xFFFFB300),
-  Color(0xFF007D0F),
+  Color(0xFFFF5E00),
+  Color(0xFFFF9100),
   Color(0xFF0BB31F),
   Color(0xFF00BBD4),
-  Color(0xFF005ABB),
-  Color(0xFF8317FF),
+  Color(0xFF0066FF),
+  Color(0xFF8A23FF),
+  Color(0xFFA0005A),
   Color(0xFFFF00DD),
-  Color(0xFFFF7CD3),
+  Color(0xFFFF76D1),
   Color(0xFF4f4f4f),
 ];
 

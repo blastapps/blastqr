@@ -29,19 +29,28 @@ class _SettingsPageState extends State<SettingsPage> {
         surfaceTintColor: Colors.transparent,
       ),
       bottomNavigationBar: SafeArea(
-        child: SizedBox(
-          height: 80,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+          height: 90,
           child: Column(
+            spacing: 4,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextButton(
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   showLicensePage(
                     applicationName: '',
                     applicationIcon: const LogoWidget(),
                     context: context,
                   );
                 },
-                child: Text(context.l10n.licenses),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                  child: Text(
+                    context.l10n.licenses,
+                    style: TextStyle(color: context.color.primary),
+                  ),
+                ),
               ),
               FutureBuilder(
                 future: PackageInfo.fromPlatform(),

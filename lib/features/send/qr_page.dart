@@ -310,8 +310,8 @@ class FileHeaderWidget extends StatelessWidget {
         alignment: Alignment.topRight,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 8,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 12,
             children: [
               Container(
                 width: 72,
@@ -332,6 +332,7 @@ class FileHeaderWidget extends StatelessWidget {
               ),
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
@@ -345,7 +346,6 @@ class FileHeaderWidget extends StatelessWidget {
                       ),
                     ),
                     Text(file.sizeInkB),
-                    Text('$_estimatedTransferTime ${context.l10n.to_transfer}'),
                   ],
                 ),
               ),

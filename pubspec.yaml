@@ -36,7 +36,7 @@ dependencies:
   camera: ^0.11.4
   wakelock_plus: ^1.5.2
   flutter_soloud: ^4.0.5
-  package_info_plus: ^10.1.0
+  package_info_plus: ^9.0.1
   media_scanner: ^2.2.1
   raptorq_flutter:
     path: ../raptorq_flutter
