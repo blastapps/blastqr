@@ -28,6 +28,7 @@ class _QrPageState extends State<QrPage> {
   bool get _isLargeFile => widget.file.size > 600000;
   bool _largeFileAcknowledged = false;
   bool _shouldCompressImage = false;
+  int? _compressedSize;
 
   bool _fullscreenMode = false;
 
@@ -54,7 +55,11 @@ class _QrPageState extends State<QrPage> {
         child: Column(
           children: [
             if (!_fullscreenMode)
-              FileHeaderWidget(file: widget.file, onTapDismiss: _dismiss),
+              FileHeaderWidget(
+                file: widget.file,
+                onTapDismiss: _dismiss,
+                compressedSize: _compressedSize,
+              ),
             Expanded(
               key: const ValueKey('qr_container'),
               child: Align(
@@ -101,6 +106,11 @@ class _QrPageState extends State<QrPage> {
                                           : null,
                                   fill: _fullscreenMode,
                                   onTap: _onToggleFullscreen,
+                                  onStart:
+                                      (size) => _onStart(
+                                        size,
+                                        multipleQrCodes: state.multipleQrCodes,
+                                      ),
                                 );
                               },
                             ),
@@ -154,6 +164,18 @@ class _QrPageState extends State<QrPage> {
         ),
       ),
     );
+  }
+
+  void _onStart(int size, {required bool multipleQrCodes}) {
+    setState(() {
+      _compressedSize = size;
+      if (multipleQrCodes) {
+        _fullscreenMode = true;
+      }
+    });
+    if (multipleQrCodes) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    }
   }
 
   void _onToggleFullscreen() {
@@ -287,14 +309,16 @@ class _FileTooLargeAlertWidgetState extends State<FileTooLargeAlertWidget> {
 }
 
 class FileHeaderWidget extends StatelessWidget {
+  final FileWrapper file;
+  final void Function() onTapDismiss;
+  final int? compressedSize;
+
   const FileHeaderWidget({
     super.key,
     required this.file,
     required this.onTapDismiss,
+    this.compressedSize,
   });
-
-  final FileWrapper file;
-  final void Function() onTapDismiss;
 
   String get _estimatedTransferTime {
     final fast = file.getEstimateTransferTime(40);
@@ -345,7 +369,20 @@ class FileHeaderWidget extends StatelessWidget {
                         softWrap: false,
                       ),
                     ),
-                    Text(file.sizeInkB),
+                    if (compressedSize != null && compressedSize != file.size)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 4,
+                        children: [
+                          Text(file.sizeInkB),
+                          const Icon(Icons.arrow_forward, size: 14),
+                          Text(
+                            '${(compressedSize! / 1000).toStringAsFixed(0)} KB',
+                          ),
+                        ],
+                      )
+                    else
+                      Text(file.sizeInkB),
                   ],
                 ),
               ),

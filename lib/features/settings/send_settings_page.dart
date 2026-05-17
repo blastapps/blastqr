@@ -48,6 +48,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
         ),
         children: [
           const SettingGroupTitle(title: 'QR Codes'),
+
           Consumer<EncodeSettings>(
             builder: (context, state, child) {
               return ListTile(
@@ -106,6 +107,26 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               );
             },
           ),
+          Consumer<EncodeSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                secondary: HugeIcon(
+                  icon: HugeIcons.strokeRoundedQrCode01,
+                  color: context.color.onSurface,
+                ),
+                title: const Text('Start in multi QR mode'),
+                subtitle: const Text('Displays as many codes as fit on screen'),
+                value: state.multipleQrCodes,
+                activeTrackColor: context.color.primary,
+                onChanged: (value) {
+                  Provider.of<EncodeSettings>(
+                    context,
+                    listen: false,
+                  ).updateMultipleQrCodes(value);
+                },
+              );
+            },
+          ),
           const SettingGroupTitle(title: 'Images'),
           ListTile(
             leading: HugeIcon(
@@ -129,6 +150,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
     final encodeSettings = Provider.of<EncodeSettings>(context, listen: false);
     encodeSettings.updateMtu(AppPreferences.defaultMtu);
     encodeSettings.updatePlaybackFps(20);
+    encodeSettings.updateMultipleQrCodes(false);
     Provider.of<AppSettings>(
       context,
       listen: false,

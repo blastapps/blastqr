@@ -275,4 +275,8 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get file_too_large_msg => '이 파일은 4GB 제한을 초과하여 전송할 수 없습니다.';
+
+  @override
+  String get low_speed_warning =>
+      '낮은 전송 속도가 감지되었습니다. 더 나은 성능을 위해 기기 위치를 조정하고 움직이지 않게 해주세요.';
 }

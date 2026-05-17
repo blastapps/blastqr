@@ -279,4 +279,8 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get file_too_large_msg =>
       'Aquest fitxer supera el límit de 4 GB i no es pot enviar.';
+
+  @override
+  String get low_speed_warning =>
+      'S\'ha detectat una velocitat de transferència baixa. Ajusta la posició dels dispositius i mantén-los quiets per obtenir millor rendiment.';
 }

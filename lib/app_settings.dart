@@ -86,10 +86,12 @@ class AppSettings extends ChangeNotifier {
 class EncodeSettings extends ChangeNotifier {
   int mtu;
   int playbackFps;
+  bool multipleQrCodes;
 
   EncodeSettings()
     : mtu = AppPreferences.mtu,
-      playbackFps = AppPreferences.playbackFps;
+      playbackFps = AppPreferences.playbackFps,
+      multipleQrCodes = AppPreferences.multipleQrCodes;
 
   void updateMtu(int mtu) {
     AppPreferences.setMtu(mtu);
@@ -100,6 +102,12 @@ class EncodeSettings extends ChangeNotifier {
   void updatePlaybackFps(int fps) {
     AppPreferences.setPlaybackFps(fps);
     playbackFps = fps;
+    notifyListeners();
+  }
+
+  void updateMultipleQrCodes(bool value) {
+    AppPreferences.setMultipleQrCodes(value);
+    multipleQrCodes = value;
     notifyListeners();
   }
 }

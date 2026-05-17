@@ -85,5 +85,6 @@
   "selected_options": "Selected files",
   "next": "Next",
   "file_too_large": "File too large",
-  "file_too_large_msg": "This file exceeds the 4 GB limit and cannot be sent."
+  "file_too_large_msg": "This file exceeds the 4 GB limit and cannot be sent.",
+  "low_speed_warning": "Low transfer speed. Adjust the position of the devices and keep them still for better performance."
 }

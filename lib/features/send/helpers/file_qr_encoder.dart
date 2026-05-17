@@ -81,6 +81,7 @@ class FileQrEncoder {
     FileWrapper file,
     int mtu, {
     ImageCompressionSettings? icSettings,
+    void Function(int)? onCompressedSize,
   }) async* {
     final usesImageCompression = icSettings != null;
 
@@ -129,6 +130,7 @@ class FileQrEncoder {
     }
     final actualTransferSize = bytes.length;
     debugPrint('Compressed file: ${file.size} -> $actualTransferSize');
+    onCompressedSize?.call(actualTransferSize);
 
     // Any K out of (K + repairPackets) symbols decodes successfully.
     // At 60% redundancy the receiver only needs to scan ~62.5% of QR frames.

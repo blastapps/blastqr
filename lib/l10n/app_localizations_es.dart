@@ -279,4 +279,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get file_too_large_msg =>
       'Este archivo supera el límite de 4 GB y no se puede enviar.';
+
+  @override
+  String get low_speed_warning =>
+      'Velocidad de transferencia baja detectada. Ajusta la posición de los dispositivos y mantenlos quietos para obtener mejor rendimiento.';
 }

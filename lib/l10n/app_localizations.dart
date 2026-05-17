@@ -623,6 +623,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This file exceeds the 4 GB limit and cannot be sent.'**
   String get file_too_large_msg;
+
+  /// No description provided for @low_speed_warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Low transfer speed. Adjust the position of the devices and keep them still for better performance.'**
+  String get low_speed_warning;
 }
 
 class _AppLocalizationsDelegate

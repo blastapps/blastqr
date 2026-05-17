@@ -43,6 +43,7 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final ImageCompressionSettings? imageCompressionSettings;
   final bool fill;
   final Function()? onTap;
+  final void Function(int)? onStart;
 
   const RaptorQrStreamingWidget({
     super.key,
@@ -53,6 +54,7 @@ class RaptorQrStreamingWidget extends StatefulWidget {
     required this.imageCompressionSettings,
     this.fill = true,
     this.onTap,
+    this.onStart,
   });
 
   @override
@@ -118,6 +120,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
       widget.file,
       widget.mtu,
       icSettings: widget.imageCompressionSettings,
+      onCompressedSize: widget.onStart,
     ).listen((pixelData) {
       final index = _qrCount;
       _qrCount++;

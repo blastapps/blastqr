@@ -18,6 +18,7 @@ class AppPreferences {
   static ResolutionPreset? _cameraResolution;
   static bool? _hapticFeedback;
   static bool? _soundFeedback;
+  static bool? _multipleQrCodes;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
@@ -32,6 +33,7 @@ class AppPreferences {
       _cameraResolution ?? ResolutionPreset.high;
   static bool get hapticFeedback => _hapticFeedback ?? false;
   static bool get soundFeedback => _soundFeedback ?? true;
+  static bool get multipleQrCodes => _multipleQrCodes ?? false;
 
   static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
@@ -104,6 +106,12 @@ class AppPreferences {
     _soundFeedback = value;
   }
 
+  static Future<void> setMultipleQrCodes(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('multipleQrCodes', value);
+    _multipleQrCodes = value;
+  }
+
   static Future<void> read() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     _localeId = sp.getString('locale_id');
@@ -124,5 +132,6 @@ class AppPreferences {
             : ResolutionPreset.high;
     _hapticFeedback = sp.getBool('hapticFeedback') ?? false;
     _soundFeedback = sp.getBool('soundFeedback') ?? true;
+    _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
   }
 }
