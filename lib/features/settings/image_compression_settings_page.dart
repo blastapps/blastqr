@@ -77,6 +77,8 @@ class _ImageCompressionSettingsPageState
                     value: settings.quality,
                     min: 0,
                     max: 100,
+                    defaultValue:
+                        ImageCompressionSettings.defaultSettings.quality,
                     onConfirm: (val) {
                       _quality = val;
                       _buildAndUpdateSettings();

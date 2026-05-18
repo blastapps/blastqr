@@ -201,9 +201,6 @@ class AppLocalizationsCa extends AppLocalizations {
   String get disabled => 'Desactivat';
 
   @override
-  String get behaviour => 'Behaviour';
-
-  @override
   String get chunk_length => 'Longitud per fragment';
 
   @override
@@ -307,6 +304,10 @@ class AppLocalizationsCa extends AppLocalizations {
   String get restore_defaults => 'Restaura';
 
   @override
+  String get restore_defaults_msg =>
+      'Segur que vols restaurar aquesta configuració als seus valors predeterminats?';
+
+  @override
   String get qr_codes_section => 'Codis QR';
 
   @override
@@ -332,7 +333,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get camera_resolution_hint =>
-      'La majoria de dispositius funcionarà millor amb aquest ajust en \"Alt\"';
+      'La majoria de dispositius funcionarà millor amb aquest ajust en \"High\"';
 
   @override
   String get error => 'Error';

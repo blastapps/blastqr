@@ -198,9 +198,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get disabled => '비활성화';
 
   @override
-  String get behaviour => 'Behaviour';
-
-  @override
   String get chunk_length => '청크 길이';
 
   @override
@@ -301,6 +298,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get restore_defaults => '기본값 복원';
 
   @override
+  String get restore_defaults_msg => '이 설정을 기본값으로 복원하시겠습니까?';
+
+  @override
   String get qr_codes_section => 'QR 코드';
 
   @override
@@ -322,7 +322,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get camera_section => '카메라';
 
   @override
-  String get camera_resolution_hint => '대부분의 기기는 이 설정을 \"높음\"으로 설정하면 더 잘 작동합니다';
+  String get camera_resolution_hint =>
+      '대부분의 기기는 이 설정을 \"High\"으로 설정하면 더 잘 작동합니다';
 
   @override
   String get error => '오류';

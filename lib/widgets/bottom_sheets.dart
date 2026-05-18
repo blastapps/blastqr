@@ -62,11 +62,13 @@ class PickerSheet extends StatelessWidget {
     this.onItemTap,
     this.icons,
     this.itemHeight,
+    this.selectedItemIndex,
   });
 
   final List<String> items;
   final List<Widget>? icons;
   final double? itemHeight;
+  final int? selectedItemIndex;
   final void Function(int index)? onItemTap;
 
   double? get _height => itemHeight != null ? itemHeight! * items.length : null;
@@ -91,6 +93,13 @@ class PickerSheet extends StatelessWidget {
             return ListTile(
               title: Text(item),
               leading: icons?.elementAtOrNull(index),
+              trailing:
+                  selectedItemIndex == index
+                      ? HugeIcon(
+                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                        color: context.color.primary,
+                      )
+                      : null,
               onTap: () {
                 Navigator.of(context).pop();
                 onItemTap?.call(index);
@@ -112,6 +121,7 @@ class SliderSheet extends StatefulWidget {
     required this.min,
     required this.max,
     required this.value,
+    required this.defaultValue,
   });
 
   final String title;
@@ -120,12 +130,13 @@ class SliderSheet extends StatefulWidget {
   final int min;
   final int max;
   final int value;
+  final int defaultValue;
 
   @override
-  State<SliderSheet> createState() => _SliderSheetState();
+  State<SliderSheet> createState() => SliderSheetState();
 }
 
-class _SliderSheetState extends State<SliderSheet> {
+class SliderSheetState extends State<SliderSheet> {
   int _value = 0;
   late final TextEditingController _textController;
 
@@ -148,6 +159,16 @@ class _SliderSheetState extends State<SliderSheet> {
     final clamped = parsed.clamp(widget.min, widget.max);
     setState(() {
       _value = clamped;
+    });
+  }
+
+  void reset() {
+    setState(() {
+      _value = widget.defaultValue;
+      _textController.text = widget.defaultValue.toString();
+      _textController.selection = TextSelection.collapsed(
+        offset: _textController.text.length,
+      );
     });
   }
 
@@ -265,6 +286,8 @@ Future<void> showSheet({
   String? message,
   required Widget body,
   Color? backgroundColor,
+  Widget? titleTrailing,
+  double messageBottomPadding = 24,
 }) {
   FocusManager.instance.primaryFocus?.unfocus();
   return showModalBottomSheet<void>(
@@ -295,12 +318,18 @@ Future<void> showSheet({
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleLarge),
+                  if (titleTrailing != null) titleTrailing,
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             if (message?.isNotEmpty == true)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                padding: EdgeInsets.fromLTRB(16, 0, 16, messageBottomPadding),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -366,17 +395,20 @@ Future<void> showPickerSheet(
   required List<String> items,
   List<Widget>? icons,
   double? itemHeight = 56,
+  int? selectedItemIndex,
   required void Function(int index) onItemTap,
 }) {
   return showSheet(
     context: context,
     title: title,
     message: message,
+    messageBottomPadding: 0,
     body: PickerSheet(
       items: items,
       onItemTap: onItemTap,
       icons: icons,
       itemHeight: itemHeight,
+      selectedItemIndex: selectedItemIndex,
     ),
   );
 }
@@ -389,21 +421,29 @@ Future<void> showSliderSheet(
   required int value,
   required int min,
   required int max,
+  required int defaultValue,
   required void Function(int val) onConfirm,
 }) {
+  final sliderKey = GlobalKey<SliderSheetState>();
   return showSheet(
     context: context,
     title: title,
     message: message,
+    titleTrailing: IconButton(
+      onPressed: () => sliderKey.currentState?.reset(),
+      icon: const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
+    ),
     body: Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: SliderSheet(
+        key: sliderKey,
         title: title,
         confirmText: confirmText ?? context.l10n.save,
         onConfirm: onConfirm,
         value: value,
         min: min,
         max: max,
+        defaultValue: defaultValue,
       ),
     ),
   );

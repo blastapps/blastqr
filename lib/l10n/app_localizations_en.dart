@@ -201,9 +201,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disabled => 'Disabled';
 
   @override
-  String get behaviour => 'Behaviour';
-
-  @override
   String get chunk_length => 'QR code size';
 
   @override
@@ -305,6 +302,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get restore_defaults => 'Restore';
+
+  @override
+  String get restore_defaults_msg =>
+      'Are you sure you want to restore these settings to their default values?';
 
   @override
   String get qr_codes_section => 'QR Codes';

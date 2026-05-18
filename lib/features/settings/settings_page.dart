@@ -52,6 +52,36 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       children: [
         ListTile(
+          selected: wide && _selectedIndex == 1,
+          leading: HugeIcon(
+            icon: HugeIcons.strokeRoundedSent02,
+            color: context.color.onSurface,
+          ),
+          title: Text(context.l10n.sending_settings),
+          onTap: () => _openDetail(context, const SendSettingsPage(), 1),
+          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
+        ),
+        ListTile(
+          selected: wide && _selectedIndex == 2,
+          leading: HugeIcon(
+            icon: HugeIcons.strokeRoundedQrCode01,
+            color: context.color.onSurface,
+          ),
+          title: Text(context.l10n.receiving_settings),
+          onTap: () => _openDetail(context, const ReceivingSettingsPage(), 2),
+          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
+        ),
+        ListTile(
+          selected: wide && _selectedIndex == 0,
+          leading: HugeIcon(
+            icon: HugeIcons.strokeRoundedPaintBoard,
+            color: context.color.onSurface,
+          ),
+          title: Text(context.l10n.appearance),
+          onTap: () => _openDetail(context, const AppearancePage(), 0),
+          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
+        ),
+        ListTile(
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedLanguageSkill,
             color: context.color.onSurface,
@@ -72,36 +102,6 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             );
           },
-        ),
-        ListTile(
-          selected: wide && _selectedIndex == 0,
-          leading: HugeIcon(
-            icon: HugeIcons.strokeRoundedPaintBoard,
-            color: context.color.onSurface,
-          ),
-          title: Text(context.l10n.appearance),
-          onTap: () => _openDetail(context, const AppearancePage(), 0),
-          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
-        ),
-        ListTile(
-          selected: wide && _selectedIndex == 1,
-          leading: HugeIcon(
-            icon: HugeIcons.strokeRoundedSent02,
-            color: context.color.onSurface,
-          ),
-          title: Text(context.l10n.sending_settings),
-          onTap: () => _openDetail(context, const SendSettingsPage(), 1),
-          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
-        ),
-        ListTile(
-          selected: wide && _selectedIndex == 2,
-          leading: HugeIcon(
-            icon: HugeIcons.strokeRoundedQrCode01,
-            color: context.color.onSurface,
-          ),
-          title: Text(context.l10n.receiving_settings),
-          onTap: () => _openDetail(context, const ReceivingSettingsPage(), 2),
-          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
         ),
         const SizedBox(height: 16),
       ],
@@ -177,7 +177,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 key: _rightPaneKey,
                 onGenerateRoute:
                     (_) => MaterialPageRoute(
-                      builder: (_) => const AppearancePage(),
+                      builder: (_) => const SendSettingsPage(),
                     ),
               ),
             ),

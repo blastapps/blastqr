@@ -21,23 +21,14 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.sending_settings)),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          height: 56,
-          child: OutlinedButton(
+      appBar: AppBar(
+        title: Text(context.l10n.sending_settings),
+        actions: [
+          IconButton(
             onPressed: _restoreDefaults,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                Text(context.l10n.restore_defaults),
-                const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
-              ],
-            ),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
           ),
-        ),
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
@@ -66,6 +57,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
                     value: state.mtu,
                     min: 100,
                     max: 2935,
+                    defaultValue: AppPreferences.defaultMtu,
                     onConfirm: (mtu) {
                       Provider.of<EncodeSettings>(
                         context,
@@ -94,6 +86,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
                     value: state.playbackFps,
                     min: 1,
                     max: 90,
+                    defaultValue: AppPreferences.defaultFps,
                     onConfirm: (fps) {
                       Provider.of<EncodeSettings>(
                         context,
@@ -145,14 +138,28 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
   }
 
   void _restoreDefaults() {
-    final encodeSettings = Provider.of<EncodeSettings>(context, listen: false);
-    encodeSettings.updateMtu(AppPreferences.defaultMtu);
-    encodeSettings.updatePlaybackFps(20);
-    encodeSettings.updateMultipleQrCodes(false);
-    Provider.of<AppSettings>(
-      context,
-      listen: false,
-    ).updateImageCompressionSettings(ImageCompressionSettings.defaultSettings);
+    showMessage(
+      context: context,
+      title: context.l10n.restore_defaults,
+      message: context.l10n.restore_defaults_msg,
+      confirmTitle: context.l10n.restore_defaults,
+      secondaryTitle: context.l10n.cancel,
+      onConfirmTap: () {
+        final encodeSettings = Provider.of<EncodeSettings>(
+          context,
+          listen: false,
+        );
+        encodeSettings.updateMtu(AppPreferences.defaultMtu);
+        encodeSettings.updatePlaybackFps(AppPreferences.defaultFps);
+        encodeSettings.updateMultipleQrCodes(false);
+        Provider.of<AppSettings>(
+          context,
+          listen: false,
+        ).updateImageCompressionSettings(
+          ImageCompressionSettings.defaultSettings,
+        );
+      },
+    );
   }
 
   void _showImageCompressionSettings() {

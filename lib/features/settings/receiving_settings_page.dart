@@ -21,23 +21,14 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
   Widget build(BuildContext context) {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.receiving_settings)),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          height: 56,
-          child: OutlinedButton(
+      appBar: AppBar(
+        title: Text(context.l10n.receiving_settings),
+        actions: [
+          IconButton(
             onPressed: _restoreDefaults,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                Text(context.l10n.restore_defaults),
-                const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
-              ],
-            ),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
           ),
-        ),
+        ],
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(
@@ -60,6 +51,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                 onTap: () {
                   showPickerSheet(
                     context,
+                    selectedItemIndex: appSettings.cameraResolution.index,
                     title: context.l10n.camera_resolution,
                     message: context.l10n.camera_resolution_hint,
                     items:
@@ -134,10 +126,19 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
   }
 
   void _restoreDefaults() {
-    final appSettings = Provider.of<AppSettings>(context, listen: false);
-    appSettings.updateCameraResolution(ResolutionPreset.high);
-    appSettings.updateHapticFeedback(false);
-    appSettings.updateSoundFeedback(true);
+    showMessage(
+      context: context,
+      title: context.l10n.restore_defaults,
+      message: context.l10n.restore_defaults_msg,
+      confirmTitle: context.l10n.restore_defaults,
+      secondaryTitle: context.l10n.cancel,
+      onConfirmTap: () {
+        final appSettings = Provider.of<AppSettings>(context, listen: false);
+        appSettings.updateCameraResolution(ResolutionPreset.high);
+        appSettings.updateHapticFeedback(false);
+        appSettings.updateSoundFeedback(true);
+      },
+    );
   }
 }
 

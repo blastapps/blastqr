@@ -468,12 +468,6 @@ abstract class AppLocalizations {
   /// **'Disabled'**
   String get disabled;
 
-  /// No description provided for @behaviour.
-  ///
-  /// In en, this message translates to:
-  /// **'Behaviour'**
-  String get behaviour;
-
   /// No description provided for @chunk_length.
   ///
   /// In en, this message translates to:
@@ -671,6 +665,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore'**
   String get restore_defaults;
+
+  /// No description provided for @restore_defaults_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore these settings to their default values?'**
+  String get restore_defaults_msg;
 
   /// No description provided for @qr_codes_section.
   ///

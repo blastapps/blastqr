@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
   static int defaultMtu = 2935;
+  static int defaultFps = 20;
 
   static String? _localeId;
   static ThemeMode? _theme;
