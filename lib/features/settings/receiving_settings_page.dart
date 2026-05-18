@@ -68,7 +68,6 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
               );
             },
           ),
-          const SizedBox(height: 16),
           SettingGroupTitle(title: context.l10n.feedback),
           Consumer<AppSettings>(
             builder: (context, state, child) {
