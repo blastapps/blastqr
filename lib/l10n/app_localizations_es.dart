@@ -95,22 +95,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get large_file_msg_3 =>
-      'Would you like to send a compresed, lower quality version of this image?';
+      '¿Te gustaría enviar una versión comprimida de menor calidad de esta imagen?';
 
   @override
   String get minutes => 'minutos';
 
   @override
-  String get image_compression => 'Image compression';
+  String get image_compression => 'Compresión de imagen';
 
   @override
-  String get image_quality => 'Quality';
+  String get image_quality => 'Calidad';
 
   @override
-  String get send_large_file => 'Send large file anyway';
+  String get send_large_file => 'Enviar archivo grande de todos modos';
 
   @override
-  String get send_compressed_image => 'Send compressed image file';
+  String get send_compressed_image => 'Enviar imagen comprimida';
 
   @override
   String get to_transfer => 'para transferir';
@@ -186,19 +186,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get theme_dark => 'Oscuro';
 
   @override
-  String get pure_black => 'Use pure black color';
+  String get pure_black => 'Usar color negro puro';
 
   @override
-  String get accent_color => 'Accent color';
+  String get accent_color => 'Color de acento';
 
   @override
-  String get animations => 'Animations';
+  String get animations => 'Animaciones';
 
   @override
-  String get enabled => 'Enabled';
+  String get enabled => 'Activado';
 
   @override
-  String get disabled => 'Disabled';
+  String get disabled => 'Desactivado';
 
   @override
   String get behaviour => 'Behaviour';
@@ -213,13 +213,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get licenses => 'Licencias';
 
   @override
-  String get file_format => 'File format';
+  String get file_format => 'Formato de archivo';
 
   @override
-  String get downscaling => 'Downscaling';
+  String get downscaling => 'Reducción de escala';
 
   @override
-  String get camera_resolution => 'Camera preview resolution';
+  String get camera_resolution => 'Resolución de la cámara';
 
   @override
   String get feedback => 'Retroalimentación';
@@ -283,4 +283,71 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get low_speed_warning =>
       'Velocidad de transferencia baja detectada. Ajusta la posición de los dispositivos y mantenlos quietos para obtener mejor rendimiento.';
+
+  @override
+  String get send_file => 'Enviar archivo';
+
+  @override
+  String get send_picture => 'Enviar imagen';
+
+  @override
+  String get desktop_receive_unsupported =>
+      '* La recepción de archivos aún no es compatible en la aplicación de escritorio.';
+
+  @override
+  String get recent => 'Recientes';
+
+  @override
+  String get sending_settings => 'Envío';
+
+  @override
+  String get receiving_settings => 'Recepción';
+
+  @override
+  String get restore_defaults => 'Restaurar';
+
+  @override
+  String get qr_codes_section => 'Códigos QR';
+
+  @override
+  String get chunk_length_hint =>
+      '2935 bytes es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos.';
+
+  @override
+  String get playback_fps_hint =>
+      '20 FPS es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos.';
+
+  @override
+  String get multi_qr_mode => 'Iniciar en modo multi-QR';
+
+  @override
+  String get multi_qr_mode_subtitle =>
+      'Muestra tantos códigos como quepan en la pantalla';
+
+  @override
+  String get images_section => 'Imágenes';
+
+  @override
+  String get camera_section => 'Cámara';
+
+  @override
+  String get camera_resolution_hint =>
+      'La mayoría de dispositivos funcionarán mejor con este ajuste en \"Alto\"';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get invalid_downscale_value =>
+      'Valor no válido (debe ser mayor que 100)';
+
+  @override
+  String downscaling_subtitle(String size) {
+    return 'Reducción a ${size}px';
+  }
+
+  @override
+  String receiving_file(String extension) {
+    return 'Recibiendo archivo $extension...';
+  }
 }

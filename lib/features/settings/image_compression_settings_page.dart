@@ -105,7 +105,11 @@ class _ImageCompressionSettingsPageState
                     color: context.color.onSurface,
                   ),
                   title: Text(context.l10n.downscaling),
-                  subtitle: Text('Downscaling to ${settings.minSize}px'),
+                  subtitle: Text(
+                    context.l10n.downscaling_subtitle(
+                      settings.minSize.toString(),
+                    ),
+                  ),
                   onTap: () {
                     showTextInputSheet(
                       context,
@@ -133,8 +137,8 @@ class _ImageCompressionSettingsPageState
     if (minSize < 100) {
       showMessage(
         context: context,
-        title: 'Error',
-        message: 'Invalid value (must be larger than 100)',
+        title: context.l10n.error,
+        message: context.l10n.invalid_downscale_value,
       );
       minSize = ImageCompressionSettings.defaultSettings.minSize;
     }

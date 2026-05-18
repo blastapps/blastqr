@@ -292,7 +292,7 @@ class _ScanPageState extends State<ScanPage> {
         );
         setState(() {
           _isReceivingData = true;
-          _statusMessage = 'Receiving ${blastQr.fileExtension} file...';
+          _statusMessage = context.l10n.receiving_file(blastQr.fileExtension);
         });
         _latestScanStartTime = DateTime.now();
         debugPrint('Scanning file with: ${_fileMetadata.toString()}');

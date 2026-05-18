@@ -21,19 +21,19 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sending')),
+      appBar: AppBar(title: Text(context.l10n.sending_settings)),
       bottomNavigationBar: SafeArea(
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           height: 56,
           child: OutlinedButton(
             onPressed: _restoreDefaults,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               spacing: 8,
               children: [
-                Text('Restore'),
-                HugeIcon(icon: HugeIcons.strokeRoundedUndo),
+                Text(context.l10n.restore_defaults),
+                const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
               ],
             ),
           ),
@@ -47,7 +47,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
           MediaQuery.of(context).padding.bottom,
         ),
         children: [
-          const SettingGroupTitle(title: 'QR Codes'),
+          SettingGroupTitle(title: context.l10n.qr_codes_section),
 
           Consumer<EncodeSettings>(
             builder: (context, state, child) {
@@ -62,8 +62,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
                   showSliderSheet(
                     context,
                     title: context.l10n.chunk_length,
-                    message:
-                        '2935 bytes is the recommended value for best performance on most devices.',
+                    message: context.l10n.chunk_length_hint,
                     value: state.mtu,
                     min: 100,
                     max: 2935,
@@ -91,8 +90,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
                   showSliderSheet(
                     context,
                     title: context.l10n.playback_fps,
-                    message:
-                        '20 FPS is the recommended value for best performance on most devices.',
+                    message: context.l10n.playback_fps_hint,
                     value: state.playbackFps,
                     min: 1,
                     max: 90,
@@ -114,8 +112,8 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
                   icon: HugeIcons.strokeRoundedQrCode01,
                   color: context.color.onSurface,
                 ),
-                title: const Text('Start in multi QR mode'),
-                subtitle: const Text('Displays as many codes as fit on screen'),
+                title: Text(context.l10n.multi_qr_mode),
+                subtitle: Text(context.l10n.multi_qr_mode_subtitle),
                 value: state.multipleQrCodes,
                 activeTrackColor: context.color.primary,
                 onChanged: (value) {
@@ -127,7 +125,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               );
             },
           ),
-          const SettingGroupTitle(title: 'Images'),
+          SettingGroupTitle(title: context.l10n.images_section),
           ListTile(
             leading: HugeIcon(
               icon: HugeIcons.strokeRoundedImage01,

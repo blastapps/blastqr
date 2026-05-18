@@ -629,6 +629,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Low transfer speed. Adjust the position of the devices and keep them still for better performance.'**
   String get low_speed_warning;
+
+  /// No description provided for @send_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Send file'**
+  String get send_file;
+
+  /// No description provided for @send_picture.
+  ///
+  /// In en, this message translates to:
+  /// **'Send picture'**
+  String get send_picture;
+
+  /// No description provided for @desktop_receive_unsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'* Receiving files is not supported on the desktop app yet.'**
+  String get desktop_receive_unsupported;
+
+  /// No description provided for @recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// No description provided for @sending_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending'**
+  String get sending_settings;
+
+  /// No description provided for @receiving_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving'**
+  String get receiving_settings;
+
+  /// No description provided for @restore_defaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore_defaults;
+
+  /// No description provided for @qr_codes_section.
+  ///
+  /// In en, this message translates to:
+  /// **'QR Codes'**
+  String get qr_codes_section;
+
+  /// No description provided for @chunk_length_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'2935 bytes is the recommended value for best performance on most devices.'**
+  String get chunk_length_hint;
+
+  /// No description provided for @playback_fps_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'20 FPS is the recommended value for best performance on most devices.'**
+  String get playback_fps_hint;
+
+  /// No description provided for @multi_qr_mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Start in multi QR mode'**
+  String get multi_qr_mode;
+
+  /// No description provided for @multi_qr_mode_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Displays as many codes as fit on screen'**
+  String get multi_qr_mode_subtitle;
+
+  /// No description provided for @images_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get images_section;
+
+  /// No description provided for @camera_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera_section;
+
+  /// No description provided for @camera_resolution_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Most devices will perform better with this setting set to \"High\"'**
+  String get camera_resolution_hint;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @invalid_downscale_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid value (must be larger than 100)'**
+  String get invalid_downscale_value;
+
+  /// No description provided for @downscaling_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downscaling to {size}px'**
+  String downscaling_subtitle(String size);
+
+  /// No description provided for @receiving_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving {extension} file...'**
+  String receiving_file(String extension);
 }
 
 class _AppLocalizationsDelegate

@@ -95,22 +95,22 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get large_file_msg_3 =>
-      'Would you like to send a compresed, lower quality version of this image?';
+      'Vols enviar una versió comprimida de menor qualitat d\'aquesta imatge?';
 
   @override
   String get minutes => 'minuts';
 
   @override
-  String get image_compression => 'Image compression';
+  String get image_compression => 'Compressió d\'imatge';
 
   @override
-  String get image_quality => 'Quality';
+  String get image_quality => 'Qualitat';
 
   @override
-  String get send_large_file => 'Send large file anyway';
+  String get send_large_file => 'Envia igualment el fitxer gran';
 
   @override
-  String get send_compressed_image => 'Send compressed image file';
+  String get send_compressed_image => 'Envia el fitxer d\'imatge comprimit';
 
   @override
   String get to_transfer => 'a transferir';
@@ -213,13 +213,13 @@ class AppLocalizationsCa extends AppLocalizations {
   String get licenses => 'Llicències';
 
   @override
-  String get file_format => 'File format';
+  String get file_format => 'Format de fitxer';
 
   @override
-  String get downscaling => 'Downscaling';
+  String get downscaling => 'Reducció d\'escala';
 
   @override
-  String get camera_resolution => 'Camera preview resolution';
+  String get camera_resolution => 'Resolució de la càmera';
 
   @override
   String get feedback => 'Retroacció';
@@ -283,4 +283,71 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get low_speed_warning =>
       'S\'ha detectat una velocitat de transferència baixa. Ajusta la posició dels dispositius i mantén-los quiets per obtenir millor rendiment.';
+
+  @override
+  String get send_file => 'Envia fitxer';
+
+  @override
+  String get send_picture => 'Envia imatge';
+
+  @override
+  String get desktop_receive_unsupported =>
+      '* La recepció de fitxers encara no és compatible a l\'aplicació d\'escriptori.';
+
+  @override
+  String get recent => 'Recents';
+
+  @override
+  String get sending_settings => 'Enviament';
+
+  @override
+  String get receiving_settings => 'Recepció';
+
+  @override
+  String get restore_defaults => 'Restaura';
+
+  @override
+  String get qr_codes_section => 'Codis QR';
+
+  @override
+  String get chunk_length_hint =>
+      '2935 bytes és el valor recomanat per al millor rendiment a la majoria de dispositius.';
+
+  @override
+  String get playback_fps_hint =>
+      '20 FPS és el valor recomanat per al millor rendiment a la majoria de dispositius.';
+
+  @override
+  String get multi_qr_mode => 'Inicia en mode multi-QR';
+
+  @override
+  String get multi_qr_mode_subtitle =>
+      'Mostra tants codis com caben a la pantalla';
+
+  @override
+  String get images_section => 'Imatges';
+
+  @override
+  String get camera_section => 'Càmera';
+
+  @override
+  String get camera_resolution_hint =>
+      'La majoria de dispositius funcionarà millor amb aquest ajust en \"Alt\"';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get invalid_downscale_value =>
+      'Valor no vàlid (ha de ser superior a 100)';
+
+  @override
+  String downscaling_subtitle(String size) {
+    return 'Reducció a ${size}px';
+  }
+
+  @override
+  String receiving_file(String extension) {
+    return 'Rebent fitxer $extension...';
+  }
 }

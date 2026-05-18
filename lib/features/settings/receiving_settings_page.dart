@@ -21,19 +21,19 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
   Widget build(BuildContext context) {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(title: const Text('Receiving')),
+      appBar: AppBar(title: Text(context.l10n.receiving_settings)),
       bottomNavigationBar: SafeArea(
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           height: 56,
           child: OutlinedButton(
             onPressed: _restoreDefaults,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               spacing: 8,
               children: [
-                Text('Restore'),
-                HugeIcon(icon: HugeIcons.strokeRoundedUndo),
+                Text(context.l10n.restore_defaults),
+                const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
               ],
             ),
           ),
@@ -47,7 +47,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
           MediaQuery.of(context).padding.bottom,
         ),
         children: [
-          const SettingGroupTitle(title: 'Camera'),
+          SettingGroupTitle(title: context.l10n.camera_section),
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return ListTile(
@@ -61,8 +61,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                   showPickerSheet(
                     context,
                     title: context.l10n.camera_resolution,
-                    message:
-                        'Most devices will perform better with this setting set to "High"',
+                    message: context.l10n.camera_resolution_hint,
                     items:
                         ResolutionPreset.values
                             .map((r) => r.name.capitalize())

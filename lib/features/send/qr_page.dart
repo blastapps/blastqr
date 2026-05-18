@@ -320,12 +320,6 @@ class FileHeaderWidget extends StatelessWidget {
     this.compressedSize,
   });
 
-  String get _estimatedTransferTime {
-    final fast = file.getEstimateTransferTime(40);
-    final slow = file.getEstimateTransferTime(8);
-    return '${fast.toStringAsFixed(0)}~${slow.toStringAsFixed(0)}s';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -425,6 +419,6 @@ extension FileWrapperExtension on FileWrapper {
         ],
       );
     }
-    return FileTypeIconWidget(type: type);
+    return FileTypeIconWidget(type: type, size: size);
   }
 }

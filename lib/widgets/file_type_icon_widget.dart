@@ -2,9 +2,10 @@ import 'package:blast_qr/model/file_type.dart';
 import 'package:flutter/material.dart';
 
 class FileTypeIconWidget extends StatelessWidget {
-  const FileTypeIconWidget({super.key, required this.type});
+  const FileTypeIconWidget({super.key, required this.type, this.size});
 
   final FileType type;
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,7 @@ class FileTypeIconWidget extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(type.icon, size: 64, color: Colors.white.withAlpha(80)),
+          Icon(type.icon, size: size ?? 64, color: Colors.white.withAlpha(80)),
           FittedBox(
             child: Text(
               type.extension.toUpperCase(),

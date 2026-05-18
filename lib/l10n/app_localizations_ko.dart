@@ -93,23 +93,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get large_file_msg_2 => '까지 시간이 걸릴 수 있습니다.';
 
   @override
-  String get large_file_msg_3 =>
-      'Would you like to send a compresed, lower quality version of this image?';
+  String get large_file_msg_3 => '이 이미지의 압축된 저화질 버전을 전송하시겠습니까?';
 
   @override
   String get minutes => '분';
 
   @override
-  String get image_compression => 'Image compression';
+  String get image_compression => '이미지 압축';
 
   @override
-  String get image_quality => 'Quality';
+  String get image_quality => '화질';
 
   @override
-  String get send_large_file => 'Send large file anyway';
+  String get send_large_file => '그래도 큰 파일 보내기';
 
   @override
-  String get send_compressed_image => 'Send compressed image file';
+  String get send_compressed_image => '압축된 이미지 파일 보내기';
 
   @override
   String get to_transfer => '전송';
@@ -184,19 +183,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get theme_dark => '다크';
 
   @override
-  String get pure_black => 'Use pure black color';
+  String get pure_black => '순수 검정색 사용';
 
   @override
-  String get accent_color => 'Accent color';
+  String get accent_color => '강조 색상';
 
   @override
-  String get animations => 'Animations';
+  String get animations => '애니메이션';
 
   @override
-  String get enabled => 'Enabled';
+  String get enabled => '활성화';
 
   @override
-  String get disabled => 'Disabled';
+  String get disabled => '비활성화';
 
   @override
   String get behaviour => 'Behaviour';
@@ -211,13 +210,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get licenses => '라이선스';
 
   @override
-  String get file_format => 'File format';
+  String get file_format => '파일 형식';
 
   @override
-  String get downscaling => 'Downscaling';
+  String get downscaling => '다운스케일링';
 
   @override
-  String get camera_resolution => 'Camera preview resolution';
+  String get camera_resolution => '카메라 미리보기 해상도';
 
   @override
   String get feedback => '피드백';
@@ -278,5 +277,66 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get low_speed_warning =>
-      '낮은 전송 속도가 감지되었습니다. 더 나은 성능을 위해 기기 위치를 조정하고 움직이지 않게 해주세요.';
+      '낙은 전송 속도가 감지되었습니다. 더 나은 성능을 위해 기기 위치를 조정하고 움직이지 않게 해주세요.';
+
+  @override
+  String get send_file => '파일 보내기';
+
+  @override
+  String get send_picture => '사진 보내기';
+
+  @override
+  String get desktop_receive_unsupported => '* 데스크탑 앱에서는 아직 파일 수신이 지원되지 않습니다.';
+
+  @override
+  String get recent => '최근';
+
+  @override
+  String get sending_settings => '전송 설정';
+
+  @override
+  String get receiving_settings => '수신 설정';
+
+  @override
+  String get restore_defaults => '기본값 복원';
+
+  @override
+  String get qr_codes_section => 'QR 코드';
+
+  @override
+  String get chunk_length_hint => '2935바이트는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다.';
+
+  @override
+  String get playback_fps_hint => '20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다.';
+
+  @override
+  String get multi_qr_mode => '다중 QR 모드로 시작';
+
+  @override
+  String get multi_qr_mode_subtitle => '화면에 맞는 만큼 많은 코드를 표시합니다';
+
+  @override
+  String get images_section => '이미지';
+
+  @override
+  String get camera_section => '카메라';
+
+  @override
+  String get camera_resolution_hint => '대부분의 기기는 이 설정을 \"높음\"으로 설정하면 더 잘 작동합니다';
+
+  @override
+  String get error => '오류';
+
+  @override
+  String get invalid_downscale_value => '잘못된 값 (100보다 커야 합니다)';
+
+  @override
+  String downscaling_subtitle(String size) {
+    return '${size}px로 축소';
+  }
+
+  @override
+  String receiving_file(String extension) {
+    return '$extension 파일 수신 중...';
+  }
 }

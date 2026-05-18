@@ -283,4 +283,71 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get low_speed_warning =>
       'Low transfer speed. Adjust the position of the devices and keep them still for better performance.';
+
+  @override
+  String get send_file => 'Send file';
+
+  @override
+  String get send_picture => 'Send picture';
+
+  @override
+  String get desktop_receive_unsupported =>
+      '* Receiving files is not supported on the desktop app yet.';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get sending_settings => 'Sending';
+
+  @override
+  String get receiving_settings => 'Receiving';
+
+  @override
+  String get restore_defaults => 'Restore';
+
+  @override
+  String get qr_codes_section => 'QR Codes';
+
+  @override
+  String get chunk_length_hint =>
+      '2935 bytes is the recommended value for best performance on most devices.';
+
+  @override
+  String get playback_fps_hint =>
+      '20 FPS is the recommended value for best performance on most devices.';
+
+  @override
+  String get multi_qr_mode => 'Start in multi QR mode';
+
+  @override
+  String get multi_qr_mode_subtitle =>
+      'Displays as many codes as fit on screen';
+
+  @override
+  String get images_section => 'Images';
+
+  @override
+  String get camera_section => 'Camera';
+
+  @override
+  String get camera_resolution_hint =>
+      'Most devices will perform better with this setting set to \"High\"';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get invalid_downscale_value =>
+      'Invalid value (must be larger than 100)';
+
+  @override
+  String downscaling_subtitle(String size) {
+    return 'Downscaling to ${size}px';
+  }
+
+  @override
+  String receiving_file(String extension) {
+    return 'Receiving $extension file...';
+  }
 }

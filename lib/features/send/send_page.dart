@@ -6,6 +6,7 @@ import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
+import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,16 @@ class SendPage extends StatefulWidget {
 }
 
 class _SendPageState extends State<SendPage> {
+  final List<FileWrapper> _recentFiles = [];
+
+  void _addRecentFile(FileWrapper fw) {
+    setState(() {
+      _recentFiles.removeWhere((e) => e.file.path == fw.file.path);
+      _recentFiles.insert(0, fw);
+      if (_recentFiles.length > 5) _recentFiles.removeLast();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +120,7 @@ class _SendPageState extends State<SendPage> {
                               size: 56,
                             ),
                             Text(
-                              'Send file',
+                              context.l10n.send_file,
                               style: Theme.of(context).textTheme.bodyLarge,
                               textAlign: TextAlign.center,
                             ),
@@ -152,7 +163,7 @@ class _SendPageState extends State<SendPage> {
                               size: 56,
                             ),
                             Text(
-                              'Send picture',
+                              context.l10n.send_picture,
                               style: Theme.of(context).textTheme.bodyLarge,
                               textAlign: TextAlign.center,
                             ),
@@ -163,6 +174,7 @@ class _SendPageState extends State<SendPage> {
                   ),
                 ],
               ),
+              _RecentFilesRow(entries: _recentFiles, onFileTap: _showQrPage),
               OutlinedButton(
                 onPressed: _onTapHelp,
                 style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
@@ -180,14 +192,10 @@ class _SendPageState extends State<SendPage> {
                 ),
               ),
               if (!Platform.isAndroid && !Platform.isIOS)
-                const Column(
+                Column(
                   spacing: 16,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '* Receiving files is not supported on the desktop app yet.',
-                    ),
-                  ],
+                  children: [Text(context.l10n.desktop_receive_unsupported)],
                 ),
             ],
           ),
@@ -239,7 +247,7 @@ class _SendPageState extends State<SendPage> {
       return;
     }
 
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (context) {
@@ -247,6 +255,7 @@ class _SendPageState extends State<SendPage> {
         },
       ),
     );
+    if (mounted) _addRecentFile(fileWrapper);
   }
 
   void _onTapHelp() {
@@ -256,6 +265,87 @@ class _SendPageState extends State<SendPage> {
         builder: (context) {
           return const HelpPage();
         },
+      ),
+    );
+  }
+}
+
+class _RecentFilesRow extends StatelessWidget {
+  const _RecentFilesRow({required this.entries, required this.onFileTap});
+
+  final List<FileWrapper> entries;
+  final void Function(File) onFileTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (entries.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Text(
+          context.l10n.recent,
+          style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
+        ),
+        SizedBox(
+          height: 52,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: entries.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              return _RecentFileChip(
+                entry: entry,
+                onTap: () => onFileTap(entry.file),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RecentFileChip extends StatelessWidget {
+  const _RecentFileChip({required this.entry, required this.onTap});
+
+  final FileWrapper entry;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        width: 140,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+        decoration: BoxDecoration(
+          border: Border.all(color: context.color.outline, width: 1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 6,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+              child: entry.buildThumbnail(context, size: 36),
+            ),
+            Expanded(
+              child: Text(
+                entry.name,
+                style: Theme.of(context).textTheme.labelSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

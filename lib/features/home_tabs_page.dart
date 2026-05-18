@@ -166,18 +166,12 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
                     },
                   )
                   : null,
-          body: Builder(
-            builder: (context) {
-              switch (_currentTab) {
-                case 0:
-                  return const SendPage();
-                case 1:
-                  return const ScanPage();
-                case 2:
-                  return const FilesPage();
-              }
-              return const SizedBox();
-            },
+          body: Stack(
+            children: [
+              Offstage(offstage: _currentTab != 0, child: const SendPage()),
+              if (_currentTab == 1) const ScanPage(),
+              if (_currentTab == 2) const FilesPage(),
+            ],
           ),
         ),
       ],
