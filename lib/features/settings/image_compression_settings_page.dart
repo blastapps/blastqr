@@ -42,6 +42,12 @@ class _ImageCompressionSettingsPageState
         builder: (context, appSettings, child) {
           final settings = appSettings.imageCompressionSettings;
           return ListView(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              MediaQuery.of(context).padding.bottom,
+            ),
             children: [
               ListTile(
                 leading: HugeIcon(

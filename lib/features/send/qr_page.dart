@@ -47,6 +47,18 @@ class _QrPageState extends State<QrPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isLargeFile && !_largeFileAcknowledged) {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      if (appSettings.alwaysCompressImages) {
+        _largeFileAcknowledged = true;
+        _shouldCompressImage = true;
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _listenerDelayTimer?.cancel();
     _acousticSub?.cancel();

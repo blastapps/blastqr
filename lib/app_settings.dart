@@ -17,6 +17,7 @@ class AppSettings extends ChangeNotifier {
   bool soundFeedback;
   bool acousticDetection;
   bool hasSeenMicPrompt;
+  bool alwaysCompressImages;
 
   AppSettings()
     : locale = AppPreferences.locale,
@@ -29,7 +30,8 @@ class AppSettings extends ChangeNotifier {
       hapticFeedback = AppPreferences.hapticFeedback,
       soundFeedback = AppPreferences.soundFeedback,
       acousticDetection = AppPreferences.acousticDetection,
-      hasSeenMicPrompt = AppPreferences.hasSeenMicPrompt;
+      hasSeenMicPrompt = AppPreferences.hasSeenMicPrompt,
+      alwaysCompressImages = AppPreferences.alwaysCompressImages;
 
   void updateLocale(String? localeId) {
     log('Setting locale to $localeId');
@@ -95,6 +97,12 @@ class AppSettings extends ChangeNotifier {
   void updateHasSeenMicPrompt(bool value) {
     AppPreferences.setHasSeenMicPrompt(value);
     hasSeenMicPrompt = value;
+    notifyListeners();
+  }
+
+  void updateAlwaysCompressImages(bool value) {
+    AppPreferences.setAlwaysCompressImages(value);
+    alwaysCompressImages = value;
     notifyListeners();
   }
 }

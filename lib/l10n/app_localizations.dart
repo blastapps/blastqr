@@ -708,6 +708,18 @@ abstract class AppLocalizations {
   /// **'Images'**
   String get images_section;
 
+  /// No description provided for @always_compress_images.
+  ///
+  /// In en, this message translates to:
+  /// **'Always compress images'**
+  String get always_compress_images;
+
+  /// No description provided for @always_compress_images_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip the compression prompt for large files'**
+  String get always_compress_images_subtitle;
+
   /// No description provided for @camera_section.
   ///
   /// In en, this message translates to:

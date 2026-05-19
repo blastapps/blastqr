@@ -252,7 +252,7 @@ Future<void> showMessage({
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(message),
+          Text(message, style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 16),
           if (confirmTitle != null)
             ElevatedButton(

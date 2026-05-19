@@ -329,6 +329,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get images_section => 'Imágenes';
 
   @override
+  String get always_compress_images => 'Comprimir imágenes siempre';
+
+  @override
+  String get always_compress_images_subtitle =>
+      'Omite el aviso de compresión para archivos grandes';
+
+  @override
   String get camera_section => 'Cámara';
 
   @override

@@ -160,6 +160,21 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
             ),
             onTap: _showImageCompressionSettings,
           ),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                title: Text(context.l10n.always_compress_images),
+                value: state.alwaysCompressImages,
+                activeTrackColor: context.color.primary,
+                onChanged: (value) {
+                  Provider.of<AppSettings>(
+                    context,
+                    listen: false,
+                  ).updateAlwaysCompressImages(value);
+                },
+              );
+            },
+          ),
         ],
       ),
     );
