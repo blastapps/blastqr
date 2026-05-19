@@ -275,11 +275,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get file_too_large_msg =>
-      'Aquest fitxer supera el límit de 4 GB i no es pot enviar.';
+      'Aquest fitxer supera el límit de 4 GB i no es pot enviar';
 
   @override
   String get low_speed_warning =>
-      'S\'ha detectat una velocitat de transferència baixa. Ajusta la posició dels dispositius i mantén-los quiets per obtenir millor rendiment.';
+      'Velocitat de transferència baixa. Ajusta la posició dels dispositius i mantén-los quiets per obtenir millor rendiment';
 
   @override
   String get send_file => 'Envia fitxer';
@@ -289,7 +289,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get desktop_receive_unsupported =>
-      '* La recepció de fitxers encara no és compatible a l\'aplicació d\'escriptori.';
+      '* La recepció de fitxers encara no és compatible a l\'aplicació d\'escriptori';
 
   @override
   String get recent => 'Recents';
@@ -312,11 +312,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get chunk_length_hint =>
-      '2935 bytes és el valor recomanat per al millor rendiment a la majoria de dispositius.';
+      '2935 bytes és el valor recomanat per al millor rendiment a la majoria de dispositius';
 
   @override
   String get playback_fps_hint =>
-      '20 FPS és el valor recomanat per al millor rendiment a la majoria de dispositius.';
+      '20 FPS és el valor recomanat per al millor rendiment a la majoria de dispositius';
 
   @override
   String get multi_qr_mode => 'Inicia en mode multi-QR';

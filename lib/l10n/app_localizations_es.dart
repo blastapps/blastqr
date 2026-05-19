@@ -275,11 +275,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get file_too_large_msg =>
-      'Este archivo supera el límite de 4 GB y no se puede enviar.';
+      'Este archivo supera el límite de 4 GB y no se puede enviar';
 
   @override
   String get low_speed_warning =>
-      'Velocidad de transferencia baja detectada. Ajusta la posición de los dispositivos y mantenlos quietos para obtener mejor rendimiento.';
+      'Velocidad de transferencia baja. Ajusta la posición de los dispositivos y mantenlos quietos para obtener mejor rendimiento';
 
   @override
   String get send_file => 'Enviar archivo';
@@ -289,7 +289,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get desktop_receive_unsupported =>
-      '* La recepción de archivos aún no es compatible en la aplicación de escritorio.';
+      '* La recepción de archivos aún no es compatible en la aplicación de escritorio';
 
   @override
   String get recent => 'Recientes';
@@ -312,11 +312,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chunk_length_hint =>
-      '2935 bytes es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos.';
+      '2935 bytes es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos';
 
   @override
   String get playback_fps_hint =>
-      '20 FPS es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos.';
+      '20 FPS es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos';
 
   @override
   String get multi_qr_mode => 'Iniciar en modo multi-QR';

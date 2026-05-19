@@ -273,8 +273,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get file_too_large_msg => '이 파일은 4GB 제한을 초과하여 전송할 수 없습니다.';
 
   @override
-  String get low_speed_warning =>
-      '낙은 전송 속도가 감지되었습니다. 더 나은 성능을 위해 기기 위치를 조정하고 움직이지 않게 해주세요.';
+  String get low_speed_warning => '전송 속도가 느립니다. 기기 위치를 조정하고 움직이지 마세요';
 
   @override
   String get send_file => '파일 보내기';
@@ -283,7 +282,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_picture => '사진 보내기';
 
   @override
-  String get desktop_receive_unsupported => '* 데스크탑 앱에서는 아직 파일 수신이 지원되지 않습니다.';
+  String get desktop_receive_unsupported => '* 데스크탑 앱에서는 아직 파일 수신이 지원되지 않습니다';
 
   @override
   String get recent => '최근';
@@ -304,10 +303,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get qr_codes_section => 'QR 코드';
 
   @override
-  String get chunk_length_hint => '2935바이트는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다.';
+  String get chunk_length_hint => '2935바이트는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다';
 
   @override
-  String get playback_fps_hint => '20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다.';
+  String get playback_fps_hint => '20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다';
 
   @override
   String get multi_qr_mode => '다중 QR 모드로 시작';

@@ -279,7 +279,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get low_speed_warning =>
-      'Low transfer speed. Adjust the position of the devices and keep them still for better performance.';
+      'Low transfer speed. Adjust the position of the devices and keep them still for better performance';
 
   @override
   String get send_file => 'Send file';
@@ -289,7 +289,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get desktop_receive_unsupported =>
-      '* Receiving files is not supported on the desktop app yet.';
+      '* Receiving files is not supported on the desktop app yet';
 
   @override
   String get recent => 'Recent';
@@ -312,11 +312,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chunk_length_hint =>
-      '2935 bytes is the recommended value for best performance on most devices.';
+      '2935 bytes is the recommended value for best performance on most devices';
 
   @override
   String get playback_fps_hint =>
-      '20 FPS is the recommended value for best performance on most devices.';
+      '20 FPS is the recommended value for best performance on most devices';
 
   @override
   String get multi_qr_mode => 'Start in multi QR mode';

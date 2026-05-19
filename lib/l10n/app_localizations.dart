@@ -621,7 +621,7 @@ abstract class AppLocalizations {
   /// No description provided for @low_speed_warning.
   ///
   /// In en, this message translates to:
-  /// **'Low transfer speed. Adjust the position of the devices and keep them still for better performance.'**
+  /// **'Low transfer speed. Adjust the position of the devices and keep them still for better performance'**
   String get low_speed_warning;
 
   /// No description provided for @send_file.
@@ -639,7 +639,7 @@ abstract class AppLocalizations {
   /// No description provided for @desktop_receive_unsupported.
   ///
   /// In en, this message translates to:
-  /// **'* Receiving files is not supported on the desktop app yet.'**
+  /// **'* Receiving files is not supported on the desktop app yet'**
   String get desktop_receive_unsupported;
 
   /// No description provided for @recent.
@@ -681,13 +681,13 @@ abstract class AppLocalizations {
   /// No description provided for @chunk_length_hint.
   ///
   /// In en, this message translates to:
-  /// **'2935 bytes is the recommended value for best performance on most devices.'**
+  /// **'2935 bytes is the recommended value for best performance on most devices'**
   String get chunk_length_hint;
 
   /// No description provided for @playback_fps_hint.
   ///
   /// In en, this message translates to:
-  /// **'20 FPS is the recommended value for best performance on most devices.'**
+  /// **'20 FPS is the recommended value for best performance on most devices'**
   String get playback_fps_hint;
 
   /// No description provided for @multi_qr_mode.
