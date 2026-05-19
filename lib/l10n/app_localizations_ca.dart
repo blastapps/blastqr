@@ -110,7 +110,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get send_large_file => 'Envia el fitxer igualment';
 
   @override
-  String get send_compressed_image => 'Envia el fitxer d\'imatge comprimit';
+  String get send_compressed_image => 'Envia imatge comprimida';
 
   @override
   String get to_transfer => 'a transferir';

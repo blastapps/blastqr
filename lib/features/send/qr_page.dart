@@ -128,6 +128,8 @@ class _QrPageState extends State<QrPage> {
                                             size,
                                             multipleQrCodes:
                                                 state.multipleQrCodes,
+                                            fps: state.playbackFps,
+                                            mtu: state.mtu,
                                           ),
                                     );
                                   },
@@ -197,13 +199,28 @@ class _QrPageState extends State<QrPage> {
     );
   }
 
-  void _onStart(int size, {required bool multipleQrCodes}) {
+  void _onStart(
+    int size, {
+    required bool multipleQrCodes,
+    required int fps,
+    required int mtu,
+  }) {
     setState(() => _compressedSize = size);
     if (multipleQrCodes) _enterFullscreen();
-    _startAcousticListener(fileSize: size);
+    _startAcousticListener(
+      fileSize: size,
+      fps: fps,
+      mtu: mtu,
+      codesPerFrame: _maxQrCodesPerFrame(),
+    );
   }
 
-  void _startAcousticListener({int? fileSize}) {
+  void _startAcousticListener({
+    int? fileSize,
+    int fps = 0,
+    int mtu = 0,
+    int codesPerFrame = 1,
+  }) {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
     if (!appSettings.acousticDetection) return;
 
@@ -224,16 +241,15 @@ class _QrPageState extends State<QrPage> {
     }
 
     if (fileSize != null) {
-      // Estimate earliest possible completion at 330 KB/s (best-case speed),
-      // then subtract a 6 s buffer so we never miss the tone.
-      // A minimum delay of 2 s is enforced so even small files don't start
-      // listening immediately (700 KB files can still take ~6 s in total).
-      const bestCaseKBps = 330.0;
-      const bufferSeconds = 6.0;
-      const minDelaySeconds = 2.0;
+      // Estimate earliest possible completion based on actual fps, mtu, and
+      // number of codes displayed per frame, then subtract a 4 s buffer so
+      // we never miss the tone.
+      final bestCaseKBps = fps * mtu * codesPerFrame / 1000.0;
+      debugPrint('Best case speed: $bestCaseKBps kB/s');
+      const bufferSeconds = 4.0;
       final estimatedSeconds = fileSize / (bestCaseKBps * 1000);
       final delaySeconds = (estimatedSeconds - bufferSeconds).clamp(
-        minDelaySeconds,
+        0.0,
         double.infinity,
       );
       _listenerDelayTimer = Timer(
@@ -276,6 +292,22 @@ class _QrPageState extends State<QrPage> {
   void _onTapNext() {
     _cleanup();
     widget.onNext!();
+  }
+
+  /// Mirrors the column logic in [_FlexibleGrid]: 2 rows × 1–3 columns based
+  /// on the current screen aspect ratio.
+  int _maxQrCodesPerFrame() {
+    final size = MediaQuery.of(context).size;
+    final aspectRatio = size.width / size.height;
+    final int columns;
+    if (aspectRatio < 0.8) {
+      columns = 1;
+    } else if (aspectRatio < 1.4) {
+      columns = 2;
+    } else {
+      columns = 3;
+    }
+    return 2 * columns;
   }
 
   void _cleanup() {

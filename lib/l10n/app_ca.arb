@@ -84,7 +84,7 @@
   "image_compression": "Compressió d'imatge",
   "image_quality": "Qualitat",
   "send_large_file": "Envia el fitxer igualment",
-  "send_compressed_image": "Envia el fitxer d'imatge comprimit",
+  "send_compressed_image": "Envia imatge comprimida",
   "file_format": "Format de fitxer",
   "downscaling": "Reducció d'escala",
   "camera_resolution": "Resolució de la càmera",
