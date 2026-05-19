@@ -210,60 +210,78 @@ class _SendPageState extends State<SendPage> {
 
   void _pickFileToEncode() async {
     const XTypeGroup typeGroup = XTypeGroup(label: 'files');
-    final XFile? file = await openFile(
+    final List<XFile> files = await openFiles(
       acceptedTypeGroups: <XTypeGroup>[typeGroup],
     );
-    if (file != null && mounted) {
-      final platformFile = File(file.path);
-      _showQrPage(platformFile);
+    if (files.isNotEmpty && mounted) {
+      _showQrPages(files.map((f) => File(f.path)).toList());
     }
   }
 
   void _pickImageToEncode() async {
     final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null && mounted) {
-      final platformFile = File(image.path);
-      _showQrPage(platformFile);
+    final List<XFile> images = await picker.pickMultiImage();
+    if (images.isNotEmpty && mounted) {
+      _showQrPages(images.map((f) => File(f.path)).toList());
     }
   }
 
-  void _showQrPage(File file) async {
-    final fileWrapper = await file.toFileWrapper();
+  void _showQrPage(File file) {
+    _showQrPages([file]);
+  }
+
+  void _showQrPages(List<File> files) async {
+    final fileWrappers = await Future.wait(files.map((f) => f.toFileWrapper()));
     if (!mounted) return;
 
     const maxFileSize = 4 * 1024 * 1024 * 1024; // 4 GB
-    if (fileWrapper.size > maxFileSize) {
-      showDialog(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: Text(context.l10n.file_too_large),
-              content: Text(context.l10n.file_too_large_msg),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(context.l10n.ok),
-                ),
-              ],
-            ),
-      );
-      return;
+    for (final fileWrapper in fileWrappers) {
+      if (fileWrapper.size > maxFileSize) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text(context.l10n.file_too_large),
+                content: Text(context.l10n.file_too_large_msg),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(context.l10n.ok),
+                  ),
+                ],
+              ),
+        );
+        return;
+      }
     }
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) {
-          return QrPage(file: fileWrapper);
-        },
-      ),
-    );
-    if (mounted) _addRecentFile(fileWrapper);
+    await Navigator.of(context).push(_qrRouteForIndex(fileWrappers, 0));
+    if (mounted) {
+      for (final fw in fileWrappers) {
+        _addRecentFile(fw);
+      }
+    }
     if (mounted) {
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) await _maybeShowMicPrompt();
     }
+  }
+
+  Route<void> _qrRouteForIndex(List<FileWrapper> fileWrappers, int index) {
+    final isLast = index == fileWrappers.length - 1;
+    return MaterialPageRoute(
+      fullscreenDialog: true,
+      builder:
+          (context) => QrPage(
+            file: fileWrappers[index],
+            onNext:
+                isLast
+                    ? null
+                    : () => Navigator.of(context).pushReplacement(
+                      _qrRouteForIndex(fileWrappers, index + 1),
+                    ),
+          ),
+    );
   }
 
   Future<void> _maybeShowMicPrompt() async {
