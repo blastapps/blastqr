@@ -101,7 +101,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get minutes => 'minuts';
 
   @override
-  String get image_compression => 'Compressió d\'imatge';
+  String get image_compression => 'Compressió d\'imatges';
 
   @override
   String get image_quality => 'Qualitat';
@@ -282,10 +282,10 @@ class AppLocalizationsCa extends AppLocalizations {
       'Velocitat de transferència baixa. Ajusta la posició dels dispositius i mantén-los quiets per obtenir millor rendiment';
 
   @override
-  String get send_file => 'Envia fitxer';
+  String get send_file => 'Envia fitxers';
 
   @override
-  String get send_picture => 'Envia imatge';
+  String get send_picture => 'Envia imatges';
 
   @override
   String get desktop_receive_unsupported =>

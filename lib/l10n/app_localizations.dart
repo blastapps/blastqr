@@ -627,13 +627,13 @@ abstract class AppLocalizations {
   /// No description provided for @send_file.
   ///
   /// In en, this message translates to:
-  /// **'Send file'**
+  /// **'Send files'**
   String get send_file;
 
   /// No description provided for @send_picture.
   ///
   /// In en, this message translates to:
-  /// **'Send picture'**
+  /// **'Send pictures'**
   String get send_picture;
 
   /// No description provided for @desktop_receive_unsupported.

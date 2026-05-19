@@ -282,10 +282,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Low transfer speed. Adjust the position of the devices and keep them still for better performance';
 
   @override
-  String get send_file => 'Send file';
+  String get send_file => 'Send files';
 
   @override
-  String get send_picture => 'Send picture';
+  String get send_picture => 'Send pictures';
 
   @override
   String get desktop_receive_unsupported =>

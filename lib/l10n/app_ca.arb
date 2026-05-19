@@ -83,7 +83,7 @@
   "large_file_msg_3": "Vols enviar una versió comprimida de menor qualitat d'aquesta imatge?",
   "image_compression": "Compressió d'imatges",
   "image_quality": "Qualitat",
-  "send_large_file": "Envia el fitxer igualment",
+  "send_large_file": "Envia el fitxer complet",
   "send_compressed_image": "Envia imatge comprimida",
   "file_format": "Format de fitxer",
   "downscaling": "Reducció d'escala",
