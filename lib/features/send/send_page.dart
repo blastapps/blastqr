@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:blast_qr/acoustic_ack_listener.dart';
+import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
@@ -7,11 +9,13 @@ import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class SendPage extends StatefulWidget {
@@ -256,6 +260,29 @@ class _SendPageState extends State<SendPage> {
       ),
     );
     if (mounted) _addRecentFile(fileWrapper);
+    if (mounted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) await _maybeShowMicPrompt();
+    }
+  }
+
+  Future<void> _maybeShowMicPrompt() async {
+    final appSettings = Provider.of<AppSettings>(context, listen: false);
+    if (appSettings.acousticDetection || appSettings.hasSeenMicPrompt) return;
+    appSettings.updateHasSeenMicPrompt(true);
+    await showMessage(
+      context: context,
+      title: context.l10n.mic_permission_title,
+      message: context.l10n.mic_permission_message,
+      confirmTitle: context.l10n.mic_permission_allow,
+      secondaryTitle: context.l10n.cancel,
+      onConfirmTap: () async {
+        final granted = await AcousticAckListener.requestPermission();
+        if (mounted && granted) {
+          appSettings.updateAcousticDetection(true);
+        }
+      },
+    );
   }
 
   void _onTapHelp() {

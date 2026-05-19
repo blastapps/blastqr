@@ -89,7 +89,6 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                       ? context.l10n.enabled
                       : context.l10n.disabled,
                 ),
-                inactiveThumbColor: context.color.secondary,
                 activeTrackColor: context.color.primary,
               );
             },
@@ -114,7 +113,6 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                       ? context.l10n.enabled
                       : context.l10n.disabled,
                 ),
-                inactiveThumbColor: context.color.secondary,
                 activeTrackColor: context.color.primary,
               );
             },

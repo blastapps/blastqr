@@ -65,7 +65,7 @@ class SoundFeedbackService {
 
     _completionSource = await _soloud.loadMem(
       'bqr_complete',
-      _buildWav(523.25, durationMs: 300),
+      _buildSequentialWav(880.0, 1320.0, durationMsEach: 250),
     );
 
     _qrSource = await _soloud.loadMem(
@@ -115,6 +115,62 @@ class SoundFeedbackService {
   // ---------------------------------------------------------------------------
   // WAV generation
   // ---------------------------------------------------------------------------
+
+  /// Generates a WAV containing [freq1] for [durationMsEach] ms followed
+  /// immediately by [freq2] for the same duration — the two-tone completion
+  /// signal used for acoustic acknowledgement detection.
+  static Uint8List _buildSequentialWav(
+    double freq1,
+    double freq2, {
+    required int durationMsEach,
+  }) {
+    final samplesPerTone = (_sampleRate * durationMsEach / 1000).round();
+    final totalSamples = samplesPerTone * 2;
+    final dataBytes = totalSamples * 2;
+    final bytes = ByteData(44 + dataBytes);
+    _writeAscii(bytes, 0, 'RIFF');
+    bytes.setUint32(4, 36 + dataBytes, Endian.little);
+    _writeAscii(bytes, 8, 'WAVE');
+    _writeAscii(bytes, 12, 'fmt ');
+    bytes.setUint32(16, 16, Endian.little);
+    bytes.setUint16(20, 1, Endian.little);
+    bytes.setUint16(22, 1, Endian.little);
+    bytes.setUint32(24, _sampleRate, Endian.little);
+    bytes.setUint32(28, _sampleRate * 2, Endian.little);
+    bytes.setUint16(32, 2, Endian.little);
+    bytes.setUint16(34, 16, Endian.little);
+    _writeAscii(bytes, 36, 'data');
+    bytes.setUint32(40, dataBytes, Endian.little);
+    const amplitude = 32767 * 0.35; // pure sine needs no normalisation divisor
+    final rampSamples = (_sampleRate * 0.030).round(); // 30 ms half-Hann ramp
+    for (var pass = 0; pass < 2; pass++) {
+      final freq = pass == 0 ? freq1 : freq2;
+      final offset = pass * samplesPerTone;
+      for (var i = 0; i < samplesPerTone; i++) {
+        // Smooth attack/release with a half-Hann window; flat sustain in between.
+        // Eliminates the click/pop artefacts of a linear ramp.
+        final double envelope;
+        if (i < rampSamples) {
+          envelope = 0.5 * (1 - math.cos(math.pi * i / rampSamples));
+        } else if (i > samplesPerTone - rampSamples) {
+          envelope =
+              0.5 *
+              (1 - math.cos(math.pi * (samplesPerTone - i) / rampSamples));
+        } else {
+          envelope = 1.0;
+        }
+        // Pure sine — concentrates all energy at the target frequency,
+        // which improves Goertzel detection power and removes harshness.
+        final t = 2 * math.pi * freq * i / _sampleRate;
+        final sample = (amplitude * envelope * math.sin(t)).round().clamp(
+          -32768,
+          32767,
+        );
+        bytes.setInt16(44 + (offset + i) * 2, sample, Endian.little);
+      }
+    }
+    return bytes.buffer.asUint8List();
+  }
 
   static Uint8List _buildWav(double frequency, {required int durationMs}) {
     final sampleCount = (_sampleRate * durationMs / 1000).round();

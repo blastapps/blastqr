@@ -162,7 +162,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- Las transferencias de archivos de blastQR funcionan completamente sin conexión.\n\n- La información transferida NO está encriptada y puede ser leída por cualquiera que tenga acceso a la secuencia de códigos QR. Evita usar esta aplicación para transmitir información sensible.\n\n- Debido a la tecnología utilizada, las transferencias de archivos con blastQR son lentas (alcanzando un máximo de aproximadamente 40kB/s). Se recomienda enviar archivos pequeños o comprimirlos previamente.\n\n- Para obtener velocidades más altas, puedes modificar el valor de \'Longitud del fragmento\' en la pantalla de configuración del dispositivo emisor. Un valor más alto puede aumentar la velocidad, pero no todos los dispositivos pueden manejarlo.\n\n- También puedes usar blastQR para escanear códigos QR normales.\n\n- blastQR es un proyecto de código abierto. Puedes encontrar el código fuente en:';
+      '- Las transferencias de archivos de blastQR funcionan completamente sin conexión.\n\n- La información transferida NO está encriptada y puede ser leída por cualquiera que tenga acceso a la secuencia de códigos QR. Evita usar esta aplicación para transmitir información sensible.\n\n- Debido a la tecnología utilizada, las transferencias de archivos con blastQR son lentas (alcanzando un máximo de aproximadamente 110kB/s). Se recomienda enviar archivos pequeños o comprimirlos previamente.\n\n- Para obtener velocidades más altas, puedes modificar el valor de \'Tamaño código QR\' en la pantalla de configuración del dispositivo emisor. Un valor más alto puede aumentar la velocidad, pero no todos los dispositivos pueden manejarlo.\n\n- También puedes usar blastQR para escanear códigos QR normales.\n\n- blastQR es un proyecto de código abierto. Puedes encontrar el código fuente en:';
 
   @override
   String get settings => 'Configuración';
@@ -201,10 +201,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get disabled => 'Desactivado';
 
   @override
-  String get chunk_length => 'Longitud del fragmento';
+  String get chunk_length => 'Tamaño código QR';
 
   @override
-  String get playback_fps => 'Velocidad de reproducción de secuencia';
+  String get playback_fps => 'Velocidad de reproducción';
 
   @override
   String get licenses => 'Licencias';
@@ -351,4 +351,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String receiving_file(String extension) {
     return 'Recibiendo archivo $extension...';
   }
+
+  @override
+  String get acoustic_detection => 'Detección acústica';
+
+  @override
+  String get acoustic_detection_subtitle =>
+      'Usa el micrófono para detectar la finalización de transferencias';
+
+  @override
+  String get acoustic_feedback => 'Finalización de transferencia';
+
+  @override
+  String get transfer_complete => '¡Transferencia completa!';
+
+  @override
+  String get keep_showing_qr => 'Mostrar el código QR de nuevo';
+
+  @override
+  String get mic_permission_title => 'Detección acústica';
+
+  @override
+  String get mic_permission_message =>
+      'blastQR puede detectar cuándo el otro dispositivo ha recibido un archivo escuchando el tono de finalización a través del micrófono. ¿Quieres activar esta función?';
+
+  @override
+  String get mic_permission_allow => 'Permitir acceso al micrófono';
 }

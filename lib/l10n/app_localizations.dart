@@ -393,7 +393,7 @@ abstract class AppLocalizations {
   /// No description provided for @help_message_4.
   ///
   /// In en, this message translates to:
-  /// **'- blastQR file transfers work completely offline.\n\n- The transferred information is NOT encrypted and can be read by anyone who gains access to the QR code sequence. Avoid using blastQR for transmitting any sensitive information.\n\n- Due to the nature of the technology blastQR file transfers are slow (peaking at around 40kB/s). I recommend transferring small files or compressing them in advance.\n\n- For higher speeds play with the \'Chunk length\' setting in the Settings screen of the sending device. A higher value can result in higher speeds.\n\n- You can also use blastQR to scan regular QR codes.\n\n- blastQR is an open source project. You can find the source code at:'**
+  /// **'- blastQR file transfers work completely offline.\n\n- The transferred information is NOT encrypted and can be read by anyone who gains access to the QR code sequence. Avoid using blastQR for transmitting any sensitive information.\n\n- Due to the nature of the technology blastQR file transfers are slow (peaking at around 110kB/s). I recommend transferring small files or compressing them in advance.\n\n- For higher speeds play with the \'Chunk length\' setting in the Settings screen of the sending device. A higher value can result in higher speeds.\n\n- You can also use blastQR to scan regular QR codes.\n\n- blastQR is an open source project. You can find the source code at:'**
   String get help_message_4;
 
   /// No description provided for @settings.
@@ -743,6 +743,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Receiving {extension} file...'**
   String receiving_file(String extension);
+
+  /// No description provided for @acoustic_detection.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detect completion'**
+  String get acoustic_detection;
+
+  /// No description provided for @acoustic_detection_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use microphone to detect transfer completion'**
+  String get acoustic_detection_subtitle;
+
+  /// No description provided for @acoustic_feedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer completion'**
+  String get acoustic_feedback;
+
+  /// No description provided for @transfer_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer complete!'**
+  String get transfer_complete;
+
+  /// No description provided for @keep_showing_qr.
+  ///
+  /// In en, this message translates to:
+  /// **'Show QR code again'**
+  String get keep_showing_qr;
+
+  /// No description provided for @mic_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detect completion'**
+  String get mic_permission_title;
+
+  /// No description provided for @mic_permission_message.
+  ///
+  /// In en, this message translates to:
+  /// **'blastQR can detect when a transfer has finished by listening for a completion tone through the microphone. Would you like to enable this feature?'**
+  String get mic_permission_message;
+
+  /// No description provided for @mic_permission_allow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow microphone access'**
+  String get mic_permission_allow;
 }
 
 class _AppLocalizationsDelegate

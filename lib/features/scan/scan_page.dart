@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';

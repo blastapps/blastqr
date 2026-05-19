@@ -162,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- blastQR file transfers work completely offline.\n\n- The transferred information is NOT encrypted and can be read by anyone who gains access to the QR code sequence. Avoid using blastQR for transmitting any sensitive information.\n\n- Due to the nature of the technology blastQR file transfers are slow (peaking at around 40kB/s). I recommend transferring small files or compressing them in advance.\n\n- For higher speeds play with the \'Chunk length\' setting in the Settings screen of the sending device. A higher value can result in higher speeds.\n\n- You can also use blastQR to scan regular QR codes.\n\n- blastQR is an open source project. You can find the source code at:';
+      '- blastQR file transfers work completely offline.\n\n- The transferred information is NOT encrypted and can be read by anyone who gains access to the QR code sequence. Avoid using blastQR for transmitting any sensitive information.\n\n- Due to the nature of the technology blastQR file transfers are slow (peaking at around 110kB/s). I recommend transferring small files or compressing them in advance.\n\n- For higher speeds play with the \'Chunk length\' setting in the Settings screen of the sending device. A higher value can result in higher speeds.\n\n- You can also use blastQR to scan regular QR codes.\n\n- blastQR is an open source project. You can find the source code at:';
 
   @override
   String get settings => 'Settings';
@@ -351,4 +351,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String receiving_file(String extension) {
     return 'Receiving $extension file...';
   }
+
+  @override
+  String get acoustic_detection => 'Auto-detect completion';
+
+  @override
+  String get acoustic_detection_subtitle =>
+      'Use microphone to detect transfer completion';
+
+  @override
+  String get acoustic_feedback => 'Transfer completion';
+
+  @override
+  String get transfer_complete => 'Transfer complete!';
+
+  @override
+  String get keep_showing_qr => 'Show QR code again';
+
+  @override
+  String get mic_permission_title => 'Auto-detect completion';
+
+  @override
+  String get mic_permission_message =>
+      'blastQR can detect when a transfer has finished by listening for a completion tone through the microphone. Would you like to enable this feature?';
+
+  @override
+  String get mic_permission_allow => 'Allow microphone access';
 }

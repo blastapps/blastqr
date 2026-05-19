@@ -59,6 +59,8 @@
 	<string>No</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app uses the microphone to detect when a file transfer has been received by the other device</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs photos access to get QR code from photo library</string>
 	<key>UIApplicationSceneManifest</key>

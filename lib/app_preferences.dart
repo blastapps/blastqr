@@ -19,7 +19,9 @@ class AppPreferences {
   static ResolutionPreset? _cameraResolution;
   static bool? _hapticFeedback;
   static bool? _soundFeedback;
+  static bool? _acousticDetection;
   static bool? _multipleQrCodes;
+  static bool? _hasSeenMicPrompt;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
@@ -34,7 +36,9 @@ class AppPreferences {
       _cameraResolution ?? ResolutionPreset.high;
   static bool get hapticFeedback => _hapticFeedback ?? false;
   static bool get soundFeedback => _soundFeedback ?? true;
+  static bool get acousticDetection => _acousticDetection ?? false;
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
+  static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
 
   static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
@@ -107,10 +111,22 @@ class AppPreferences {
     _soundFeedback = value;
   }
 
+  static Future<void> setAcousticDetection(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('acousticDetection', value);
+    _acousticDetection = value;
+  }
+
   static Future<void> setMultipleQrCodes(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('multipleQrCodes', value);
     _multipleQrCodes = value;
+  }
+
+  static Future<void> setHasSeenMicPrompt(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('hasSeenMicPrompt', value);
+    _hasSeenMicPrompt = value;
   }
 
   static Future<void> read() async {
@@ -133,6 +149,8 @@ class AppPreferences {
             : ResolutionPreset.high;
     _hapticFeedback = sp.getBool('hapticFeedback') ?? false;
     _soundFeedback = sp.getBool('soundFeedback') ?? true;
+    _acousticDetection = sp.getBool('acousticDetection') ?? false;
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
+    _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
   }
 }

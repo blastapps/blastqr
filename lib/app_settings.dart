@@ -15,6 +15,8 @@ class AppSettings extends ChangeNotifier {
   ResolutionPreset cameraResolution;
   bool hapticFeedback;
   bool soundFeedback;
+  bool acousticDetection;
+  bool hasSeenMicPrompt;
 
   AppSettings()
     : locale = AppPreferences.locale,
@@ -25,7 +27,9 @@ class AppSettings extends ChangeNotifier {
       imageCompressionSettings = AppPreferences.imageCompressionSettings,
       cameraResolution = AppPreferences.cameraResolution,
       hapticFeedback = AppPreferences.hapticFeedback,
-      soundFeedback = AppPreferences.soundFeedback;
+      soundFeedback = AppPreferences.soundFeedback,
+      acousticDetection = AppPreferences.acousticDetection,
+      hasSeenMicPrompt = AppPreferences.hasSeenMicPrompt;
 
   void updateLocale(String? localeId) {
     log('Setting locale to $localeId');
@@ -79,6 +83,18 @@ class AppSettings extends ChangeNotifier {
   void updateSoundFeedback(bool value) {
     AppPreferences.setSoundFeedback(value);
     soundFeedback = value;
+    notifyListeners();
+  }
+
+  void updateAcousticDetection(bool value) {
+    AppPreferences.setAcousticDetection(value);
+    acousticDetection = value;
+    notifyListeners();
+  }
+
+  void updateHasSeenMicPrompt(bool value) {
+    AppPreferences.setHasSeenMicPrompt(value);
+    hasSeenMicPrompt = value;
     notifyListeners();
   }
 }

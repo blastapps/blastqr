@@ -42,6 +42,8 @@ PODS:
     - Flutter
   - raptorq_flutter (0.1.0):
     - Flutter
+  - record_ios (1.2.0):
+    - Flutter
   - SDWebImage (5.21.7):
     - SDWebImage/Core (= 5.21.7)
   - SDWebImage/Core (5.21.7)
@@ -78,6 +80,7 @@ DEPENDENCIES:
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - raptorq_flutter (from `.symlinks/plugins/raptorq_flutter/ios`)
+  - record_ios (from `.symlinks/plugins/record_ios/ios`)
   - share_handler_ios (from `.symlinks/plugins/share_handler_ios/ios`)
   - share_handler_ios_models (from `.symlinks/plugins/share_handler_ios/ios/Models`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -118,6 +121,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   raptorq_flutter:
     :path: ".symlinks/plugins/raptorq_flutter/ios"
+  record_ios:
+    :path: ".symlinks/plugins/record_ios/ios"
   share_handler_ios:
     :path: ".symlinks/plugins/share_handler_ios/ios"
   share_handler_ios_models:
@@ -145,6 +150,7 @@ SPEC CHECKSUMS:
   open_file_ios: 46184d802ee7959203f6392abcfa0dd49fdb5be0
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   raptorq_flutter: 54d5f65040679e54a05cc460bc6d13cd7abc3720
+  record_ios: 412daca2350b228e698fffcd08f1f94ceb1e3844
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
   share_handler_ios: e2244e990f826b2c8eaa291ac3831569438ba0fb

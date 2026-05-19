@@ -99,7 +99,6 @@ class _AppearancePageState extends State<AppearancePage> {
                         ? context.l10n.enabled
                         : context.l10n.disabled,
                   ),
-                  inactiveThumbColor: context.color.secondary,
                   activeTrackColor: context.color.primary,
                 );
               },
@@ -121,7 +120,6 @@ class _AppearancePageState extends State<AppearancePage> {
                       ? context.l10n.enabled
                       : context.l10n.disabled,
                 ),
-                inactiveThumbColor: context.color.secondary,
                 activeTrackColor: context.color.primary,
               );
             },

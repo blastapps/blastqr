@@ -1,3 +1,4 @@
+import 'package:blast_qr/acoustic_ack_listener.dart';
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
@@ -114,6 +115,33 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
                     context,
                     listen: false,
                   ).updateMultipleQrCodes(value);
+                },
+              );
+            },
+          ),
+          SettingGroupTitle(title: context.l10n.acoustic_feedback),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                secondary: HugeIcon(
+                  icon: HugeIcons.strokeRoundedMic01,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.acoustic_detection),
+                subtitle: Text(context.l10n.acoustic_detection_subtitle),
+                value: state.acousticDetection,
+                activeTrackColor: context.color.primary,
+                onChanged: (value) async {
+                  final appSettings = Provider.of<AppSettings>(
+                    context,
+                    listen: false,
+                  );
+                  if (value) {
+                    final granted =
+                        await AcousticAckListener.requestPermission();
+                    if (!mounted || !granted) return;
+                  }
+                  appSettings.updateAcousticDetection(value);
                 },
               );
             },

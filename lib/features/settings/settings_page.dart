@@ -52,7 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       children: [
         ListTile(
-          selected: wide && _selectedIndex == 1,
+          selected: wide && _selectedIndex == 0,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedSent02,
             color: context.color.onSurface,
@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
           trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
         ),
         ListTile(
-          selected: wide && _selectedIndex == 2,
+          selected: wide && _selectedIndex == 1,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedQrCode01,
             color: context.color.onSurface,
@@ -72,7 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
           trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
         ),
         ListTile(
-          selected: wide && _selectedIndex == 0,
+          selected: wide && _selectedIndex == 2,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedPaintBoard,
             color: context.color.onSurface,

@@ -107,7 +107,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get image_quality => 'Qualitat';
 
   @override
-  String get send_large_file => 'Envia igualment el fitxer gran';
+  String get send_large_file => 'Envia el fitxer igualment';
 
   @override
   String get send_compressed_image => 'Envia el fitxer d\'imatge comprimit';
@@ -162,7 +162,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- Les transferències de fitxers de blastQR funcionen completament sense connexió a internet.\n\n- La informació transferida NO està encriptada i pot ser llegida per qualsevol que tingui accés a la seqüència de codis QR. Eviteu utilitzar blastQR per transmetre informació sensible.\n\n- A causa de la tecnologia utilitzada, les transferències de fitxers amb blastQR són lentes (amb un màxim d\'uns 40kB/s). Es recomana enviar fitxers petits o comprimir-los abans.\n\n- Per a velocitats més altes, pots modificar el valor de \'Longitud per fragment\' a la pantalla de configuració del dispositiu emissor. Pots augmentar la velocitat assignant valors més alts.\n\n- També pots utilitzar blastQR per escanejar codis QR normals.\n\n- blastQR és un projecte de codi obert. Pots trobar el codi font a:';
+      '- Les transferències de fitxers de blastQR funcionen completament sense connexió a internet.\n\n- La informació transferida NO està encriptada i pot ser llegida per qualsevol que tingui accés a la seqüència de codis QR. Eviteu utilitzar blastQR per transmetre informació sensible.\n\n- A causa de la tecnologia utilitzada, les transferències de fitxers amb blastQR són lentes (amb un màxim d\'uns 110kB/s). Es recomana enviar fitxers petits o comprimir-los abans.\n\n- Per a velocitats més altes, pots modificar el valor de \'Mida codi QR\' a la pantalla de configuració del dispositiu emissor. Pots augmentar la velocitat assignant valors més alts.\n\n- També pots utilitzar blastQR per escanejar codis QR normals.\n\n- blastQR és un projecte de codi obert. Pots trobar el codi font a:';
 
   @override
   String get settings => 'Configuració';
@@ -201,10 +201,10 @@ class AppLocalizationsCa extends AppLocalizations {
   String get disabled => 'Desactivat';
 
   @override
-  String get chunk_length => 'Longitud per fragment';
+  String get chunk_length => 'Mida de codi QR';
 
   @override
-  String get playback_fps => 'Velocitat de reproducció de seqüència';
+  String get playback_fps => 'Velocitat de reproducció';
 
   @override
   String get licenses => 'Llicències';
@@ -351,4 +351,30 @@ class AppLocalizationsCa extends AppLocalizations {
   String receiving_file(String extension) {
     return 'Rebent fitxer $extension...';
   }
+
+  @override
+  String get acoustic_detection => 'Detecció acústica';
+
+  @override
+  String get acoustic_detection_subtitle =>
+      'Detecta la finalització de transferències amb el micròfon';
+
+  @override
+  String get acoustic_feedback => 'Finalització de transferències';
+
+  @override
+  String get transfer_complete => 'Transferència completa!';
+
+  @override
+  String get keep_showing_qr => 'Torna a mostrar el codi QR';
+
+  @override
+  String get mic_permission_title => 'Detecció acústica';
+
+  @override
+  String get mic_permission_message =>
+      'blastQR pot detectar quan una transferència ha finalitzat a través del micròfon. Vols activar aquesta funció?';
+
+  @override
+  String get mic_permission_allow => 'Permet accés al micròfon';
 }

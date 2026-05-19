@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:blast_qr/model/file_type.dart';
+import 'package:blast_qr/widgets/file_type_icon_widget.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 /// Wrapper class to make handling files easier.
@@ -28,5 +30,27 @@ class FileWrapper {
 
   double getEstimateTransferTime(int speedInkBps) {
     return (size / 1000) / speedInkBps;
+  }
+}
+
+extension FileWrapperThumbnailExtension on FileWrapper {
+  Widget buildThumbnail(BuildContext context, {required double size}) {
+    if (type.isImage && !type.isAvifImage) {
+      final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(Icons.image, size: size / 2),
+          Image.file(
+            file,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            cacheWidth: (size * pixelRatio).toInt(),
+          ),
+        ],
+      );
+    }
+    return FileTypeIconWidget(type: type, size: size);
   }
 }
