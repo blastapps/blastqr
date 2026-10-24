@@ -182,12 +182,24 @@ class FileQrEncoder {
     ImageCompressionSettings? icSettings,
     void Function(int)? onCompressedSize,
   }) async {
-    final usesImageCompression = icSettings != null;
+    var bytes = await file.file.readAsBytes();
+    var compression =
+        file.type.isPrecompressed
+            ? BlastQrCompression.none
+            : BlastQrCompression.gzip;
+    var fileExtension = file.type.extension;
 
-    final fileExtension =
-        usesImageCompression
-            ? icSettings.outputFormat.extension ?? file.type.extension
-            : file.type.extension;
+    // Image compression. The settings can be passed for any file (e.g. with
+    // "always compress images"), so only images are re-encoded, and only a
+    // re-encoded image takes the output format's extension.
+    if (icSettings != null && file.type.allowsImageCompression) {
+      final compressedImage = await _compressImage(bytes, icSettings);
+      if (compressedImage != null) {
+        bytes = compressedImage;
+        compression = BlastQrCompression.none;
+        fileExtension = icSettings.outputFormat.extension ?? fileExtension;
+      }
+    }
 
     // Metadata bytes (header)
     Uint8List fileExtBytes = utf8.encode(fileExtension);
@@ -198,21 +210,6 @@ class FileQrEncoder {
       final padded = Uint8List(4);
       padded.setAll(0, fileExtBytes);
       fileExtBytes = padded;
-    }
-
-    var bytes = await file.file.readAsBytes();
-    var compression =
-        file.type.isPrecompressed
-            ? BlastQrCompression.none
-            : BlastQrCompression.gzip;
-
-    // Image compression
-    if (usesImageCompression && file.type.allowsImageCompression) {
-      final compressedImage = await _compressImage(bytes, icSettings);
-      if (compressedImage != null) {
-        bytes = compressedImage;
-        compression = BlastQrCompression.none;
-      }
     }
 
     // Append filename in first 128 bytes of file data
