@@ -1,59 +1,102 @@
-# blast_qr
+# blastQR
 
-A new Flutter project.
+Send files between devices with an animated sequence of QR codes. No internet,
+Wi-Fi, Bluetooth or cable needed: one screen shows the codes and the other
+device's camera reads them.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Works fully offline.** The only link between devices is the screen and the
+  camera.
+- **Resilient to missed frames.** Files are encoded with
+  [RaptorQ](https://en.wikipedia.org/wiki/Raptor_code), a fountain code, so the
+  receiver can rebuild the file from any large enough set of frames, in any
+  order.
+- **Multiple codes on screen.** Shows up to 6 QR codes at once for higher
+  speed. Transfers peak at around 110 kB/s, so it suits small files best.
+- **Completion signal by sound.** When the receiver has the whole file it plays
+  a short tone, and the sender's microphone picks it up to stop the transfer.
+- **Optional image compression and gzip** to shrink files before sending.
+- **Regular QR scanner.** Normal QR codes are shown as text.
+- Available in English, Spanish, Catalan and Korean.
 
-A few resources to get you started if this is your first Flutter project:
+## Platforms
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+| Platform | Send | Receive |
+|---|:-:|:-:|
+| Android | ✓ | ✓ |
+| iOS | ✓ | ✓ |
+| macOS | ✓ | |
+| Windows | ✓ | |
+| Linux | ✓ | |
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Security note
 
-## Using Rust Inside Flutter
+Transfers are **not encrypted**. Anyone who can see or record the QR codes can
+read the file. Don't use blastQR for sensitive data.
 
-This project leverages Flutter for GUI and Rust for the backend logic,
-utilizing the capabilities of the
-[Rinf](https://pub.dev/packages/rinf) framework.
+## How it works
 
-To run and build this app, you need to have
-[Flutter SDK](https://docs.flutter.dev/get-started/install)
-and [Rust toolchain](https://www.rust-lang.org/tools/install)
-installed on your system.
-You can check that your system is ready with the commands below.
-Note that all the Flutter subcomponents should be installed.
+The sender splits the file into packets with RaptorQ, adds extra repair
+packets, puts a small header on each one and loops them as QR codes. The
+receiver scans until it has enough packets, rebuilds the file and saves it.
 
-```shell
-rustc --version
-flutter doctor
-```
+See [docs/protocol.md](docs/protocol.md) for the full format and design notes.
 
-You also need to have the CLI tool for Rinf ready.
+## Building from source
 
-```shell
-cargo install rinf
-```
+You need:
 
-Messages sent between Dart and Rust are implemented using Protobuf.
-If you have newly cloned the project repository
-or made changes to the `.proto` files in the `./messages` directory,
-run the following command:
+- [Flutter](https://docs.flutter.dev/get-started/install) (stable channel,
+  Dart 3.7 or newer)
+- [Rust](https://www.rust-lang.org/tools/install), which builds the RaptorQ
+  library
+- The usual platform tools: Xcode for iOS/macOS, Android Studio or the Android
+  SDK for Android
 
-```shell
-rinf message
-```
+The RaptorQ bindings live in a separate package, `raptorq_flutter`, which must
+be checked out next to this repo:
 
-Now you can run and build this app just like any other Flutter projects.
-
-```shell
+```sh
+git clone https://codeberg.org/cukha/raptorq_flutter.git
+git clone https://codeberg.org/cukha/blastqr.git
+cd blastqr
+flutter pub get
 flutter run
 ```
 
-For detailed instructions on writing Rust and Flutter together,
-please refer to Rinf's [documentation](https://rinf.cunarist.com).
+<!-- TODO: publish raptorq_flutter and confirm the URL above. -->
 
+### Release signing (Android)
+
+Release builds read signing settings from `android/key.properties`, which is
+not in the repo. Without it, use `flutter run` or a debug build.
+
+## Project layout
+
+| Path | Contents |
+|---|---|
+| `lib/features/send/` | Picking files, encoding and showing QR codes |
+| `lib/features/scan/` | Camera scanning and decoding |
+| `lib/features/files_received/` | Received files list |
+| `lib/features/settings/` | Settings screens |
+| `lib/raptorq/` | Wrappers around the RaptorQ encoder and decoder |
+| `lib/l10n/` | Translations (`.arb` files) |
+| `docs/` | Protocol documentation |
+
+## Translations
+
+Strings live in `lib/l10n/app_<language>.arb`. To add a language, copy
+`app_en.arb`, translate the values and run `flutter gen-l10n` (or just
+`flutter run`).
+
+## License
+
+blastQR is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+Bundled third-party components keep their own licenses:
+
+- [Jersey 25](https://github.com/scfried/soft-type-jersey) font, SIL Open Font
+  License 1.1 ([fonts/Jersey25/OFL.txt](fonts/Jersey25/OFL.txt))
+- [raptorq](https://github.com/cberner/raptorq) crate, Apache License 2.0
+  ([assets/licenses/raptorq.txt](assets/licenses/raptorq.txt))
