@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
@@ -6,32 +7,83 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
+/// Decides which frame each QR code shows, based on elapsed time.
+///
+/// In multi-code mode the codes don't all change at once: code `j` of `n`
+/// changes `j/n` of a frame interval after code 0. A camera exposure that
+/// catches the screen mid-change then loses at most one code instead of all
+/// of them. Each code still changes at the playback fps.
 class RaptorQrStreamingWidgetController with ChangeNotifier {
-  Timer? _timer;
+  /// Notify at this many steps per frame interval. Divisible by every grid
+  /// size (1, 2, 4, 6), so each code's change time lands on a step.
+  static const int _stepsPerFrame = 12;
 
-  int currentChunkIndex = 0;
   int _length = 0;
+  int _fps = 20;
 
-  void start(Duration delay) {
-    _timer = Timer.periodic(delay, _nextChunk);
+  /// Time since playback started, and the point the current fps applies from.
+  Duration _elapsed = Duration.zero;
+  Duration _fpsOrigin = Duration.zero;
+
+  /// Frames played before the last fps change.
+  int _baseFrames = 0;
+  int _lastStep = -1;
+
+  /// Frame index for single-code mode.
+  int get currentChunkIndex =>
+      _length == 0 ? 0 : framesAdvanced(0, 1) % _length;
+
+  /// How many times code [cell] of [cellCount] has changed.
+  int framesAdvanced(int cell, int cellCount) {
+    final frames = _framesSinceOrigin - cell / cellCount;
+    return _baseFrames + math.max(0, frames.floor());
   }
 
-  void stopAnimation() {
-    _timer?.cancel();
-  }
+  double get _framesSinceOrigin =>
+      (_elapsed - _fpsOrigin).inMicroseconds * _fps / 1e6;
 
-  void _nextChunk(_) {
-    currentChunkIndex += 1;
-    if (currentChunkIndex >= _length) {
-      currentChunkIndex = 0;
-      debugPrint('!!! Reached end of buffer');
-    }
-    notifyListeners();
-  }
+  bool _stopped = false;
 
   void setLength(int length) {
     _length = length;
+  }
+
+  /// Freezes playback on the current frames.
+  void stopAnimation() {
+    _stopped = true;
+  }
+
+  /// Starts timing from zero. Called by the widget when playback begins.
+  void start(int fps) {
+    _stopped = false;
+    _fps = fps;
+    _elapsed = Duration.zero;
+    _fpsOrigin = Duration.zero;
+    _baseFrames = 0;
+    _lastStep = -1;
+  }
+
+  /// Changes fps without jumping: frames already played are kept. The next
+  /// tick repaints.
+  void setFps(int fps) {
+    _baseFrames = framesAdvanced(0, 1);
+    _fpsOrigin = _elapsed;
+    _fps = fps;
+    _lastStep = -1;
+  }
+
+  /// Called on every screen refresh by the widget's ticker. Time-based, so
+  /// a pause (app in background) skips ahead instead of bursting frames.
+  void tick(Duration elapsed) {
+    if (_stopped) return;
+    _elapsed = elapsed;
+    final step = (_framesSinceOrigin * _stepsPerFrame).floor();
+    if (step != _lastStep) {
+      _lastStep = step;
+      notifyListeners();
+    }
   }
 }
 
@@ -62,7 +114,8 @@ class RaptorQrStreamingWidget extends StatefulWidget {
       _RaptorQrStreamingWidgetState();
 }
 
-class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
+class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
+    with SingleTickerProviderStateMixin {
   static const List<int> _hardcodedFpses = [15, 16, 20, 22, 25, 30];
 
   int _qrCount = 0;
@@ -72,6 +125,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
   late int _fpsIndex;
   late List<int> _fpsList;
   late StreamSubscription _imageStream;
+  late final Ticker _ticker = createTicker(widget.controller.tick);
 
   List<int> _buildFpsList(int settingsFps) {
     final list = [..._hardcodedFpses];
@@ -100,13 +154,13 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
       _fpsList = _buildFpsList(widget.fps);
       _fps = widget.fps;
       _fpsIndex = _fpsList.indexOf(_fps);
-      _initTimer();
+      _applyFps();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   void init() async {
-    widget.controller.stopAnimation();
+    _ticker.stop();
     _qrCount = 0;
     for (final img in _imageCache.values) {
       img.dispose();
@@ -128,7 +182,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
       widget.controller.setLength(_qrCount);
       if (_qrCount == 1) {
         _isEncoding = false;
-        _initTimer();
+        _startPlayback();
         setState(() {});
       }
     });
@@ -136,15 +190,20 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     _imageStream.onDone(() {});
   }
 
-  void _initTimer() {
-    final delay = Duration(milliseconds: (1000 / _fps).toInt());
-    widget.controller.stopAnimation();
-    widget.controller.start(delay);
+  void _startPlayback() {
+    widget.controller.start(_fps);
+    _ticker
+      ..stop()
+      ..start();
+  }
+
+  void _applyFps() {
+    if (_ticker.isActive) widget.controller.setFps(_fps);
   }
 
   @override
   void dispose() {
-    widget.controller.stopAnimation();
+    _ticker.dispose();
     _imageStream.cancel();
     for (final img in _imageCache.values) {
       img.dispose();
@@ -191,15 +250,24 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
                 return _FlexibleGrid(
                   constraints: c,
                   itemBuilder: (gridIndex, totalCount, w, h) {
+                    // Cells start spread evenly across the frame list and
+                    // each advances on its own staggered schedule.
                     final step = _qrCount ~/ totalCount;
-                    final imgIndex = (index + gridIndex * step) % _qrCount;
+                    final advanced = widget.controller.framesAdvanced(
+                      gridIndex,
+                      totalCount,
+                    );
+                    final imgIndex = (gridIndex * step + advanced) % _qrCount;
                     final img = _imageCache[imgIndex];
                     return Container(
                       padding: const EdgeInsets.all(8),
                       height: w,
                       width: h,
-                      child: CustomPaint(
-                        painter: img != null ? _QrImagePainter(img) : null,
+                      // Own layer per code: a change repaints only that code.
+                      child: RepaintBoundary(
+                        child: CustomPaint(
+                          painter: img != null ? _QrImagePainter(img) : null,
+                        ),
                       ),
                     );
                   },
@@ -253,7 +321,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget> {
     setState(() {
       _fps = _fpsList[_fpsIndex];
     });
-    _initTimer();
+    _applyFps();
   }
 
   void _generateUiImage(int index, QrPixelData pixelData) {
