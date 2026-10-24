@@ -110,7 +110,6 @@
   "error": "Error",
   "invalid_downscale_value": "Valor no válido (debe ser mayor que 100)",
   "downscaling_subtitle": "Reducción a {size}px",
-  "receiving_file": "Recibiendo archivo {extension}...",
   "acoustic_detection": "Detección acústica",
   "acoustic_detection_subtitle": "Usa el micrófono para detectar la finalización de transferencias",
   "acoustic_feedback": "Finalización de transferencia",
@@ -120,5 +119,8 @@
   "mic_permission_message": "blastQR puede detectar cuándo el otro dispositivo ha recibido un archivo escuchando el tono de finalización a través del micrófono. ¿Quieres activar esta función?",
   "mic_permission_allow": "Permitir acceso al micrófono",
   "receive_failed_msg": "No se ha podido guardar el archivo. Puede que esté dañado o que supere los 4 GB.",
-  "file_too_large_for_qr_size_msg": "Este archivo es demasiado grande para el tamaño de código QR actual. Aumenta el tamaño del código QR en Configuración › Envío."
+  "file_too_large_for_qr_size_msg": "Este archivo es demasiado grande para el tamaño de código QR actual. Aumenta el tamaño del código QR en Configuración › Envío.",
+  "receiving_generic": "Recibiendo archivo...",
+  "update_required_title": "Actualización necesaria",
+  "update_required_msg": "Esto se ha enviado con una versión más reciente de blastQR. Actualiza la aplicación para recibirlo."
 }

@@ -109,7 +109,6 @@
   "error": "Error",
   "invalid_downscale_value": "Valor no vàlid (ha de ser superior a 100)",
   "downscaling_subtitle": "Reducció a {size}px",
-  "receiving_file": "Rebent fitxer {extension}...",
   "acoustic_detection": "Detecció acústica",
   "acoustic_detection_subtitle": "Detecta la finalització de transferències amb el micròfon",
   "acoustic_feedback": "Finalització de transferències",
@@ -119,5 +118,8 @@
   "mic_permission_message": "blastQR pot detectar quan una transferència ha finalitzat a través del micròfon. Vols activar aquesta funció?",
   "mic_permission_allow": "Permet accés al micròfon",
   "receive_failed_msg": "No s'ha pogut desar el fitxer. Pot ser que estigui malmès o que superi els 4 GB.",
-  "file_too_large_for_qr_size_msg": "Aquest fitxer és massa gran per a la mida de codi QR actual. Augmenta la mida del codi QR a Configuració › Enviament."
+  "file_too_large_for_qr_size_msg": "Aquest fitxer és massa gran per a la mida de codi QR actual. Augmenta la mida del codi QR a Configuració › Enviament.",
+  "receiving_generic": "Rebent fitxer...",
+  "update_required_title": "Cal actualitzar",
+  "update_required_msg": "Això s'ha enviat amb una versió més recent de blastQR. Actualitza l'aplicació per rebre-ho."
 }

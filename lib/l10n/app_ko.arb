@@ -110,7 +110,6 @@
   "error": "오류",
   "invalid_downscale_value": "잘못된 값 (100보다 커야 합니다)",
   "downscaling_subtitle": "{size}px로 축소",
-  "receiving_file": "{extension} 파일 수신 중...",
   "acoustic_detection": "완료 자동 감지",
   "acoustic_detection_subtitle": "마이크를 사용하여 전송 완료를 감지합니다",
   "acoustic_feedback": "전송 완료 감지",
@@ -120,5 +119,8 @@
   "mic_permission_message": "blastQR는 마이크를 통해 완료 신호음을 감지하여 전송이 완료되었는지 자동으로 알 수 있습니다. 이 기능을 활성화하시겠습니까?",
   "mic_permission_allow": "마이크 접근 허용",
   "receive_failed_msg": "파일을 저장할 수 없습니다. 파일이 손상되었거나 4GB를 초과할 수 있습니다.",
-  "file_too_large_for_qr_size_msg": "현재 QR 코드 크기로는 이 파일을 보낼 수 없습니다. 설정 › 전송 설정에서 QR 코드 크기를 늘려 주세요."
+  "file_too_large_for_qr_size_msg": "현재 QR 코드 크기로는 이 파일을 보낼 수 없습니다. 설정 › 전송 설정에서 QR 코드 크기를 늘려 주세요.",
+  "receiving_generic": "파일 수신 중...",
+  "update_required_title": "업데이트 필요",
+  "update_required_msg": "최신 버전의 blastQR로 보낸 파일입니다. 받으려면 앱을 업데이트하세요."
 }

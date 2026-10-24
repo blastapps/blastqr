@@ -4,13 +4,14 @@ import 'dart:typed_data';
 
 import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
+import 'package:blast_qr/model/transfer_container.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Uint8List _transferObject(String name, List<int> content) {
-  final nameBlock = Uint8List(BlastQrcodeData.nameBlockLength)
-    ..setAll(0, utf8.encode(name));
-  return Uint8List.fromList([...nameBlock, ...content]);
-}
+/// v2 transfer object: metadata block + content.
+Uint8List _v2Object(String name, List<int> content) => Uint8List.fromList([
+  ...TransferContainer.encodeMetadata(fileName: name),
+  ...content,
+]);
 
 void main() {
   late Directory dir;
@@ -23,66 +24,67 @@ void main() {
 
   tearDown(() => dir.deleteSync(recursive: true));
 
-  test('writes uncompressed content and returns the name block', () async {
-    final content = List.generate(5000, (i) => i % 251);
-    final nameBlock = await writeReceivedFile(
-      data: _transferObject('a.bin', content),
-      gzipped: false,
-      outputPath: outputPath,
-    );
+  Future<TransferMetadata> write(
+    Uint8List data, {
+    bool gzipped = false,
+    int maxContentBytes = BlastQrcodeData.maxFileBytes,
+  }) => writeReceivedFile(
+    data: data,
+    gzipped: gzipped,
+    outputPath: outputPath,
+    maxContentBytes: maxContentBytes,
+  );
 
-    expect(utf8.decode(nameBlock).replaceAll('\x00', ''), 'a.bin');
-    expect(File(outputPath).readAsBytesSync(), content);
-  });
+  group('container', () {
+    test('writes the content and returns the filename', () async {
+      final content = List.generate(5000, (i) => i % 251);
+      final metadata = await write(_v2Object('a.bin', content));
 
-  test('decompresses gzip content to disk', () async {
-    final content = utf8.encode('hello ' * 100000);
-    final nameBlock = await writeReceivedFile(
-      data: Uint8List.fromList(
-        gzip.encode(_transferObject('hello.txt', content)),
-      ),
-      gzipped: true,
-      outputPath: outputPath,
-    );
+      expect(metadata.fileName, 'a.bin');
+      expect(File(outputPath).readAsBytesSync(), content);
+    });
 
-    expect(utf8.decode(nameBlock).replaceAll('\x00', ''), 'hello.txt');
-    expect(File(outputPath).readAsBytesSync(), content);
-  });
+    test('decompresses gzip content to disk', () async {
+      final content = utf8.encode('hello ' * 100000);
+      final metadata = await write(
+        Uint8List.fromList(gzip.encode(_v2Object('hello.txt', content))),
+        gzipped: true,
+      );
 
-  test('rejects data shorter than the name block', () async {
-    await expectLater(
-      writeReceivedFile(
-        data: Uint8List(10),
-        gzipped: false,
-        outputPath: outputPath,
-      ),
-      throwsA(isA<FormatException>()),
-    );
-    expect(File(outputPath).existsSync(), isFalse);
+      expect(metadata.fileName, 'hello.txt');
+      expect(File(outputPath).readAsBytesSync(), content);
+    });
+
+    test('handles an empty file', () async {
+      final metadata = await write(_v2Object('empty.txt', []));
+      expect(metadata.fileName, 'empty.txt');
+      expect(File(outputPath).readAsBytesSync(), isEmpty);
+    });
+
+    test('rejects data shorter than its metadata', () async {
+      final full = _v2Object('name.txt', []);
+      await expectLater(
+        write(full.sublist(0, full.length - 2)),
+        throwsA(isA<FormatException>()),
+      );
+      expect(File(outputPath).existsSync(), isFalse);
+    });
   });
 
   test('rejects corrupt gzip and removes the partial file', () async {
-    final valid = gzip.encode(_transferObject('x', List.filled(10000, 7)));
+    final valid = gzip.encode(_v2Object('x', List.filled(10000, 7)));
     final corrupt = Uint8List.fromList(valid.sublist(0, valid.length ~/ 2));
 
-    await expectLater(
-      writeReceivedFile(data: corrupt, gzipped: true, outputPath: outputPath),
-      throwsA(anything),
-    );
+    await expectLater(write(corrupt, gzipped: true), throwsA(anything));
     expect(File(outputPath).existsSync(), isFalse);
   });
 
   test('stops a gzip bomb at the size limit', () async {
     // 50 MB of zeros compresses to ~50 KB.
-    final bomb = gzip.encode(_transferObject('bomb', Uint8List(50 << 20)));
+    final bomb = gzip.encode(_v2Object('bomb', Uint8List(50 << 20)));
 
     await expectLater(
-      writeReceivedFile(
-        data: Uint8List.fromList(bomb),
-        gzipped: true,
-        outputPath: outputPath,
-        maxContentBytes: 1 << 20,
-      ),
+      write(Uint8List.fromList(bomb), gzipped: true, maxContentBytes: 1 << 20),
       throwsA(isA<ReceivedFileTooLargeException>()),
     );
     expect(File(outputPath).existsSync(), isFalse);

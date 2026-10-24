@@ -750,12 +750,6 @@ abstract class AppLocalizations {
   /// **'Downscaling to {size}px'**
   String downscaling_subtitle(String size);
 
-  /// No description provided for @receiving_file.
-  ///
-  /// In en, this message translates to:
-  /// **'Receiving {extension} file...'**
-  String receiving_file(String extension);
-
   /// No description provided for @acoustic_detection.
   ///
   /// In en, this message translates to:
@@ -815,6 +809,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.'**
   String get file_too_large_for_qr_size_msg;
+
+  /// No description provided for @receiving_generic.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving file...'**
+  String get receiving_generic;
+
+  /// No description provided for @update_required_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Update needed'**
+  String get update_required_title;
+
+  /// No description provided for @update_required_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This was sent with a newer version of blastQR. Update the app to receive it.'**
+  String get update_required_msg;
 }
 
 class _AppLocalizationsDelegate

@@ -22,16 +22,17 @@ final _skip =
 Uint8List _data(int length) =>
     Uint8List.fromList(List.generate(length, (i) => (i * 31 + 7) % 251));
 
-/// Wraps a packet in a v1 frame, like the sender does.
+/// Wraps a packet in a v2 frame, like the sender does.
 BlastQrcodeData _frame(Uint8List packet, int transferLength) {
-  final bytes = Uint8List(BlastQrcodeData.headerLength + packet.length);
-  bytes.setAll(0, BlastQrcodeData.signatureBytes);
-  bytes[3] = BlastQrcodeData.protocolVersion;
-  bytes.buffer.asByteData().setUint32(4, transferLength, Endian.big);
-  bytes.setAll(8, 'bin'.codeUnits);
-  bytes[12] = BlastQrCompression.none.headerByte;
-  bytes.setAll(13, packet);
-  return BlastQrcodeData.fromBytes(bytes);
+  final header = BlastQrcodeData.buildHeader(
+    flags: 0,
+    kind: BlastQrcodeData.kindFile,
+    sessionId: 7,
+    transferLength: transferLength,
+    symbolSize: packet.length - BlastQrcodeData.packetIdLength,
+  );
+  return BlastQrcodeData.parse(Uint8List.fromList([...header, ...packet]))
+      .frame!;
 }
 
 /// Feeds the endless stream to a decoder, keeping each frame with

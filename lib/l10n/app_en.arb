@@ -114,15 +114,7 @@
       }
     }
   },
-  "receiving_file": "Receiving {extension} file...",
-  "@receiving_file": {
-    "placeholders": {
-      "extension": {
-        "type": "String"
-      }
-    }
-  },
-  "acoustic_detection": "Auto-detect completion",
+  "acoustic_detection":"Auto-detect completion",
   "acoustic_detection_subtitle": "Use microphone to detect transfer completion",
   "acoustic_feedback": "Transfer completion",
   "transfer_complete": "Transfer complete!",
@@ -131,5 +123,8 @@
   "mic_permission_message": "blastQR can detect when a transfer has finished by listening for a completion tone through the microphone. Would you like to enable this feature?",
   "mic_permission_allow": "Allow microphone access",
   "receive_failed_msg": "The file could not be saved. It may be damaged or larger than 4 GB.",
-  "file_too_large_for_qr_size_msg": "This file is too large for the current QR code size. Increase the QR code size in Settings › Sending."
+  "file_too_large_for_qr_size_msg": "This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.",
+  "receiving_generic": "Receiving file...",
+  "update_required_title": "Update needed",
+  "update_required_msg": "This was sent with a newer version of blastQR. Update the app to receive it."
 }

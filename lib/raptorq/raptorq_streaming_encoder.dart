@@ -16,6 +16,7 @@ class RaptorqStreamingEncoder {
 
   late final RaptorQEncoder _encoder;
   late final int _sourceCount;
+  late final int _symbolSize;
   late final int _blockCount;
   late final int _maxRepair;
 
@@ -27,12 +28,17 @@ class RaptorqStreamingEncoder {
   Future<void> init(Uint8List data) async {
     _encoder = await RaptorQEncoder.newInstance(data: data, mtu: mtu);
     _sourceCount = _encoder.sourcePacketCount();
-    _blockCount = _encoder.oti().sourceBlocks;
+    final oti = _encoder.oti();
+    _blockCount = oti.sourceBlocks;
+    _symbolSize = oti.symbolSize;
     _maxRepair = _encoder.maxRepairPackets();
   }
 
   /// Number of source packets (K, summed over all blocks).
   int get sourceCount => _sourceCount;
+
+  /// RaptorQ symbol size T: the MTU rounded down to a multiple of 8.
+  int get symbolSize => _symbolSize;
 
   /// Returns the next packets of the stream: about [count], at least one.
   Future<List<Uint8List>> nextPackets(int count) async {

@@ -342,11 +342,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String receiving_file(String extension) {
-    return '$extension 파일 수신 중...';
-  }
-
-  @override
   String get acoustic_detection => '완료 자동 감지';
 
   @override
@@ -378,4 +373,14 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get file_too_large_for_qr_size_msg =>
       '현재 QR 코드 크기로는 이 파일을 보낼 수 없습니다. 설정 › 전송 설정에서 QR 코드 크기를 늘려 주세요.';
+
+  @override
+  String get receiving_generic => '파일 수신 중...';
+
+  @override
+  String get update_required_title => '업데이트 필요';
+
+  @override
+  String get update_required_msg =>
+      '최신 버전의 blastQR로 보낸 파일입니다. 받으려면 앱을 업데이트하세요.';
 }

@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
@@ -13,6 +11,7 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
+import 'package:blast_qr/model/transfer_container.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/sound_feedback.dart';
@@ -60,6 +59,11 @@ class _ScanPageState extends State<ScanPage> {
   late AppSettings _appSettings;
   DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
+
+  /// The transfer being received, and when its last frame arrived.
+  StreamKey? _streamKey;
+  DateTime _lastFrameAt = DateTime.now();
+  static const _switchTransferAfter = Duration(milliseconds: 1500);
   CameraController? _cameraController;
   bool _focusLocked = false;
 
@@ -197,7 +201,6 @@ class _ScanPageState extends State<ScanPage> {
               show: _decodedChunkCount > 0,
               info: _statusMessage,
               progress: _progress,
-              fileExtension: _fileMetadata?.extension ?? '',
               onTapCancel: _reset,
             ),
             // Speed bar
@@ -281,32 +284,84 @@ class _ScanPageState extends State<ScanPage> {
       return;
     }
 
-    if (BlastQrcodeData.bytesIsValidBlastQrCode(result.rawBytes)) {
-      final blastQr = _parseQrCode(result);
-      // Malformed or unsafe frames are ignored, like a missed frame.
-      if (blastQr == null || !blastQr.isDecodable) {
+    final parsed = BlastQrcodeData.parse(result.rawBytes);
+    switch (parsed.verdict) {
+      case FrameVerdict.foreign:
+        _handleRegularQRCodeResult(result.text);
+        return;
+      case FrameVerdict.malformed:
+        return; // Treated like a misread frame.
+      case FrameVerdict.newerVersion:
+      case FrameVerdict.unsupportedFlags:
+        _showUpdateRequired();
+        return;
+      case FrameVerdict.ok:
+        break;
+    }
+
+    final frame = parsed.frame!;
+    // Unsafe headers are ignored, like a missed frame.
+    if (!frame.isDecodable) {
+      return;
+    }
+
+    final key = frame.streamKey;
+    if (_streamKey != null && key != _streamKey) {
+      // Another transfer. Switch to it only once the current one has gone
+      // quiet (the sender picked another file); while it's still arriving,
+      // the other frames are probably from a second sender in view.
+      final quietFor = DateTime.now().difference(_lastFrameAt);
+      if (quietFor < _switchTransferAfter || _loadingResult) {
         return;
       }
-      // The decoder locks onto this frame's transfer synchronously, so the
-      // metadata below always describes the transfer being decoded.
-      _decoder.decodeChunk(blastQr);
-      if (_fileMetadata == null) {
-        _fileMetadata = ReceivingFileMetadata(
-          extension: blastQr.fileExtension,
-          size: blastQr.transferLength,
-          isCompressed: blastQr.isCompressedData,
-        );
-        setState(() {
-          _isReceivingData = true;
-          _statusMessage = context.l10n.receiving_file(blastQr.fileExtension);
-        });
-        _latestScanStartTime = DateTime.now();
-        debugPrint('Scanning file with: ${_fileMetadata.toString()}');
-        _lockFocus();
-      }
-    } else {
-      _handleRegularQRCodeResult(result.text);
+      _restartTransfer();
     }
+    _lastFrameAt = DateTime.now();
+
+    // The decoder locks onto this frame's transfer synchronously, so the
+    // metadata below always describes the transfer being decoded.
+    _decoder.decodeChunk(frame);
+    if (_streamKey == null) {
+      _streamKey = key;
+      _fileMetadata = ReceivingFileMetadata(
+        size: frame.transferLength,
+        isCompressed: frame.isCompressedData,
+      );
+      setState(() {
+        _isReceivingData = true;
+        _statusMessage = context.l10n.receiving_generic;
+      });
+      _latestScanStartTime = DateTime.now();
+      debugPrint('Scanning file with: ${_fileMetadata.toString()}');
+      _lockFocus();
+    }
+  }
+
+  /// Drops the current transfer's progress and starts on a new one right
+  /// away (no pause, unlike [_reset]).
+  void _restartTransfer() {
+    debugPrint('Switching to a new transfer');
+    _decoder.reset();
+    _streamKey = null;
+    _fileMetadata = null;
+    _progress = 0;
+    _decodedChunkCount = 0;
+    _dataLengthInLastPeriod = 0;
+  }
+
+  /// The stream needs a newer app (newer protocol version, or a feature such
+  /// as encryption that this version doesn't support).
+  void _showUpdateRequired() {
+    _shouldScan = false;
+    if (_appSettings.hapticFeedback) {
+      HapticFeedback.heavyImpact();
+    }
+    showMessage(
+      context: context,
+      title: context.l10n.update_required_title,
+      message: context.l10n.update_required_msg,
+      confirmTitle: context.l10n.ok,
+    ).then((_) => _reset());
   }
 
   void _handleDecodeProgress(int chunkLen, int chunkCount, double progress) {
@@ -328,20 +383,6 @@ class _ScanPageState extends State<ScanPage> {
 
     if (_speedTimer?.isActive == false || _speedTimer == null) {
       _startSpeedTimer();
-    }
-  }
-
-  BlastQrcodeData? _parseQrCode(Code result) {
-    if (result.rawBytes == null) {
-      log('null bytes');
-      return null;
-    }
-    try {
-      final data = BlastQrcodeData.fromBytes(result.rawBytes!);
-      return data;
-    } catch (error) {
-      log(error.toString());
-      return null;
     }
   }
 
@@ -378,9 +419,9 @@ class _ScanPageState extends State<ScanPage> {
     final tempFile = File(
       '${tempDirectory.path}/receiving-${DateTime.now().microsecondsSinceEpoch}',
     );
-    final Uint8List fileNameBytes;
+    final TransferMetadata metadata;
     try {
-      fileNameBytes = await writeReceivedFile(
+      metadata = await writeReceivedFile(
         data: data,
         gzipped: _fileMetadata!.isCompressed,
         outputPath: tempFile.path,
@@ -391,19 +432,8 @@ class _ScanPageState extends State<ScanPage> {
       return;
     }
 
-    final fileExtension = '.${_fileMetadata!.extension}';
-    String fileName = utf8
-        .decode(fileNameBytes, allowMalformed: true)
-        .replaceAll('\x00', '');
-
-    if (fileName.contains(fileExtension) == false) {
-      fileName += fileExtension;
-    }
     // The name comes from the sender: never trust it as a path.
-    fileName = sanitizeFileName(
-      fileName,
-      fallbackExtension: _fileMetadata!.extension,
-    );
+    var fileName = sanitizeFileName(metadata.fileName ?? '');
     fileName = await resolveUniqueFileName(itemsDirectory, fileName);
 
     final resultFile = await _moveFile(
@@ -591,6 +621,7 @@ class _ScanPageState extends State<ScanPage> {
     _speed = 0;
     _decodedChunkCount = 0;
     _fileMetadata = null;
+    _streamKey = null;
     _renameController.text = '';
     _showLowSpeedWarning = false;
     _lowSpeedStartTime = null;
@@ -707,7 +738,6 @@ class ScanProgressWidget extends StatelessWidget {
   const ScanProgressWidget({
     super.key,
     required this.progress,
-    required this.fileExtension,
     required this.info,
     required this.onTapCancel,
     required this.chunkCount,
@@ -716,7 +746,6 @@ class ScanProgressWidget extends StatelessWidget {
   });
 
   final double progress;
-  final String fileExtension;
   final String info;
   final int chunkCount;
   final String speed;
@@ -775,24 +804,7 @@ class ScanProgressWidget extends StatelessWidget {
                           HugeIcon(
                             icon: HugeIcons.strokeRoundedFile01,
                             size: 24,
-                            color: context.color.onSurface.withAlpha(80),
-                          ),
-                          SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Text(
-                                  fileExtension.toUpperCase(),
-                                  style: TextStyle(
-                                    color: context.color.onSurface,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            color: context.color.onSurface,
                           ),
                         ],
                       ),

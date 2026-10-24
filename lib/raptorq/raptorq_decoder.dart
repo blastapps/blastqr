@@ -4,9 +4,6 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:raptorq_flutter/raptorq_flutter.dart';
 
-typedef _StreamKey =
-    ({int transferLength, int symbolSize, bool isCompressed, String extension});
-
 class RaptorqDecoder {
   final Function(int chunkLen, int totalChunks, double estimatedProgress)?
   onProcessChunk;
@@ -19,7 +16,7 @@ class RaptorqDecoder {
   Future<ObjectTransmissionInfo>? _oti;
 
   /// The transfer this decoder is locked to (set by the first frame).
-  _StreamKey? _streamKey;
+  StreamKey? _streamKey;
 
   bool complete = false;
   bool isLoadingResult = false;

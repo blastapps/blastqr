@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 
-import 'package:blast_qr/extensions.dart';
 import 'package:blast_qr/features/send/helpers/qr_lookup_table.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:blast_qr/model/transfer_container.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -17,16 +17,8 @@ import 'package:qr/qr.dart';
 /// One rendered QR frame. [seq] is its position in the stream (0, 1, 2, ...).
 typedef QrPixelData = ({int seq, int moduleCount, Uint8List pixels});
 
-/// Fixed part of every frame's 13-byte header.
-typedef _FrameHeader =
-    ({
-      Uint8List sizeBytes,
-      Uint8List fileExtBytes,
-      int compressionByte,
-      int qrVersion,
-    });
-
-typedef _WorkerInit = ({SendPort setup, SendPort results, _FrameHeader header});
+typedef _WorkerInit =
+    ({SendPort setup, SendPort results, Uint8List header, int qrVersion});
 
 /// Render worker: turns packets into RGBA pixel buffers until it gets `null`.
 void _renderWorker(_WorkerInit init) {
@@ -39,24 +31,28 @@ void _renderWorker(_WorkerInit init) {
       return;
     }
     final (seq, packet) = message as (int, Uint8List);
-    final (moduleCount, pixels) = _renderQrFrame(init.header, packet);
+    final (moduleCount, pixels) = _renderQrFrame(
+      init.header,
+      packet,
+      init.qrVersion,
+    );
     // TransferableTypedData hands the buffer over without copying.
     init.results.send((seq, moduleCount, TransferableTypedData.fromList([pixels])));
   });
 }
 
-/// Builds one frame (header + RaptorQ packet) and renders it to RGBA pixels,
-/// one pixel per module.
-(int, Uint8List) _renderQrFrame(_FrameHeader header, Uint8List packet) {
-  final combined = Uint8List(BlastQrcodeData.headerLength + packet.length);
-  combined.setAll(0, BlastQrcodeData.signatureBytes);
-  combined[3] = BlastQrcodeData.protocolVersion;
-  combined.setAll(4, header.sizeBytes);
-  combined.setAll(8, header.fileExtBytes);
-  combined[12] = header.compressionByte;
-  combined.setAll(13, packet);
+/// Builds one frame (shared header + RaptorQ packet) and renders it to RGBA
+/// pixels, one pixel per module.
+(int, Uint8List) _renderQrFrame(
+  Uint8List header,
+  Uint8List packet,
+  int qrVersion,
+) {
+  final combined = Uint8List(header.length + packet.length)
+    ..setAll(0, header)
+    ..setAll(header.length, packet);
 
-  final qrCode = QrCode(header.qrVersion, QrErrorCorrectLevel.L);
+  final qrCode = QrCode(qrVersion, QrErrorCorrectLevel.L);
   qrCode.addByteData(combined.buffer.asByteData());
   // Fixed mask: skips evaluating all 8 masks, much faster to generate.
   final qrImage = QrImage.withMaskPattern(qrCode, 3);
@@ -183,10 +179,7 @@ class FileQrEncoder {
     void Function(int)? onCompressedSize,
   }) async {
     var bytes = await file.file.readAsBytes();
-    var compression =
-        file.type.isPrecompressed
-            ? BlastQrCompression.none
-            : BlastQrCompression.gzip;
+    var gzipped = !file.type.isPrecompressed;
     var fileExtension = file.type.extension;
 
     // Image compression. The settings can be passed for any file (e.g. with
@@ -196,41 +189,33 @@ class FileQrEncoder {
       final compressedImage = await _compressImage(bytes, icSettings);
       if (compressedImage != null) {
         bytes = compressedImage;
-        compression = BlastQrCompression.none;
+        gzipped = false;
         fileExtension = icSettings.outputFormat.extension ?? fileExtension;
       }
     }
 
-    // Metadata bytes (header)
-    Uint8List fileExtBytes = utf8.encode(fileExtension);
-    if (fileExtBytes.lengthInBytes > 4) {
-      // Set fileExtBytes to 0 if longer than 4 bytes
-      fileExtBytes = Uint8List(4);
-    } else if (fileExtBytes.lengthInBytes < 4) {
-      final padded = Uint8List(4);
-      padded.setAll(0, fileExtBytes);
-      fileExtBytes = padded;
-    }
-
-    // Append filename in first 128 bytes of file data
-    final namePlusExtension = '${file.nameWithoutExtension}.$fileExtension';
-    final filenameBytes = namePlusExtension.encodeFixed128();
-    bytes = Uint8List.fromList([...filenameBytes, ...bytes]);
-    debugPrint(
-      'Appended filename: $namePlusExtension in ${filenameBytes.length} bytes',
-    );
+    // v2 container: metadata (filename) followed by the content.
+    final fileName = '${file.nameWithoutExtension}.$fileExtension';
+    final metadata = TransferContainer.encodeMetadata(fileName: fileName);
+    bytes = Uint8List(metadata.length + bytes.length)
+      ..setAll(0, metadata)
+      ..setAll(metadata.length, bytes);
+    debugPrint('Container: $fileName, ${metadata.length} bytes of metadata');
 
     // File compression
-    if (compression == BlastQrCompression.gzip) {
+    if (gzipped) {
       final compressed = await compute(_gzipCompress, bytes);
       // Only keep gzip when it helps. This also keeps files near the size
       // limit from growing past what the u32 header can describe.
       if (compressed.length < bytes.length) {
         bytes = compressed;
       } else {
-        compression = BlastQrCompression.none;
+        gzipped = false;
       }
     }
+    // A future encryption layer goes here: after compression, before RaptorQ,
+    // setting BlastQrcodeData.flagEncrypted.
+
     final actualTransferSize = bytes.length;
     debugPrint('Compressed file: ${file.size} -> $actualTransferSize');
     onCompressedSize?.call(actualTransferSize);
@@ -238,15 +223,16 @@ class FileQrEncoder {
     final encoder = RaptorqStreamingEncoder(mtu: mtu);
     await encoder.init(bytes);
 
-    final header = (
-      sizeBytes:
-          Uint8List(4)
-            ..buffer.asByteData().setUint32(0, actualTransferSize, Endian.big),
-      fileExtBytes: fileExtBytes,
-      compressionByte: compression.headerByte,
-      qrVersion: _pickQrVersion(mtu),
+    final header = BlastQrcodeData.buildHeader(
+      flags: gzipped ? BlastQrcodeData.flagGzip : 0,
+      kind: BlastQrcodeData.kindFile,
+      // Random per send, so receivers can tell a new transfer from an old one.
+      sessionId: 1 + Random.secure().nextInt(0xFFFF),
+      transferLength: actualTransferSize,
+      symbolSize: encoder.symbolSize,
     );
-    debugPrint('Picked QR version: ${header.qrVersion} for mtu $mtu');
+    final qrVersion = _pickQrVersion(mtu);
+    debugPrint('Picked QR version: $qrVersion for mtu $mtu');
 
     final results = ReceivePort();
     final isolates = <Isolate>[];
@@ -258,6 +244,7 @@ class FileQrEncoder {
           setup: setup.sendPort,
           results: results.sendPort,
           header: header,
+          qrVersion: qrVersion,
         )),
       );
       workers.add(await setup.first as SendPort);

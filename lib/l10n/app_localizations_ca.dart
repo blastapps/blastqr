@@ -355,11 +355,6 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String receiving_file(String extension) {
-    return 'Rebent fitxer $extension...';
-  }
-
-  @override
   String get acoustic_detection => 'Detecció acústica';
 
   @override
@@ -392,4 +387,14 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get file_too_large_for_qr_size_msg =>
       'Aquest fitxer és massa gran per a la mida de codi QR actual. Augmenta la mida del codi QR a Configuració › Enviament.';
+
+  @override
+  String get receiving_generic => 'Rebent fitxer...';
+
+  @override
+  String get update_required_title => 'Cal actualitzar';
+
+  @override
+  String get update_required_msg =>
+      'Això s\'ha enviat amb una versió més recent de blastQR. Actualitza l\'aplicació per rebre-ho.';
 }

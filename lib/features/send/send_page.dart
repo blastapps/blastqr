@@ -262,7 +262,7 @@ class _SendPageState extends State<SendPage> {
       // Receivers reject transfers with too many symbols, which only happens
       // with big files at a small QR code size.
       final transferLength =
-          fileWrapper.size + BlastQrcodeData.nameBlockLength;
+          fileWrapper.size + BlastQrcodeData.maxMetadataBytes;
       if (!BlastQrcodeData.fitsSymbolLimit(transferLength, symbolSize)) {
         _showFileTooLarge(context.l10n.file_too_large_for_qr_size_msg);
         return;
