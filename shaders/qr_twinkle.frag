@@ -70,25 +70,41 @@ float light(vec2 uv) {
   return clamp(l, 0.0, 1.0);
 }
 
-// Whether the module at [m] (within its code) belongs to a finder or
-// alignment pattern: -1 if not, else 1 for dark and 0 for light.
-float pattern(vec2 m) {
-  // Finder patterns in three corners, each with a light separator around
-  // it, and the alignment pattern towards the fourth.
-  float far = kTile - 7.0;
-  bool nearX = m.x < 8.0;
-  bool farX = m.x >= far - 1.0;
-  bool nearY = m.y < 8.0;
-  bool farY = m.y >= far - 1.0;
+// Whether the module at [m] (within its code) is the start of a finder or
+// alignment pattern's block: each takes up 4 x 4 modules, and is drawn
+// inside it on modules half the size, so the patterns are half as large as
+// in a real code and don't dominate the wall.
+bool inPatternBlock(vec2 m) {
+  float far = kTile - 4.0;
+  bool nearX = m.x < 4.0;
+  bool farX = m.x >= far;
+  bool nearY = m.y < 4.0;
+  bool farY = m.y >= far;
+  if ((nearX || farX) && (nearY || farY) && !(farX && farY)) return true;
+  // The alignment pattern's block, just inside the fourth corner.
+  return all(greaterThanEqual(m, vec2(kTile - 5.0)))
+      && all(lessThanEqual(m, vec2(kTile - 2.0)));
+}
+
+// Whether the half-size module at [f] (within its code, on the half-size
+// grid) is dark in a finder or alignment pattern: 1 for dark, 0 for light.
+// Only asked inside a pattern block.
+float pattern(vec2 f) {
+  float far = 2.0 * kTile - 7.0;
+  bool nearX = f.x < 8.0;
+  bool farX = f.x >= far - 1.0;
+  bool nearY = f.y < 8.0;
+  bool farY = f.y >= far - 1.0;
   if ((nearX || farX) && (nearY || farY) && !(farX && farY)) {
-    vec2 f = vec2(farX ? m.x - far : m.x, farY ? m.y - far : m.y);
-    if (f.x < 0.0 || f.y < 0.0 || f.x > 6.0 || f.y > 6.0) return 0.0;
-    float r = max(abs(f.x - 3.0), abs(f.y - 3.0));
+    // A finder pattern: 7 x 7, with a light separator on its inner sides.
+    vec2 g = vec2(farX ? f.x - far : f.x, farY ? f.y - far : f.y);
+    if (g.x < 0.0 || g.y < 0.0 || g.x > 6.0 || g.y > 6.0) return 0.0;
+    float r = max(abs(g.x - 3.0), abs(g.y - 3.0));
     return (r == 3.0 || r <= 1.0) ? 1.0 : 0.0;
   }
-  float r = max(abs(m.x - far), abs(m.y - far));
-  if (r <= 2.0) return (r == 2.0 || r == 0.0) ? 1.0 : 0.0;
-  return -1.0;
+  // The alignment pattern: 5 x 5, with light around it to fill its block.
+  float r = max(abs(f.x - far), abs(f.y - far));
+  return (r == 2.0 || r == 0.0) ? 1.0 : 0.0;
 }
 
 void main() {
@@ -105,7 +121,6 @@ void main() {
   // The light at the module's middle, so a module comes on as a whole.
   float l = light((index + 0.5) * uCell / uSize);
 
-  float on;
   // Which code the module is in, with every other row of codes shifted
   // half a code along like bricks, and each code flipped its own way, so
   // the finder patterns don't line up into a grid.
@@ -113,20 +128,32 @@ void main() {
   vec2 shifted = vec2(index.x + mod(row, 2.0) * floor(kTile * 0.5), index.y);
   vec2 code = floor(shifted / kTile);
   vec2 m = shifted - code * kTile;
+  // Which half of the module this pixel is in, for the half-size patterns.
+  vec2 half_ = step(0.0, q);
   float flip = hash(code + 3.7);
-  if (flip < 0.5) m.x = kTile - 1.0 - m.x;
-  if (fract(flip * 7.0) < 0.5) m.y = kTile - 1.0 - m.y;
-  float fixedModule = pattern(m);
-  if (fixedModule >= 0.0) {
+  if (flip < 0.5) {
+    m.x = kTile - 1.0 - m.x;
+    half_.x = 1.0 - half_.x;
+  }
+  if (fract(flip * 7.0) < 0.5) {
+    m.y = kTile - 1.0 - m.y;
+    half_.y = 1.0 - half_.y;
+  }
+
+  float on;
+  float cell = uCell;
+  if (inPatternBlock(m)) {
     // Finder and alignment patterns don't twinkle; they show only where
     // the light is brightest, so the wall still reads as QR codes without
-    // them dominating it.
-    on = fixedModule * smoothstep(0.4, 0.9, l);
+    // them dominating it. Drawn on the half-size grid.
+    on = pattern(m * 2.0 + half_) * smoothstep(0.4, 0.9, l);
+    cell = 0.5 * uCell;
+    q = fract(p / cell) - 0.5;
   } else {
     // A data module: a slow wave of its own, which it rides over a
     // threshold set by the light — high where it is dark, so none come on,
-    // lower where it is light, so about half do, as in a real code. The wide band makes each fade in
-    // and out smoothly rather than switch.
+    // lower where it is light, so about half do, as in a real code. The
+    // wide band makes each fade in and out smoothly rather than switch.
     float rate = floor(mix(kTwinkleMin, kTwinkleMax + 1.0, hash(index + 17.0)));
     float wave = 0.5 + 0.5 * sin(TAU * (uTime * rate + hash(index)));
     float threshold = mix(1.1, 0.55, l);
@@ -139,8 +166,8 @@ void main() {
 
   // The module grows a little as it comes on; fully on, it just overlaps
   // its neighbours so lit runs of modules show no seams.
-  float extent = mix(0.3, 0.5 + uPixel / uCell, on);
-  float d = (max(abs(q.x), abs(q.y)) - extent) * uCell;
+  float extent = mix(0.3, 0.5 + uPixel / cell, on);
+  float d = (max(abs(q.x), abs(q.y)) - extent) * cell;
   float coverage = clamp(0.5 - d / uPixel, 0.0, 1.0);
 
   float fade = smoothstep(uFadeStart, uFadeEnd, p.y);

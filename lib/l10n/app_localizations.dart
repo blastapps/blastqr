@@ -453,7 +453,7 @@ abstract class AppLocalizations {
   /// No description provided for @animations.
   ///
   /// In en, this message translates to:
-  /// **'Animations'**
+  /// **'Animated background'**
   String get animations;
 
   /// No description provided for @enabled.

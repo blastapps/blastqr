@@ -192,7 +192,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accent_color => 'Accent color';
 
   @override
-  String get animations => 'Animations';
+  String get animations => 'Animated background';
 
   @override
   String get enabled => 'Enabled';

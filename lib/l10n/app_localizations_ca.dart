@@ -192,7 +192,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get accent_color => 'Colorització';
 
   @override
-  String get animations => 'Animacions';
+  String get animations => 'Fons animat';
 
   @override
   String get enabled => 'Activat';

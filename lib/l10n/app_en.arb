@@ -57,7 +57,7 @@
   "theme_dark": "Dark",
   "pure_black": "Use pure black color",
   "accent_color": "Accent color",
-  "animations": "Animations",
+  "animations": "Animated background",
   "enabled": "Enabled",
   "disabled": "Disabled",
   "chunk_length": "QR code size",

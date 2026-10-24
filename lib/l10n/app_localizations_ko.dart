@@ -189,7 +189,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accent_color => '강조 색상';
 
   @override
-  String get animations => '애니메이션';
+  String get animations => '애니메이션 배경';
 
   @override
   String get enabled => '활성화';

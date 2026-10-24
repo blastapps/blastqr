@@ -74,7 +74,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
               return SizedBox.expand(
                 child: QrTwinkleBackground(
                   color: context.color.primary,
-                  opacity: darkTheme ? 0.45 : 0.25,
+                  opacity: darkTheme ? 0.26 : 0.12,
                   // Fade in from below the status bar, so only a faint bit
                   // shows behind the pages' (transparent, 80 high) app bars.
                   fadeStart: MediaQuery.paddingOf(context).top,
