@@ -373,11 +373,18 @@ class _ScanPageState extends State<ScanPage> {
 
     final fileExtension = '.${_fileMetadata!.extension}';
     final fileNameBytes = bytes.sublist(0, 128);
-    String fileName = utf8.decode(fileNameBytes).replaceAll('\x00', '');
+    String fileName = utf8
+        .decode(fileNameBytes, allowMalformed: true)
+        .replaceAll('\x00', '');
 
     if (fileName.contains(fileExtension) == false) {
       fileName += fileExtension;
     }
+    // The name comes from the sender: never trust it as a path.
+    fileName = sanitizeFileName(
+      fileName,
+      fallbackExtension: _fileMetadata!.extension,
+    );
     fileName = await resolveUniqueFileName(itemsDirectory, fileName);
 
     final resultFile = await File(
@@ -401,9 +408,8 @@ class _ScanPageState extends State<ScanPage> {
     }
 
     _showResultSheet(fileWrapper, elapsedTime).then((_) async {
-      if (mounted && _renameController.text != fileName) {
-        // Should rename file
-        final newFilename = _renameController.text;
+      final newFilename = sanitizeFileName(_renameController.text);
+      if (mounted && newFilename != fileName) {
         final uniqueName = await resolveUniqueFileName(
           itemsDirectory,
           newFilename,

@@ -4,6 +4,7 @@ import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
@@ -688,7 +689,8 @@ class _FilesPageState extends State<FilesPage> {
     try {
       final path = file.path;
       final lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-      final newPath = path.substring(0, lastSeparator + 1) + newName;
+      final newPath =
+          path.substring(0, lastSeparator + 1) + sanitizeFileName(newName);
       if (await File(newPath).exists()) {
         throw Exception('File with that name already exists.');
       }
