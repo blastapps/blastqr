@@ -77,6 +77,9 @@ Uint8List _gzipCompress(Uint8List original) {
 class FileQrEncoder {
   const FileQrEncoder._();
 
+  /// Repair packets per block, as a fraction of its source packets.
+  static const double _redundancy = 0.64;
+
   static Stream<QrPixelData> encode(
     FileWrapper file,
     int mtu, {
@@ -139,16 +142,13 @@ class FileQrEncoder {
     debugPrint('Compressed file: ${file.size} -> $actualTransferSize');
     onCompressedSize?.call(actualTransferSize);
 
-    // Any K out of (K + repairPackets) symbols decodes successfully.
-    // At 60% redundancy the receiver only needs to scan ~62.5% of QR frames.
-    final sourceSymbols = (actualTransferSize / mtu).ceil();
-    final repairPackets = (sourceSymbols * 0.64).toInt();
-
-    log('Encoding with MTU: $mtu, repairPacketsPerBlock: $repairPackets');
+    // Any ~K of a block's (K + repair) packets decode it. With 64% extra,
+    // the receiver only needs to scan ~61% of the frames in each loop.
+    log('Encoding with MTU: $mtu, redundancy: $_redundancy');
 
     final encoder = RaptorqStreamingEncoder(
       mtu: mtu,
-      repairPacketsPerBlock: repairPackets,
+      redundancy: _redundancy,
     );
 
     final sizeBytes = Uint8List(4)
