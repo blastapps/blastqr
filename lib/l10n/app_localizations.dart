@@ -803,6 +803,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow microphone access'**
   String get mic_permission_allow;
+
+  /// No description provided for @receive_failed_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be saved. It may be damaged or larger than 4 GB.'**
+  String get receive_failed_msg;
+
+  /// No description provided for @file_too_large_for_qr_size_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.'**
+  String get file_too_large_for_qr_size_msg;
 }
 
 class _AppLocalizationsDelegate

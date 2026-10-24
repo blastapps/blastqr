@@ -126,7 +126,14 @@ class FileQrEncoder {
 
     // File compression
     if (compression == BlastQrCompression.gzip) {
-      bytes = await compute(_gzipCompress, bytes);
+      final compressed = await compute(_gzipCompress, bytes);
+      // Only keep gzip when it helps. This also keeps files near the size
+      // limit from growing past what the u32 header can describe.
+      if (compressed.length < bytes.length) {
+        bytes = compressed;
+      } else {
+        compression = BlastQrCompression.none;
+      }
     }
     final actualTransferSize = bytes.length;
     debugPrint('Compressed file: ${file.size} -> $actualTransferSize');

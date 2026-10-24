@@ -370,4 +370,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get mic_permission_allow => '마이크 접근 허용';
+
+  @override
+  String get receive_failed_msg =>
+      '파일을 저장할 수 없습니다. 파일이 손상되었거나 4GB를 초과할 수 있습니다.';
+
+  @override
+  String get file_too_large_for_qr_size_msg =>
+      '현재 QR 코드 크기로는 이 파일을 보낼 수 없습니다. 설정 › 전송 설정에서 QR 코드 크기를 늘려 주세요.';
 }

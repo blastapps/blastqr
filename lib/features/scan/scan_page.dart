@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
@@ -281,8 +282,14 @@ class _ScanPageState extends State<ScanPage> {
     }
 
     if (BlastQrcodeData.bytesIsValidBlastQrCode(result.rawBytes)) {
-      final blastQr = _parseQrCode(result)!;
-      _decoder.decodeChunk(blastQr.data, blastQr.transferLength, blastQr.mtu);
+      final blastQr = _parseQrCode(result);
+      // Malformed or unsafe frames are ignored, like a missed frame.
+      if (blastQr == null || !blastQr.isDecodable) {
+        return;
+      }
+      // The decoder locks onto this frame's transfer synchronously, so the
+      // metadata below always describes the transfer being decoded.
+      _decoder.decodeChunk(blastQr);
       if (_fileMetadata == null) {
         _fileMetadata = ReceivingFileMetadata(
           extension: blastQr.fileExtension,
@@ -365,14 +372,26 @@ class _ScanPageState extends State<ScanPage> {
       await itemsDirectory.create();
     }
 
-    var bytes = data;
-    if (_fileMetadata!.isCompressed) {
-      debugPrint('Decompressing data');
-      bytes = gzip.decode(data) as Uint8List;
+    // Write to the temp folder first so a half-written file never shows up
+    // in the Received tab.
+    final tempDirectory = await getTemporaryDirectory();
+    final tempFile = File(
+      '${tempDirectory.path}/receiving-${DateTime.now().microsecondsSinceEpoch}',
+    );
+    final Uint8List fileNameBytes;
+    try {
+      fileNameBytes = await writeReceivedFile(
+        data: data,
+        gzipped: _fileMetadata!.isCompressed,
+        outputPath: tempFile.path,
+      );
+    } catch (error) {
+      debugPrint('Failed to save received file: $error');
+      _showReceiveFailed();
+      return;
     }
 
     final fileExtension = '.${_fileMetadata!.extension}';
-    final fileNameBytes = bytes.sublist(0, 128);
     String fileName = utf8
         .decode(fileNameBytes, allowMalformed: true)
         .replaceAll('\x00', '');
@@ -387,9 +406,10 @@ class _ScanPageState extends State<ScanPage> {
     );
     fileName = await resolveUniqueFileName(itemsDirectory, fileName);
 
-    final resultFile = await File(
+    final resultFile = await _moveFile(
+      tempFile,
       '${itemsDirectory.path}/$fileName',
-    ).writeAsBytes(bytes.sublist(128));
+    );
 
     final fileWrapper = await resultFile.toFileWrapper();
 
@@ -418,6 +438,31 @@ class _ScanPageState extends State<ScanPage> {
       }
       _reset();
     });
+  }
+
+  /// Renames [file] to [newPath], copying instead if they're on different
+  /// filesystems.
+  Future<File> _moveFile(File file, String newPath) async {
+    try {
+      return await file.rename(newPath);
+    } on FileSystemException {
+      final copy = await file.copy(newPath);
+      await file.delete();
+      return copy;
+    }
+  }
+
+  void _showReceiveFailed() {
+    if (!mounted) return;
+    if (_appSettings.hapticFeedback) {
+      HapticFeedback.heavyImpact();
+    }
+    showMessage(
+      context: context,
+      title: context.l10n.error,
+      message: context.l10n.receive_failed_msg,
+      confirmTitle: context.l10n.ok,
+    ).then((_) => _reset());
   }
 
   Future<void> _showResultSheet(FileWrapper file, double timeInSeconds) async {

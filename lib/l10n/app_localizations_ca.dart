@@ -384,4 +384,12 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get mic_permission_allow => 'Permet accés al micròfon';
+
+  @override
+  String get receive_failed_msg =>
+      'No s\'ha pogut desar el fitxer. Pot ser que estigui malmès o que superi els 4 GB.';
+
+  @override
+  String get file_too_large_for_qr_size_msg =>
+      'Aquest fitxer és massa gran per a la mida de codi QR actual. Augmenta la mida del codi QR a Configuració › Enviament.';
 }

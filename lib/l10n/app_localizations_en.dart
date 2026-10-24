@@ -384,4 +384,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mic_permission_allow => 'Allow microphone access';
+
+  @override
+  String get receive_failed_msg =>
+      'The file could not be saved. It may be damaged or larger than 4 GB.';
+
+  @override
+  String get file_too_large_for_qr_size_msg =>
+      'This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.';
 }

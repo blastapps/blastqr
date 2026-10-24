@@ -1,7 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
+import 'package:blast_qr/model/blast_qrcode_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:raptorq_flutter/raptorq_flutter.dart';
+
+typedef _StreamKey =
+    ({int transferLength, int symbolSize, bool isCompressed, String extension});
 
 class RaptorqDecoder {
   final Function(int chunkLen, int totalChunks, double estimatedProgress)?
@@ -9,7 +13,13 @@ class RaptorqDecoder {
   final Function()? onTransferComplete;
   final Function(Uint8List result) onReceiveResult;
 
-  RaptorQDecoder? _decoder;
+  /// Created once per transfer. Stored as a future so frames that arrive
+  /// while it's being built all share the same decoder.
+  Future<RaptorQDecoder>? _decoder;
+  Future<ObjectTransmissionInfo>? _oti;
+
+  /// The transfer this decoder is locked to (set by the first frame).
+  _StreamKey? _streamKey;
 
   bool complete = false;
   bool isLoadingResult = false;
@@ -23,34 +33,63 @@ class RaptorqDecoder {
     this.onProcessChunk,
   });
 
-  Future<RaptorQDecoder> _buildDecoder(int transferLength, int mtu) async {
-    final oti = await ObjectTransmissionInfo.withDefaults(
-      transferLength: BigInt.from(transferLength),
-      maxPacketSize: mtu,
-    );
-    return RaptorQDecoder.newInstance(oti: oti);
-  }
-
-  Future<void> decodeChunk(Uint8List data, int transferLength, int mtu) async {
+  /// Feeds one frame to the decoder.
+  ///
+  /// Frames that are unsafe to decode, or that belong to a different transfer
+  /// than the first frame, are dropped. Returns whether the frame was used.
+  Future<bool> decodeChunk(BlastQrcodeData frame) async {
     if (complete || isLoadingResult) {
-      return;
+      return false;
+    }
+    if (!frame.isDecodable) {
+      debugPrint('Dropping frame with unsafe header');
+      return false;
     }
 
-    _decoder ??= await _buildDecoder(transferLength, mtu);
+    // Everything up to the first await runs synchronously, so frames from
+    // the same camera image can't create two decoders.
+    final key = frame.streamKey;
+    if (_streamKey == null) {
+      _streamKey = key;
+      _oti = ObjectTransmissionInfo.withDefaults(
+        transferLength: BigInt.from(frame.transferLength),
+        // The MTU RaptorQ was given; it rounds this back down to symbolSize.
+        maxPacketSize: frame.data.length,
+      );
+      _decoder = _oti!.then((oti) => RaptorQDecoder.newInstance(oti: oti));
+    } else if (key != _streamKey) {
+      debugPrint('Dropping frame from another transfer');
+      return false;
+    }
 
-    final result = await _decoder!.addPacket(packet: data);
+    try {
+      final oti = await _oti!;
+      // Packets for a block that doesn't exist would crash the decoder.
+      final sourceBlockNumber = frame.data[0];
+      if (sourceBlockNumber >= oti.sourceBlocks) {
+        return false;
+      }
 
-    if (result != null) {
-      _handleOutput(result);
-      return;
+      final decoder = await _decoder!;
+      if (complete) return false;
+      final result = await decoder.addPacket(packet: frame.data);
+
+      if (result != null) {
+        _handleOutput(result);
+        return true;
+      }
+    } catch (error) {
+      // A malformed packet must not take the whole transfer down.
+      debugPrint('RaptorQ rejected packet: $error');
+      return false;
     }
 
     count += 1;
 
-    final chunkLen = data.length;
-    final sourceSymbols = (transferLength / mtu).ceil();
+    final sourceSymbols = (frame.transferLength / frame.symbolSize).ceil();
     estimatedProgress = count / sourceSymbols;
-    onProcessChunk?.call(chunkLen, count, estimatedProgress);
+    onProcessChunk?.call(frame.data.length, count, estimatedProgress);
+    return true;
   }
 
   void _handleOutput(Uint8List bytes) {
@@ -67,11 +106,18 @@ class RaptorqDecoder {
     complete = false;
     isLoadingResult = false;
     latestResult = Uint8List(0);
-    _decoder?.dispose();
-    _decoder = null;
+    _disposeDecoder();
   }
 
   void dispose() {
-    _decoder?.dispose();
+    _disposeDecoder();
+  }
+
+  void _disposeDecoder() {
+    final decoder = _decoder;
+    _decoder = null;
+    _oti = null;
+    _streamKey = null;
+    decoder?.then((d) => d.dispose()).catchError((_) {});
   }
 }

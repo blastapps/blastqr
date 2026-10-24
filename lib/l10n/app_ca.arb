@@ -117,5 +117,7 @@
   "keep_showing_qr": "Torna a mostrar el codi QR",
   "mic_permission_title": "Detecció acústica",
   "mic_permission_message": "blastQR pot detectar quan una transferència ha finalitzat a través del micròfon. Vols activar aquesta funció?",
-  "mic_permission_allow": "Permet accés al micròfon"
+  "mic_permission_allow": "Permet accés al micròfon",
+  "receive_failed_msg": "No s'ha pogut desar el fitxer. Pot ser que estigui malmès o que superi els 4 GB.",
+  "file_too_large_for_qr_size_msg": "Aquest fitxer és massa gran per a la mida de codi QR actual. Augmenta la mida del codi QR a Configuració › Enviament."
 }
