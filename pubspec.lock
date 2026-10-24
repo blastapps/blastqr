@@ -388,7 +388,7 @@ packages:
     source: hosted
     version: "2.0.34"
   flutter_rust_bridge:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: flutter_rust_bridge
       sha256: "39804d78730d41ecddbe97e38c7dd6c2b43f76e91ef7bbd329f98f9b0bd19e56"

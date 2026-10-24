@@ -1,5 +1,6 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -13,79 +14,174 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:qr/qr.dart';
 
-typedef QrPixelData = ({int moduleCount, Uint8List pixels});
+/// One rendered QR frame. [seq] is its position in the stream (0, 1, 2, ...).
+typedef QrPixelData = ({int seq, int moduleCount, Uint8List pixels});
 
-typedef _QrBuildArgs =
+/// Fixed part of every frame's 13-byte header.
+typedef _FrameHeader =
     ({
-      List<Uint8List> chunks,
       Uint8List sizeBytes,
       Uint8List fileExtBytes,
       int compressionByte,
       int qrVersion,
     });
 
-void _buildQrPixelsBatched(({_QrBuildArgs args, SendPort sendPort}) message) {
-  final args = message.args;
-  final sendPort = message.sendPort;
+typedef _WorkerInit = ({SendPort setup, SendPort results, _FrameHeader header});
 
-  for (final chunk in args.chunks) {
-    final combined = Uint8List(3 + 1 + 4 + 4 + 1 + chunk.length);
-    combined.setAll(0, BlastQrcodeData.signatureBytes);
-    combined[3] = BlastQrcodeData.protocolVersion;
-    combined.setAll(4, args.sizeBytes);
-    combined.setAll(8, args.fileExtBytes);
-    combined[12] = args.compressionByte;
-    combined.setAll(13, chunk);
+/// Render worker: turns packets into RGBA pixel buffers until it gets `null`.
+void _renderWorker(_WorkerInit init) {
+  final requests = ReceivePort();
+  init.setup.send(requests.sendPort);
 
-    final qrCode = QrCode(args.qrVersion, QrErrorCorrectLevel.L);
-    qrCode.addByteData(combined.buffer.asByteData());
-    final qrImage = QrImage.withMaskPattern(qrCode, 3);
+  requests.listen((message) {
+    if (message == null) {
+      requests.close();
+      return;
+    }
+    final (seq, packet) = message as (int, Uint8List);
+    final (moduleCount, pixels) = _renderQrFrame(init.header, packet);
+    // TransferableTypedData hands the buffer over without copying.
+    init.results.send((seq, moduleCount, TransferableTypedData.fromList([pixels])));
+  });
+}
 
-    // We pre-render to raw RGBA pixels rather than passing QrImage directly
-    // so the pixel buffer can be decoded into a ui.Image on the UI isolate
-    // via ui.decodeImageFromPixels — avoiding repeated per-frame QR module
-    // traversal during animation.
-    final moduleCount = qrImage.moduleCount;
-    final pixels = Uint8List(moduleCount * moduleCount * 4);
-    for (var row = 0; row < moduleCount; row++) {
-      for (var col = 0; col < moduleCount; col++) {
-        final offset = (row * moduleCount + col) * 4;
-        if (qrImage.isDark(row, col)) {
-          pixels[offset + 3] = 255;
-        } else {
-          pixels[offset] = 255;
-          pixels[offset + 1] = 255;
-          pixels[offset + 2] = 255;
-          pixels[offset + 3] = 255;
-        }
+/// Builds one frame (header + RaptorQ packet) and renders it to RGBA pixels,
+/// one pixel per module.
+(int, Uint8List) _renderQrFrame(_FrameHeader header, Uint8List packet) {
+  final combined = Uint8List(BlastQrcodeData.headerLength + packet.length);
+  combined.setAll(0, BlastQrcodeData.signatureBytes);
+  combined[3] = BlastQrcodeData.protocolVersion;
+  combined.setAll(4, header.sizeBytes);
+  combined.setAll(8, header.fileExtBytes);
+  combined[12] = header.compressionByte;
+  combined.setAll(13, packet);
+
+  final qrCode = QrCode(header.qrVersion, QrErrorCorrectLevel.L);
+  qrCode.addByteData(combined.buffer.asByteData());
+  // Fixed mask: skips evaluating all 8 masks, much faster to generate.
+  final qrImage = QrImage.withMaskPattern(qrCode, 3);
+
+  final moduleCount = qrImage.moduleCount;
+  final pixels = Uint8List(moduleCount * moduleCount * 4);
+  for (var row = 0; row < moduleCount; row++) {
+    for (var col = 0; col < moduleCount; col++) {
+      final offset = (row * moduleCount + col) * 4;
+      if (qrImage.isDark(row, col)) {
+        pixels[offset + 3] = 255;
+      } else {
+        pixels[offset] = 255;
+        pixels[offset + 1] = 255;
+        pixels[offset + 2] = 255;
+        pixels[offset + 3] = 255;
       }
     }
-    // TransferableTypedData transfers ownership of the buffer to the main
-    // isolate without copying, keeping throughput on par with compute().
-    sendPort.send((
-      moduleCount: moduleCount,
-      pixels: TransferableTypedData.fromList([pixels]),
-    ));
   }
-  sendPort.send(null); // signals completion
+  return (moduleCount, pixels);
 }
 
 Uint8List _gzipCompress(Uint8List original) {
   return gzip.encode(original) as Uint8List;
 }
 
+/// An endless stream of rendered QR frames for one file.
+///
+/// Frames are generated on demand: the source stays [lookahead] frames ahead
+/// of what the display has used (see [markConsumed]), so memory stays small
+/// however long the transfer runs. Frames can arrive slightly out of order
+/// (two render workers); use [QrPixelData.seq] to order them.
+class QrFrameSource {
+  /// Frames kept ready or in progress beyond those already shown. About
+  /// 0.5–4 s of playback depending on fps and grid size.
+  static const int lookahead = 90;
+
+  /// One background isolate renders a version-40 frame in ~3–10 ms, which
+  /// can fall short of 6 codes × 30 fps, so two share the work.
+  static const int workerCount = 2;
+
+  final RaptorqStreamingEncoder _encoder;
+  final List<Isolate> _isolates;
+  final List<SendPort> _workers;
+  final ReceivePort _results;
+  final _frames = StreamController<QrPixelData>();
+  final _pending = Queue<Uint8List>();
+
+  int _requested = 0;
+  int _consumed = 0;
+  bool _pumping = false;
+  bool _disposed = false;
+
+  QrFrameSource._(this._encoder, this._isolates, this._workers, this._results) {
+    _results.listen((message) {
+      if (_disposed) return;
+      final (seq, moduleCount, pixels) =
+          message as (int, int, TransferableTypedData);
+      _frames.add((
+        seq: seq,
+        moduleCount: moduleCount,
+        pixels: pixels.materialize().asUint8List(),
+      ));
+    });
+    _pump();
+  }
+
+  /// Rendered frames, endlessly.
+  Stream<QrPixelData> get frames => _frames.stream;
+
+  /// Number of source packets (K). The receiver needs about this many frames.
+  int get sourceCount => _encoder.sourceCount;
+
+  /// Tells the source that frames up to [count] (exclusive) have been shown,
+  /// so it can render more.
+  void markConsumed(int count) {
+    if (count <= _consumed) return;
+    _consumed = count;
+    _pump();
+  }
+
+  Future<void> _pump() async {
+    if (_pumping) return;
+    _pumping = true;
+    try {
+      while (!_disposed && _requested - _consumed < lookahead) {
+        if (_pending.isEmpty) {
+          _pending.addAll(await _encoder.nextPackets(32));
+          if (_disposed) return;
+        }
+        final seq = _requested++;
+        _workers[seq % _workers.length].send((seq, _pending.removeFirst()));
+      }
+    } finally {
+      _pumping = false;
+    }
+  }
+
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    for (final worker in _workers) {
+      worker.send(null);
+    }
+    for (final isolate in _isolates) {
+      isolate.kill(priority: Isolate.beforeNextEvent);
+    }
+    _results.close();
+    _frames.close();
+    _encoder.dispose();
+  }
+}
+
 class FileQrEncoder {
   const FileQrEncoder._();
 
-  /// Repair packets per block, as a fraction of its source packets.
-  static const double _redundancy = 0.64;
-
-  static Stream<QrPixelData> encode(
+  /// Prepares [file] for sending and starts an endless frame stream.
+  ///
+  /// The caller must [QrFrameSource.dispose] the result.
+  static Future<QrFrameSource> start(
     FileWrapper file,
     int mtu, {
     ImageCompressionSettings? icSettings,
     void Function(int)? onCompressedSize,
-  }) async* {
+  }) async {
     final usesImageCompression = icSettings != null;
 
     final fileExtension =
@@ -142,57 +238,35 @@ class FileQrEncoder {
     debugPrint('Compressed file: ${file.size} -> $actualTransferSize');
     onCompressedSize?.call(actualTransferSize);
 
-    // Any ~K of a block's (K + repair) packets decode it. With 64% extra,
-    // the receiver only needs to scan ~61% of the frames in each loop.
-    log('Encoding with MTU: $mtu, redundancy: $_redundancy');
+    final encoder = RaptorqStreamingEncoder(mtu: mtu);
+    await encoder.init(bytes);
 
-    final encoder = RaptorqStreamingEncoder(
-      mtu: mtu,
-      redundancy: _redundancy,
+    final header = (
+      sizeBytes:
+          Uint8List(4)
+            ..buffer.asByteData().setUint32(0, actualTransferSize, Endian.big),
+      fileExtBytes: fileExtBytes,
+      compressionByte: compression.headerByte,
+      qrVersion: _pickQrVersion(mtu),
     );
+    debugPrint('Picked QR version: ${header.qrVersion} for mtu $mtu');
 
-    final sizeBytes = Uint8List(4)
-      ..buffer.asByteData().setUint32(0, actualTransferSize, Endian.big);
-
-    final qrVersion = _pickQrVersion(mtu);
-    debugPrint('Picked QR version: $qrVersion for mtu $mtu');
-
-    final startTime = DateTime.now().millisecondsSinceEpoch;
-
-    final chunks = await encoder.encode(bytes);
-    encoder.dispose();
-
-    final ct = DateTime.now().millisecondsSinceEpoch - startTime;
-    final cts = (ct / 1000).toStringAsFixed(2);
-    debugPrint('Chunks finalized in ${cts}s!!');
-
-    final receivePort = ReceivePort();
-    await Isolate.spawn(_buildQrPixelsBatched, (
-      args: (
-        chunks: chunks,
-        sizeBytes: sizeBytes,
-        fileExtBytes: fileExtBytes,
-        compressionByte: compression.headerByte,
-        qrVersion: qrVersion,
-      ),
-      sendPort: receivePort.sendPort,
-    ));
-
-    await for (final message in receivePort) {
-      if (message == null) {
-        receivePort.close();
-        break;
-      }
-      final msg = message as ({int moduleCount, TransferableTypedData pixels});
-      yield (
-        moduleCount: msg.moduleCount,
-        pixels: msg.pixels.materialize().asUint8List(),
+    final results = ReceivePort();
+    final isolates = <Isolate>[];
+    final workers = <SendPort>[];
+    for (var i = 0; i < QrFrameSource.workerCount; i++) {
+      final setup = ReceivePort();
+      isolates.add(
+        await Isolate.spawn(_renderWorker, (
+          setup: setup.sendPort,
+          results: results.sendPort,
+          header: header,
+        )),
       );
+      workers.add(await setup.first as SendPort);
     }
 
-    final elapsedTime = DateTime.now().millisecondsSinceEpoch - startTime;
-    final elapsedSeconds = (elapsedTime / 1000).toStringAsFixed(2);
-    debugPrint('Encoding finalized in ${elapsedSeconds}s!!');
+    return QrFrameSource._(encoder, isolates, workers, results);
   }
 
   static int _pickQrVersion(int payloadBytes) {

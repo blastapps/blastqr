@@ -20,7 +20,6 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
   /// size (1, 2, 4, 6), so each code's change time lands on a step.
   static const int _stepsPerFrame = 12;
 
-  int _length = 0;
   int _fps = 20;
 
   /// Time since playback started, and the point the current fps applies from.
@@ -30,10 +29,6 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
   /// Frames played before the last fps change.
   int _baseFrames = 0;
   int _lastStep = -1;
-
-  /// Frame index for single-code mode.
-  int get currentChunkIndex =>
-      _length == 0 ? 0 : framesAdvanced(0, 1) % _length;
 
   /// How many times code [cell] of [cellCount] has changed.
   int framesAdvanced(int cell, int cellCount) {
@@ -45,10 +40,6 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
       (_elapsed - _fpsOrigin).inMicroseconds * _fps / 1e6;
 
   bool _stopped = false;
-
-  void setLength(int length) {
-    _length = length;
-  }
 
   /// Freezes playback on the current frames.
   void stopAnimation() {
@@ -118,14 +109,33 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
     with SingleTickerProviderStateMixin {
   static const List<int> _hardcodedFpses = [15, 16, 20, 22, 25, 30];
 
-  int _qrCount = 0;
-  final Map<int, ui.Image> _imageCache = {};
-  bool _isEncoding = true;
   late int _fps;
   late int _fpsIndex;
   late List<int> _fpsList;
-  late StreamSubscription _imageStream;
   late final Ticker _ticker = createTicker(widget.controller.tick);
+
+  QrFrameSource? _source;
+  StreamSubscription<QrPixelData>? _frameSub;
+
+  /// Bumped on every (re)start so late callbacks from an old source are
+  /// ignored.
+  int _generation = 0;
+
+  /// Rendered frames waiting to be shown, by sequence number.
+  final Map<int, ui.Image> _ready = {};
+
+  /// Sequence number of the next frame to show. Frames are shown strictly in
+  /// order, so every frame on screen is one the receiver hasn't seen yet.
+  int _nextSeq = 0;
+
+  /// What each grid cell shows, and how many times the controller has told
+  /// it to change.
+  final List<ui.Image?> _cellImages = [];
+  final List<int?> _cellSeqs = [];
+  final List<int> _cellAdvanced = [];
+
+  /// Number of cells in the last layout (1 when not in fill mode).
+  int _cellCount = 1;
 
   List<int> _buildFpsList(int settingsFps) {
     final list = [..._hardcodedFpses];
@@ -142,11 +152,16 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
     _fpsList = _buildFpsList(widget.fps);
     _fps = widget.fps;
     _fpsIndex = _fpsList.indexOf(_fps);
+    widget.controller.addListener(_onControllerTick);
     init();
   }
 
   @override
   void didUpdateWidget(covariant RaptorQrStreamingWidget oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerTick);
+      widget.controller.addListener(_onControllerTick);
+    }
     if (oldWidget.file != widget.file) {
       init();
     }
@@ -159,35 +174,50 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
     super.didUpdateWidget(oldWidget);
   }
 
-  void init() async {
+  Future<void> init() async {
+    final generation = ++_generation;
     _ticker.stop();
-    _qrCount = 0;
-    for (final img in _imageCache.values) {
-      img.dispose();
-    }
-    _imageCache.clear();
-    _isEncoding = true;
+    _releaseFrames();
+    if (mounted) setState(() {});
 
     debugPrint('Generating QR codes..');
 
-    _imageStream = FileQrEncoder.encode(
+    final source = await FileQrEncoder.start(
       widget.file,
       widget.mtu,
       icSettings: widget.imageCompressionSettings,
       onCompressedSize: widget.onStart,
-    ).listen((pixelData) {
-      final index = _qrCount;
-      _qrCount++;
-      _generateUiImage(index, pixelData);
-      widget.controller.setLength(_qrCount);
-      if (_qrCount == 1) {
-        _isEncoding = false;
-        _startPlayback();
-        setState(() {});
-      }
-    });
+    );
+    if (!mounted || generation != _generation) {
+      source.dispose();
+      return;
+    }
+    _source = source;
+    _frameSub = source.frames.listen(
+      (frame) => _decodeFrame(generation, frame),
+    );
+  }
 
-    _imageStream.onDone(() {});
+  void _decodeFrame(int generation, QrPixelData frame) {
+    ui.decodeImageFromPixels(
+      frame.pixels,
+      frame.moduleCount,
+      frame.moduleCount,
+      ui.PixelFormat.rgba8888,
+      (image) {
+        if (!mounted || generation != _generation) {
+          image.dispose();
+          return;
+        }
+        _ready[frame.seq] = image;
+        if (!_ticker.isActive && frame.seq == 0) {
+          _startPlayback();
+        } else {
+          // Fill cells that are still empty right away.
+          _onControllerTick();
+        }
+      },
+    );
   }
 
   void _startPlayback() {
@@ -195,25 +225,85 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
     _ticker
       ..stop()
       ..start();
+    _onControllerTick();
+    setState(() {});
   }
 
   void _applyFps() {
     if (_ticker.isActive) widget.controller.setFps(_fps);
   }
 
+  /// Gives each cell whose turn it is to change the next new frame. If that
+  /// frame isn't rendered yet, the cell keeps its current one until it is.
+  void _onControllerTick() {
+    if (!mounted || _source == null) return;
+    _resizeCells(_cellCount);
+
+    var changed = false;
+    for (var cell = 0; cell < _cellCount; cell++) {
+      final advanced = widget.controller.framesAdvanced(cell, _cellCount);
+      final due = advanced != _cellAdvanced[cell] || _cellImages[cell] == null;
+      if (!due) continue;
+
+      final image = _ready.remove(_nextSeq);
+      if (image == null) break; // Rendering is behind: show the rest later.
+      _cellImages[cell]?.dispose();
+      _cellImages[cell] = image;
+      _cellSeqs[cell] = _nextSeq;
+      _cellAdvanced[cell] = advanced;
+      _nextSeq++;
+      changed = true;
+    }
+
+    if (changed) {
+      _source?.markConsumed(_nextSeq);
+      setState(() {});
+    }
+  }
+
+  void _resizeCells(int count) {
+    while (_cellImages.length > count) {
+      _cellImages.removeLast()?.dispose();
+      _cellSeqs.removeLast();
+      _cellAdvanced.removeLast();
+    }
+    while (_cellImages.length < count) {
+      _cellImages.add(null);
+      _cellSeqs.add(null);
+      _cellAdvanced.add(-1);
+    }
+  }
+
+  void _releaseFrames() {
+    _frameSub?.cancel();
+    _frameSub = null;
+    _source?.dispose();
+    _source = null;
+    for (final image in _ready.values) {
+      image.dispose();
+    }
+    _ready.clear();
+    for (final image in _cellImages) {
+      image?.dispose();
+    }
+    _cellImages.clear();
+    _cellSeqs.clear();
+    _cellAdvanced.clear();
+    _nextSeq = 0;
+  }
+
   @override
   void dispose() {
+    _generation++;
+    widget.controller.removeListener(_onControllerTick);
     _ticker.dispose();
-    _imageStream.cancel();
-    for (final img in _imageCache.values) {
-      img.dispose();
-    }
+    _releaseFrames();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isEncoding || _qrCount == 0) {
+    if (!_ticker.isActive) {
       return SizedBox(
         width: double.infinity,
         child: Column(
@@ -239,77 +329,73 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
           final qrSize = c.maxWidth > c.maxHeight ? c.maxHeight : c.maxWidth;
           final hOffset = c.maxWidth > (c.maxHeight - 20) ? 12 : 0;
           final vOffset = c.maxWidth > (c.maxHeight - 20) ? 20 : 8;
-          return ListenableBuilder(
-            listenable: widget.controller,
-            builder: (context, child) {
-              final index = widget.controller.currentChunkIndex;
-              final uiImage = _imageCache[index];
-              final double adaptedPadding = widget.fill ? 8 : 16;
+          final double adaptedPadding = widget.fill ? 8 : 16;
 
-              if (widget.fill) {
-                return _FlexibleGrid(
-                  constraints: c,
-                  itemBuilder: (gridIndex, totalCount, w, h) {
-                    // Cells start spread evenly across the frame list and
-                    // each advances on its own staggered schedule.
-                    final step = _qrCount ~/ totalCount;
-                    final advanced = widget.controller.framesAdvanced(
-                      gridIndex,
-                      totalCount,
-                    );
-                    final imgIndex = (gridIndex * step + advanced) % _qrCount;
-                    final img = _imageCache[imgIndex];
-                    return Container(
-                      padding: const EdgeInsets.all(8),
-                      height: w,
-                      width: h,
-                      // Own layer per code: a change repaints only that code.
-                      child: RepaintBoundary(
-                        child: CustomPaint(
-                          painter: img != null ? _QrImagePainter(img) : null,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }
-
-              return Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.fromLTRB(16, adaptedPadding, 16, 0),
-                    height: qrSize - vOffset,
-                    width: qrSize - hOffset,
+          if (widget.fill) {
+            return _FlexibleGrid(
+              constraints: c,
+              itemBuilder: (gridIndex, totalCount, w, h) {
+                // Read by the next tick; cells are filled from there.
+                _cellCount = totalCount;
+                final img =
+                    gridIndex < _cellImages.length
+                        ? _cellImages[gridIndex]
+                        : null;
+                return Container(
+                  padding: const EdgeInsets.all(8),
+                  height: w,
+                  width: h,
+                  // Own layer per code: a change repaints only that code.
+                  child: RepaintBoundary(
                     child: CustomPaint(
-                      painter:
-                          uiImage != null ? _QrImagePainter(uiImage) : null,
+                      painter: img != null ? _QrImagePainter(img) : null,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${index + 1}/$_qrCount',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: _cycleNextFps,
-                          child: Text(
-                            '${_fps}FPS',
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      ],
+                );
+              },
+            );
+          }
+
+          _cellCount = 1;
+          final uiImage = _cellImages.isNotEmpty ? _cellImages[0] : null;
+          final seq = _cellSeqs.isNotEmpty ? _cellSeqs[0] : null;
+          final sourceCount = _source?.sourceCount;
+          return Column(
+            children: [
+              Container(
+                padding: EdgeInsets.fromLTRB(16, adaptedPadding, 16, 0),
+                height: qrSize - vOffset,
+                width: qrSize - hOffset,
+                child: CustomPaint(
+                  painter: uiImage != null ? _QrImagePainter(uiImage) : null,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Frame number / frames the receiver needs (K).
+                    Text(
+                      seq == null || sourceCount == null
+                          ? ''
+                          : '${seq + 1}/$sourceCount',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
+                    GestureDetector(
+                      onTap: _cycleNextFps,
+                      child: Text(
+                        '${_fps}FPS',
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -322,22 +408,6 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       _fps = _fpsList[_fpsIndex];
     });
     _applyFps();
-  }
-
-  void _generateUiImage(int index, QrPixelData pixelData) {
-    ui.decodeImageFromPixels(
-      pixelData.pixels,
-      pixelData.moduleCount,
-      pixelData.moduleCount,
-      ui.PixelFormat.rgba8888,
-      (image) {
-        if (mounted) {
-          _imageCache[index] = image;
-        } else {
-          image.dispose();
-        }
-      },
-    );
   }
 }
 

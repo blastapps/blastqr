@@ -7,9 +7,7 @@ void main() {
   late RaptorQrStreamingWidgetController controller;
 
   setUp(() {
-    controller = RaptorQrStreamingWidgetController()
-      ..setLength(1000)
-      ..start(20); // 50 ms per frame
+    controller = RaptorQrStreamingWidgetController()..start(20); // 50 ms/frame
   });
 
   List<int> cells(int count) => [
@@ -18,13 +16,13 @@ void main() {
 
   test('single code advances once per frame interval', () {
     controller.tick(_ms(0));
-    expect(controller.currentChunkIndex, 0);
+    expect(controller.framesAdvanced(0, 1), 0);
     controller.tick(_ms(49));
-    expect(controller.currentChunkIndex, 0);
+    expect(controller.framesAdvanced(0, 1), 0);
     controller.tick(_ms(50));
-    expect(controller.currentChunkIndex, 1);
+    expect(controller.framesAdvanced(0, 1), 1);
     controller.tick(_ms(1000));
-    expect(controller.currentChunkIndex, 20);
+    expect(controller.framesAdvanced(0, 1), 20);
   });
 
   test('codes in a grid change at staggered times, never together', () {
@@ -66,15 +64,15 @@ void main() {
     controller.tick(_ms(1000)); // 20 frames at 20 fps
     controller.setFps(10);
     controller.tick(_ms(1000));
-    expect(controller.currentChunkIndex, 20);
+    expect(controller.framesAdvanced(0, 1), 20);
     controller.tick(_ms(2000)); // +10 frames at 10 fps
-    expect(controller.currentChunkIndex, 30);
+    expect(controller.framesAdvanced(0, 1), 30);
   });
 
   test('stopAnimation freezes playback', () {
     controller.tick(_ms(500));
     controller.stopAnimation();
     controller.tick(_ms(5000));
-    expect(controller.currentChunkIndex, 10);
+    expect(controller.framesAdvanced(0, 1), 10);
   });
 }

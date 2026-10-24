@@ -1,48 +1,65 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:raptorq_flutter/raptorq_flutter.dart';
 
+/// An endless stream of RaptorQ packets for one transfer.
+///
+/// All source packets come first (the original data, in order), then new
+/// repair packets forever, interleaved across blocks. Every packet is
+/// different, so a receiver never sees a frame it already has. Repair ids are
+/// 24-bit, so after ~16 million repair packets per block the stream wraps
+/// around and starts repeating, which takes days at any realistic fps.
 class RaptorqStreamingEncoder {
-  /// Extra repair packets, as a fraction of each block's source packets.
-  final double redundancy;
   final int mtu;
 
-  late RaptorQEncoder _encoder;
+  late final RaptorQEncoder _encoder;
+  late final int _sourceCount;
+  late final int _blockCount;
+  late final int _maxRepair;
 
-  RaptorqStreamingEncoder({required this.redundancy, required this.mtu});
+  int _nextSource = 0;
+  int _nextRepair = 0;
 
-  Future<List<Uint8List>> encode(Uint8List data) async {
+  RaptorqStreamingEncoder({required this.mtu});
+
+  Future<void> init(Uint8List data) async {
     _encoder = await RaptorQEncoder.newInstance(data: data, mtu: mtu);
-    final oti = _encoder.oti();
-    final repairPackets = repairPacketsPerBlock(
-      transferLength: data.length,
-      symbolSize: oti.symbolSize,
-      sourceBlocks: oti.sourceBlocks,
-      redundancy: redundancy,
+    _sourceCount = _encoder.sourcePacketCount();
+    _blockCount = _encoder.oti().sourceBlocks;
+    _maxRepair = _encoder.maxRepairPackets();
+  }
+
+  /// Number of source packets (K, summed over all blocks).
+  int get sourceCount => _sourceCount;
+
+  /// Returns the next packets of the stream: about [count], at least one.
+  Future<List<Uint8List>> nextPackets(int count) async {
+    if (_nextSource < _sourceCount) {
+      final n = math.min(count, _sourceCount - _nextSource);
+      final packets = await _encoder.sourcePackets(
+        start: _nextSource,
+        count: n,
+      );
+      _nextSource += n;
+      return packets;
+    }
+
+    // One "round" is one repair packet for every block.
+    final rounds = math.min(
+      math.max(1, (count / _blockCount).ceil()),
+      _maxRepair - _nextRepair,
     );
-    return _encoder.getEncodedPackets(repairPacketsPerBlock: repairPackets);
+    final packets = await _encoder.repairPackets(
+      start: _nextRepair,
+      count: rounds,
+    );
+    _nextRepair = (_nextRepair + rounds) % _maxRepair;
+    return packets;
   }
 
   void dispose() {
     _encoder.dispose();
-  }
-
-  /// Repair packets to generate for each source block.
-  ///
-  /// RaptorQ applies the count to every block, so it must be based on the
-  /// size of one block, not the whole file. Large files are split into
-  /// several blocks (above ~165 MB at the default MTU), and sizing by the
-  /// whole file would multiply the repair frames by the number of blocks.
-  /// Uses the largest block, since blocks differ by at most one symbol.
-  static int repairPacketsPerBlock({
-    required int transferLength,
-    required int symbolSize,
-    required int sourceBlocks,
-    required double redundancy,
-  }) {
-    final totalSymbols = (transferLength / symbolSize).ceil();
-    final largestBlock = (totalSymbols / sourceBlocks).ceil();
-    return (largestBlock * redundancy).ceil();
   }
 }
