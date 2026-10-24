@@ -47,6 +47,7 @@ class _SendPageState extends State<SendPage> {
         centerTitle: true,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
         actions: [
           IconButton(
             onPressed: () {
@@ -95,24 +96,18 @@ class _SendPageState extends State<SendPage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: _pickFileToEncode,
-                      child: Container(
+                      // Ink rather than Container, so the tap ripple shows
+                      // over the solid fill.
+                      child: Ink(
                         padding: const EdgeInsets.all(16),
                         height: 180,
                         width: double.infinity,
-                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: context.color.outline,
                             width: 1,
                           ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              context.color.surface.withAlpha(0),
-                              context.color.primaryContainer,
-                            ],
-                          ),
+                          color: context.color.primaryContainer,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
@@ -138,24 +133,18 @@ class _SendPageState extends State<SendPage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: _pickImageToEncode,
-                      child: Container(
+                      // Ink rather than Container, so the tap ripple shows
+                      // over the solid fill.
+                      child: Ink(
                         padding: const EdgeInsets.all(16),
                         height: 180,
                         width: double.infinity,
-                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: context.color.outline,
                             width: 1,
                           ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              context.color.surface.withAlpha(0),
-                              context.color.primaryContainer,
-                            ],
-                          ),
+                          color: context.color.primaryContainer,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
