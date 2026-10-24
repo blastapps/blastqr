@@ -11,6 +11,7 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/widgets/navigation_tabs.dart';
+import 'package:blast_qr/widgets/qr_twinkle_background.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,8 @@ class HomeTabsPage extends StatefulWidget {
 }
 
 class _HomeTabsPageState extends State<HomeTabsPage> {
+  static const _scanTab = 1;
+
   int _currentTab = 0;
   SharedMedia? media;
 
@@ -65,47 +68,49 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
         Container(color: context.color.surface),
         Consumer<AppSettings>(
           builder: (context, state, child) {
-            if (state.animations) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                    colorFilter: ColorFilter.mode(
-                      context.color.primary,
-                      BlendMode.srcATop,
-                    ),
-                    fit: BoxFit.cover,
-                    opacity: darkTheme ? 0.6 : 0.25,
-                    image: const AssetImage('assets/bg_qr.webp'),
-                  ),
+            // Not on the camera tab: the shader would keep the GPU busy
+            // while the camera is scanning.
+            if (state.animations && _currentTab != _scanTab) {
+              return SizedBox.expand(
+                child: QrTwinkleBackground(
+                  color: context.color.primary,
+                  opacity: darkTheme ? 0.45 : 0.25,
+                  // Fade in from below the status bar, so only a faint bit
+                  // shows behind the pages' (transparent, 80 high) app bars.
+                  fadeStart: MediaQuery.paddingOf(context).top,
+                  fadeLength: 240,
                 ),
-                height: 400,
               );
             }
-            return Container(
-              height: 400,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: const Alignment(0.5, 4),
-                  colors: [context.color.surface, context.color.primary],
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Container(
+                  height: 400,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: const Alignment(0.5, 4),
+                      colors: [context.color.surface, context.color.primary],
+                    ),
+                  ),
                 ),
-              ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: const FractionalOffset(0.5, 0.0),
+                      end: const FractionalOffset(0.5, 1.5),
+                      colors: [
+                        context.color.surface,
+                        context.color.surface.withAlpha(0),
+                      ],
+                    ),
+                  ),
+                  height: 400,
+                ),
+              ],
             );
           },
-        ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: const FractionalOffset(0.5, 0.0),
-              end: const FractionalOffset(0.5, 1.5),
-              colors: [
-                context.color.surface,
-                context.color.surface.withAlpha(0),
-              ],
-            ),
-          ),
-          height: 400,
         ),
         Scaffold(
           extendBodyBehindAppBar: true,
@@ -169,7 +174,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
           body: Stack(
             children: [
               Offstage(offstage: _currentTab != 0, child: const SendPage()),
-              if (_currentTab == 1) const ScanPage(),
+              if (_currentTab == _scanTab) const ScanPage(),
               if (_currentTab == 2) const FilesPage(),
             ],
           ),
