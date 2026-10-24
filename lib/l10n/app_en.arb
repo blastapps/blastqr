@@ -31,7 +31,7 @@
   "minutes": "minutes",
   "image_compression": "Image compression",
   "image_quality": "Quality",
-  "send_large_file": "Send large file anyway",
+  "send_large_file": "Send original file anyway",
   "send_compressed_image": "Send compressed image file",
   "to_transfer": "to transfer",
   "generating_codes": "Generating codes...",

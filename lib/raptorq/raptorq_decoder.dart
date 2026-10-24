@@ -18,6 +18,10 @@ class RaptorqDecoder {
   /// The transfer this decoder is locked to (set by the first frame).
   StreamKey? _streamKey;
 
+  /// Ids of packets already fed to the decoder. The camera usually reads each
+  /// code several times while it's on screen; repeats carry no new data.
+  final Set<int> _seenPackets = {};
+
   bool complete = false;
   bool isLoadingResult = false;
   int count = 0;
@@ -59,6 +63,15 @@ class RaptorqDecoder {
       return false;
     }
 
+    // Packet id: source block number (u8) + symbol id (u24). Checked before
+    // the first await, so two reads of the same code can't both get through.
+    final data = frame.data;
+    final packetId =
+        (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+    if (!_seenPackets.add(packetId)) {
+      return false;
+    }
+
     try {
       final oti = await _oti!;
       // Packets for a block that doesn't exist would crash the decoder.
@@ -81,6 +94,7 @@ class RaptorqDecoder {
       return false;
     }
 
+    // Progress counts unique packets only. ~K of them complete the transfer.
     count += 1;
 
     final sourceSymbols = (frame.transferLength / frame.symbolSize).ceil();
@@ -103,6 +117,7 @@ class RaptorqDecoder {
     complete = false;
     isLoadingResult = false;
     latestResult = Uint8List(0);
+    _seenPackets.clear();
     _disposeDecoder();
   }
 

@@ -79,7 +79,7 @@
   "large_file_msg_3": "¿Te gustaría enviar una versión comprimida de menor calidad de esta imagen?",
   "image_compression": "Compresión de imagen",
   "image_quality": "Calidad",
-  "send_large_file": "Enviar archivo grande de todos modos",
+  "send_large_file": "Enviar archivo original de todos modos",
   "send_compressed_image": "Enviar imagen comprimida",
   "pure_black": "Usar color negro puro",
   "accent_color": "Color de acento",

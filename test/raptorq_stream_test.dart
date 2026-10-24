@@ -31,8 +31,9 @@ BlastQrcodeData _frame(Uint8List packet, int transferLength) {
     transferLength: transferLength,
     symbolSize: packet.length - BlastQrcodeData.packetIdLength,
   );
-  return BlastQrcodeData.parse(Uint8List.fromList([...header, ...packet]))
-      .frame!;
+  return BlastQrcodeData.parse(
+    Uint8List.fromList([...header, ...packet]),
+  ).frame!;
 }
 
 /// Feeds the endless stream to a decoder, keeping each frame with
@@ -104,14 +105,41 @@ void main() {
     expect(shown, lessThan(69 / 0.3 * 1.3));
   }, skip: _skip);
 
-  test('works across several source blocks', () async {
-    // 96-byte symbols: ~6.5 MB spans 2 blocks.
-    final shown = await _transfer(
-      _data(6500000),
-      mtu: 100,
-      catchRate: 0.5,
-      maxFrames: 300000,
-    );
-    expect(shown, greaterThan(0));
-  }, skip: _skip, timeout: const Timeout(Duration(minutes: 5)));
+  test(
+    'works across several source blocks',
+    () async {
+      // 96-byte symbols: ~6.5 MB spans 2 blocks.
+      final shown = await _transfer(
+        _data(6500000),
+        mtu: 100,
+        catchRate: 0.5,
+        maxFrames: 300000,
+      );
+      expect(shown, greaterThan(0));
+    },
+    skip: _skip,
+    timeout: const Timeout(Duration(minutes: 5)),
+  );
+
+  test('repeated reads of the same code are not counted', () async {
+    final data = _data(50000);
+    final encoder = RaptorqStreamingEncoder(mtu: 2935);
+    await encoder.init(data);
+    final decoder = RaptorqDecoder(onReceiveResult: (_) {});
+    try {
+      final packets = await encoder.nextPackets(3);
+      // Each code read three times, as a camera faster than the display would.
+      for (final packet in packets) {
+        for (var read = 0; read < 3; read++) {
+          final used = await decoder.decodeChunk(_frame(packet, data.length));
+          expect(used, read == 0, reason: 'only the first read is used');
+        }
+      }
+      expect(decoder.count, 3);
+      expect(decoder.estimatedProgress, closeTo(3 / 18, 0.001)); // K = 18
+    } finally {
+      encoder.dispose();
+      decoder.dispose();
+    }
+  }, skip: _skip);
 }
