@@ -166,6 +166,50 @@ class QrFrameSource {
   }
 }
 
+/// Builds the transfer object (see [TransferContainer]): the metadata block
+/// with [fileName], then [content], gzipped as a whole if [tryGzip] and only
+/// if that makes it smaller. Returns whether gzip was kept.
+Future<({Uint8List bytes, bool gzipped})> buildTransferObject({
+  required String fileName,
+  required Uint8List content,
+  required bool tryGzip,
+}) async {
+  final metadata = TransferContainer.encodeMetadata(fileName: fileName);
+  final bytes = Uint8List(metadata.length + content.length)
+    ..setAll(0, metadata)
+    ..setAll(metadata.length, content);
+
+  if (tryGzip) {
+    final compressed = await compute(_gzipCompress, bytes);
+    // Only keep gzip when it helps. This also keeps files near the size
+    // limit from growing past what the u32 header can describe.
+    if (compressed.length < bytes.length) {
+      return (bytes: compressed, gzipped: true);
+    }
+  }
+  // A future encryption layer goes here: after compression, before RaptorQ,
+  // setting BlastQrcodeData.flagEncrypted.
+  return (bytes: bytes, gzipped: false);
+}
+
+/// The header shared by every frame of one send, with a new random session
+/// id unless [sessionId] is given.
+Uint8List buildFrameHeader({
+  required bool gzipped,
+  required int transferLength,
+  required int symbolSize,
+  int? sessionId,
+}) {
+  return BlastQrcodeData.buildHeader(
+    flags: gzipped ? BlastQrcodeData.flagGzip : 0,
+    kind: BlastQrcodeData.kindFile,
+    // Random per send, so receivers can tell a new transfer from an old one.
+    sessionId: sessionId ?? 1 + Random.secure().nextInt(0xFFFF),
+    transferLength: transferLength,
+    symbolSize: symbolSize,
+  );
+}
+
 class FileQrEncoder {
   const FileQrEncoder._();
 
@@ -194,27 +238,12 @@ class FileQrEncoder {
       }
     }
 
-    // v2 container: metadata (filename) followed by the content.
-    final fileName = '${file.nameWithoutExtension}.$fileExtension';
-    final metadata = TransferContainer.encodeMetadata(fileName: fileName);
-    bytes = Uint8List(metadata.length + bytes.length)
-      ..setAll(0, metadata)
-      ..setAll(metadata.length, bytes);
-    debugPrint('Container: $fileName, ${metadata.length} bytes of metadata');
-
-    // File compression
-    if (gzipped) {
-      final compressed = await compute(_gzipCompress, bytes);
-      // Only keep gzip when it helps. This also keeps files near the size
-      // limit from growing past what the u32 header can describe.
-      if (compressed.length < bytes.length) {
-        bytes = compressed;
-      } else {
-        gzipped = false;
-      }
-    }
-    // A future encryption layer goes here: after compression, before RaptorQ,
-    // setting BlastQrcodeData.flagEncrypted.
+    final transfer = await buildTransferObject(
+      fileName: '${file.nameWithoutExtension}.$fileExtension',
+      content: bytes,
+      tryGzip: gzipped,
+    );
+    bytes = transfer.bytes;
 
     final actualTransferSize = bytes.length;
     debugPrint('Compressed file: ${file.size} -> $actualTransferSize');
@@ -223,15 +252,12 @@ class FileQrEncoder {
     final encoder = RaptorqStreamingEncoder(mtu: mtu);
     await encoder.init(bytes);
 
-    final header = BlastQrcodeData.buildHeader(
-      flags: gzipped ? BlastQrcodeData.flagGzip : 0,
-      kind: BlastQrcodeData.kindFile,
-      // Random per send, so receivers can tell a new transfer from an old one.
-      sessionId: 1 + Random.secure().nextInt(0xFFFF),
+    final header = buildFrameHeader(
+      gzipped: transfer.gzipped,
       transferLength: actualTransferSize,
       symbolSize: encoder.symbolSize,
     );
-    final qrVersion = _pickQrVersion(mtu);
+    final qrVersion = pickQrVersion(mtu);
     debugPrint('Picked QR version: $qrVersion for mtu $mtu');
 
     final results = ReceivePort();
@@ -253,7 +279,9 @@ class FileQrEncoder {
     return QrFrameSource._(encoder, isolates, workers, results);
   }
 
-  static int _pickQrVersion(int payloadBytes) {
+  /// QR version for an MTU setting: the smallest version that holds the
+  /// MTU, plus one for the header and packet id.
+  static int pickQrVersion(int payloadBytes) {
     for (final entry in qrByteCapacityL.entries) {
       if (payloadBytes <= entry.value) {
         return entry.key < 40 ? entry.key + 1 : 40;

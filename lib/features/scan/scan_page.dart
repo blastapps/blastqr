@@ -5,13 +5,13 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/features/scan/received_file_writer.dart';
+import 'package:blast_qr/features/scan/transfer_tracker.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
-import 'package:blast_qr/model/transfer_container.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/sound_feedback.dart';
@@ -60,10 +60,8 @@ class _ScanPageState extends State<ScanPage> {
   DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
 
-  /// The transfer being received, and when its last frame arrived.
-  StreamKey? _streamKey;
-  DateTime _lastFrameAt = DateTime.now();
-  static const _switchTransferAfter = Duration(milliseconds: 1500);
+  /// Decides which transfer the scanned frames belong to.
+  final _tracker = TransferTracker();
   CameraController? _cameraController;
   bool _focusLocked = false;
 
@@ -284,57 +282,44 @@ class _ScanPageState extends State<ScanPage> {
       return;
     }
 
-    final parsed = BlastQrcodeData.parse(result.rawBytes);
-    switch (parsed.verdict) {
-      case FrameVerdict.foreign:
+    final (:action, :frame) = _tracker.handle(
+      result.rawBytes,
+      DateTime.now(),
+      busy: _loadingResult,
+    );
+    switch (action) {
+      case ScanAction.foreign:
         _handleRegularQRCodeResult(result.text);
-        return;
-      case FrameVerdict.malformed:
-        return; // Treated like a misread frame.
-      case FrameVerdict.newerVersion:
-      case FrameVerdict.unsupportedFlags:
+      case ScanAction.updateRequired:
         _showUpdateRequired();
-        return;
-      case FrameVerdict.ok:
+      case ScanAction.ignore:
         break;
+      case ScanAction.switchTransfer:
+        _restartTransfer();
+        _startTransfer(frame!);
+      case ScanAction.start:
+        _startTransfer(frame!);
+      case ScanAction.decode:
+        _decoder.decodeChunk(frame!);
     }
+  }
 
-    final frame = parsed.frame!;
-    // Unsafe headers are ignored, like a missed frame.
-    if (!frame.isDecodable) {
-      return;
-    }
-
-    final key = frame.streamKey;
-    if (_streamKey != null && key != _streamKey) {
-      // Another transfer. Switch to it only once the current one has gone
-      // quiet (the sender picked another file); while it's still arriving,
-      // the other frames are probably from a second sender in view.
-      final quietFor = DateTime.now().difference(_lastFrameAt);
-      if (quietFor < _switchTransferAfter || _loadingResult) {
-        return;
-      }
-      _restartTransfer();
-    }
-    _lastFrameAt = DateTime.now();
-
+  /// Sets up a new transfer from its first frame and decodes that frame.
+  void _startTransfer(BlastQrcodeData frame) {
     // The decoder locks onto this frame's transfer synchronously, so the
     // metadata below always describes the transfer being decoded.
     _decoder.decodeChunk(frame);
-    if (_streamKey == null) {
-      _streamKey = key;
-      _fileMetadata = ReceivingFileMetadata(
-        size: frame.transferLength,
-        isCompressed: frame.isCompressedData,
-      );
-      setState(() {
-        _isReceivingData = true;
-        _statusMessage = context.l10n.receiving_generic;
-      });
-      _latestScanStartTime = DateTime.now();
-      debugPrint('Scanning file with: ${_fileMetadata.toString()}');
-      _lockFocus();
-    }
+    _fileMetadata = ReceivingFileMetadata(
+      size: frame.transferLength,
+      isCompressed: frame.isCompressedData,
+    );
+    setState(() {
+      _isReceivingData = true;
+      _statusMessage = context.l10n.receiving_generic;
+    });
+    _latestScanStartTime = DateTime.now();
+    debugPrint('Scanning file with: ${_fileMetadata.toString()}');
+    _lockFocus();
   }
 
   /// Drops the current transfer's progress and starts on a new one right
@@ -342,7 +327,6 @@ class _ScanPageState extends State<ScanPage> {
   void _restartTransfer() {
     debugPrint('Switching to a new transfer');
     _decoder.reset();
-    _streamKey = null;
     _fileMetadata = null;
     _progress = 0;
     _decodedChunkCount = 0;
@@ -413,33 +397,20 @@ class _ScanPageState extends State<ScanPage> {
       await itemsDirectory.create();
     }
 
-    // Write to the temp folder first so a half-written file never shows up
-    // in the Received tab.
-    final tempDirectory = await getTemporaryDirectory();
-    final tempFile = File(
-      '${tempDirectory.path}/receiving-${DateTime.now().microsecondsSinceEpoch}',
-    );
-    final TransferMetadata metadata;
+    final File resultFile;
     try {
-      metadata = await writeReceivedFile(
+      resultFile = await saveReceivedFile(
         data: data,
         gzipped: _fileMetadata!.isCompressed,
-        outputPath: tempFile.path,
+        directory: itemsDirectory,
+        tempDirectory: await getTemporaryDirectory(),
       );
     } catch (error) {
       debugPrint('Failed to save received file: $error');
       _showReceiveFailed();
       return;
     }
-
-    // The name comes from the sender: never trust it as a path.
-    var fileName = sanitizeFileName(metadata.fileName ?? '');
-    fileName = await resolveUniqueFileName(itemsDirectory, fileName);
-
-    final resultFile = await _moveFile(
-      tempFile,
-      '${itemsDirectory.path}/$fileName',
-    );
+    final fileName = resultFile.path.split(Platform.pathSeparator).last;
 
     final fileWrapper = await resultFile.toFileWrapper();
 
@@ -468,18 +439,6 @@ class _ScanPageState extends State<ScanPage> {
       }
       _reset();
     });
-  }
-
-  /// Renames [file] to [newPath], copying instead if they're on different
-  /// filesystems.
-  Future<File> _moveFile(File file, String newPath) async {
-    try {
-      return await file.rename(newPath);
-    } on FileSystemException {
-      final copy = await file.copy(newPath);
-      await file.delete();
-      return copy;
-    }
   }
 
   void _showReceiveFailed() {
@@ -621,7 +580,7 @@ class _ScanPageState extends State<ScanPage> {
     _speed = 0;
     _decodedChunkCount = 0;
     _fileMetadata = null;
-    _streamKey = null;
+    _tracker.reset();
     _renameController.text = '';
     _showLowSpeedWarning = false;
     _lowSpeedStartTime = null;

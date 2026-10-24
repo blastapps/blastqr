@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/transfer_container.dart';
 
@@ -11,6 +12,47 @@ import 'package:blast_qr/model/transfer_container.dart';
 class ReceivedFileTooLargeException implements Exception {
   @override
   String toString() => 'Received file exceeds the size limit';
+}
+
+/// Saves a decoded transfer object as a file in [directory] and returns it.
+///
+/// The content is written to [tempDirectory] first, so a half-written file
+/// never shows up in [directory]. The sender's filename is cleaned (it must
+/// never be trusted as a path) and made unique. Throws if the data can't be
+/// saved; nothing is left behind in that case.
+Future<File> saveReceivedFile({
+  required Uint8List data,
+  required bool gzipped,
+  required Directory directory,
+  required Directory tempDirectory,
+  int maxContentBytes = BlastQrcodeData.maxFileBytes,
+}) async {
+  final tempFile = File(
+    '${tempDirectory.path}/receiving-${DateTime.now().microsecondsSinceEpoch}',
+  );
+  final metadata = await writeReceivedFile(
+    data: data,
+    gzipped: gzipped,
+    outputPath: tempFile.path,
+    maxContentBytes: maxContentBytes,
+  );
+  final fileName = await resolveUniqueFileName(
+    directory,
+    sanitizeFileName(metadata.fileName ?? ''),
+  );
+  return _moveFile(tempFile, '${directory.path}/$fileName');
+}
+
+/// Renames [file] to [newPath], copying instead if they're on different
+/// filesystems.
+Future<File> _moveFile(File file, String newPath) async {
+  try {
+    return await file.rename(newPath);
+  } on FileSystemException {
+    final copy = await file.copy(newPath);
+    await file.delete();
+    return copy;
+  }
 }
 
 /// Writes a decoded transfer object (see [TransferContainer]) to

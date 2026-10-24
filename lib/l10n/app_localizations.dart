@@ -297,7 +297,7 @@ abstract class AppLocalizations {
   /// No description provided for @send_large_file.
   ///
   /// In en, this message translates to:
-  /// **'Send large file anyway'**
+  /// **'Send original file anyway'**
   String get send_large_file;
 
   /// No description provided for @send_compressed_image.

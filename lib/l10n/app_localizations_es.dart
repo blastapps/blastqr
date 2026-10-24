@@ -107,7 +107,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get image_quality => 'Calidad';
 
   @override
-  String get send_large_file => 'Enviar archivo grande de todos modos';
+  String get send_large_file => 'Enviar archivo original de todos modos';
 
   @override
   String get send_compressed_image => 'Enviar imagen comprimida';
