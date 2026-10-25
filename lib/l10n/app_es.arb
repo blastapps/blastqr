@@ -72,7 +72,6 @@
   "selected": "seleccionados",
   "delete_files_msg": "¿Estás seguro de que deseas eliminar los archivos seleccionados?",
   "selected_options": "Archivos seleccionados",
-  "next": "Siguiente",
   "file_too_large": "Archivo demasiado grande",
   "file_too_large_msg": "Este archivo supera el límite de 4 GB y no se puede enviar",
   "low_speed_warning": "Velocidad de transferencia baja. Ajusta la posición de los dispositivos y mantenlos quietos para obtener mejor rendimiento",
@@ -136,5 +135,6 @@
   "edit_password": "Editar contraseña",
   "password_short_warning": "Las contraseñas cortas no son seguras.",
   "custom_password_title": "Contraseña personalizada",
-  "custom_password_msg": "El archivo se cifrará con la siguiente contraseña."
+  "custom_password_msg": "El archivo se cifrará con la siguiente contraseña.",
+  "files_count": "{count, plural, =1{1 archivo} other{{count} archivos}}"
 }

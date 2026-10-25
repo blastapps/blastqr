@@ -16,6 +16,8 @@ device's camera reads them.
   speed. Transfers peak at around 110 kB/s, so it suits small files best.
 - **Completion signal by sound.** When the receiver has the whole file it plays
   a short tone, and the sender's microphone picks it up to stop the transfer.
+- **Several files at once.** They're zipped into one transfer and unpacked
+  into separate files on the receiver.
 - **Optional password encryption.** The sender gets a generated password to
   share with the receiver, who types it in once the file has arrived.
 - **Optional image compression and gzip** to shrink files before sending.

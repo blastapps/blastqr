@@ -15,7 +15,8 @@ The sender shows each packet once, in its own QR code, and never repeats one.
 A receiver that misses frames just takes longer.
 
 The data that RaptorQ carries is called the transfer object. It contains the
-file and its name, optionally gzipped, and optionally encrypted.
+file and its name, optionally gzipped, and optionally encrypted. Several files
+are sent as one zip, in a single transfer.
 
 ## Frame
 
@@ -110,6 +111,7 @@ Each metadata entry is a 1-byte tag, a 2-byte length and the value.
 | tag | value |
 |---|---|
 | 1 | file name with extension, UTF-8, at most 255 bytes |
+| 2 | empty. The content is a bundle of several files (see below) |
 
 Receivers skip tags they don't know, so new metadata can be added without a
 new version.
@@ -123,6 +125,19 @@ The transfer length in the header is the size of the final result.
 
 The file name is inside the transfer object, so the receiver only learns it at
 the end. When the transfer is encrypted, the name is encrypted too.
+
+## Bundles
+
+To send several files, the sender puts them in a zip and sends that as the
+content, with metadata tag 2 and a name like `blastqr-20261025-143000.zip`.
+The zip entries are stored without compression; gzip on the whole transfer
+does the compressing. Entry names are file names without folders, unique
+within the zip.
+
+A receiver that knows tag 2 saves each entry as a separate file. It only
+extracts zips whose entries are all stored without compression, so the files
+can't be bigger than the zip. Otherwise, or if the zip can't be read, it saves
+the zip as one file. A receiver that doesn't know tag 2 also saves the zip.
 
 ## Encryption
 
@@ -219,9 +234,10 @@ When RaptorQ has enough packets, the receiver:
    retried without scanning again.
 2. gunzips it, if flag 0x01 is set. It stops once the content passes the 4 GB
    limit, so a small gzip stream can't expand into a huge file.
-3. reads the metadata, then writes the content to a file.
+3. reads the metadata, then writes the content to a file, or extracts it if
+   it's a bundle.
 
-The file name from the sender is not trusted. The receiver keeps only the last
+File names from the sender, including zip entry names, are not trusted. The receiver keeps only the last
 path segment, removes control and forbidden characters and leading dots, and
 cuts it to 200 bytes. If nothing is left, the name is `file`.
 

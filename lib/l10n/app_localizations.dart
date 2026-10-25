@@ -600,12 +600,6 @@ abstract class AppLocalizations {
   /// **'Selected files'**
   String get selected_options;
 
-  /// No description provided for @next.
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get next;
-
   /// No description provided for @file_too_large.
   ///
   /// In en, this message translates to:
@@ -911,6 +905,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The file will be encrypted with the following password.'**
   String get custom_password_msg;
+
+  /// No description provided for @files_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file} other{{count} files}}'**
+  String files_count(int count);
 }
 
 class _AppLocalizationsDelegate

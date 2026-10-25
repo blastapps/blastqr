@@ -9,6 +9,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:blast_qr/crypto/transfer_crypto.dart';
+import 'package:blast_qr/file_bundle.dart';
 import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/features/scan/transfer_tracker.dart';
 import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
@@ -62,8 +63,10 @@ void main() {
   /// receiver catches each frame with probability [catchRate]. With a
   /// [password] the transfer is encrypted, and the receiver tries
   /// [receiverPasswords] in order (all on the same received data, like the
-  /// app does), counting wrong ones in `wrongAttempts`.
-  Future<({File file, bool gzipped, int wrongAttempts})> send(
+  /// app does), counting wrong ones in `wrongAttempts`. With [isBundle],
+  /// [content] is a zip that the receiver extracts into `files`.
+  Future<({File file, List<File> files, bool gzipped, int wrongAttempts})>
+  send(
     String fileName,
     Uint8List content, {
     bool tryGzip = true,
@@ -71,6 +74,7 @@ void main() {
     double catchRate = 1,
     String? password,
     List<String>? receiverPasswords,
+    bool isBundle = false,
   }) async {
     // Sender.
     final transfer = await buildTransferObject(
@@ -78,6 +82,7 @@ void main() {
       content: content,
       tryGzip: tryGzip,
       password: password,
+      isBundle: isBundle,
     );
     final encoder = RaptorqStreamingEncoder(mtu: mtu);
     await encoder.init(transfer.bytes);
@@ -133,20 +138,25 @@ void main() {
       data = plain;
     }
 
-    final file = await saveReceivedFile(
+    final files = await saveReceivedFiles(
       data: data,
       gzipped: firstFrame.isCompressedData,
       directory: docs,
       tempDirectory: temp,
     );
-    return (file: file, gzipped: transfer.gzipped, wrongAttempts: wrongAttempts);
+    return (
+      file: files.first,
+      files: files,
+      gzipped: transfer.gzipped,
+      wrongAttempts: wrongAttempts,
+    );
   }
 
   String nameOf(File file) => file.path.split(Platform.pathSeparator).last;
 
   test('compressible file arrives intact and gzipped', () async {
     final content = utf8.encode('All work and no play. ' * 20000);
-    final (:file, :gzipped, wrongAttempts: _) = await send('notes.txt', content);
+    final (:file, :gzipped, wrongAttempts: _, files: _) = await send('notes.txt', content);
 
     expect(gzipped, isTrue);
     expect(nameOf(file), 'notes.txt');
@@ -155,7 +165,7 @@ void main() {
 
   test('incompressible file arrives intact without gzip', () async {
     final content = _random(300000);
-    final (:file, :gzipped, wrongAttempts: _) = await send('photo.jpg', content);
+    final (:file, :gzipped, wrongAttempts: _, files: _) = await send('photo.jpg', content);
 
     expect(gzipped, isFalse);
     expect(nameOf(file), 'photo.jpg');
@@ -164,7 +174,7 @@ void main() {
 
   test('audio/video path (gzip not tried) arrives intact', () async {
     final content = _random(100000, seed: 2);
-    final (:file, :gzipped, wrongAttempts: _) = await send(
+    final (:file, :gzipped, wrongAttempts: _, files: _) = await send(
       'clip.mp4',
       content,
       tryGzip: false,
@@ -176,7 +186,7 @@ void main() {
   }, skip: _skip);
 
   test('empty file arrives as an empty file', () async {
-    final (:file, gzipped: _, wrongAttempts: _) = await send('empty.txt', Uint8List(0));
+    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send('empty.txt', Uint8List(0));
 
     expect(nameOf(file), 'empty.txt');
     expect(file.readAsBytesSync(), isEmpty);
@@ -184,7 +194,7 @@ void main() {
 
   test('heavy frame loss still delivers the exact file', () async {
     final content = _random(500000, seed: 3);
-    final (:file, gzipped: _, wrongAttempts: _) = await send(
+    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
       'big.bin',
       content,
       catchRate: 0.3,
@@ -195,7 +205,7 @@ void main() {
   test('large file split into several RaptorQ blocks', () async {
     // 96-byte symbols: ~6.5 MB spans 2 blocks.
     final content = _random(6500000, seed: 4);
-    final (:file, gzipped: _, wrongAttempts: _) = await send(
+    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
       'archive.zip',
       content,
       mtu: 100,
@@ -205,7 +215,7 @@ void main() {
   }, skip: _skip, timeout: const Timeout(Duration(minutes: 5)));
 
   test('a sender-chosen path cannot escape the folder', () async {
-    final (:file, gzipped: _, wrongAttempts: _) = await send(
+    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
       '../../escape.txt',
       utf8.encode('hi'),
     );
@@ -226,7 +236,7 @@ void main() {
   group('encrypted', () {
     test('compressible file arrives intact, gzipped then encrypted', () async {
       final content = utf8.encode('Secret plans. ' * 20000);
-      final (:file, :gzipped, :wrongAttempts) = await send(
+      final (:file, :gzipped, :wrongAttempts, files: _) = await send(
         'plans.txt',
         content,
         password: 'K7M2-QX9P-4RTA',
@@ -240,7 +250,7 @@ void main() {
 
     test('incompressible file arrives intact', () async {
       final content = _random(200000, seed: 5);
-      final (:file, :gzipped, wrongAttempts: _) = await send(
+      final (:file, :gzipped, wrongAttempts: _, files: _) = await send(
         'photo.jpg',
         content,
         password: 'correct horse battery staple',
@@ -252,7 +262,7 @@ void main() {
 
     test('a generated code can be typed loosely', () async {
       final content = utf8.encode('hello');
-      final (:file, gzipped: _, :wrongAttempts) = await send(
+      final (:file, gzipped: _, :wrongAttempts, files: _) = await send(
         'hi.txt',
         content,
         password: 'K7M2-QX9P-4RTA',
@@ -264,7 +274,7 @@ void main() {
 
     test('wrong passwords can be retried on the same received data', () async {
       final content = _random(50000, seed: 6);
-      final (:file, gzipped: _, :wrongAttempts) = await send(
+      final (:file, gzipped: _, :wrongAttempts, files: _) = await send(
         'retry.bin',
         content,
         password: 'right password',
@@ -276,7 +286,7 @@ void main() {
 
     test('heavy frame loss still delivers the exact file', () async {
       final content = _random(300000, seed: 7);
-      final (:file, gzipped: _, wrongAttempts: _) = await send(
+      final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
         'lossy.bin',
         content,
         catchRate: 0.3,
@@ -302,6 +312,71 @@ void main() {
         plain.bytes.length + envelopeOverhead(),
       );
       expect(envelopeOverhead(), 52);
+    }, skip: _skip);
+  });
+
+  group('bundle', () {
+    Future<Uint8List> zip(Map<String, String> files) async {
+      final path = '${docs.parent.path}/bundle.zip';
+      await writeBundle([
+        for (final MapEntry(:key, :value) in files.entries)
+          (name: key, path: null, bytes: utf8.encode(value)),
+      ], path);
+      return File(path).readAsBytesSync();
+    }
+
+    test('several files arrive as separate files', () async {
+      final content = await zip({
+        'notes.txt': 'All work and no play. ' * 2000,
+        'list.csv': 'a,b,c\n' * 500,
+        'notes(1).txt': 'second',
+      });
+      final (:files, :gzipped, file: _, wrongAttempts: _) = await send(
+        'blastqr-bundle.zip',
+        content,
+        isBundle: true,
+      );
+
+      expect(gzipped, isTrue);
+      expect(files.map(nameOf), ['notes.txt', 'list.csv', 'notes(1).txt']);
+      expect(files[2].readAsStringSync(), 'second');
+      expect(temp.listSync(), isEmpty);
+    }, skip: _skip);
+
+    test('an encrypted bundle arrives as separate files', () async {
+      final content = await zip({'a.txt': 'secret a', 'b.txt': 'secret b'});
+      final (:files, file: _, gzipped: _, wrongAttempts: _) = await send(
+        'blastqr-bundle.zip',
+        content,
+        isBundle: true,
+        password: 'K7M2-QX9P-4RTA',
+      );
+
+      expect(files.map(nameOf), ['a.txt', 'b.txt']);
+      expect(files[1].readAsStringSync(), 'secret b');
+    }, skip: _skip);
+
+    test('a bundle that is not a zip is kept as one file', () async {
+      final content = Uint8List.fromList(utf8.encode('not a zip'));
+      final (:files, file: _, gzipped: _, wrongAttempts: _) = await send(
+        'broken.zip',
+        content,
+        isBundle: true,
+      );
+
+      expect(files.map(nameOf), ['broken.zip']);
+      expect(files.single.readAsBytesSync(), content);
+      expect(temp.listSync(), isEmpty);
+    }, skip: _skip);
+
+    test('a zip sent without the bundle tag is kept as one file', () async {
+      final content = await zip({'a.txt': 'a', 'b.txt': 'b'});
+      final (:files, file: _, gzipped: _, wrongAttempts: _) = await send(
+        'archive.zip',
+        content,
+      );
+
+      expect(files.map(nameOf), ['archive.zip']);
     }, skip: _skip);
   });
 }

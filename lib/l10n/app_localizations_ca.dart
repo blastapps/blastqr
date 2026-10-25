@@ -268,9 +268,6 @@ class AppLocalizationsCa extends AppLocalizations {
   String get selected_options => 'Fitxers seleccionats';
 
   @override
-  String get next => 'Següent';
-
-  @override
   String get file_too_large => 'Fitxer massa gran';
 
   @override
@@ -442,4 +439,15 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get custom_password_msg =>
       'El fitxer es xifrarà amb la contrasenya següent.';
+
+  @override
+  String files_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fitxers',
+      one: '1 fitxer',
+    );
+    return '$_temp0';
+  }
 }

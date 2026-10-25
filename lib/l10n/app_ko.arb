@@ -72,7 +72,6 @@
   "selected": "선택됨",
   "delete_files_msg": "선택한 파일을 삭제하시겠습니까?",
   "selected_options": "선택된 파일",
-  "next": "다음",
   "file_too_large": "파일이 너무 큽니다",
   "file_too_large_msg": "이 파일은 4GB 제한을 초과하여 전송할 수 없습니다.",
   "low_speed_warning": "전송 속도가 느립니다. 기기 위치를 조정하고 움직이지 마세요",
@@ -136,5 +135,6 @@
   "edit_password": "비밀번호 편집",
   "password_short_warning": "짧은 비밀번호는 안전하지 않습니다.",
   "custom_password_title": "사용자 지정 비밀번호",
-  "custom_password_msg": "파일이 다음 비밀번호로 암호화됩니다."
+  "custom_password_msg": "파일이 다음 비밀번호로 암호화됩니다.",
+  "files_count": "{count, plural, other{파일 {count}개}}"
 }

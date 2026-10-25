@@ -45,4 +45,22 @@ void main() {
     );
     expect(name, '한' * 85); // 85 × 3 bytes = 255
   });
+
+  test('bundle tag: exact bytes and round trip', () {
+    final block = TransferContainer.encodeMetadata(
+      fileName: 'a.zip',
+      isBundle: true,
+    );
+    expect(block, [0, 11, 1, 0, 5, 0x61, 0x2E, 0x7A, 0x69, 0x70, 2, 0, 0]);
+
+    final metadata = TransferContainer.decodeMetadata(block.sublist(2));
+    expect(metadata.fileName, 'a.zip');
+    expect(metadata.isBundle, isTrue);
+    expect(
+      TransferContainer.decodeMetadata(
+        TransferContainer.encodeMetadata(fileName: 'a.zip').sublist(2),
+      ).isBundle,
+      isFalse,
+    );
+  });
 }

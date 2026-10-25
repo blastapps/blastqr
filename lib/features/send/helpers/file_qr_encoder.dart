@@ -177,8 +177,12 @@ Future<({Uint8List bytes, bool gzipped})> buildTransferObject({
   required Uint8List content,
   required bool tryGzip,
   String? password,
+  bool isBundle = false,
 }) async {
-  final metadata = TransferContainer.encodeMetadata(fileName: fileName);
+  final metadata = TransferContainer.encodeMetadata(
+    fileName: fileName,
+    isBundle: isBundle,
+  );
   var bytes = Uint8List(metadata.length + content.length)
     ..setAll(0, metadata)
     ..setAll(metadata.length, content);
@@ -234,6 +238,7 @@ class FileQrEncoder {
     ImageCompressionSettings? icSettings,
     String? password,
     String? fileName,
+    bool isBundle = false,
     void Function(int)? onCompressedSize,
   }) async {
     var bytes = await file.file.readAsBytes();
@@ -245,7 +250,7 @@ class FileQrEncoder {
     // "always compress images"), so only images are re-encoded, and only a
     // re-encoded image takes the output format's extension.
     if (icSettings != null && file.type.allowsImageCompression) {
-      final compressedImage = await _compressImage(bytes, icSettings);
+      final compressedImage = await compressImage(bytes, icSettings);
       if (compressedImage != null) {
         bytes = compressedImage;
         gzipped = false;
@@ -267,6 +272,7 @@ class FileQrEncoder {
       content: bytes,
       tryGzip: gzipped,
       password: password,
+      isBundle: isBundle,
     );
     bytes = transfer.bytes;
 
@@ -316,7 +322,7 @@ class FileQrEncoder {
     return 40;
   }
 
-  static Future<Uint8List?> _compressImage(
+  static Future<Uint8List?> compressImage(
     Uint8List bytes,
     ImageCompressionSettings settings,
   ) async {

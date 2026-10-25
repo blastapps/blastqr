@@ -69,6 +69,15 @@ Future<String> resolveUniqueFileName(
   if (!await File('${directory.path}/$fileName').exists()) {
     return fileName;
   }
+  return uniqueFileName(
+    fileName,
+    (candidate) => File('${directory.path}/$candidate').existsSync(),
+  );
+}
+
+/// [fileName], or `name(1).ext`, `name(2).ext`… if [isTaken] says it's used.
+String uniqueFileName(String fileName, bool Function(String) isTaken) {
+  if (!isTaken(fileName)) return fileName;
 
   final dotIndex = fileName.lastIndexOf('.');
   final name = dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
@@ -77,9 +86,7 @@ Future<String> resolveUniqueFileName(
   var counter = 1;
   while (true) {
     final candidate = '$name($counter)$ext';
-    if (!await File('${directory.path}/$candidate').exists()) {
-      return candidate;
-    }
+    if (!isTaken(candidate)) return candidate;
     counter++;
   }
 }

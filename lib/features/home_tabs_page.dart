@@ -4,7 +4,7 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/files_page.dart';
 import 'package:blast_qr/features/scan/scan_page.dart';
-import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/send/send_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
@@ -191,17 +191,6 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     if (!mounted) return;
     final options = await chooseSendOptions(context, [fileWrapper]);
     if (options == null || !mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) {
-          return QrPage(
-            file: fileWrapper,
-            password: options.password,
-            fileName: options.fileName,
-          );
-        },
-      ),
-    );
+    await sendFiles(context, [fileWrapper], options);
   }
 }

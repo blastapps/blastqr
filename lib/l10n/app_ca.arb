@@ -76,7 +76,6 @@
   "selected": "seleccionats",
   "delete_files_msg": "Segur que vols suprimir els fitxers seleccionats?",
   "selected_options": "Fitxers seleccionats",
-  "next": "Següent",
   "file_too_large": "Fitxer massa gran",
   "file_too_large_msg": "Aquest fitxer supera el límit de 4 GB i no es pot enviar",
   "low_speed_warning": "Velocitat de transferència baixa. Ajusta la posició dels dispositius i mantén-los quiets per obtenir millor rendiment",
@@ -135,5 +134,6 @@
   "edit_password": "Editar la contrasenya",
   "password_short_warning": "Les contrasenyes curtes no són segures.",
   "custom_password_title": "Contrasenya personalitzada",
-  "custom_password_msg": "El fitxer es xifrarà amb la contrasenya següent."
+  "custom_password_msg": "El fitxer es xifrarà amb la contrasenya següent.",
+  "files_count": "{count, plural, =1{1 fitxer} other{{count} fitxers}}"
 }

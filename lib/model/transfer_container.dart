@@ -7,7 +7,10 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 class TransferMetadata {
   final String? fileName;
 
-  const TransferMetadata({this.fileName});
+  /// The content is a zip of several files, to be extracted by the receiver.
+  final bool isBundle;
+
+  const TransferMetadata({this.fileName, this.isBundle = false});
 }
 
 /// The v2 transfer object, before compression:
@@ -25,17 +28,26 @@ class TransferContainer {
   const TransferContainer._();
 
   static const int tagFileName = 1;
+  static const int tagBundle = 2;
 
   /// Longest filename sent, in UTF-8 bytes.
   static const int maxFileNameBytes = 255;
 
   /// Builds the metadata block, including its 2-byte length prefix.
-  static Uint8List encodeMetadata({required String fileName}) {
+  static Uint8List encodeMetadata({
+    required String fileName,
+    bool isBundle = false,
+  }) {
     final name = _truncateUtf8(utf8.encode(fileName), maxFileNameBytes);
     final entries = BytesBuilder()
       ..addByte(tagFileName)
       ..add(_u16(name.length))
       ..add(name);
+    if (isBundle) {
+      entries
+        ..addByte(tagBundle)
+        ..add(_u16(0));
+    }
     final body = entries.toBytes();
     assert(body.length + 2 <= BlastQrcodeData.maxMetadataBytes);
     return (BytesBuilder()
@@ -49,6 +61,7 @@ class TransferContainer {
   static TransferMetadata decodeMetadata(Uint8List block) {
     final view = ByteData.sublistView(block);
     String? fileName;
+    var isBundle = false;
     var offset = 0;
     while (offset < block.length) {
       if (offset + 3 > block.length) {
@@ -63,10 +76,12 @@ class TransferContainer {
       }
       if (tag == tagFileName) {
         fileName = utf8.decode(block.sublist(start, end), allowMalformed: true);
+      } else if (tag == tagBundle) {
+        isBundle = true;
       }
       offset = end;
     }
-    return TransferMetadata(fileName: fileName);
+    return TransferMetadata(fileName: fileName, isBundle: isBundle);
   }
 
   static Uint8List _u16(int value) =>

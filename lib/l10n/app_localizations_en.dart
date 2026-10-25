@@ -268,9 +268,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selected_options => 'Selected files';
 
   @override
-  String get next => 'Next';
-
-  @override
   String get file_too_large => 'File too large';
 
   @override
@@ -441,4 +438,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get custom_password_msg =>
       'The file will be encrypted with the following password.';
+
+  @override
+  String files_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files',
+      one: '1 file',
+    );
+    return '$_temp0';
+  }
 }

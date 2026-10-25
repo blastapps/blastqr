@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:blast_qr/file_bundle.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/transfer_container.dart';
@@ -14,13 +15,14 @@ class ReceivedFileTooLargeException implements Exception {
   String toString() => 'Received file exceeds the size limit';
 }
 
-/// Saves a decoded transfer object as a file in [directory] and returns it.
+/// Saves a decoded transfer object in [directory] and returns the new files.
 ///
 /// The content is written to [tempDirectory] first, so a half-written file
 /// never shows up in [directory]. The sender's filename is cleaned (it must
-/// never be trusted as a path) and made unique. Throws if the data can't be
-/// saved; nothing is left behind in that case.
-Future<File> saveReceivedFile({
+/// never be trusted as a path) and made unique. A bundle is extracted into
+/// separate files; if that fails, the zip is kept as one file. Throws if the
+/// data can't be saved; nothing is left behind in that case.
+Future<List<File>> saveReceivedFiles({
   required Uint8List data,
   required bool gzipped,
   required Directory directory,
@@ -36,11 +38,23 @@ Future<File> saveReceivedFile({
     outputPath: tempFile.path,
     maxContentBytes: maxContentBytes,
   );
+  if (metadata.isBundle) {
+    try {
+      final paths = await extractBundle(tempFile.path, directory);
+      await tempFile.delete();
+      return [for (final path in paths) File(path)];
+    } on BundleFormatException {
+      // Keep the zip as it is.
+    } catch (_) {
+      await tempFile.delete();
+      rethrow;
+    }
+  }
   final fileName = await resolveUniqueFileName(
     directory,
     sanitizeFileName(metadata.fileName ?? ''),
   );
-  return _moveFile(tempFile, '${directory.path}/$fileName');
+  return [await _moveFile(tempFile, '${directory.path}/$fileName')];
 }
 
 /// Renames [file] to [newPath], copying instead if they're on different

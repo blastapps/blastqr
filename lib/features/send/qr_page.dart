@@ -21,13 +21,16 @@ class QrPage extends StatefulWidget {
   const QrPage({
     super.key,
     required this.file,
-    this.onNext,
+    this.isBundle = false,
     this.password,
     this.fileName,
   });
 
+  static const largeFileBytes = 600000;
+
   final FileWrapper file;
-  final VoidCallback? onNext;
+
+  final bool isBundle;
 
   final String? password;
 
@@ -39,7 +42,8 @@ class QrPage extends StatefulWidget {
 
 class _QrPageState extends State<QrPage> {
   final _qrController = RaptorQrStreamingWidgetController();
-  bool get _isLargeFile => widget.file.size > 600000;
+
+  bool get _isLargeFile => widget.file.size > QrPage.largeFileBytes;
   bool _largeFileAcknowledged = false;
   bool _shouldCompressImage = false;
   int? _compressedSize;
@@ -156,6 +160,7 @@ class _QrPageState extends State<QrPage> {
                                               : null,
                                       password: widget.password,
                                       fileName: widget.fileName,
+                                      isBundle: widget.isBundle,
                                       fill: _fullscreenMode,
                                       onTap: _onToggleFullscreen,
                                       onNearlyComplete:
@@ -182,7 +187,6 @@ class _QrPageState extends State<QrPage> {
                           child: AcousticSuccessOverlay(
                             onKeepShowing: _onKeepShowingQr,
                             onDone: _dismiss,
-                            onNextFile: widget.onNext,
                             password: widget.password,
                           ),
                         ),
@@ -226,17 +230,11 @@ class _QrPageState extends State<QrPage> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
-                  onPressed: widget.onNext != null ? _onTapNext : _dismiss,
+                  onPressed: _dismiss,
                   child: Row(
                     spacing: 8,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.onNext != null
-                            ? context.l10n.next
-                            : context.l10n.done,
-                      ),
-                    ],
+                    children: [Text(context.l10n.done)],
                   ),
                 ),
               ),
@@ -334,11 +332,6 @@ class _QrPageState extends State<QrPage> {
   void _dismiss() {
     _cleanup();
     Navigator.of(context).pop();
-  }
-
-  void _onTapNext() {
-    _cleanup();
-    widget.onNext!();
   }
 
   /// Mirrors the column logic in [_FlexibleGrid]: 2 rows × 1–3 columns based

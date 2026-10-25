@@ -82,7 +82,6 @@
   "selected": "selected",
   "delete_files_msg": "Are you sure you want to delete the selected files?",
   "selected_options": "Selected files",
-  "next": "Next",
   "file_too_large": "File too large",
   "file_too_large_msg": "This file exceeds the 4 GB limit and cannot be sent.",
   "low_speed_warning": "Low transfer speed. Adjust the position of the devices and keep them still for better performance",
@@ -140,5 +139,13 @@
   "edit_password": "Edit password",
   "password_short_warning": "Short passwords are not secure.",
   "custom_password_title": "Custom password",
-  "custom_password_msg": "The file will be encrypted with the following password."
+  "custom_password_msg": "The file will be encrypted with the following password.",
+  "files_count": "{count, plural, =1{1 file} other{{count} files}}",
+  "@files_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

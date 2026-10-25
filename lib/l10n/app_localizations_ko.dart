@@ -264,9 +264,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get selected_options => '선택된 파일';
 
   @override
-  String get next => '다음';
-
-  @override
   String get file_too_large => '파일이 너무 큽니다';
 
   @override
@@ -425,4 +422,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get custom_password_msg => '파일이 다음 비밀번호로 암호화됩니다.';
+
+  @override
+  String files_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개',
+    );
+    return '$_temp0';
+  }
 }

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/send/widgets/custom_password_sheet.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
@@ -506,14 +506,7 @@ class _FilesPageState extends State<FilesPage> {
   }
 
   void _onTapSend(FileWrapper file, SendOptions options) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) {
-          return QrPage(file: file, password: options.password);
-        },
-      ),
-    );
+    sendFiles(context, [file], options);
   }
 
   void _showMultiSelectSheet() {
@@ -574,27 +567,7 @@ class _FilesPageState extends State<FilesPage> {
 
   void _sendSelectedFiles(List<FileWrapper> files, SendOptions options) {
     _exitSelectionMode();
-    Navigator.of(context).push(_qrRouteForIndex(files, 0, options.password));
-  }
-
-  Route<void> _qrRouteForIndex(
-    List<FileWrapper> files,
-    int index,
-    String? password,
-  ) {
-    final isLast = index == files.length - 1;
-    return MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => QrPage(
-        file: files[index],
-        password: password,
-        onNext: isLast
-            ? null
-            : () => Navigator.of(
-                context,
-              ).pushReplacement(_qrRouteForIndex(files, index + 1, password)),
-      ),
-    );
+    sendFiles(context, files, options);
   }
 
   Future<void> _saveAllToDownloads(List<FileWrapper> files) async {

@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:blast_qr/acoustic_ack_listener.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
-import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
@@ -30,6 +31,15 @@ class SendPage extends StatefulWidget {
 
 class _SendPageState extends State<SendPage> {
   final List<FileWrapper> _recentFiles = [];
+  bool _dropRegionReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _dropRegionReady = true);
+    });
+  }
 
   void _addRecentFile(FileWrapper fw) {
     setState(() {
@@ -37,6 +47,32 @@ class _SendPageState extends State<SendPage> {
       _recentFiles.insert(0, fw);
       if (_recentFiles.length > 5) _recentFiles.removeLast();
     });
+  }
+
+  /// The drop region is created after the first frame: on macOS,
+  /// irondash_engine_context only registers the Flutter view asynchronously
+  /// and crashes if a drop region asks for it earlier.
+  Widget _dropRegion({required Widget child}) {
+    if (!_dropRegionReady) return child;
+    return DropRegion(
+      // Formats this region can accept.
+      formats: Formats.standardFormats,
+      hitTestBehavior: HitTestBehavior.opaque,
+      onDropOver: (event) {
+        return DropOperation.copy;
+      },
+      onPerformDrop: (event) async {
+        final uris = await Future.wait(
+          event.session.items.map((item) => _droppedFileUri(item)),
+        );
+        final files = [
+          for (final uri in uris)
+            if (uri != null) File(uri.toFilePath()),
+        ];
+        if (files.isNotEmpty && mounted) _showQrPages(files);
+      },
+      child: child,
+    );
   }
 
   @override
@@ -68,23 +104,7 @@ class _SendPageState extends State<SendPage> {
           ),
         ],
       ),
-      body: DropRegion(
-        // Formats this region can accept.
-        formats: Formats.standardFormats,
-        hitTestBehavior: HitTestBehavior.opaque,
-        onDropOver: (event) {
-          return DropOperation.copy;
-        },
-        onPerformDrop: (event) async {
-          final item = event.session.items.first;
-          final reader = item.dataReader!;
-          reader.getValue<Uri>(Formats.fileUri, (fileUri) {
-            debugPrint('Dropped file: $fileUri');
-            if (fileUri != null) {
-              _showQrPage(File(fileUri.path));
-            }
-          });
-        },
+      body: _dropRegion(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -218,25 +238,21 @@ class _SendPageState extends State<SendPage> {
     }
   }
 
-  void _showQrPage(File file) {
-    _showQrPages([file]);
+  Future<Uri?> _droppedFileUri(DropItem item) {
+    final reader = item.dataReader;
+    if (reader == null) return Future.value(null);
+    final completer = Completer<Uri?>();
+    final progress = reader.getValue<Uri>(
+      Formats.fileUri,
+      (uri) => completer.complete(uri),
+      onError: (_) => completer.complete(null),
+    );
+    if (progress == null) completer.complete(null);
+    return completer.future;
   }
 
-  void _showFileTooLarge(String message) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(context.l10n.file_too_large),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(context.l10n.ok),
-              ),
-            ],
-          ),
-    );
+  void _showQrPage(File file) {
+    _showQrPages([file]);
   }
 
   void _showQrPages(List<File> files) async {
@@ -247,7 +263,7 @@ class _SendPageState extends State<SendPage> {
     final symbolSize = BlastQrcodeData.symbolSizeForMtu(mtu);
     for (final fileWrapper in fileWrappers) {
       if (fileWrapper.size > BlastQrcodeData.maxFileBytes) {
-        _showFileTooLarge(context.l10n.file_too_large_msg);
+        showFileTooLarge(context, context.l10n.file_too_large_msg);
         return;
       }
       // Receivers reject transfers with too many symbols, which only happens
@@ -255,7 +271,7 @@ class _SendPageState extends State<SendPage> {
       final transferLength =
           fileWrapper.size + BlastQrcodeData.maxMetadataBytes;
       if (!BlastQrcodeData.fitsSymbolLimit(transferLength, symbolSize)) {
-        _showFileTooLarge(context.l10n.file_too_large_for_qr_size_msg);
+        showFileTooLarge(context, context.l10n.file_too_large_for_qr_size_msg);
         return;
       }
     }
@@ -263,9 +279,7 @@ class _SendPageState extends State<SendPage> {
     final options = await chooseSendOptions(context, fileWrappers);
     if (options == null || !mounted) return;
 
-    await Navigator.of(
-      context,
-    ).push(_qrRouteForIndex(fileWrappers, 0, options));
+    await sendFiles(context, fileWrappers, options);
     if (mounted) {
       for (final fw in fileWrappers) {
         _addRecentFile(fw);
@@ -275,29 +289,6 @@ class _SendPageState extends State<SendPage> {
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) await _maybeShowMicPrompt();
     }
-  }
-
-  Route<void> _qrRouteForIndex(
-    List<FileWrapper> fileWrappers,
-    int index,
-    SendOptions options,
-  ) {
-    final isLast = index == fileWrappers.length - 1;
-    return MaterialPageRoute(
-      fullscreenDialog: true,
-      builder:
-          (context) => QrPage(
-            file: fileWrappers[index],
-            password: options.password,
-            fileName: fileWrappers.length == 1 ? options.fileName : null,
-            onNext:
-                isLast
-                    ? null
-                    : () => Navigator.of(context).pushReplacement(
-                      _qrRouteForIndex(fileWrappers, index + 1, options),
-                    ),
-          ),
-    );
   }
 
   Future<void> _maybeShowMicPrompt() async {

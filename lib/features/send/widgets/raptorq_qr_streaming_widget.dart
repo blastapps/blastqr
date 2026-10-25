@@ -88,6 +88,9 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final String? password;
 
   final String? fileName;
+
+  final bool isBundle;
+
   final bool fill;
   final Function()? onTap;
   final void Function(int)? onStart;
@@ -107,6 +110,7 @@ class RaptorQrStreamingWidget extends StatefulWidget {
     required this.imageCompressionSettings,
     this.password,
     this.fileName,
+    this.isBundle = false,
     this.fill = true,
     this.onTap,
     this.onStart,
@@ -203,6 +207,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       icSettings: widget.imageCompressionSettings,
       password: widget.password,
       fileName: widget.fileName,
+      isBundle: widget.isBundle,
       onCompressedSize: widget.onStart,
     );
     if (!mounted || generation != _generation) {

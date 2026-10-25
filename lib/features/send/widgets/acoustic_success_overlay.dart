@@ -11,13 +11,11 @@ class AcousticSuccessOverlay extends StatefulWidget {
     super.key,
     required this.onKeepShowing,
     required this.onDone,
-    this.onNextFile,
     this.password,
   });
 
   final VoidCallback onKeepShowing;
   final VoidCallback onDone;
-  final VoidCallback? onNextFile;
 
   final String? password;
 
@@ -40,11 +38,7 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
       value: 1.0,
     )..addStatusListener((status) {
       if (status == AnimationStatus.dismissed && mounted) {
-        if (widget.onNextFile != null) {
-          widget.onNextFile!();
-        } else {
-          widget.onDone();
-        }
+        widget.onDone();
       }
     });
     _countdown!.reverse();

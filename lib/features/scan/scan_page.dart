@@ -19,6 +19,7 @@ import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/sound_feedback.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
+import 'package:blast_qr/widgets/file_preview.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -431,9 +432,9 @@ class _ScanPageState extends State<ScanPage> {
       await itemsDirectory.create();
     }
 
-    final File resultFile;
+    final List<File> resultFiles;
     try {
-      resultFile = await saveReceivedFile(
+      resultFiles = await saveReceivedFiles(
         data: data,
         gzipped: metadata.isCompressed,
         directory: itemsDirectory,
@@ -444,28 +445,34 @@ class _ScanPageState extends State<ScanPage> {
       _showReceiveFailed();
       return;
     }
-    final fileName = resultFile.path.split(Platform.pathSeparator).last;
-
-    final fileWrapper = await resultFile.toFileWrapper();
+    final fileWrappers = await Future.wait(
+      resultFiles.map((f) => f.toFileWrapper()),
+    );
 
     if (!mounted) {
       return;
     }
 
-    Provider.of<FileBadgeCount>(context, listen: false).add();
+    final badgeCount = Provider.of<FileBadgeCount>(context, listen: false);
+    for (var i = 0; i < fileWrappers.length; i++) {
+      badgeCount.add();
+    }
 
     _showResultSheet(
-      fileWrapper,
+      fileWrappers,
       elapsedTime,
       encrypted: metadata.isEncrypted,
     ).then((_) async {
-      final newFilename = sanitizeFileName(_renameController.text);
-      if (mounted && newFilename != fileName) {
-        final uniqueName = await resolveUniqueFileName(
-          itemsDirectory,
-          newFilename,
-        );
-        resultFile.rename('${itemsDirectory.path}/$uniqueName');
+      if (fileWrappers.length == 1) {
+        final file = fileWrappers.single;
+        final newFilename = sanitizeFileName(_renameController.text);
+        if (mounted && newFilename != file.name) {
+          final uniqueName = await resolveUniqueFileName(
+            itemsDirectory,
+            newFilename,
+          );
+          file.file.rename('${itemsDirectory.path}/$uniqueName');
+        }
       }
       _reset();
     });
@@ -548,12 +555,14 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> _showResultSheet(
-    FileWrapper file,
+    List<FileWrapper> files,
     double timeInSeconds, {
     bool encrypted = false,
   }) async {
+    final file = files.first;
     _renameController.text = file.name;
-    final speed = ((file.size / 1000) / timeInSeconds).toStringAsFixed(1);
+    final totalSize = files.fold(0, (sum, f) => sum + f.size);
+    final speed = ((totalSize / 1000) / timeInSeconds).toStringAsFixed(1);
     return showSheet(
       context: context,
       title:
@@ -576,53 +585,61 @@ class _ScanPageState extends State<ScanPage> {
                 ],
               ),
             ),
-          GestureDetector(
-            onTap: () {
-              _onTapOpen(file);
-            },
-            child: Container(
-              width: 150,
-              height: 150,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(60),
-                    spreadRadius: 0,
-                    blurRadius: 1,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: file.buildThumbnail(context, size: 150),
+          if (files.length > 1) ...[
+            FilesPreview(files: files),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(context.l10n.files_count(files.length)),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _renameController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                suffixIcon: Padding(
-                  padding: const EdgeInsetsGeometry.all(12),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedEdit01,
-                    color: context.color.onSurface,
-                  ),
-                ),
-                contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
-              ),
+          ] else ...[
+            GestureDetector(
               onTap: () {
-                final dotIndex = _renameController.text.indexOf('.');
-                final selection = TextSelection(
-                  baseOffset: 0,
-                  extentOffset: dotIndex > 0 ? dotIndex : 0,
-                );
-                _renameController.selection = selection;
+                _onTapOpen(file);
               },
+              child: Container(
+                width: 150,
+                height: 150,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(60),
+                      spreadRadius: 0,
+                      blurRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: file.buildThumbnail(context, size: 150),
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _renameController,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  suffixIcon: Padding(
+                    padding: const EdgeInsetsGeometry.all(12),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedEdit01,
+                      color: context.color.onSurface,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
+                ),
+                onTap: () {
+                  final dotIndex = _renameController.text.indexOf('.');
+                  final selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: dotIndex > 0 ? dotIndex : 0,
+                  );
+                  _renameController.selection = selection;
+                },
+              ),
+            ),
+          ],
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
             child: Row(
@@ -632,11 +649,14 @@ class _ScanPageState extends State<ScanPage> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () async {
-                      Provider.of<FileBadgeCount>(
+                      final badgeCount = Provider.of<FileBadgeCount>(
                         context,
                         listen: false,
-                      ).subtract();
-                      await file.file.delete();
+                      );
+                      for (final f in files) {
+                        badgeCount.subtract();
+                        await f.file.delete();
+                      }
                       if (mounted) {
                         Navigator.of(context).pop();
                       }
