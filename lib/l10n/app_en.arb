@@ -89,6 +89,7 @@
   "send_picture": "Send pictures",
   "desktop_receive_unsupported": "* Receiving files is not supported on Windows yet",
   "recent": "Recent",
+  "send_selected": "Send selected",
   "sending_settings": "Sending",
   "receiving_settings": "Receiving",
   "restore_defaults": "Restore",

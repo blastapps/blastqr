@@ -292,6 +292,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get recent => 'Recents';
 
   @override
+  String get send_selected => 'Envia els seleccionats';
+
+  @override
   String get sending_settings => 'Enviament';
 
   @override

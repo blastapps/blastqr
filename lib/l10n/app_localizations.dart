@@ -642,6 +642,12 @@ abstract class AppLocalizations {
   /// **'Recent'**
   String get recent;
 
+  /// No description provided for @send_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Send selected'**
+  String get send_selected;
+
   /// No description provided for @sending_settings.
   ///
   /// In en, this message translates to:

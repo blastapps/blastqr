@@ -45,7 +45,7 @@ class _SendPageState extends State<SendPage> {
     setState(() {
       _recentFiles.removeWhere((e) => e.file.path == fw.file.path);
       _recentFiles.insert(0, fw);
-      if (_recentFiles.length > 5) _recentFiles.removeLast();
+      if (_recentFiles.length > 15) _recentFiles.removeLast();
     });
   }
 
@@ -105,116 +105,145 @@ class _SendPageState extends State<SendPage> {
         ],
       ),
       body: _dropRegion(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            spacing: 16,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                spacing: 8,
+        child: Column(
+          children: [
+            Expanded(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: _pickFileToEncode,
-                      // Ink rather than Container, so the tap ripple shows
-                      // over the solid fill.
-                      child: Ink(
-                        padding: const EdgeInsets.all(16),
-                        height: 180,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: context.color.outline,
-                            width: 1,
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: _pickFileToEncode,
+                            // Ink rather than Container, so the tap ripple shows
+                            // over the solid fill.
+                            child: Ink(
+                              padding: const EdgeInsets.all(16),
+                              height: 180,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: context.color.outline,
+                                  width: 1,
+                                ),
+                                color: context.color.primaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 16,
+                                children: [
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedFileAdd,
+                                    color: context.color.onSurface,
+                                    size: 56,
+                                  ),
+                                  Text(
+                                    context.l10n.send_file,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          color: context.color.primaryContainer,
-                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 16,
-                          children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedFileAdd,
-                              color: context.color.onSurface,
-                              size: 56,
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: _pickImageToEncode,
+                            // Ink rather than Container, so the tap ripple shows
+                            // over the solid fill.
+                            child: Ink(
+                              padding: const EdgeInsets.all(16),
+                              height: 180,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: context.color.outline,
+                                  width: 1,
+                                ),
+                                color: context.color.primaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 16,
+                                children: [
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedImageAdd01,
+                                    color: context.color.onSurface,
+                                    size: 56,
+                                  ),
+                                  Text(
+                                    context.l10n.send_picture,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             ),
-                            Text(
-                              context.l10n.send_file,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
+                  // Recents sit in the lower half so the send buttons stay
+                  // centered whether or not they are shown.
                   Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: _pickImageToEncode,
-                      // Ink rather than Container, so the tap ripple shows
-                      // over the solid fill.
-                      child: Ink(
-                        padding: const EdgeInsets.all(16),
-                        height: 180,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: context.color.outline,
-                            width: 1,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Column(
+                        spacing: 16,
+                        children: [
+                          _RecentFilesRow(
+                            entries: _recentFiles,
+                            onFileTap: _showQrPage,
+                            onSendSelected: _showQrPages,
                           ),
-                          color: context.color.primaryContainer,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 16,
-                          children: [
-                            HugeIcon(
-                              icon: HugeIcons.strokeRoundedImageAdd01,
-                              color: context.color.onSurface,
-                              size: 56,
-                            ),
-                            Text(
-                              context.l10n.send_picture,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
+                          if (!canScanWithCamera)
+                            Text(context.l10n.desktop_receive_unsupported),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
-              _RecentFilesRow(entries: _recentFiles, onFileTap: _showQrPage),
-              OutlinedButton(
-                onPressed: _onTapHelp,
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
-                  children: [
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedHelpCircle,
-                      color: context.color.onSurface,
-                    ),
-                    Text(context.l10n.help),
-                  ],
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: OutlinedButton(
+                  onPressed: _onTapHelp,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedHelpCircle,
+                        color: context.color.onSurface,
+                      ),
+                      Text(context.l10n.help),
+                    ],
+                  ),
                 ),
               ),
-              if (!canScanWithCamera)
-                Column(
-                  spacing: 16,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text(context.l10n.desktop_receive_unsupported)],
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -322,26 +351,88 @@ class _SendPageState extends State<SendPage> {
   }
 }
 
-class _RecentFilesRow extends StatelessWidget {
-  const _RecentFilesRow({required this.entries, required this.onFileTap});
+class _RecentFilesRow extends StatefulWidget {
+  const _RecentFilesRow({
+    required this.entries,
+    required this.onFileTap,
+    required this.onSendSelected,
+  });
 
   final List<FileWrapper> entries;
   final void Function(File) onFileTap;
+  final void Function(List<File>) onSendSelected;
+
+  @override
+  State<_RecentFilesRow> createState() => _RecentFilesRowState();
+}
+
+class _RecentFilesRowState extends State<_RecentFilesRow> {
+  final Set<String> _selectedPaths = {};
+
+  bool get _selecting => _selectedPaths.isNotEmpty;
+
+  void _toggle(FileWrapper entry) {
+    setState(() {
+      final path = entry.file.path;
+      if (!_selectedPaths.remove(path)) _selectedPaths.add(path);
+    });
+  }
+
+  void _clearSelection() => setState(_selectedPaths.clear);
+
+  void _sendSelected() {
+    final files = [
+      for (final entry in widget.entries)
+        if (_selectedPaths.contains(entry.file.path)) entry.file,
+    ];
+    _clearSelection();
+    if (files.isNotEmpty) widget.onSendSelected(files);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final entries = widget.entries;
     if (entries.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Text(
-          context.l10n.recent,
-          style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+          child: SizedBox(
+            height: 24,
+            child: Row(
+              spacing: 4,
+              children: [
+                Text(
+                  _selecting
+                      ? '${_selectedPaths.length} ${context.l10n.selected}'
+                      : context.l10n.recent,
+                  style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
+                ),
+                if (_selecting)
+                  IconButton(
+                    onPressed: _clearSelection,
+                    tooltip: context.l10n.cancel,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 24,
+                      height: 24,
+                    ),
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCancel01,
+                      color: context.color.onSurface,
+                      size: 16,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
         SizedBox(
           height: 52,
           child: ListView.separated(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
             scrollDirection: Axis.horizontal,
             itemCount: entries.length,
             separatorBuilder: (_, _) => const SizedBox(width: 8),
@@ -349,9 +440,26 @@ class _RecentFilesRow extends StatelessWidget {
               final entry = entries[index];
               return _RecentFileChip(
                 entry: entry,
-                onTap: () => onFileTap(entry.file),
+                selected: _selectedPaths.contains(entry.file.path),
+                onTap: _selecting
+                    ? () => _toggle(entry)
+                    : () => widget.onFileTap(entry.file),
+                onLongPress: () => _toggle(entry),
               );
             },
+          ),
+        ),
+        Visibility(
+          visible: _selecting,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+            child: OutlinedButton(
+              onPressed: _sendSelected,
+              child: Text(context.l10n.send_selected),
+            ),
           ),
         ),
       ],
@@ -360,21 +468,33 @@ class _RecentFilesRow extends StatelessWidget {
 }
 
 class _RecentFileChip extends StatelessWidget {
-  const _RecentFileChip({required this.entry, required this.onTap});
+  const _RecentFileChip({
+    required this.entry,
+    required this.selected,
+    required this.onTap,
+    required this.onLongPress,
+  });
 
   final FileWrapper entry;
+  final bool selected;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
         width: 140,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
         decoration: BoxDecoration(
-          border: Border.all(color: context.color.outline, width: 1),
+          color: Theme.of(context).colorScheme.primaryContainer,
+          border: Border.all(
+            color: selected ? context.color.primary : context.color.outline,
+            width: selected ? 2 : 1,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -386,7 +506,18 @@ class _RecentFileChip extends StatelessWidget {
               height: 32,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
-              child: entry.buildThumbnail(context, size: 36),
+              child: selected
+                  ? ColoredBox(
+                      color: context.color.primary,
+                      child: Center(
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedTick02,
+                          color: context.color.onPrimary,
+                          size: 20,
+                        ),
+                      ),
+                    )
+                  : entry.buildThumbnail(context, size: 36),
             ),
             Expanded(
               child: Text(

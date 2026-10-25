@@ -5,8 +5,6 @@ PODS:
     - Mantle
     - SDWebImage
     - SDWebImageWebPCoder
-  - flutter_zxing (0.0.1):
-    - Flutter
   - irondash_engine_context (0.0.1):
     - Flutter
   - libwebp (1.5.0):
@@ -48,7 +46,6 @@ PODS:
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
-  - flutter_zxing (from `.symlinks/plugins/flutter_zxing/ios`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
   - raptorq_flutter (from `.symlinks/plugins/raptorq_flutter/ios`)
@@ -68,8 +65,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_image_compress_common:
     :path: ".symlinks/plugins/flutter_image_compress_common/ios"
-  flutter_zxing:
-    :path: ".symlinks/plugins/flutter_zxing/ios"
   irondash_engine_context:
     :path: ".symlinks/plugins/irondash_engine_context/ios"
   open_file_ios:
@@ -86,7 +81,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
-  flutter_zxing: e8bcc43bd3056c70c271b732ed94e7a16fd62f93
   irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d

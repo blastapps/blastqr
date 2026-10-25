@@ -91,6 +91,7 @@
   "send_picture": "Envia imatges",
   "desktop_receive_unsupported": "* La recepció de fitxers encara no és compatible a Windows",
   "recent": "Recents",
+  "send_selected": "Envia els seleccionats",
   "sending_settings": "Enviament",
   "receiving_settings": "Recepció",
   "restore_defaults": "Restaura",
