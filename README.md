@@ -16,6 +16,8 @@ device's camera reads them.
   speed. Transfers peak at around 110 kB/s, so it suits small files best.
 - **Completion signal by sound.** When the receiver has the whole file it plays
   a short tone, and the sender's microphone picks it up to stop the transfer.
+- **Optional password encryption.** The sender gets a generated password to
+  share with the receiver, who types it in once the file has arrived.
 - **Optional image compression and gzip** to shrink files before sending.
 - **Regular QR scanner.** Normal QR codes are shown as text.
 - Available in English, Spanish, Catalan and Korean.
@@ -32,8 +34,16 @@ device's camera reads them.
 
 ## Security note
 
-Transfers are **not encrypted**. Anyone who can see or record the QR codes can
-read the file. Don't use blastQR for sensitive data.
+Without encryption, anyone who can see or record the QR codes can read the
+file.
+
+With "Send password-encrypted", the file and its name are encrypted
+(Argon2id and ChaCha20-Poly1305), and a recording of the codes is useless
+without the password. Share the password by saying it or showing it, not where
+a camera can see it. The size of the file can still be seen, and a weak custom
+password can be guessed from a recording.
+
+Received files are saved unencrypted on the receiving device.
 
 ## How it works
 
@@ -49,23 +59,35 @@ You need:
 
 - [Flutter](https://docs.flutter.dev/get-started/install) (stable channel,
   Dart 3.7 or newer)
-- [Rust](https://www.rust-lang.org/tools/install), which builds the RaptorQ
-  library
+- [Rust](https://www.rust-lang.org/tools/install) installed with rustup,
+  which builds the RaptorQ and encryption libraries. The targets for your
+  platform are installed automatically from `rust-toolchain.toml`.
 - The usual platform tools: Xcode for iOS/macOS, Android Studio or the Android
-  SDK for Android
+  SDK for Android. Android also needs NDK 27 or newer.
 
-The RaptorQ bindings live in a separate package, `raptorq_flutter`, which must
-be checked out next to this repo:
+Two native packages live in separate repos and must be checked out next to
+this one: `raptorq_flutter` (RaptorQ) and `blastqr_crypto` (encryption).
 
 ```sh
 git clone https://codeberg.org/cukha/raptorq_flutter.git
+git clone https://codeberg.org/cukha/blastqr_crypto.git
 git clone https://codeberg.org/cukha/blastqr.git
 cd blastqr
 flutter pub get
 flutter run
 ```
 
-<!-- TODO: publish raptorq_flutter and confirm the URL above. -->
+<!-- TODO: publish raptorq_flutter and blastqr_crypto and confirm the URLs above. -->
+
+### Running the tests
+
+`flutter test` runs everything. The round-trip tests load both native
+libraries built for your computer, and are skipped until they're built:
+
+```sh
+(cd ../raptorq_flutter/rust && cargo build --release)
+(cd ../blastqr_crypto/rust && cargo build --release)
+```
 
 ### Release signing (Android)
 
@@ -81,6 +103,7 @@ not in the repo. Without it, use `flutter run` or a debug build.
 | `lib/features/files_received/` | Received files list |
 | `lib/features/settings/` | Settings screens |
 | `lib/raptorq/` | Wrappers around the RaptorQ encoder and decoder |
+| `lib/crypto/` | Passwords and the wrapper around `blastqr_crypto` |
 | `lib/l10n/` | Translations (`.arb` files) |
 | `docs/` | Protocol documentation |
 
@@ -100,3 +123,6 @@ Bundled third-party components keep their own licenses:
   License 1.1 ([fonts/Jersey25/OFL.txt](fonts/Jersey25/OFL.txt))
 - [raptorq](https://github.com/cberner/raptorq) crate, Apache License 2.0
   ([assets/licenses/raptorq.txt](assets/licenses/raptorq.txt))
+- [argon2](https://github.com/RustCrypto/password-hashes) and
+  [chacha20poly1305](https://github.com/RustCrypto/AEADs) crates, MIT or
+  Apache License 2.0
