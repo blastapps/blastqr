@@ -639,7 +639,7 @@ abstract class AppLocalizations {
   /// No description provided for @desktop_receive_unsupported.
   ///
   /// In en, this message translates to:
-  /// **'* Receiving files is not supported on the desktop app yet'**
+  /// **'* Receiving files is not supported on Windows yet'**
   String get desktop_receive_unsupported;
 
   /// No description provided for @recent.

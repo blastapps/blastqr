@@ -289,7 +289,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get desktop_receive_unsupported =>
-      '* La recepció de fitxers encara no és compatible a l\'aplicació d\'escriptori';
+      '* La recepció de fitxers encara no és compatible a Windows';
 
   @override
   String get recent => 'Recents';

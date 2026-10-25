@@ -11,6 +11,7 @@ import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:blast_qr/widgets/qr_twinkle_background.dart';
 import 'package:flutter/material.dart';
@@ -118,7 +119,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
           extendBody: true,
           backgroundColor: Colors.transparent,
           bottomNavigationBar:
-              (Platform.isIOS || Platform.isAndroid)
+              canScanWithCamera
                   ? Consumer2<FileBadgeCount, NavBarVisibility>(
                     builder: (context, count, navBar, child) {
                       return AnimatedSlide(

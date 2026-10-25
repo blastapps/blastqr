@@ -11,6 +11,7 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:file_selector/file_selector.dart';
@@ -186,7 +187,7 @@ class _SendPageState extends State<SendPage> {
                   ],
                 ),
               ),
-              if (!Platform.isAndroid && !Platform.isIOS)
+              if (!canScanWithCamera)
                 Column(
                   spacing: 16,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -262,9 +263,9 @@ class _SendPageState extends State<SendPage> {
     final options = await chooseSendOptions(context, fileWrappers);
     if (options == null || !mounted) return;
 
-    await Navigator.of(context).push(
-      _qrRouteForIndex(fileWrappers, 0, options),
-    );
+    await Navigator.of(
+      context,
+    ).push(_qrRouteForIndex(fileWrappers, 0, options));
     if (mounted) {
       for (final fw in fileWrappers) {
         _addRecentFile(fw);

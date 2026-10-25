@@ -28,9 +28,9 @@ device's camera reads them.
 |---|:-:|:-:|
 | Android | ✓ | ✓ |
 | iOS | ✓ | ✓ |
-| macOS | ✓ | |
+| macOS | ✓ | ✓ |
 | Windows | ✓ | |
-| Linux | ✓ | |
+| Linux | ✓ | ✓ |
 
 ## Security note
 
@@ -58,12 +58,15 @@ See [docs/protocol.md](docs/protocol.md) for the full format and design notes.
 You need:
 
 - [Flutter](https://docs.flutter.dev/get-started/install) (stable channel,
-  Dart 3.7 or newer)
+  Flutter 3.41 / Dart 3.11 or newer)
 - [Rust](https://www.rust-lang.org/tools/install) installed with rustup,
   which builds the RaptorQ and encryption libraries. The targets for your
   platform are installed automatically from `rust-toolchain.toml`.
 - The usual platform tools: Xcode for iOS/macOS, Android Studio or the Android
   SDK for Android. Android also needs NDK 27 or newer.
+- On Linux, the GStreamer development packages for the camera
+  (`libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+  gstreamer1.0-plugins-good` on Ubuntu/Debian).
 
 Two native packages live in separate repos and must be checked out next to
 this one: `raptorq_flutter` (RaptorQ) and `blastqr_crypto` (encryption).

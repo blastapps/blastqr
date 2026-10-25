@@ -40,6 +40,7 @@ class FilesPage extends StatefulWidget {
 }
 
 class _FilesPageState extends State<FilesPage> {
+  static const _chipsOverlap = 12.0;
   double cacheWidth = 100;
   List<FileWrapper> _files = [];
   bool _isLoading = true;
@@ -86,10 +87,11 @@ class _FilesPageState extends State<FilesPage> {
 
     if (await itemsDirectory.exists()) {
       final List<FileSystemEntity> files = itemsDirectory.listSync();
-      _files = await Future.wait(
-          files.whereType<File>().map((f) async => await f.toFileWrapper()),
-        )
-        ..sort((l, r) => r.modified.compareTo(l.modified));
+      _files =
+          await Future.wait(
+              files.whereType<File>().map((f) async => await f.toFileWrapper()),
+            )
+            ..sort((l, r) => r.modified.compareTo(l.modified));
     } else {
       _files = []; // No images found
     }
@@ -212,14 +214,13 @@ class _FilesPageState extends State<FilesPage> {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
       child: Row(
         spacing: 8,
-        children:
-            chips.map((filter) {
-              return BlastChip(
-                label: Text(_filterLabel(filter)),
-                selected: _selectedFilter == filter,
-                onSelected: (_) => setState(() => _selectedFilter = filter),
-              );
-            }).toList(),
+        children: chips.map((filter) {
+          return BlastChip(
+            label: Text(_filterLabel(filter)),
+            selected: _selectedFilter == filter,
+            onSelected: (_) => setState(() => _selectedFilter = filter),
+          );
+        }).toList(),
       ),
     );
   }
@@ -230,18 +231,16 @@ class _FilesPageState extends State<FilesPage> {
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title:
-            _isSelecting
-                ? Text('${_selectedFiles.length} ${context.l10n.selected}')
-                : const LogoWidget(),
+        title: _isSelecting
+            ? Text('${_selectedFiles.length} ${context.l10n.selected}')
+            : const LogoWidget(),
         centerTitle: !_isSelecting,
-        leading:
-            _isSelecting
-                ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: _exitSelectionMode,
-                )
-                : null,
+        leading: _isSelecting
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _exitSelectionMode,
+              )
+            : null,
         automaticallyImplyLeading: false,
         toolbarHeight: 80,
         surfaceTintColor: Colors.transparent,
@@ -269,18 +268,24 @@ class _FilesPageState extends State<FilesPage> {
               ),
             ),
         ],
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: [0.9, 1.0],
-              colors: [
-                context.color.surface,
-                context.color.surface.withAlpha(0),
-              ],
-            ),
-          ),
+        // The chips row tucks 12px under the bar, so fade over those 12px.
+        flexibleSpace: LayoutBuilder(
+          builder: (context, constraints) {
+            final fadeStart = 1 - _chipsOverlap / constraints.maxHeight;
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [fadeStart, 1.0],
+                  colors: [
+                    context.color.surface,
+                    context.color.surface.withAlpha(0),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
       body: Builder(
@@ -309,7 +314,7 @@ class _FilesPageState extends State<FilesPage> {
             slivers: [
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: MediaQuery.of(context).padding.top - 12,
+                  height: MediaQuery.of(context).padding.top - _chipsOverlap,
                 ),
               ),
               SliverToBoxAdapter(child: _buildChipsRow()),
@@ -371,20 +376,18 @@ class _FilesPageState extends State<FilesPage> {
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 decoration: BoxDecoration(
-                                  color:
-                                      isSelected
-                                          ? context.color.primary.withAlpha(180)
-                                          : Colors.transparent,
+                                  color: isSelected
+                                      ? context.color.primary.withAlpha(180)
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child:
-                                    isSelected
-                                        ? const Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 28,
-                                        )
-                                        : null,
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 28,
+                                      )
+                                    : null,
                               ),
                             ),
                         ],
@@ -571,9 +574,7 @@ class _FilesPageState extends State<FilesPage> {
 
   void _sendSelectedFiles(List<FileWrapper> files, SendOptions options) {
     _exitSelectionMode();
-    Navigator.of(context).push(
-      _qrRouteForIndex(files, 0, options.password),
-    );
+    Navigator.of(context).push(_qrRouteForIndex(files, 0, options.password));
   }
 
   Route<void> _qrRouteForIndex(
@@ -584,17 +585,15 @@ class _FilesPageState extends State<FilesPage> {
     final isLast = index == files.length - 1;
     return MaterialPageRoute(
       fullscreenDialog: true,
-      builder:
-          (context) => QrPage(
-            file: files[index],
-            password: password,
-            onNext:
-                isLast
-                    ? null
-                    : () => Navigator.of(context).pushReplacement(
-                      _qrRouteForIndex(files, index + 1, password),
-                    ),
-          ),
+      builder: (context) => QrPage(
+        file: files[index],
+        password: password,
+        onNext: isLast
+            ? null
+            : () => Navigator.of(
+                context,
+              ).pushReplacement(_qrRouteForIndex(files, index + 1, password)),
+      ),
     );
   }
 

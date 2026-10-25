@@ -88,7 +88,7 @@
   "low_speed_warning": "Low transfer speed. Adjust the position of the devices and keep them still for better performance",
   "send_file": "Send files",
   "send_picture": "Send pictures",
-  "desktop_receive_unsupported": "* Receiving files is not supported on the desktop app yet",
+  "desktop_receive_unsupported": "* Receiving files is not supported on Windows yet",
   "recent": "Recent",
   "sending_settings": "Sending",
   "receiving_settings": "Receiving",

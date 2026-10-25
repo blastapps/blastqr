@@ -282,7 +282,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_picture => '사진 보내기';
 
   @override
-  String get desktop_receive_unsupported => '* 데스크탑 앱에서는 아직 파일 수신이 지원되지 않습니다';
+  String get desktop_receive_unsupported => '* Windows에서는 아직 파일 수신이 지원되지 않습니다';
 
   @override
   String get recent => '최근';

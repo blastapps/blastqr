@@ -1,8 +1,6 @@
 PODS:
   - flutter_image_compress_macos (1.0.0):
     - FlutterMacOS
-  - flutter_zxing (0.0.1):
-    - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - irondash_engine_context (0.0.1):
     - FlutterMacOS
@@ -13,7 +11,6 @@ PODS:
 
 DEPENDENCIES:
   - flutter_image_compress_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos`)
-  - flutter_zxing (from `Flutter/ephemeral/.symlinks/plugins/flutter_zxing/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - irondash_engine_context (from `Flutter/ephemeral/.symlinks/plugins/irondash_engine_context/macos`)
   - raptorq_flutter (from `Flutter/ephemeral/.symlinks/plugins/raptorq_flutter/macos`)
@@ -22,8 +19,6 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   flutter_image_compress_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos
-  flutter_zxing:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_zxing/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   irondash_engine_context:
@@ -35,7 +30,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   flutter_image_compress_macos: e68daf54bb4bf2144c580fd4d151c949cbf492f0
-  flutter_zxing: 91e9d17c79c60860450e8879cced0ec54f6a2601
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   irondash_engine_context: 893c7d96d20ce361d7e996f39d360c4c2f9869ba
   raptorq_flutter: 82643cb6c42d38b50c3b2d12414ddbc7bf1c9adb

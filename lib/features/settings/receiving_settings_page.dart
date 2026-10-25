@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/extensions/string_extension.dart';
@@ -38,36 +40,41 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
           MediaQuery.of(context).padding.bottom,
         ),
         children: [
-          SettingGroupTitle(title: context.l10n.camera_section),
-          Consumer<AppSettings>(
-            builder: (context, state, child) {
-              return ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedCamera01,
-                  color: context.color.onSurface,
-                ),
-                title: Text(context.l10n.camera_resolution),
-                subtitle: Text(appSettings.cameraResolution.name.capitalize()),
-                onTap: () {
-                  showPickerSheet(
-                    context,
-                    selectedItemIndex: appSettings.cameraResolution.index,
-                    title: context.l10n.camera_resolution,
-                    message: context.l10n.camera_resolution_hint,
-                    items:
-                        ResolutionPreset.values
-                            .map((r) => r.name.capitalize())
-                            .toList(),
-                    onItemTap: (index) {
-                      appSettings.updateCameraResolution(
-                        ResolutionPreset.values[index],
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          ),
+          // Linux scans at low resolution only, see ScanPage.
+          if (!Platform.isLinux) ...[
+            SettingGroupTitle(title: context.l10n.camera_section),
+            Consumer<AppSettings>(
+              builder: (context, state, child) {
+                return ListTile(
+                  leading: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCamera01,
+                    color: context.color.onSurface,
+                  ),
+                  title: Text(context.l10n.camera_resolution),
+                  subtitle: Text(
+                    appSettings.cameraResolution.name.capitalize(),
+                  ),
+                  onTap: () {
+                    showPickerSheet(
+                      context,
+                      selectedItemIndex: appSettings.cameraResolution.index,
+                      title: context.l10n.camera_resolution,
+                      message: context.l10n.camera_resolution_hint,
+                      items:
+                          ResolutionPreset.values
+                              .map((r) => r.name.capitalize())
+                              .toList(),
+                      onItemTap: (index) {
+                        appSettings.updateCameraResolution(
+                          ResolutionPreset.values[index],
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ],
           SettingGroupTitle(title: context.l10n.feedback),
           Consumer<AppSettings>(
             builder: (context, state, child) {

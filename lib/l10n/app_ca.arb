@@ -90,7 +90,7 @@
   "camera_resolution": "Resolució de la càmera",
   "send_file": "Envia fitxers",
   "send_picture": "Envia imatges",
-  "desktop_receive_unsupported": "* La recepció de fitxers encara no és compatible a l'aplicació d'escriptori",
+  "desktop_receive_unsupported": "* La recepció de fitxers encara no és compatible a Windows",
   "recent": "Recents",
   "sending_settings": "Enviament",
   "receiving_settings": "Recepció",

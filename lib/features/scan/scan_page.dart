@@ -112,10 +112,9 @@ class _ScanPageState extends State<ScanPage> {
               },
               icon: HugeIcon(
                 icon: HugeIcons.strokeRoundedSmartPhone03,
-                color:
-                    appSettings.hapticFeedback
-                        ? darkColors.onSurface
-                        : darkColors.outline,
+                color: appSettings.hapticFeedback
+                    ? darkColors.onSurface
+                    : darkColors.outline,
               ),
             ),
             IconButton(
@@ -123,14 +122,12 @@ class _ScanPageState extends State<ScanPage> {
                 appSettings.updateSoundFeedback(!appSettings.soundFeedback);
               },
               icon: HugeIcon(
-                icon:
-                    appSettings.soundFeedback
-                        ? HugeIcons.strokeRoundedVolumeLow
-                        : HugeIcons.strokeRoundedVolumeOff,
-                color:
-                    appSettings.soundFeedback
-                        ? darkColors.onSurface
-                        : darkColors.outline,
+                icon: appSettings.soundFeedback
+                    ? HugeIcons.strokeRoundedVolumeLow
+                    : HugeIcons.strokeRoundedVolumeOff,
+                color: appSettings.soundFeedback
+                    ? darkColors.onSurface
+                    : darkColors.outline,
               ),
             ),
           ],
@@ -143,24 +140,36 @@ class _ScanPageState extends State<ScanPage> {
                 // Temporary fix for: https://github.com/flutter/flutter/issues/152763
                 _resetReaderWidget();
               },
-              child:
-                  _showsReaderWidget && _cameraLoaded
-                      ? ReaderWidget(
-                        scanDelay: Duration.zero,
-                        scanDelaySuccess: Duration.zero,
-                        codeFormat: Format.qrCode,
-                        cropPercent: 1.0,
-                        showGallery: false,
-                        showToggleCamera: false,
-                        showFlashlight: false,
-                        tryRotate: false,
-                        isMultiScan: true,
-                        onMultiScan: _handleMultiscan,
-                        onScan: _handleScan,
-                        onControllerCreated: _onCameraControllerCreated,
-                        resolution: appSettings.cameraResolution,
-                      )
-                      : const SizedBox(),
+              child: _showsReaderWidget && _cameraLoaded
+                  // ReaderWidget outlines codes in primaryColor, which a
+                  // dark theme sets to the surface color.
+                  ? Builder(
+                      builder: (context) => Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(primaryColor: context.color.primary),
+                        child: ReaderWidget(
+                          scanDelay: Duration.zero,
+                          scanDelaySuccess: Duration.zero,
+                          codeFormat: Format.qrCode,
+                          cropPercent: 1.0,
+                          showGallery: false,
+                          showToggleCamera: false,
+                          showFlashlight: false,
+                          tryRotate: false,
+                          isMultiScan: true,
+                          onMultiScan: _handleMultiscan,
+                          onScan: _handleScan,
+                          onControllerCreated: _onCameraControllerCreated,
+                          // camera_desktop fails above low on Linux:
+                          // https://github.com/hugocornellier/camera_desktop/issues/8
+                          resolution: Platform.isLinux
+                              ? ResolutionPreset.low
+                              : appSettings.cameraResolution,
+                        ),
+                      ),
+                    )
+                  : const SizedBox(),
             ),
             // Top gradient
             Container(
@@ -318,10 +327,9 @@ class _ScanPageState extends State<ScanPage> {
     );
     setState(() {
       _isReceivingData = true;
-      _statusMessage =
-          frame.isEncrypted
-              ? context.l10n.receiving_encrypted
-              : context.l10n.receiving_generic;
+      _statusMessage = frame.isEncrypted
+          ? context.l10n.receiving_encrypted
+          : context.l10n.receiving_generic;
     });
     _latestScanStartTime = DateTime.now();
     debugPrint('Scanning file with: ${_fileMetadata.toString()}');
@@ -732,6 +740,8 @@ class _ScanPageState extends State<ScanPage> {
 
   void _lockFocus() {
     if (_focusLocked || _cameraController == null) return;
+    // Desktop cameras have no focus or exposure controls.
+    if (!Platform.isIOS && !Platform.isAndroid) return;
     _focusLocked = true;
     unawaited(_cameraController!.setFocusMode(FocusMode.locked));
     unawaited(_cameraController!.setExposureMode(ExposureMode.auto));
@@ -740,7 +750,7 @@ class _ScanPageState extends State<ScanPage> {
 
   void _unlockFocus() {
     _focusLocked = false;
-    if (_cameraController != null) {
+    if (_cameraController != null && (Platform.isIOS || Platform.isAndroid)) {
       unawaited(_cameraController!.setFocusMode(FocusMode.auto));
       unawaited(_cameraController!.setExposureMode(ExposureMode.auto));
       unawaited(_cameraController!.setExposureOffset(0.0));
@@ -823,100 +833,103 @@ class ScanProgressWidget extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-          child: Container(
-                height: 72,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(36),
-                  color: context.color.surface,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(45),
-                      spreadRadius: 0,
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-                  child: Row(
-                    spacing: 8,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: CircularProgressIndicator(
-                              strokeCap: StrokeCap.round,
-                              value: progress > 1 ? null : progress,
-                              color: context.color.primary,
-                              backgroundColor: context.color.outline,
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: context.color.surface,
-                            ),
-                            width: 44,
-                            height: 44,
-                          ),
-                          HugeIcon(
-                            icon: HugeIcons.strokeRoundedFile01,
-                            size: 24,
-                            color: context.color.onSurface,
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            progress > 1
-                                ? context.l10n.keep_scanning_msg
-                                : info,
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontFamily: 'Jersey25',
-                              color: context.color.onSurface,
-                              height: 1,
-                            ),
-                          ),
-                          Text(
-                            '$chunkCount | $speed',
-                            style: TextStyle(color: context.color.onSurface),
-                            textAlign: TextAlign.end,
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: onTapCancel,
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(24, 24),
-                          maximumSize: const Size(32, 32),
-                          backgroundColor: context.color.primaryContainer,
-                          foregroundColor: context.color.onSurface,
+          child:
+              Container(
+                    height: 72,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(36),
+                      color: context.color.surface,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(45),
+                          spreadRadius: 0,
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
                         ),
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.clear, size: 16),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                      child: Row(
+                        spacing: 8,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 48,
+                                height: 48,
+                                child: CircularProgressIndicator(
+                                  strokeCap: StrokeCap.round,
+                                  value: progress > 1 ? null : progress,
+                                  color: context.color.primary,
+                                  backgroundColor: context.color.outline,
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: context.color.surface,
+                                ),
+                                width: 44,
+                                height: 44,
+                              ),
+                              HugeIcon(
+                                icon: HugeIcons.strokeRoundedFile01,
+                                size: 24,
+                                color: context.color.onSurface,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                progress > 1
+                                    ? context.l10n.keep_scanning_msg
+                                    : info,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontFamily: 'Jersey25',
+                                  color: context.color.onSurface,
+                                  height: 1,
+                                ),
+                              ),
+                              Text(
+                                '$chunkCount | $speed',
+                                style: TextStyle(
+                                  color: context.color.onSurface,
+                                ),
+                                textAlign: TextAlign.end,
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            onPressed: onTapCancel,
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(24, 24),
+                              maximumSize: const Size(32, 32),
+                              backgroundColor: context.color.primaryContainer,
+                              foregroundColor: context.color.onSurface,
+                            ),
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.clear, size: 16),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
+                  )
+                  .animate(target: show ? 1 : 0)
+                  .fade()
+                  .slideY(
+                    begin: 0.75,
+                    end: 0,
+                    duration: 300.ms,
+                    curve: Curves.easeOutBack,
                   ),
-                ),
-              )
-              .animate(target: show ? 1 : 0)
-              .fade()
-              .slideY(
-                begin: 0.75,
-                end: 0,
-                duration: 300.ms,
-                curve: Curves.easeOutBack,
-              ),
         ),
         SizedBox(height: MediaQuery.of(context).padding.bottom - 64),
       ],

@@ -91,7 +91,7 @@
   "camera_resolution": "카메라 미리보기 해상도",
   "send_file": "파일 보내기",
   "send_picture": "사진 보내기",
-  "desktop_receive_unsupported": "* 데스크탑 앱에서는 아직 파일 수신이 지원되지 않습니다",
+  "desktop_receive_unsupported": "* Windows에서는 아직 파일 수신이 지원되지 않습니다",
   "recent": "최근",
   "sending_settings": "전송 설정",
   "receiving_settings": "수신 설정",

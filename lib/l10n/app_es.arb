@@ -91,7 +91,7 @@
   "camera_resolution": "Resolución de la cámara",
   "send_file": "Enviar Archivos",
   "send_picture": "Enviar imágenes",
-  "desktop_receive_unsupported": "* La recepción de archivos aún no es compatible en la aplicación de escritorio",
+  "desktop_receive_unsupported": "* La recepción de archivos aún no es compatible en Windows",
   "recent": "Recientes",
   "sending_settings": "Envío",
   "receiving_settings": "Recepción",

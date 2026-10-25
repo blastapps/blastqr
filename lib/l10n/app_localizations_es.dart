@@ -289,7 +289,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get desktop_receive_unsupported =>
-      '* La recepción de archivos aún no es compatible en la aplicación de escritorio';
+      '* La recepción de archivos aún no es compatible en Windows';
 
   @override
   String get recent => 'Recientes';

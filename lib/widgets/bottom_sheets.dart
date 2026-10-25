@@ -322,7 +322,7 @@ Future<T?> showSheet<T>({
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleLarge),
-                  if (titleTrailing != null) titleTrailing,
+                  ?titleTrailing,
                 ],
               ),
             ),
