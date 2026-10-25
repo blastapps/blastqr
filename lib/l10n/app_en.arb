@@ -13,7 +13,7 @@
   "pick_file_msg": "Pick a file to send",
   "keep_scanning_msg": "Keep scanning!",
   "result": "Result",
-  "file_name": "File name", 
+  "file_name": "File name",
   "open": "Open",
   "rename": "Rename",
   "delete": "Delete",
@@ -114,7 +114,7 @@
       }
     }
   },
-  "acoustic_detection":"Auto-detect completion",
+  "acoustic_detection": "Auto-detect completion",
   "acoustic_detection_subtitle": "Use microphone to detect transfer completion",
   "acoustic_feedback": "Transfer completion",
   "transfer_complete": "Transfer complete!",
@@ -126,5 +126,19 @@
   "file_too_large_for_qr_size_msg": "This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.",
   "receiving_generic": "Receiving file...",
   "update_required_title": "Update needed",
-  "update_required_msg": "This was sent with a newer version of blastQR. Update the app to receive it."
+  "update_required_msg": "This was sent with a newer version of blastQR. Update the app to receive it.",
+  "send_encrypted": "Send password-encrypted",
+  "receiving_encrypted": "Receiving encrypted file...",
+  "enter_password": "Enter password",
+  "enter_password_msg": "This file is encrypted. Enter the password from the sender.",
+  "wrong_password": "Wrong password. Try again.",
+  "unlock": "Unlock",
+  "received_encrypted": "Received encrypted",
+  "show_password": "Show password",
+  "password": "Password",
+  "new_password": "New password",
+  "edit_password": "Edit password",
+  "password_short_warning": "Short passwords are not secure.",
+  "custom_password_title": "Custom password",
+  "custom_password_msg": "The file will be encrypted with the following password."
 }

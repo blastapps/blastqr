@@ -827,6 +827,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This was sent with a newer version of blastQR. Update the app to receive it.'**
   String get update_required_msg;
+
+  /// No description provided for @send_encrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Send password-encrypted'**
+  String get send_encrypted;
+
+  /// No description provided for @receiving_encrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving encrypted file...'**
+  String get receiving_encrypted;
+
+  /// No description provided for @enter_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get enter_password;
+
+  /// No description provided for @enter_password_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is encrypted. Enter the password from the sender.'**
+  String get enter_password_msg;
+
+  /// No description provided for @wrong_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password. Try again.'**
+  String get wrong_password;
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @received_encrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Received encrypted'**
+  String get received_encrypted;
+
+  /// No description provided for @show_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get show_password;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @new_password.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get new_password;
+
+  /// No description provided for @edit_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit password'**
+  String get edit_password;
+
+  /// No description provided for @password_short_warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Short passwords are not secure.'**
+  String get password_short_warning;
+
+  /// No description provided for @custom_password_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom password'**
+  String get custom_password_title;
+
+  /// No description provided for @custom_password_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'The file will be encrypted with the following password.'**
+  String get custom_password_msg;
 }
 
 class _AppLocalizationsDelegate

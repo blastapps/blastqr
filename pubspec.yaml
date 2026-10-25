@@ -41,6 +41,8 @@ dependencies:
   media_scanner: ^2.2.1
   raptorq_flutter:
     path: ../raptorq_flutter
+  blastqr_crypto:
+    path: ../blastqr_crypto
 
 dev_dependencies:
   flutter_test:

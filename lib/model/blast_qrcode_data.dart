@@ -12,7 +12,7 @@ enum FrameVerdict {
   newerVersion,
 
   /// A BlastQR frame using a feature this app doesn't support (an unknown
-  /// must-understand flag, e.g. encryption before it's implemented).
+  /// must-understand flag).
   unsupportedFlags,
 
   /// Looks like ours but isn't self-consistent. Treated like a misread frame.
@@ -49,12 +49,12 @@ class BlastQrcodeData {
   /// hints that older apps may ignore.
   static const int flagGzip = 0x01;
 
-  /// Reserved for encryption. Until it's implemented, receivers reject it.
+  /// The transfer object is an encrypted envelope (see TransferCrypto).
   static const int flagEncrypted = 0x02;
   static const int mustUnderstandFlags = 0x0F;
 
   /// Must-understand flags this app supports.
-  static const int supportedFlags = flagGzip;
+  static const int supportedFlags = flagGzip | flagEncrypted;
 
   /// What is being sent. Unknown kinds are received as plain files, so new
   /// kinds never break older apps.
@@ -106,6 +106,8 @@ class BlastQrcodeData {
   });
 
   bool get isCompressedData => flags & flagGzip != 0;
+
+  bool get isEncrypted => flags & flagEncrypted != 0;
 
   /// Builds the 14-byte v2 header. Every frame of a transfer shares it.
   static Uint8List buildHeader({

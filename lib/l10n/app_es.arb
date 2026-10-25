@@ -122,5 +122,19 @@
   "file_too_large_for_qr_size_msg": "Este archivo es demasiado grande para el tamaño de código QR actual. Aumenta el tamaño del código QR en Configuración › Envío.",
   "receiving_generic": "Recibiendo archivo...",
   "update_required_title": "Actualización necesaria",
-  "update_required_msg": "Esto se ha enviado con una versión más reciente de blastQR. Actualiza la aplicación para recibirlo."
+  "update_required_msg": "Esto se ha enviado con una versión más reciente de blastQR. Actualiza la aplicación para recibirlo.",
+  "send_encrypted": "Enviar cifrado con contraseña",
+  "receiving_encrypted": "Recibiendo archivo cifrado...",
+  "enter_password": "Introducir contraseña",
+  "enter_password_msg": "Este archivo está cifrado. Introduce la contraseña del remitente.",
+  "wrong_password": "Contraseña incorrecta. Inténtalo de nuevo.",
+  "unlock": "Desbloquear",
+  "received_encrypted": "Recibido cifrado",
+  "show_password": "Mostrar contraseña",
+  "password": "Contraseña",
+  "new_password": "Nueva contraseña",
+  "edit_password": "Editar contraseña",
+  "password_short_warning": "Las contraseñas cortas no son seguras.",
+  "custom_password_title": "Contraseña personalizada",
+  "custom_password_msg": "El archivo se cifrará con la siguiente contraseña."
 }

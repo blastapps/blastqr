@@ -5,6 +5,7 @@ import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/theme.dart';
+import 'package:blastqr_crypto/blastqr_crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,12 @@ void main() async {
     const Duration(seconds: 1),
     onTimeout: () {
       debugPrint('RaptorQFlutter.init() timed out!');
+    },
+  );
+  await BlastqrCrypto.init().timeout(
+    const Duration(seconds: 1),
+    onTimeout: () {
+      debugPrint('BlastqrCrypto.init() timed out!');
     },
   );
 

@@ -1,6 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class FileHeaderWidget extends StatelessWidget {
   const FileHeaderWidget({
@@ -8,11 +11,17 @@ class FileHeaderWidget extends StatelessWidget {
     required this.file,
     required this.onTapDismiss,
     this.compressedSize,
+    this.encrypted = false,
+    this.name,
   });
 
   final FileWrapper file;
   final VoidCallback onTapDismiss;
   final int? compressedSize;
+
+  final bool encrypted;
+
+  final String? name;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +49,35 @@ class FileHeaderWidget extends StatelessWidget {
                   ],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: file.buildThumbnail(context, size: 72),
+                child:
+                    encrypted
+                        ? Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: 6,
+                                sigmaY: 6,
+                              ),
+                              child: file.buildThumbnail(context, size: 72),
+                            ),
+                            Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withAlpha(110),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const HugeIcon(
+                                  icon: HugeIcons.strokeRoundedSquareLock02,
+                                  size: 24,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                        : file.buildThumbnail(context, size: 72),
               ),
               Expanded(
                 child: Column(
@@ -50,7 +87,7 @@ class FileHeaderWidget extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 36),
                       child: Text(
-                        file.name,
+                        name ?? file.name,
                         style: Theme.of(context).textTheme.titleMedium,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,

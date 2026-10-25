@@ -280,7 +280,7 @@ Future<void> showMessage({
   );
 }
 
-Future<void> showSheet({
+Future<T?> showSheet<T>({
   required BuildContext context,
   required String title,
   String? message,
@@ -290,7 +290,7 @@ Future<void> showSheet({
   double messageBottomPadding = 24,
 }) {
   FocusManager.instance.primaryFocus?.unfocus();
-  return showModalBottomSheet<void>(
+  return showModalBottomSheet<T>(
     context: context,
     showDragHandle: true,
     backgroundColor:

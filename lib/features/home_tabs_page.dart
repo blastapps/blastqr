@@ -5,6 +5,7 @@ import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/files_page.dart';
 import 'package:blast_qr/features/scan/scan_page.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/send/send_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/extension.dart';
@@ -186,15 +187,20 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
   void _showQrPage(File file) async {
     Navigator.of(context).popUntil((r) => r.isFirst); // Go back to main screen
     final fileWrapper = await file.toFileWrapper();
-    if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (context) {
-            return QrPage(file: fileWrapper);
-          },
-        ),
-      );
-    }
+    if (!mounted) return;
+    final options = await chooseSendOptions(context, [fileWrapper]);
+    if (options == null || !mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) {
+          return QrPage(
+            file: fileWrapper,
+            password: options.password,
+            fileName: options.fileName,
+          );
+        },
+      ),
+    );
   }
 }

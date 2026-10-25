@@ -10,6 +10,7 @@ import 'package:blast_qr/features/send/widgets/file_too_large_alert_widget.dart'
 import 'package:blast_qr/features/send/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/password_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -17,10 +18,20 @@ import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class QrPage extends StatefulWidget {
-  const QrPage({super.key, required this.file, this.onNext});
+  const QrPage({
+    super.key,
+    required this.file,
+    this.onNext,
+    this.password,
+    this.fileName,
+  });
 
   final FileWrapper file;
   final VoidCallback? onNext;
+
+  final String? password;
+
+  final String? fileName;
 
   @override
   State<QrPage> createState() => _QrPageState();
@@ -39,6 +50,14 @@ class _QrPageState extends State<QrPage> {
   StreamSubscription<void>? _acousticSub;
   Timer? _listenerDelayTimer;
   bool _completionDetected = false;
+
+  bool _nearlyComplete = false;
+
+  bool get _showsPasswordButton =>
+      !_fullscreenMode &&
+      widget.password != null &&
+      _nearlyComplete &&
+      !_completionDetected;
 
   @override
   void initState() {
@@ -80,8 +99,10 @@ class _QrPageState extends State<QrPage> {
             if (!_fullscreenMode)
               FileHeaderWidget(
                 file: widget.file,
+                name: widget.fileName,
                 onTapDismiss: _dismiss,
                 compressedSize: _compressedSize,
+                encrypted: widget.password != null,
               ),
             Expanded(
               key: const ValueKey('qr_container'),
@@ -133,8 +154,14 @@ class _QrPageState extends State<QrPage> {
                                               ? appSettings
                                                   .imageCompressionSettings
                                               : null,
+                                      password: widget.password,
+                                      fileName: widget.fileName,
                                       fill: _fullscreenMode,
                                       onTap: _onToggleFullscreen,
+                                      onNearlyComplete:
+                                          () => setState(
+                                            () => _nearlyComplete = true,
+                                          ),
                                       onStart:
                                           (size) => _onStart(
                                             size,
@@ -156,6 +183,7 @@ class _QrPageState extends State<QrPage> {
                             onKeepShowing: _onKeepShowingQr,
                             onDone: _dismiss,
                             onNextFile: widget.onNext,
+                            password: widget.password,
                           ),
                         ),
                       ),
@@ -163,7 +191,9 @@ class _QrPageState extends State<QrPage> {
                 ),
               ),
             ),
-            if (!_fullscreenMode && (!_isLargeFile || _largeFileAcknowledged))
+            if (!_fullscreenMode &&
+                !_showsPasswordButton &&
+                (!_isLargeFile || _largeFileAcknowledged))
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: GestureDetector(
@@ -186,6 +216,11 @@ class _QrPageState extends State<QrPage> {
                     ],
                   ),
                 ),
+              ),
+            if (_showsPasswordButton)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: PasswordButton(password: widget.password!),
               ),
             if (!_fullscreenMode)
               Padding(

@@ -98,12 +98,21 @@ void main() {
       expect(BlastQrcodeData.parse(bytes).verdict, FrameVerdict.newerVersion);
     });
 
-    test('encryption (not supported yet) asks for an update', () {
-      final bytes = _v2Bytes(flags: BlastQrcodeData.flagEncrypted);
+    test('unknown must-understand flags ask for an update', () {
+      final bytes = _v2Bytes(flags: 0x04);
       expect(
         BlastQrcodeData.parse(bytes).verdict,
         FrameVerdict.unsupportedFlags,
       );
+    });
+
+    test('encrypted frames are accepted', () {
+      final frame = _v2(
+        flags: BlastQrcodeData.flagEncrypted | BlastQrcodeData.flagGzip,
+      );
+      expect(frame.isEncrypted, isTrue);
+      expect(frame.isCompressedData, isTrue);
+      expect(_v2().isEncrypted, isFalse);
     });
 
     test('unknown optional flags are ignored', () {

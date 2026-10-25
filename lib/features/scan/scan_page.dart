@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/crypto/transfer_crypto.dart';
 import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/features/scan/transfer_tracker.dart';
+import 'package:blast_qr/features/scan/widgets/password_sheet.dart';
+import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
@@ -312,10 +314,14 @@ class _ScanPageState extends State<ScanPage> {
     _fileMetadata = ReceivingFileMetadata(
       size: frame.transferLength,
       isCompressed: frame.isCompressedData,
+      isEncrypted: frame.isEncrypted,
     );
     setState(() {
       _isReceivingData = true;
-      _statusMessage = context.l10n.receiving_generic;
+      _statusMessage =
+          frame.isEncrypted
+              ? context.l10n.receiving_encrypted
+              : context.l10n.receiving_generic;
     });
     _latestScanStartTime = DateTime.now();
     debugPrint('Scanning file with: ${_fileMetadata.toString()}');
@@ -382,13 +388,33 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _handleResult(Uint8List data) async {
-    if (_fileMetadata == null) {
+    final metadata = _fileMetadata;
+    if (metadata == null) {
       return;
     }
-    _loadingResult = false;
 
     final elapsedTime =
         DateTime.now().difference(_latestScanStartTime).inMilliseconds / 1000;
+
+    // Everything has arrived: play the completion tone now
+    _playTransferComplete();
+
+    if (metadata.isEncrypted) {
+      final Uint8List? plain;
+      try {
+        plain = await _decrypt(data);
+      } catch (error) {
+        debugPrint('Failed to decrypt received file: $error');
+        _showReceiveFailed();
+        return;
+      }
+      if (plain == null || !mounted || _fileMetadata != metadata) {
+        if (mounted && _fileMetadata == metadata) _reset();
+        return;
+      }
+      data = plain;
+    }
+    _loadingResult = false;
 
     final directory = await getApplicationDocumentsDirectory();
     final itemsDirectory = Directory('${directory.path}/docs');
@@ -401,7 +427,7 @@ class _ScanPageState extends State<ScanPage> {
     try {
       resultFile = await saveReceivedFile(
         data: data,
-        gzipped: _fileMetadata!.isCompressed,
+        gzipped: metadata.isCompressed,
         directory: itemsDirectory,
         tempDirectory: await getTemporaryDirectory(),
       );
@@ -418,17 +444,13 @@ class _ScanPageState extends State<ScanPage> {
       return;
     }
 
-    // Increment file badge
     Provider.of<FileBadgeCount>(context, listen: false).add();
 
-    if (_appSettings.hapticFeedback) {
-      HapticFeedback.heavyImpact();
-    }
-    if (_appSettings.soundFeedback) {
-      _soundService.playTransferComplete();
-    }
-
-    _showResultSheet(fileWrapper, elapsedTime).then((_) async {
+    _showResultSheet(
+      fileWrapper,
+      elapsedTime,
+      encrypted: metadata.isEncrypted,
+    ).then((_) async {
       final newFilename = sanitizeFileName(_renameController.text);
       if (mounted && newFilename != fileName) {
         final uniqueName = await resolveUniqueFileName(
@@ -439,6 +461,69 @@ class _ScanPageState extends State<ScanPage> {
       }
       _reset();
     });
+  }
+
+  void _playTransferComplete() {
+    if (_appSettings.hapticFeedback) {
+      HapticFeedback.heavyImpact();
+    }
+    if (_appSettings.soundFeedback) {
+      _soundService.playTransferComplete();
+    }
+  }
+
+  /// Asks until the password is right, keeping the received data, so a wrong
+  /// password never means scanning again. Returns null if cancelled; throws
+  /// if the data is damaged or unsupported.
+  Future<Uint8List?> _decrypt(Uint8List envelope) async {
+    final metadata = _fileMetadata;
+    var failed = false;
+    var lastTried = '';
+
+    _setCameraOn(false);
+    try {
+      while (_fileMetadata == metadata) {
+        if (!mounted) return null;
+        setState(() => _loadingResult = false);
+        final password = await showPasswordSheet(
+          context,
+          initialText: failed ? lastTried : '',
+          wrongPassword: failed,
+        );
+        if (password == null || !mounted || _fileMetadata != metadata) {
+          return null;
+        }
+        final plain = await _tryDecrypt(envelope, password);
+        if (plain != null) return plain;
+        failed = true;
+        lastTried = password;
+      }
+      return null;
+    } finally {
+      _setCameraOn(true);
+    }
+  }
+
+  void _setCameraOn(bool on) {
+    if (!mounted) return;
+    setState(() {
+      _showsReaderWidget = on;
+      if (!on) {
+        _cameraController = null;
+        _focusLocked = false;
+      }
+    });
+  }
+
+  /// Null if [password] is wrong; other errors are rethrown.
+  Future<Uint8List?> _tryDecrypt(Uint8List envelope, String password) async {
+    setState(() => _loadingResult = true);
+    try {
+      return await TransferCrypto.decrypt(envelope, password);
+    } on TransferCryptoError catch (error) {
+      if (error == TransferCryptoError.wrongPassword) return null;
+      rethrow;
+    }
   }
 
   void _showReceiveFailed() {
@@ -454,7 +539,11 @@ class _ScanPageState extends State<ScanPage> {
     ).then((_) => _reset());
   }
 
-  Future<void> _showResultSheet(FileWrapper file, double timeInSeconds) async {
+  Future<void> _showResultSheet(
+    FileWrapper file,
+    double timeInSeconds, {
+    bool encrypted = false,
+  }) async {
     _renameController.text = file.name;
     final speed = ((file.size / 1000) / timeInSeconds).toStringAsFixed(1);
     return showSheet(
@@ -463,6 +552,22 @@ class _ScanPageState extends State<ScanPage> {
           '${context.l10n.received_in} ${timeInSeconds.toStringAsFixed(1)}s (${speed}kB/s)',
       body: Column(
         children: [
+          if (encrypted)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  HugeIcon(
+                    icon: HugeIcons.strokeRoundedSquareLock02,
+                    size: 18,
+                    color: context.color.onSurface,
+                  ),
+                  Text(context.l10n.received_encrypted),
+                ],
+              ),
+            ),
           GestureDetector(
             onTap: () {
               _onTapOpen(file);

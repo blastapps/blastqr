@@ -42,13 +42,17 @@ void main() {
       expect(act(null, 0), ScanAction.foreign);
     });
 
-    test('newer versions and encryption ask for an update', () {
+    test('newer versions and unknown features ask for an update', () {
       expect(act(_frame(version: 3), 0), ScanAction.updateRequired);
+      expect(act(_frame(flags: 0x04), 0), ScanAction.updateRequired);
+      expect(tracker.current, isNull);
+    });
+
+    test('encrypted transfers are received', () {
       expect(
         act(_frame(flags: BlastQrcodeData.flagEncrypted), 0),
-        ScanAction.updateRequired,
+        ScanAction.start,
       );
-      expect(tracker.current, isNull);
     });
 
     test('unsafe headers are ignored and lock nothing', () {

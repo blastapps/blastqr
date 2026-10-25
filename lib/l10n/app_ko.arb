@@ -122,5 +122,19 @@
   "file_too_large_for_qr_size_msg": "현재 QR 코드 크기로는 이 파일을 보낼 수 없습니다. 설정 › 전송 설정에서 QR 코드 크기를 늘려 주세요.",
   "receiving_generic": "파일 수신 중...",
   "update_required_title": "업데이트 필요",
-  "update_required_msg": "최신 버전의 blastQR로 보낸 파일입니다. 받으려면 앱을 업데이트하세요."
+  "update_required_msg": "최신 버전의 blastQR로 보낸 파일입니다. 받으려면 앱을 업데이트하세요.",
+  "send_encrypted": "비밀번호로 암호화해서 보내기",
+  "receiving_encrypted": "암호화된 파일 수신 중...",
+  "enter_password": "비밀번호 입력",
+  "enter_password_msg": "이 파일은 암호화되어 있습니다. 보낸 사람의 비밀번호를 입력하세요.",
+  "wrong_password": "비밀번호가 틀렸습니다. 다시 시도하세요.",
+  "unlock": "잠금 해제",
+  "received_encrypted": "암호화되어 수신됨",
+  "show_password": "비밀번호 보기",
+  "password": "비밀번호",
+  "new_password": "새 비밀번호",
+  "edit_password": "비밀번호 편집",
+  "password_short_warning": "짧은 비밀번호는 안전하지 않습니다.",
+  "custom_password_title": "사용자 지정 비밀번호",
+  "custom_password_msg": "파일이 다음 비밀번호로 암호화됩니다."
 }

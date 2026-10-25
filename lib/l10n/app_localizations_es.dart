@@ -397,4 +397,48 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get update_required_msg =>
       'Esto se ha enviado con una versión más reciente de blastQR. Actualiza la aplicación para recibirlo.';
+
+  @override
+  String get send_encrypted => 'Enviar cifrado con contraseña';
+
+  @override
+  String get receiving_encrypted => 'Recibiendo archivo cifrado...';
+
+  @override
+  String get enter_password => 'Introducir contraseña';
+
+  @override
+  String get enter_password_msg =>
+      'Este archivo está cifrado. Introduce la contraseña del remitente.';
+
+  @override
+  String get wrong_password => 'Contraseña incorrecta. Inténtalo de nuevo.';
+
+  @override
+  String get unlock => 'Desbloquear';
+
+  @override
+  String get received_encrypted => 'Recibido cifrado';
+
+  @override
+  String get show_password => 'Mostrar contraseña';
+
+  @override
+  String get password => 'Contraseña';
+
+  @override
+  String get new_password => 'Nueva contraseña';
+
+  @override
+  String get edit_password => 'Editar contraseña';
+
+  @override
+  String get password_short_warning => 'Las contraseñas cortas no son seguras.';
+
+  @override
+  String get custom_password_title => 'Contraseña personalizada';
+
+  @override
+  String get custom_password_msg =>
+      'El archivo se cifrará con la siguiente contraseña.';
 }

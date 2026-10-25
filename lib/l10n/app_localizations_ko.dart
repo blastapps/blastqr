@@ -383,4 +383,46 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get update_required_msg =>
       '최신 버전의 blastQR로 보낸 파일입니다. 받으려면 앱을 업데이트하세요.';
+
+  @override
+  String get send_encrypted => '비밀번호로 암호화해서 보내기';
+
+  @override
+  String get receiving_encrypted => '암호화된 파일 수신 중...';
+
+  @override
+  String get enter_password => '비밀번호 입력';
+
+  @override
+  String get enter_password_msg => '이 파일은 암호화되어 있습니다. 보낸 사람의 비밀번호를 입력하세요.';
+
+  @override
+  String get wrong_password => '비밀번호가 틀렸습니다. 다시 시도하세요.';
+
+  @override
+  String get unlock => '잠금 해제';
+
+  @override
+  String get received_encrypted => '암호화되어 수신됨';
+
+  @override
+  String get show_password => '비밀번호 보기';
+
+  @override
+  String get password => '비밀번호';
+
+  @override
+  String get new_password => '새 비밀번호';
+
+  @override
+  String get edit_password => '비밀번호 편집';
+
+  @override
+  String get password_short_warning => '짧은 비밀번호는 안전하지 않습니다.';
+
+  @override
+  String get custom_password_title => '사용자 지정 비밀번호';
+
+  @override
+  String get custom_password_msg => '파일이 다음 비밀번호로 암호화됩니다.';
 }
