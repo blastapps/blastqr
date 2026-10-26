@@ -453,4 +453,9 @@ class AppLocalizationsCa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String sending_files_count(int count) {
+    return 'Enviant $count fitxers';
+  }
 }

@@ -148,5 +148,13 @@
         "type": "int"
       }
     }
+  },
+  "sending_files_count": "Sending {count} files",
+  "@sending_files_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

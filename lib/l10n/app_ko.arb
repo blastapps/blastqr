@@ -137,5 +137,6 @@
   "password_short_warning": "짧은 비밀번호는 안전하지 않습니다.",
   "custom_password_title": "사용자 지정 비밀번호",
   "custom_password_msg": "파일이 다음 비밀번호로 암호화됩니다.",
-  "files_count": "{count, plural, other{파일 {count}개}}"
+  "files_count": "{count, plural, other{파일 {count}개}}",
+  "sending_files_count": "파일 {count}개 보내는 중"
 }

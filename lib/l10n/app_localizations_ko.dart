@@ -435,4 +435,9 @@ class AppLocalizationsKo extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String sending_files_count(int count) {
+    return '파일 $count개 보내는 중';
+  }
 }

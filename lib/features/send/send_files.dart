@@ -23,7 +23,7 @@ Future<void> sendFiles(
   SendOptions options,
 ) async {
   if (files.length == 1) {
-    await _showQrPage(context, files.single, options, isBundle: false);
+    await _showQrPage(context, files.single, options);
     return;
   }
 
@@ -45,7 +45,7 @@ Future<void> sendFiles(
       await showFileTooLarge(context, tooLarge);
       return;
     }
-    await _showQrPage(context, bundle, options, isBundle: true);
+    await _showQrPage(context, bundle, options, bundledFiles: files);
   } finally {
     await bundle.file.delete();
   }
@@ -123,7 +123,7 @@ Future<void> _showQrPage(
   BuildContext context,
   FileWrapper file,
   SendOptions options, {
-  required bool isBundle,
+  List<FileWrapper> bundledFiles = const [],
 }) {
   return Navigator.of(context).push(
     MaterialPageRoute(
@@ -131,7 +131,7 @@ Future<void> _showQrPage(
       builder:
           (context) => QrPage(
             file: file,
-            isBundle: isBundle,
+            bundledFiles: bundledFiles,
             password: options.password,
             fileName: options.fileName,
           ),

@@ -137,5 +137,6 @@
   "password_short_warning": "Las contraseñas cortas no son seguras.",
   "custom_password_title": "Contraseña personalizada",
   "custom_password_msg": "El archivo se cifrará con la siguiente contraseña.",
-  "files_count": "{count, plural, =1{1 archivo} other{{count} archivos}}"
+  "files_count": "{count, plural, =1{1 archivo} other{{count} archivos}}",
+  "sending_files_count": "Enviando {count} archivos"
 }

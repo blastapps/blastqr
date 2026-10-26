@@ -917,6 +917,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 file} other{{count} files}}'**
   String files_count(int count);
+
+  /// No description provided for @sending_files_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending {count} files'**
+  String sending_files_count(int count);
 }
 
 class _AppLocalizationsDelegate

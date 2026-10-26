@@ -136,5 +136,6 @@
   "password_short_warning": "Les contrasenyes curtes no són segures.",
   "custom_password_title": "Contrasenya personalitzada",
   "custom_password_msg": "El fitxer es xifrarà amb la contrasenya següent.",
-  "files_count": "{count, plural, =1{1 fitxer} other{{count} fitxers}}"
+  "files_count": "{count, plural, =1{1 fitxer} other{{count} fitxers}}",
+  "sending_files_count": "Enviant {count} fitxers"
 }

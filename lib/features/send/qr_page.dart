@@ -21,7 +21,7 @@ class QrPage extends StatefulWidget {
   const QrPage({
     super.key,
     required this.file,
-    this.isBundle = false,
+    this.bundledFiles = const [],
     this.password,
     this.fileName,
   });
@@ -30,7 +30,10 @@ class QrPage extends StatefulWidget {
 
   final FileWrapper file;
 
-  final bool isBundle;
+  /// The original files when [file] is a bundle of several.
+  final List<FileWrapper> bundledFiles;
+
+  bool get isBundle => bundledFiles.isNotEmpty;
 
   final String? password;
 
@@ -104,6 +107,7 @@ class _QrPageState extends State<QrPage> {
               FileHeaderWidget(
                 file: widget.file,
                 name: widget.fileName,
+                bundledFiles: widget.bundledFiles,
                 onTapDismiss: _dismiss,
                 compressedSize: _compressedSize,
                 encrypted: widget.password != null,
