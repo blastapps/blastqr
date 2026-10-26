@@ -111,6 +111,16 @@ void main() {
       expect(tracker.current!.sessionId, 1);
     });
 
+    test('other QR codes are ignored while a transfer is arriving', () {
+      final hello = Uint8List.fromList('hello'.codeUnits);
+      act(_frame(session: 1), 0);
+      expect(act(hello, 100), ScanAction.ignore);
+      expect(act(null, 200), ScanAction.ignore);
+      expect(act(_frame(session: 1), 300), ScanAction.decode);
+      expect(act(hello, 1800, busy: true), ScanAction.ignore);
+      expect(act(hello, 1800), ScanAction.foreign);
+    });
+
     test('reset forgets the transfer', () {
       act(_frame(session: 1), 0);
       tracker.reset();
