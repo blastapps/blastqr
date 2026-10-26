@@ -246,6 +246,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get filter_document => '문서';
 
   @override
+  String get filter_book => '책';
+
+  @override
   String get filter_other => '기타';
 
   @override

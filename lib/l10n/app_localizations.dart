@@ -564,6 +564,12 @@ abstract class AppLocalizations {
   /// **'Documents'**
   String get filter_document;
 
+  /// No description provided for @filter_book.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get filter_book;
+
   /// No description provided for @filter_other.
   ///
   /// In en, this message translates to:

@@ -249,6 +249,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get filter_document => 'Documents';
 
   @override
+  String get filter_book => 'Llibres';
+
+  @override
   String get filter_other => 'Altres';
 
   @override

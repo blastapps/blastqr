@@ -12,6 +12,7 @@ class FileType {
   final bool isUnknown;
   final bool isAvifImage;
   final bool isWebpImage;
+  final bool isEbook;
 
   FileType({required this.extension, required this.mimeType})
     : isImage = mimeType?.startsWith('image') == true,
@@ -20,7 +21,11 @@ class FileType {
       isWebpImage = mimeType == 'image/webp' || extension == 'webp',
       isDocument = documentExtensions.contains(extension),
       isAudio = mimeType?.startsWith('audio') == true,
-      isVideo = mimeType?.startsWith('video') == true;
+      isVideo = mimeType?.startsWith('video') == true,
+      isEbook =
+          extension == 'epub' ||
+          mimeType?.contains('ebook') == true ||
+          mimeType?.contains('epub') == true;
 
   bool get allowsImageCompression => isImage;
 

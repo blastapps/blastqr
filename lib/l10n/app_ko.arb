@@ -66,6 +66,7 @@
   "filter_videos": "동영상",
   "filter_audio": "오디오",
   "filter_document": "문서",
+  "filter_book": "책",
   "filter_other": "기타",
   "older": "이전 파일",
   "select_all": "전체 선택",

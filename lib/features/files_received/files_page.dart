@@ -22,7 +22,7 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-enum _FilterType { all, image, video, audio, document, other }
+enum _FilterType { all, image, video, audio, document, book, other }
 
 class _DateHeader {
   final DateTime date;
@@ -131,6 +131,8 @@ class _FilesPageState extends State<FilesPage> {
           return f.type.isAudio;
         case _FilterType.document:
           return f.type.isDocument;
+        case _FilterType.book:
+          return f.type.isDocument;
         case _FilterType.other:
           return !f.type.isImage &&
               !f.type.isVideo &&
@@ -193,6 +195,8 @@ class _FilesPageState extends State<FilesPage> {
         return context.l10n.filter_audio;
       case _FilterType.document:
         return context.l10n.filter_document;
+      case _FilterType.book:
+        return context.l10n.filter_book;
       case _FilterType.other:
         return context.l10n.filter_other;
     }

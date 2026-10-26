@@ -76,6 +76,7 @@
   "filter_videos": "Videos",
   "filter_audio": "Audio",
   "filter_document": "Documents",
+  "filter_book": "Books",
   "filter_other": "Other",
   "older": "Older",
   "select_all": "Select all",

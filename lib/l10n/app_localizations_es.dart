@@ -249,6 +249,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get filter_document => 'Documentos';
 
   @override
+  String get filter_book => 'Libros';
+
+  @override
   String get filter_other => 'Otros';
 
   @override
