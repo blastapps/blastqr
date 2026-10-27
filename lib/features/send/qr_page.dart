@@ -63,6 +63,7 @@ class _QrPageState extends State<QrPage> {
   AcousticAckListener? _acousticListener;
   StreamSubscription<void>? _acousticSub;
   Timer? _listenerDelayTimer;
+  bool _ackArmed = false;
   bool _completionDetected = false;
   bool _dismissed = false;
 
@@ -307,6 +308,9 @@ class _QrPageState extends State<QrPage> {
     );
   }
 
+  /// Starts the mic right away, because starting it blocks the main thread
+  /// and would stutter the animation if done mid-transfer. Detections only
+  /// count once the delay has passed.
   void _startAcousticListener({
     int? fileSize,
     int fps = 0,
@@ -316,21 +320,19 @@ class _QrPageState extends State<QrPage> {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
     if (!appSettings.acousticDetection) return;
 
-    _acousticSub?.cancel();
     _listenerDelayTimer?.cancel();
+    _ackArmed = false;
 
-    void startNow() {
-      if (!mounted) return;
-      _acousticListener ??= AcousticAckListener();
+    if (_acousticListener == null) {
+      _acousticListener = AcousticAckListener();
       _acousticSub = _acousticListener!.onDetected.listen((_) {
-        if (mounted) {
-          if (_fullscreenMode) _exitFullscreen();
-          setState(() => _completionDetected = true);
-          _acousticListener?.stop();
-        }
+        if (!mounted || !_ackArmed) return;
+        _ackArmed = false;
+        if (_fullscreenMode) _exitFullscreen();
+        setState(() => _completionDetected = true);
       });
-      _acousticListener!.start();
     }
+    _acousticListener!.start();
 
     if (fileSize != null) {
       // Estimate earliest possible completion based on actual fps, mtu, and
@@ -346,11 +348,11 @@ class _QrPageState extends State<QrPage> {
       );
       _listenerDelayTimer = Timer(
         Duration(milliseconds: (delaySeconds * 1000).round()),
-        startNow,
+        () => _ackArmed = true,
       );
       return;
     }
-    startNow();
+    _ackArmed = true;
   }
 
   void _cycleFps(int current) {
@@ -369,7 +371,7 @@ class _QrPageState extends State<QrPage> {
     } else {
       appSettings.updateAcousticDetection(false);
       _listenerDelayTimer?.cancel();
-      _acousticSub?.cancel();
+      _ackArmed = false;
       _acousticListener?.stop();
     }
   }

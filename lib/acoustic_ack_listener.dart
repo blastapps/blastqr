@@ -55,25 +55,46 @@ class AcousticAckListener {
     return granted;
   }
 
-  /// Start microphone capture and begin detection.
+  bool _active = false;
+
+  /// Start microphone capture and begin detection. No-op if already running.
   /// Silently no-ops if microphone permission is not granted.
   Future<void> start() async {
-    final hasPermission = await _recorder.hasPermission();
-    if (!hasPermission) return;
+    if (_active) return;
+    _active = true;
 
-    final stream = await _recorder.startStream(
-      const RecordConfig(
-        encoder: AudioEncoder.pcm16bits,
-        sampleRate: _sampleRate,
-        numChannels: 1,
-      ),
-    );
+    final hasPermission = await _recorder.hasPermission();
+    if (!hasPermission || !_active) {
+      _active = false;
+      return;
+    }
+
+    final Stream<Uint8List> stream;
+    try {
+      stream = await _recorder.startStream(
+        const RecordConfig(
+          encoder: AudioEncoder.pcm16bits,
+          sampleRate: _sampleRate,
+          numChannels: 1,
+          audioInterruption: AudioInterruptionMode.none,
+          androidConfig: AndroidRecordConfig(manageBluetooth: false),
+        ),
+      );
+    } catch (_) {
+      _active = false;
+      rethrow;
+    }
+    if (!_active) {
+      await _recorder.stop();
+      return;
+    }
 
     _audioSub = stream.listen(_onAudioData);
   }
 
   /// Stop capture. Can be restarted by calling [start] again.
   Future<void> stop() async {
+    _active = false;
     await _audioSub?.cancel();
     _audioSub = null;
     await _recorder.stop();
