@@ -35,6 +35,9 @@ const float TAU = 6.2831853;
 
 // Modules per QR code along each side (a version 4 code).
 const float kTile = 33.0;
+// Blank modules between neighbouring codes, like a real code's quiet zone.
+// Without it one code's finders sit right against the next one's.
+const float kQuiet = 2.0;
 
 // The fewest and most times a module twinkles in one cycle. Whole numbers,
 // so the loop has no seam.
@@ -124,10 +127,15 @@ void main() {
   // Which code the module is in, with every other row of codes shifted
   // half a code along like bricks, and each code flipped its own way, so
   // the finder patterns don't line up into a grid.
-  float row = floor(index.y / kTile);
-  vec2 shifted = vec2(index.x + mod(row, 2.0) * floor(kTile * 0.5), index.y);
-  vec2 code = floor(shifted / kTile);
-  vec2 m = shifted - code * kTile;
+  float pitch = kTile + kQuiet;
+  float row = floor(index.y / pitch);
+  vec2 shifted = vec2(index.x + mod(row, 2.0) * floor(pitch * 0.5), index.y);
+  vec2 code = floor(shifted / pitch);
+  vec2 m = shifted - code * pitch;
+  if (any(greaterThanEqual(m, vec2(kTile)))) {
+    fragColor = vec4(0.0);
+    return;
+  }
   // Which half of the module this pixel is in, for the half-size patterns.
   vec2 half_ = step(0.0, q);
   float flip = hash(code + 3.7);
