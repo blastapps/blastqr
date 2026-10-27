@@ -20,7 +20,8 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:desktop_drop/desktop_drop.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SendPage extends StatefulWidget {
   const SendPage({super.key});
@@ -31,15 +32,6 @@ class SendPage extends StatefulWidget {
 
 class _SendPageState extends State<SendPage> {
   final List<FileWrapper> _recentFiles = [];
-  bool _dropRegionReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _dropRegionReady = true);
-    });
-  }
 
   void _addRecentFile(FileWrapper fw) {
     setState(() {
@@ -49,26 +41,10 @@ class _SendPageState extends State<SendPage> {
     });
   }
 
-  /// The drop region is created after the first frame: on macOS,
-  /// irondash_engine_context only registers the Flutter view asynchronously
-  /// and crashes if a drop region asks for it earlier.
   Widget _dropRegion({required Widget child}) {
-    if (!_dropRegionReady) return child;
-    return DropRegion(
-      // Formats this region can accept.
-      formats: Formats.standardFormats,
-      hitTestBehavior: HitTestBehavior.opaque,
-      onDropOver: (event) {
-        return DropOperation.copy;
-      },
-      onPerformDrop: (event) async {
-        final uris = await Future.wait(
-          event.session.items.map((item) => _droppedFileUri(item)),
-        );
-        final files = [
-          for (final uri in uris)
-            if (uri != null) File(uri.toFilePath()),
-        ];
+    return DropTarget(
+      onDragDone: (details) async {
+        final files = await _copyDroppedFiles(details.files);
         if (files.isNotEmpty && mounted) _showQrPages(files);
       },
       child: child,
@@ -169,17 +145,31 @@ class _SendPageState extends State<SendPage> {
     }
   }
 
-  Future<Uri?> _droppedFileUri(DropItem item) {
-    final reader = item.dataReader;
-    if (reader == null) return Future.value(null);
-    final completer = Completer<Uri?>();
-    final progress = reader.getValue<Uri>(
-      Formats.fileUri,
-      (uri) => completer.complete(uri),
-      onError: (_) => completer.complete(null),
-    );
-    if (progress == null) completer.complete(null);
-    return completer.future;
+  /// Dropped files are only readable during the drop (macOS sandbox access is
+  /// scoped to it), so copy them somewhere the app can keep using.
+  Future<List<File>> _copyDroppedFiles(List<DropItem> items) async {
+    final dir = await (await getTemporaryDirectory()).createTemp('dropped_');
+    final files = <File>[];
+    for (final item in items.whereType<DropItemFile>()) {
+      final bookmark = item.extraAppleBookmark;
+      final accessing =
+          bookmark != null &&
+          await DesktopDrop.instance.startAccessingSecurityScopedResource(
+            bookmark: bookmark,
+          );
+      try {
+        files.add(await File(item.path).copy('${dir.path}/${item.name}'));
+      } on FileSystemException {
+        // Skip files we can't read.
+      } finally {
+        if (accessing) {
+          await DesktopDrop.instance.stopAccessingSecurityScopedResource(
+            bookmark: bookmark,
+          );
+        }
+      }
+    }
+    return files;
   }
 
   void _showQrPage(File file) {

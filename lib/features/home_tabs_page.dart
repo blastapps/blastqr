@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:share_handler/share_handler.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class HomeTabsPage extends StatefulWidget {
   const HomeTabsPage({super.key});
@@ -31,7 +31,6 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
   static const _scanTab = 1;
 
   int _currentTab = 0;
-  SharedMedia? media;
 
   @override
   void initState() {
@@ -39,31 +38,31 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    if (Platform.isMacOS) return;
-    final handler = ShareHandlerPlatform.instance;
-    media = await handler.getInitialSharedMedia();
-
-    handler.sharedMediaStream.listen((SharedMedia media) {
+    if (!Platform.isIOS && !Platform.isAndroid) return;
+    final sharing = ReceiveSharingIntent.instance;
+    sharing.getMediaStream().listen((media) {
       if (!mounted) return;
       _handleSharedMedia(media);
     });
+
+    final initial = await sharing.getInitialMedia();
     if (!mounted) return;
-
-    if (media != null) _handleSharedMedia(media!);
-
-    handler.resetInitialSharedMedia();
+    if (initial.isNotEmpty) _handleSharedMedia(initial);
+    sharing.reset();
   }
 
-  Future<void> _handleSharedMedia(SharedMedia media) async {
-    final files = [
-      for (final attachment in media.attachments ?? <SharedAttachment?>[])
-        if (attachment != null) File(attachment.path),
-    ];
-    final text = media.content;
-    if (text != null && text.isNotEmpty) {
-      files.add(await _writeSharedText(text));
+  Future<void> _handleSharedMedia(List<SharedMediaFile> media) async {
+    final files = <File>[];
+    for (final item in media) {
+      switch (item.type) {
+        case SharedMediaType.text || SharedMediaType.url:
+          if (item.path.isNotEmpty) {
+            files.add(await _writeSharedText(item.path));
+          }
+        default:
+          files.add(File(item.path));
+      }
     }
     if (files.isNotEmpty) _showQrPage(files);
   }
