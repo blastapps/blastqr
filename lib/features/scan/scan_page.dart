@@ -70,6 +70,8 @@ class _ScanPageState extends State<ScanPage> {
   final _tracker = TransferTracker();
   CameraController? _cameraController;
   bool _focusLocked = false;
+  final _readerKey = GlobalKey();
+  Offset? _focusIndicator;
 
   @override
   void initState() {
@@ -169,10 +171,7 @@ class _ScanPageState extends State<ScanPage> {
           alignment: Alignment.topCenter,
           children: [
             GestureDetector(
-              onTap: () {
-                // Temporary fix for: https://github.com/flutter/flutter/issues/152763
-                _resetReaderWidget();
-              },
+              onTapUp: (details) => _focusAt(details.localPosition),
               child: _showsReaderWidget && _cameraLoaded
                   // ReaderWidget outlines codes in primaryColor, which a
                   // dark theme sets to the surface color.
@@ -182,6 +181,7 @@ class _ScanPageState extends State<ScanPage> {
                           context,
                         ).copyWith(primaryColor: context.color.primary),
                         child: ReaderWidget(
+                          key: _readerKey,
                           scanDelay: Duration.zero,
                           scanDelaySuccess: Duration.zero,
                           codeFormat: Format.qrCode,
@@ -204,6 +204,40 @@ class _ScanPageState extends State<ScanPage> {
                     )
                   : const SizedBox(),
             ),
+            if (_focusIndicator case final tap?)
+              Positioned(
+                left: tap.dx - 32,
+                top: tap.dy - 32,
+                child: IgnorePointer(
+                  child:
+                      Container(
+                            key: ValueKey(tap),
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                            ),
+                          )
+                          .animate(
+                            onComplete: (_) {
+                              if (mounted && _focusIndicator == tap) {
+                                setState(() => _focusIndicator = null);
+                              }
+                            },
+                          )
+                          .scale(
+                            begin: const Offset(1.4, 1.4),
+                            duration: 200.ms,
+                            curve: Curves.easeOut,
+                          )
+                          .then(delay: 600.ms)
+                          .fadeOut(duration: 300.ms),
+                ),
+              ),
             // Top gradient
             Container(
               height: 92 + MediaQuery.of(context).viewPadding.top,
@@ -768,17 +802,42 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
-  // Temporary fix for: https://github.com/flutter/flutter/issues/152763
-  void _resetReaderWidget() async {
-    setState(() {
-      _showsReaderWidget = false;
-    });
-    await Future.delayed(const Duration(milliseconds: 10));
-    if (mounted) {
-      setState(() {
-        _showsReaderWidget = true;
-      });
+  void _focusAt(Offset tap) {
+    final controller = _cameraController;
+    if (controller == null || !controller.value.isInitialized) return;
+    if (!Platform.isIOS && !Platform.isAndroid) return;
+    final size =
+        (_readerKey.currentContext?.findRenderObject() as RenderBox?)?.size;
+    if (size == null || size.isEmpty) return;
+
+    // ReaderWidget cover-fits the preview, centered in its box.
+    final value = controller.value;
+    final orientation =
+        value.lockedCaptureOrientation ?? value.deviceOrientation;
+    final isLandscape =
+        orientation == DeviceOrientation.landscapeLeft ||
+        orientation == DeviceOrientation.landscapeRight;
+    final previewAspect = isLandscape
+        ? value.aspectRatio
+        : 1 / value.aspectRatio;
+    final preview = size.width / size.height > previewAspect
+        ? Size(size.width, size.width / previewAspect)
+        : Size(size.height * previewAspect, size.height);
+    final point = Offset(
+      ((tap.dx - (size.width - preview.width) / 2) / preview.width).clamp(0, 1),
+      ((tap.dy - (size.height - preview.height) / 2) / preview.height).clamp(
+        0,
+        1,
+      ),
+    );
+
+    if (value.focusPointSupported) {
+      unawaited(controller.setFocusPoint(point).catchError((_) {}));
     }
+    if (value.exposurePointSupported) {
+      unawaited(controller.setExposurePoint(point).catchError((_) {}));
+    }
+    setState(() => _focusIndicator = tap);
   }
 
   void _onCameraControllerCreated(
