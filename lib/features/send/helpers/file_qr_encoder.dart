@@ -327,7 +327,7 @@ class FileQrEncoder {
     ImageCompressionSettings settings,
   ) async {
     try {
-      return await FlutterImageCompress.compressWithList(
+      final compressed = await FlutterImageCompress.compressWithList(
         bytes,
         minHeight: settings.minSize,
         minWidth: settings.minSize,
@@ -335,6 +335,11 @@ class FileQrEncoder {
         format: settings.outputFormat.toCompressFormat(),
         keepExif: true,
       );
+      if (compressed.length >= bytes.length) {
+        debugPrint('Compressed image is not smaller. Sending original');
+        return null;
+      }
+      return compressed;
     } catch (e) {
       debugPrint('Image compression failed. Reverting to file compression');
       return null;
