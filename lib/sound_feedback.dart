@@ -65,7 +65,7 @@ class SoundFeedbackService {
 
     _completionSource = await _soloud.loadMem(
       'bqr_complete',
-      _buildSequentialWav(880.0, 1320.0, durationMsEach: 250),
+      _buildCompletionWav(),
     );
 
     _qrSource = await _soloud.loadMem(
@@ -116,57 +116,41 @@ class SoundFeedbackService {
   // WAV generation
   // ---------------------------------------------------------------------------
 
-  /// Generates a WAV containing [freq1] for [durationMsEach] ms followed
-  /// immediately by [freq2] for the same duration — the two-tone completion
-  /// signal used for acoustic acknowledgement detection.
-  static Uint8List _buildSequentialWav(
-    double freq1,
-    double freq2, {
-    required int durationMsEach,
-  }) {
-    final samplesPerTone = (_sampleRate * durationMsEach / 1000).round();
-    final totalSamples = samplesPerTone * 2;
+  /// The completion signal for acoustic acknowledgement: C6, E6, G6 at
+  /// 200 ms each, chime-like. Each note has a strong octave overtone, which is
+  /// what [AcousticAckListener] detects.
+  static Uint8List _buildCompletionWav() {
+    const notes = [1046.5, 1318.5, 1568.0];
+    const noteMs = 200;
+    const amplitude = 0.22; // per partial
+    final samplesPerNote = _sampleRate * noteMs ~/ 1000;
+    final attack = (_sampleRate * 0.008).round();
+    final release = (_sampleRate * 0.030).round();
+    final totalSamples = samplesPerNote * notes.length;
+
     final dataBytes = totalSamples * 2;
     final bytes = ByteData(44 + dataBytes);
-    _writeAscii(bytes, 0, 'RIFF');
-    bytes.setUint32(4, 36 + dataBytes, Endian.little);
-    _writeAscii(bytes, 8, 'WAVE');
-    _writeAscii(bytes, 12, 'fmt ');
-    bytes.setUint32(16, 16, Endian.little);
-    bytes.setUint16(20, 1, Endian.little);
-    bytes.setUint16(22, 1, Endian.little);
-    bytes.setUint32(24, _sampleRate, Endian.little);
-    bytes.setUint32(28, _sampleRate * 2, Endian.little);
-    bytes.setUint16(32, 2, Endian.little);
-    bytes.setUint16(34, 16, Endian.little);
-    _writeAscii(bytes, 36, 'data');
-    bytes.setUint32(40, dataBytes, Endian.little);
-    const amplitude = 32767 * 0.35; // pure sine needs no normalisation divisor
-    final rampSamples = (_sampleRate * 0.030).round(); // 30 ms half-Hann ramp
-    for (var pass = 0; pass < 2; pass++) {
-      final freq = pass == 0 ? freq1 : freq2;
-      final offset = pass * samplesPerTone;
-      for (var i = 0; i < samplesPerTone; i++) {
-        // Smooth attack/release with a half-Hann window; flat sustain in between.
-        // Eliminates the click/pop artefacts of a linear ramp.
-        final double envelope;
-        if (i < rampSamples) {
-          envelope = 0.5 * (1 - math.cos(math.pi * i / rampSamples));
-        } else if (i > samplesPerTone - rampSamples) {
-          envelope =
-              0.5 *
-              (1 - math.cos(math.pi * (samplesPerTone - i) / rampSamples));
-        } else {
-          envelope = 1.0;
+    _writeHeader(bytes, dataBytes);
+    for (var n = 0; n < notes.length; n++) {
+      for (var i = 0; i < samplesPerNote; i++) {
+        var envelope = math.exp(-i / (_sampleRate * 0.25));
+        if (i < attack) {
+          envelope *= 0.5 * (1 - math.cos(math.pi * i / attack));
+        } else if (i > samplesPerNote - release) {
+          envelope *=
+              0.5 * (1 - math.cos(math.pi * (samplesPerNote - i) / release));
         }
-        // Pure sine — concentrates all energy at the target frequency,
-        // which improves Goertzel detection power and removes harshness.
-        final t = 2 * math.pi * freq * i / _sampleRate;
-        final sample = (amplitude * envelope * math.sin(t)).round().clamp(
+        final t = 2 * math.pi * notes[n] * i / _sampleRate;
+        final wave = math.sin(t) + math.sin(2 * t);
+        final sample = (32767 * amplitude * envelope * wave).round().clamp(
           -32768,
           32767,
         );
-        bytes.setInt16(44 + (offset + i) * 2, sample, Endian.little);
+        bytes.setInt16(
+          44 + (n * samplesPerNote + i) * 2,
+          sample,
+          Endian.little,
+        );
       }
     }
     return bytes.buffer.asUint8List();
@@ -176,6 +160,27 @@ class SoundFeedbackService {
     final sampleCount = (_sampleRate * durationMs / 1000).round();
     final dataBytes = sampleCount * 2;
     final bytes = ByteData(44 + dataBytes);
+    _writeHeader(bytes, dataBytes);
+    // Additive synthesis: fundamental + 2nd harmonic (0.3×) + 3rd harmonic (0.1×).
+    // Lighter overtones = softer, flute-like tone with less buzz.
+    // Sum normalised to ±1 so peak amplitude is unchanged.
+    const amplitude = 32767 * 0.30;
+    const norm = 1.0 + 0.3 + 0.1; // = 1.4
+    for (var i = 0; i < sampleCount; i++) {
+      // Longer fade (300 samples ≈ 13ms) for smoother attack and release.
+      final envelope = i < 300
+          ? i / 300.0
+          : (i > sampleCount - 300 ? (sampleCount - i) / 300.0 : 1.0);
+      final t = 2 * math.pi * frequency * i / _sampleRate;
+      final wave =
+          (math.sin(t) + 0.3 * math.sin(2 * t) + 0.1 * math.sin(3 * t)) / norm;
+      final sample = (amplitude * envelope * wave).round().clamp(-32768, 32767);
+      bytes.setInt16(44 + i * 2, sample, Endian.little);
+    }
+    return bytes.buffer.asUint8List();
+  }
+
+  static void _writeHeader(ByteData bytes, int dataBytes) {
     _writeAscii(bytes, 0, 'RIFF');
     bytes.setUint32(4, 36 + dataBytes, Endian.little);
     _writeAscii(bytes, 8, 'WAVE');
@@ -189,24 +194,6 @@ class SoundFeedbackService {
     bytes.setUint16(34, 16, Endian.little);
     _writeAscii(bytes, 36, 'data');
     bytes.setUint32(40, dataBytes, Endian.little);
-    // Additive synthesis: fundamental + 2nd harmonic (0.3×) + 3rd harmonic (0.1×).
-    // Lighter overtones = softer, flute-like tone with less buzz.
-    // Sum normalised to ±1 so peak amplitude is unchanged.
-    const amplitude = 32767 * 0.30;
-    const norm = 1.0 + 0.3 + 0.1; // = 1.4
-    for (var i = 0; i < sampleCount; i++) {
-      // Longer fade (300 samples ≈ 13ms) for smoother attack and release.
-      final envelope =
-          i < 300
-              ? i / 300.0
-              : (i > sampleCount - 300 ? (sampleCount - i) / 300.0 : 1.0);
-      final t = 2 * math.pi * frequency * i / _sampleRate;
-      final wave =
-          (math.sin(t) + 0.3 * math.sin(2 * t) + 0.1 * math.sin(3 * t)) / norm;
-      final sample = (amplitude * envelope * wave).round().clamp(-32768, 32767);
-      bytes.setInt16(44 + i * 2, sample, Endian.little);
-    }
-    return bytes.buffer.asUint8List();
   }
 
   static void _writeAscii(ByteData data, int offset, String s) {

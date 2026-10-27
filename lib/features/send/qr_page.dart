@@ -229,7 +229,7 @@ class _QrPageState extends State<QrPage> {
                           CircleButton(
                             size: 64,
                             icon: const HugeIcon(
-                              icon: HugeIcons.strokeRoundedLayoutGrid,
+                              icon: HugeIcons.strokeRoundedArrowExpand,
                             ),
                             backgroundColor: colors.tertiaryContainer,
                             onPressed: _onToggleFullscreen,

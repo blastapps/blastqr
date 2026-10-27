@@ -244,16 +244,12 @@ cuts it to 200 bytes. If nothing is left, the name is `file`.
 ## Completion tone
 
 Sound is the only way back from the receiver to the sender. Once all the data
-has arrived, the receiver can play 880 Hz for 250 ms followed by 1320 Hz for
-250 ms. It plays before the file is saved and before any password is asked, so
-it means "you can stop showing codes", not "the file is saved".
+has arrived, the receiver can play C6, E6, G6 (200 ms each), each with an
+equally loud octave overtone. It indicates to the sender that they can stop showing codes.
 
-The sender can listen with its microphone (16 kHz, 100 ms Goertzel windows). It
-waits for 880 Hz, then for 1320 Hz within 700 ms after the 880 Hz tone has
-stopped. Waiting for the gap avoids false alarms from the receiver's shorter
-per-packet sounds, which can contain both frequencies at once.
-
-The tone is optional on both sides.
+The sender listens for the overtones C7, E7, G7 in order. A note counts when
+it stands 10× above the frequencies around it, so broadband noise doesn't
+trigger it. The sender doesn't listen for C6, E6, G6 themselves, because the per-packet beeps also produce sound at those pitches.
 
 ## Extending the protocol
 

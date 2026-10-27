@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class AcousticSuccessOverlay extends StatefulWidget {
-  static const countdownDuration = Duration(seconds: 3);
+  static const countdownDuration = Duration(seconds: 6);
 
   const AcousticSuccessOverlay({
     super.key,
