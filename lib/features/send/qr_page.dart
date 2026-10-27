@@ -195,7 +195,9 @@ class _QrPageState extends State<QrPage> {
                 ),
               ),
             ),
-            if (!_fullscreenMode)
+            if (!_fullscreenMode &&
+                !_completionDetected &&
+                _largeFileAcknowledged) ...[
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -273,6 +275,9 @@ class _QrPageState extends State<QrPage> {
                   ),
                 ),
               ),
+            ] else if (!_fullscreenMode) ...[
+              const Spacer(),
+            ],
 
             if (!_fullscreenMode)
               Padding(
