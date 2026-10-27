@@ -110,6 +110,8 @@ class _FilesPageState extends State<FilesPage> {
         types.add(_FilterType.audio);
       } else if (f.type.isDocument) {
         types.add(_FilterType.document);
+      } else if (f.type.isEbook) {
+        types.add(_FilterType.book);
       } else {
         types.add(_FilterType.other);
       }
@@ -132,12 +134,13 @@ class _FilesPageState extends State<FilesPage> {
         case _FilterType.document:
           return f.type.isDocument;
         case _FilterType.book:
-          return f.type.isDocument;
+          return f.type.isEbook;
         case _FilterType.other:
           return !f.type.isImage &&
               !f.type.isVideo &&
               !f.type.isAudio &&
-              !f.type.isDocument;
+              !f.type.isDocument &&
+              !f.type.isEbook;
       }
     }).toList();
   }
@@ -209,6 +212,7 @@ class _FilesPageState extends State<FilesPage> {
       _FilterType.video,
       _FilterType.audio,
       _FilterType.document,
+      _FilterType.book,
       _FilterType.other,
     ];
     final available = _availableFilters;
