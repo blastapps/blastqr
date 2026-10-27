@@ -162,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- blastQR file transfers work completely offline.\n\n- The transferred information is NOT encrypted and can be read by anyone who gains access to the QR code sequence. Avoid using blastQR for transmitting any sensitive information.\n\n- Due to the nature of the technology blastQR file transfers are slow (peaking at around 110kB/s). I recommend transferring small files or compressing them in advance.\n\n- For higher speeds play with the \'Chunk length\' setting in the Settings screen of the sending device. A higher value can result in higher speeds.\n\n- You can also use blastQR to scan regular QR codes.\n\n- blastQR is an open source project. You can find the source code at:';
+      '- blastQR file transfers work completely offline.\n\n- The transferred information is NOT encrypted and can be read by anyone who gains access to the QR code sequence unless using the \'Send password-encrypted\' feature. Avoid using blastQR for transmitting any sensitive information without enabling encryption first and always use strong passwords.\n\n- Due to the nature of the technology blastQR file transfers are slow (peaking at around 110kB/s). I recommend transferring small files or compressing them in advance.\n\n- You can also use blastQR to scan regular QR codes.\n\n- blastQR is an open source project. You can find the source code at:';
 
   @override
   String get settings => 'Settings';
@@ -208,6 +208,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get licenses => 'Licenses';
+
+  @override
+  String get source_code => 'Source code';
+
+  @override
+  String get share_app => 'Share blastQR';
 
   @override
   String get file_format => 'File format';

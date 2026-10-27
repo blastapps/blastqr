@@ -31,7 +31,7 @@ dependencies:
   share_handler: ^0.0.25
   qr: ^3.0.2
   super_drag_and_drop: ^0.9.1
-  flutter_image_compress: ^2.4.0
+  flutter_image_compress: ^2.5.1
   path: ^1.9.1
   archive: ^4.0.9
   camera: ^0.11.4
@@ -45,6 +45,8 @@ dependencies:
     path: ../raptorq_flutter
   blastqr_crypto:
     path: ../blastqr_crypto
+  share_plus: ^12.0.2
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:

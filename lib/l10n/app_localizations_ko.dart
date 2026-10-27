@@ -159,7 +159,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- blastQR 파일 전송은 완전히 오프라인에서 작동합니다.\n\n- 전송된 정보는 암호화되어 있지 않으며, 애니메이션 QR 코드 시퀀스에 접근할 수 있는 누구나 읽을 수 있습니다. 이 앱을 사용하여 민감한 정보를 전송하지 마세요.\n\n- 기술적인 한계로 인해 blastQR 파일 전송 속도는 느리며 (최대 약 110kB/s) 작은 파일 전송을 권장합니다. 또는 사전에 압축하여 전송하세요.\n\n- 더 높은 전송 속도를 원한다면, 전송 기기의 설정 화면에서 \'QR 코드 크기\' 값을 조정할 수 있습니다. 값이 높을수록 속도가 증가할 수 있지만, 모든 기기가 이를 지원하는 것은 아닙니다.\n\n- blastQR을 사용하여 일반적인 QR 코드도 스캔할 수 있습니다.\n\n- blastQR은 오픈 소스 프로젝트입니다. 소스 코드는 다음에서 확인할 수 있습니다:';
+      '- blastQR 파일 전송은 완전히 오프라인에서 작동합니다.\n\n- 전송된 정보는 \'비밀번호로 암호화해서 보내기\' 기능을 사용하지 않는 한 암호화되지 않으며, QR 코드 시퀀스에 접근할 수 있는 누구나 읽을 수 있습니다. 먼저 암호화를 활성화하지 않은 상태에서는 민감한 정보를 전송하지 마시고, 항상 강력한 비밀번호를 사용하세요.\n\n- 기술적인 한계로 인해 blastQR 파일 전송 속도는 느리며 (최대 약 110kB/s) 작은 파일 전송을 권장합니다. 또는 사전에 압축하여 전송하세요.\n\n- blastQR을 사용하여 일반적인 QR 코드도 스캔할 수 있습니다.\n\n- blastQR은 오픈 소스 프로젝트입니다. 소스 코드는 다음에서 확인할 수 있습니다:';
 
   @override
   String get settings => '설정';
@@ -205,6 +205,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get licenses => '라이선스';
+
+  @override
+  String get source_code => '소스 코드';
+
+  @override
+  String get share_app => 'blastQR 공유하기';
 
   @override
   String get file_format => '파일 형식';

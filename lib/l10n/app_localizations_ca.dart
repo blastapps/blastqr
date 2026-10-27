@@ -162,7 +162,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- Les transferències de fitxers de blastQR funcionen completament sense connexió a internet.\n\n- La informació transferida NO està encriptada i pot ser llegida per qualsevol que tingui accés a la seqüència de codis QR. Eviteu utilitzar blastQR per transmetre informació sensible.\n\n- A causa de la tecnologia utilitzada, les transferències de fitxers amb blastQR són lentes (amb un màxim d\'uns 110kB/s). Es recomana enviar fitxers petits o comprimir-los abans.\n\n- Per a velocitats més altes, pots modificar el valor de \'Mida codi QR\' a la pantalla de configuració del dispositiu emissor. Pots augmentar la velocitat assignant valors més alts.\n\n- També pots utilitzar blastQR per escanejar codis QR normals.\n\n- blastQR és un projecte de codi obert. Pots trobar el codi font a:';
+      '- Les transferències de fitxers de blastQR funcionen completament sense connexió a internet.\n\n- La informació transferida NO està encriptada i pot ser llegida per qualsevol que tingui accés a la seqüència de codis QR, tret que s\'utilitzi la funció \'Enviar xifrat amb contrasenya\'. Eviteu utilitzar blastQR per transmetre informació sensible sense activar abans el xifratge i utilitzeu sempre contrasenyes segures.\n\n- A causa de la tecnologia utilitzada, les transferències de fitxers amb blastQR són lentes (amb un màxim d\'uns 110kB/s). Es recomana enviar fitxers petits o comprimir-los abans.\n\n- També pots utilitzar blastQR per escanejar codis QR normals.\n\n- blastQR és un projecte de codi obert. Pots trobar el codi font a:';
 
   @override
   String get settings => 'Configuració';
@@ -208,6 +208,12 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get licenses => 'Llicències';
+
+  @override
+  String get source_code => 'Codi font';
+
+  @override
+  String get share_app => 'Compartir blastQR';
 
   @override
   String get file_format => 'Format de fitxer';
@@ -349,7 +355,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get camera_resolution_hint =>
-      'La majoria de dispositius funcionarà millor amb aquest ajust en \"High\"';
+      '\"High\" és el valor recomanat per al millor rendiment a la majoria de dispositius';
 
   @override
   String get error => 'Error';

@@ -1,5 +1,6 @@
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/help/help_page.dart';
 import 'package:blast_qr/features/settings/appearance_page.dart';
 import 'package:blast_qr/features/settings/receiving_settings_page.dart';
 import 'package:blast_qr/features/settings/send_settings_page.dart';
@@ -11,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -116,6 +119,36 @@ class _SettingsPageState extends State<SettingsPage> {
           title: context.l10n.receiving_settings,
           page: const ReceivingSettingsPage(),
         ),
+        Builder(
+          builder: (tileContext) => ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            leading: HugeIcon(
+              icon: HugeIcons.strokeRoundedShare08,
+              color: context.color.onSurface,
+            ),
+            title: Text(context.l10n.share_app),
+            onTap: () {
+              final box = tileContext.findRenderObject() as RenderBox?;
+              SharePlus.instance.share(
+                ShareParams(
+                  text: HelpPage.projectUrl,
+                  sharePositionOrigin: box == null
+                      ? null
+                      : box.localToGlobal(Offset.zero) & box.size,
+                ),
+              );
+            },
+          ),
+        ),
+        _detailTile(
+          context,
+          index: 3,
+          icon: HugeIcons.strokeRoundedHelpCircle,
+          title: context.l10n.help,
+          page: const HelpPage(),
+        ),
         const SizedBox(height: 16),
       ],
     );
@@ -129,21 +162,40 @@ class _SettingsPageState extends State<SettingsPage> {
         spacing: 4,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              showLicensePage(
-                applicationName: '',
-                applicationIcon: const LogoWidget(),
-                context: context,
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-              child: Text(
-                context.l10n.licenses,
-                style: TextStyle(color: context.color.primary),
+          Row(
+            spacing: 8,
+            children: [
+              GestureDetector(
+                onTap: () => launchUrl(
+                  Uri.parse(HelpPage.projectUrl),
+                  mode: LaunchMode.externalApplication,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                  child: Text(
+                    context.l10n.source_code,
+                    style: TextStyle(color: context.color.primary),
+                  ),
+                ),
               ),
-            ),
+              const Text('·'),
+              GestureDetector(
+                onTap: () {
+                  showLicensePage(
+                    applicationName: '',
+                    applicationIcon: const LogoWidget(),
+                    context: context,
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                  child: Text(
+                    context.l10n.licenses,
+                    style: TextStyle(color: context.color.primary),
+                  ),
+                ),
+              ),
+            ],
           ),
           FutureBuilder(
             future: PackageInfo.fromPlatform(),
