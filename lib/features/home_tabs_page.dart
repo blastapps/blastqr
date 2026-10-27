@@ -16,6 +16,7 @@ import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:blast_qr/widgets/qr_twinkle_background.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_handler/share_handler.dart';
 
@@ -46,19 +47,39 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
 
     handler.sharedMediaStream.listen((SharedMedia media) {
       if (!mounted) return;
-      final path = media.attachments?.first?.path;
-      if (path != null) {
-        _showQrPage(File(path));
-      }
+      _handleSharedMedia(media);
     });
     if (!mounted) return;
 
-    final path = media?.attachments?.first?.path;
-    if (path != null) {
-      _showQrPage(File(path));
-    }
+    if (media != null) _handleSharedMedia(media!);
 
     handler.resetInitialSharedMedia();
+  }
+
+  Future<void> _handleSharedMedia(SharedMedia media) async {
+    final files = [
+      for (final attachment in media.attachments ?? <SharedAttachment?>[])
+        if (attachment != null) File(attachment.path),
+    ];
+    final text = media.content;
+    if (text != null && text.isNotEmpty) {
+      files.add(await _writeSharedText(text));
+    }
+    if (files.isNotEmpty) _showQrPage(files);
+  }
+
+  Future<File> _writeSharedText(String text) async {
+    final dir = Directory(
+      '${(await getTemporaryDirectory()).path}/shared_text',
+    );
+    await dir.create(recursive: true);
+    final firstLine = text.trim().split('\n').first;
+    var name = firstLine.replaceAll(RegExp(r'[^\w\- ]'), '').trim();
+    if (name.length > 40) name = name.substring(0, 40).trim();
+    if (name.isEmpty) name = 'text';
+    final file = File('${dir.path}/$name.txt');
+    await file.writeAsString(text);
+    return file;
   }
 
   @override
@@ -118,61 +139,59 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
           extendBodyBehindAppBar: true,
           extendBody: true,
           backgroundColor: Colors.transparent,
-          bottomNavigationBar:
-              canScanWithCamera
-                  ? Consumer2<FileBadgeCount, NavBarVisibility>(
-                    builder: (context, count, navBar, child) {
-                      return AnimatedSlide(
-                        offset:
-                            navBar.visible ? Offset.zero : const Offset(0, 1),
+          bottomNavigationBar: canScanWithCamera
+              ? Consumer2<FileBadgeCount, NavBarVisibility>(
+                  builder: (context, count, navBar, child) {
+                    return AnimatedSlide(
+                      offset: navBar.visible ? Offset.zero : const Offset(0, 1),
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: AnimatedOpacity(
+                        opacity: navBar.visible ? 1.0 : 0.0,
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        child: AnimatedOpacity(
-                          opacity: navBar.visible ? 1.0 : 0.0,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: SafeArea(
-                            child: Container(
-                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                              child: NavigationTabs(
-                                onTap: (index) {
-                                  setState(() {
-                                    _currentTab = index;
-                                  });
-                                },
-                                currentIndex: _currentTab,
-                                items: [
-                                  BottomNavigationBarItem(
-                                    icon: const HugeIcon(
-                                      icon: HugeIcons.strokeRoundedSent02,
-                                    ),
-                                    label: context.l10n.send,
+                        child: SafeArea(
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                            child: NavigationTabs(
+                              onTap: (index) {
+                                setState(() {
+                                  _currentTab = index;
+                                });
+                              },
+                              currentIndex: _currentTab,
+                              items: [
+                                BottomNavigationBarItem(
+                                  icon: const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedSent02,
                                   ),
-                                  BottomNavigationBarItem(
-                                    icon: const HugeIcon(
-                                      icon: HugeIcons.strokeRoundedQrCode,
-                                    ),
-                                    label: context.l10n.receive,
+                                  label: context.l10n.send,
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: const HugeIcon(
+                                    icon: HugeIcons.strokeRoundedQrCode,
                                   ),
-                                  BottomNavigationBarItem(
-                                    icon: Badge(
-                                      label: Text('${count.value ?? ''}'),
-                                      isLabelVisible: count.value != null,
-                                      child: const HugeIcon(
-                                        icon: HugeIcons.strokeRoundedFolder01,
-                                      ),
+                                  label: context.l10n.receive,
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Badge(
+                                    label: Text('${count.value ?? ''}'),
+                                    isLabelVisible: count.value != null,
+                                    child: const HugeIcon(
+                                      icon: HugeIcons.strokeRoundedFolder01,
                                     ),
-                                    label: context.l10n.my_files,
                                   ),
-                                ],
-                              ),
+                                  label: context.l10n.my_files,
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      );
-                    },
-                  )
-                  : null,
+                      ),
+                    );
+                  },
+                )
+              : null,
           body: Stack(
             children: [
               Offstage(offstage: _currentTab != 0, child: const SendPage()),
@@ -185,12 +204,12 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     );
   }
 
-  void _showQrPage(File file) async {
+  void _showQrPage(List<File> files) async {
     Navigator.of(context).popUntil((r) => r.isFirst); // Go back to main screen
-    final fileWrapper = await file.toFileWrapper();
+    final fileWrappers = [for (final f in files) await f.toFileWrapper()];
     if (!mounted) return;
-    final options = await chooseSendOptions(context, [fileWrapper]);
+    final options = await chooseSendOptions(context, fileWrappers);
     if (options == null || !mounted) return;
-    await sendFiles(context, [fileWrapper], options);
+    await sendFiles(context, fileWrappers, options);
   }
 }
