@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/widgets/file_type_icon_widget.dart';
+import 'package:blast_qr/widgets/heif_thumbnail_image.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
@@ -41,13 +42,25 @@ extension FileWrapperThumbnailExtension on FileWrapper {
         alignment: Alignment.center,
         children: [
           Icon(Icons.image, size: size / 2),
-          Image.file(
-            file,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            cacheWidth: (size * pixelRatio).toInt(),
-          ),
+          if (type.isHeifImage)
+            Image(
+              image: HeifThumbnailImage(
+                file,
+                size: (size * pixelRatio).toInt(),
+                modified: modified,
+              ),
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+            )
+          else
+            Image.file(
+              file,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              cacheWidth: (size * pixelRatio).toInt(),
+            ),
         ],
       );
     }

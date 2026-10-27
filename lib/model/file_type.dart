@@ -12,6 +12,7 @@ class FileType {
   final bool isUnknown;
   final bool isAvifImage;
   final bool isWebpImage;
+  final bool isHeifImage;
   final bool isEbook;
 
   FileType({required this.extension, required this.mimeType})
@@ -19,6 +20,10 @@ class FileType {
       isUnknown = mimeType == null,
       isAvifImage = mimeType == 'image/avif' || extension == 'avif',
       isWebpImage = mimeType == 'image/webp' || extension == 'webp',
+      isHeifImage =
+          mimeType?.startsWith('image/hei') == true ||
+          extension == 'heic' ||
+          extension == 'heif',
       isDocument = documentExtensions.contains(extension),
       isAudio = mimeType?.startsWith('audio') == true,
       isVideo = mimeType?.startsWith('video') == true,
