@@ -124,11 +124,7 @@ class RaptorQrStreamingWidget extends StatefulWidget {
 
 class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
     with SingleTickerProviderStateMixin {
-  static const List<int> _hardcodedFpses = [15, 16, 20, 22, 25, 30];
-
   late int _fps;
-  late int _fpsIndex;
-  late List<int> _fpsList;
   late final Ticker _ticker = createTicker(widget.controller.tick);
 
   QrFrameSource? _source;
@@ -156,21 +152,10 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   /// Number of cells in the last layout (1 when not in fill mode).
   int _cellCount = 1;
 
-  List<int> _buildFpsList(int settingsFps) {
-    final list = [..._hardcodedFpses];
-    if (!list.contains(settingsFps)) {
-      list.add(settingsFps);
-      list.sort();
-    }
-    return list;
-  }
-
   @override
   void initState() {
     super.initState();
-    _fpsList = _buildFpsList(widget.fps);
     _fps = widget.fps;
-    _fpsIndex = _fpsList.indexOf(_fps);
     widget.controller.addListener(_onControllerTick);
     init();
   }
@@ -185,9 +170,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       init();
     }
     if (oldWidget.fps != widget.fps) {
-      _fpsList = _buildFpsList(widget.fps);
       _fps = widget.fps;
-      _fpsIndex = _fpsList.indexOf(_fps);
       _applyFps();
     }
     super.didUpdateWidget(oldWidget);
@@ -372,10 +355,9 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
               itemBuilder: (gridIndex, totalCount, w, h) {
                 // Read by the next tick; cells are filled from there.
                 _cellCount = totalCount;
-                final img =
-                    gridIndex < _cellImages.length
-                        ? _cellImages[gridIndex]
-                        : null;
+                final img = gridIndex < _cellImages.length
+                    ? _cellImages[gridIndex]
+                    : null;
                 return Container(
                   padding: const EdgeInsets.all(8),
                   height: w,
@@ -420,12 +402,9 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
                         fontFeatures: [FontFeature.tabularFigures()],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _cycleNextFps,
-                      child: Text(
-                        '${_fps}FPS',
-                        style: const TextStyle(color: Colors.black),
-                      ),
+                    Text(
+                      '${_fps}FPS',
+                      style: const TextStyle(color: Colors.black),
                     ),
                   ],
                 ),
@@ -435,14 +414,6 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
         },
       ),
     );
-  }
-
-  void _cycleNextFps() {
-    _fpsIndex = (_fpsIndex + 1) % _fpsList.length;
-    setState(() {
-      _fps = _fpsList[_fpsIndex];
-    });
-    _applyFps();
   }
 }
 

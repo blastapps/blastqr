@@ -91,6 +91,8 @@
   "camera_resolution": "Resolución de la cámara",
   "send_file": "Enviar Archivos",
   "send_picture": "Enviar imágenes",
+  "send_file_subtitle": "Cualquier tipo de archivo",
+  "send_picture_subtitle": "De tu galería de fotos",
   "desktop_receive_unsupported": "* La recepción de archivos aún no es compatible en Windows",
   "recent": "Recientes",
   "send_selected": "Enviar seleccionados",

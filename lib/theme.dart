@@ -64,7 +64,7 @@ ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
       shadowColor: Colors.transparent,
       foregroundColor: Colors.white,
       backgroundColor: colorScheme.primary,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
   );
 }
@@ -83,7 +83,7 @@ OutlinedButtonThemeData outlinedButtonTheme(ColorScheme colorScheme) {
       backgroundColor: colorScheme.surface,
       shadowColor: Colors.transparent,
       foregroundColor: colorScheme.onSurface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
   );
 }
@@ -104,7 +104,7 @@ AppBarTheme appBarTheme(ColorScheme colorScheme) {
 
 TextButtonThemeData textButtonTheme = TextButtonThemeData(
   style: TextButton.styleFrom(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   ),
 );
 
@@ -139,7 +139,7 @@ ListTileThemeData listTileTheme(ColorScheme colorScheme) {
 
 InputDecorationTheme textFieldTheme(ColorScheme colorScheme) {
   return InputDecorationTheme(
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     prefixIconColor: colorScheme.onSurface,
   );
 }

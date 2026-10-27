@@ -288,6 +288,12 @@ class AppLocalizationsCa extends AppLocalizations {
   String get send_picture => 'Envia imatges';
 
   @override
+  String get send_file_subtitle => 'Qualsevol tipus de fitxer';
+
+  @override
+  String get send_picture_subtitle => 'De la teva galeria de fotos';
+
+  @override
   String get desktop_receive_unsupported =>
       '* La recepció de fitxers encara no és compatible a Windows';
 

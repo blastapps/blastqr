@@ -1,8 +1,8 @@
 import 'dart:ui' show ImageFilter;
 
-import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/file_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -32,7 +32,7 @@ class FileHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 16, 16),
+      padding: const EdgeInsets.all(12),
       child: Stack(
         alignment: Alignment.topRight,
         children: [
@@ -42,34 +42,33 @@ class FileHeaderWidget extends StatelessWidget {
             children: [
               bundledFiles.length > 1
                   ? Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      StackedThumbnail(
-                        files: bundledFiles,
-                        size: 72,
-                        blurred: encrypted,
-                      ),
-                      if (encrypted) const _LockBadge(),
-                    ],
-                  )
-                  : Container(
-                    width: 72,
-                    height: 72,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(60),
-                          spreadRadius: 0,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
+                      alignment: Alignment.center,
+                      children: [
+                        StackedThumbnail(
+                          files: bundledFiles,
+                          size: 56,
+                          blurred: encrypted,
                         ),
+                        if (encrypted) const _LockBadge(),
                       ],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child:
-                        encrypted
-                            ? Stack(
+                    )
+                  : Container(
+                      width: 56,
+                      height: 56,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(60),
+                            spreadRadius: 0,
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: encrypted
+                          ? Stack(
                               fit: StackFit.expand,
                               children: [
                                 ImageFiltered(
@@ -82,8 +81,8 @@ class FileHeaderWidget extends StatelessWidget {
                                 const Center(child: _LockBadge()),
                               ],
                             )
-                            : file.buildThumbnail(context, size: 72),
-                  ),
+                          : file.buildThumbnail(context, size: 72),
+                    ),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -94,8 +93,8 @@ class FileHeaderWidget extends StatelessWidget {
                       child: Text(
                         bundledFiles.length > 1
                             ? context.l10n.sending_files_count(
-                              bundledFiles.length,
-                            )
+                                bundledFiles.length,
+                              )
                             : name ?? file.name,
                         style: Theme.of(context).textTheme.titleMedium,
                         overflow: TextOverflow.ellipsis,
@@ -120,19 +119,15 @@ class FileHeaderWidget extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 12),
             ],
           ),
           SizedBox(
-            height: 36,
-            width: 36,
-            child: IconButton(
-              onPressed: onTapDismiss,
-              style: IconButton.styleFrom(
-                backgroundColor: context.color.primaryContainer,
-                foregroundColor: context.color.onSurface,
-              ),
-              padding: EdgeInsets.zero,
+            height: 48,
+            width: 48,
+            child: CircleButton(
               icon: const Icon(Icons.clear),
+              onPressed: onTapDismiss,
             ),
           ),
         ],

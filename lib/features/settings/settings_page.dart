@@ -21,7 +21,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final _rightPaneKey = GlobalKey<NavigatorState>();
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   static const _wideBreakpoint = 600.0;
 
@@ -40,9 +40,31 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Widget _detailTile(
+    BuildContext context, {
+    required int index,
+    required List<List<dynamic>> icon,
+    required String title,
+    required Widget page,
+  }) {
+    final wide = _isWide(context);
+    final selected = wide && _selectedIndex == index;
+    return ListTile(
+      selected: selected,
+      selectedTileColor: context.color.primaryContainer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      leading: HugeIcon(
+        icon: icon,
+        color: selected ? context.color.primary : context.color.onSurface,
+      ),
+      title: Text(title),
+      onTap: () => _openDetail(context, page, index),
+      trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
+    );
+  }
+
   Widget _buildSettingsList(BuildContext context) {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
-    final wide = _isWide(context);
     return ListView(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -51,36 +73,6 @@ class _SettingsPageState extends State<SettingsPage> {
         MediaQuery.of(context).padding.bottom,
       ),
       children: [
-        ListTile(
-          selected: wide && _selectedIndex == 0,
-          leading: HugeIcon(
-            icon: HugeIcons.strokeRoundedSent02,
-            color: context.color.onSurface,
-          ),
-          title: Text(context.l10n.sending_settings),
-          onTap: () => _openDetail(context, const SendSettingsPage(), 1),
-          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
-        ),
-        ListTile(
-          selected: wide && _selectedIndex == 1,
-          leading: HugeIcon(
-            icon: HugeIcons.strokeRoundedQrCode01,
-            color: context.color.onSurface,
-          ),
-          title: Text(context.l10n.receiving_settings),
-          onTap: () => _openDetail(context, const ReceivingSettingsPage(), 2),
-          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
-        ),
-        ListTile(
-          selected: wide && _selectedIndex == 2,
-          leading: HugeIcon(
-            icon: HugeIcons.strokeRoundedPaintBoard,
-            color: context.color.onSurface,
-          ),
-          title: Text(context.l10n.appearance),
-          onTap: () => _openDetail(context, const AppearancePage(), 0),
-          trailing: wide ? null : const Icon(Icons.chevron_right_rounded),
-        ),
         ListTile(
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedLanguageSkill,
@@ -102,6 +94,27 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             );
           },
+        ),
+        _detailTile(
+          context,
+          index: 0,
+          icon: HugeIcons.strokeRoundedPaintBoard,
+          title: context.l10n.appearance,
+          page: const AppearancePage(),
+        ),
+        _detailTile(
+          context,
+          index: 1,
+          icon: HugeIcons.strokeRoundedSent02,
+          title: context.l10n.sending_settings,
+          page: const SendSettingsPage(),
+        ),
+        _detailTile(
+          context,
+          index: 2,
+          icon: HugeIcons.strokeRoundedQrCode01,
+          title: context.l10n.receiving_settings,
+          page: const ReceivingSettingsPage(),
         ),
         const SizedBox(height: 16),
       ],
@@ -175,10 +188,8 @@ class _SettingsPageState extends State<SettingsPage> {
             Expanded(
               child: Navigator(
                 key: _rightPaneKey,
-                onGenerateRoute:
-                    (_) => MaterialPageRoute(
-                      builder: (_) => const SendSettingsPage(),
-                    ),
+                onGenerateRoute: (_) =>
+                    MaterialPageRoute(builder: (_) => const SendSettingsPage()),
               ),
             ),
           ],

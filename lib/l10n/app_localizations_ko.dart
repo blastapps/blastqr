@@ -282,6 +282,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_picture => '사진 보내기';
 
   @override
+  String get send_file_subtitle => '모든 파일 형식';
+
+  @override
+  String get send_picture_subtitle => '사진 보관함에서';
+
+  @override
   String get desktop_receive_unsupported => '* Windows에서는 아직 파일 수신이 지원되지 않습니다';
 
   @override

@@ -288,6 +288,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get send_picture => 'Enviar imágenes';
 
   @override
+  String get send_file_subtitle => 'Cualquier tipo de archivo';
+
+  @override
+  String get send_picture_subtitle => 'De tu galería de fotos';
+
+  @override
   String get desktop_receive_unsupported =>
       '* La recepción de archivos aún no es compatible en Windows';
 

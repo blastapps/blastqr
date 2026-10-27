@@ -93,13 +93,12 @@ class PickerSheet extends StatelessWidget {
             return ListTile(
               title: Text(item),
               leading: icons?.elementAtOrNull(index),
-              trailing:
-                  selectedItemIndex == index
-                      ? HugeIcon(
-                        icon: HugeIcons.strokeRoundedCheckmarkCircle02,
-                        color: context.color.primary,
-                      )
-                      : null,
+              trailing: selectedItemIndex == index
+                  ? HugeIcon(
+                      icon: HugeIcons.strokeRoundedCheckmarkCircle02,
+                      color: context.color.primary,
+                    )
+                  : null,
               onTap: () {
                 Navigator.of(context).pop();
                 onItemTap?.call(index);

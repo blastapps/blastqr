@@ -47,7 +47,7 @@ class NavigationTabs extends StatelessWidget {
                   height: 64,
                   width: tabWidth,
                   decoration: BoxDecoration(
-                    color: context.color.inverseSurface.withAlpha(15),
+                    color: context.color.primaryContainer,
                     borderRadius: BorderRadius.circular(32),
                   ),
                 ),

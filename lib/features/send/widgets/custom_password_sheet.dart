@@ -81,36 +81,35 @@ class _CustomPasswordSheetState extends State<_CustomPasswordSheet> {
           spacing: 4,
           children: [
             Expanded(
-              child:
-                  _editing
-                      ? BlastTextField(
-                        controller: _controller,
-                        hintText: context.l10n.password,
-                        autofocus: true,
-                        textAlign: TextAlign.center,
-                        style: passwordTextStyle(context, fontSize: 24),
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => _sendEncrypted(),
-                      )
-                      : Container(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: context.color.surfaceContainer,
-                          border: Border.all(color: context.color.outline),
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            _password,
-                            maxLines: 1,
-                            style: passwordTextStyle(context, fontSize: 28),
-                          ),
+              child: _editing
+                  ? BlastTextField(
+                      controller: _controller,
+                      hintText: context.l10n.password,
+                      autofocus: true,
+                      textAlign: TextAlign.center,
+                      style: passwordTextStyle(context, fontSize: 24),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _sendEncrypted(),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: context.color.surfaceContainer,
+                        border: Border.all(color: context.color.outline),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          _password,
+                          maxLines: 1,
+                          style: passwordTextStyle(context, fontSize: 28),
                         ),
                       ),
+                    ),
             ),
 
             if (!_editing)

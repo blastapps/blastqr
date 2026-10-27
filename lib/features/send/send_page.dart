@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:blast_qr/acoustic_ack_listener.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/help/help_page.dart';
 import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
@@ -14,6 +13,7 @@ import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
+import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +87,7 @@ class _SendPageState extends State<SendPage> {
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         actions: [
-          IconButton(
+          CircleButton(
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -97,149 +97,51 @@ class _SendPageState extends State<SendPage> {
                 ),
               );
             },
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedSettings01,
-              color: context.color.onSurface,
-            ),
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
           ),
         ],
       ),
       body: _dropRegion(
         child: Column(
           children: [
-            Expanded(
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
               child: Column(
+                spacing: 8,
                 children: [
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                    child: Row(
-                      spacing: 8,
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: _pickFileToEncode,
-                            // Ink rather than Container, so the tap ripple shows
-                            // over the solid fill.
-                            child: Ink(
-                              padding: const EdgeInsets.all(16),
-                              height: 180,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: context.color.outline,
-                                  width: 1,
-                                ),
-                                color: context.color.primaryContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 16,
-                                children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedFileAdd,
-                                    color: context.color.onSurface,
-                                    size: 56,
-                                  ),
-                                  Text(
-                                    context.l10n.send_file,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: _pickImageToEncode,
-                            // Ink rather than Container, so the tap ripple shows
-                            // over the solid fill.
-                            child: Ink(
-                              padding: const EdgeInsets.all(16),
-                              height: 180,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: context.color.outline,
-                                  width: 1,
-                                ),
-                                color: context.color.primaryContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 16,
-                                children: [
-                                  HugeIcon(
-                                    icon: HugeIcons.strokeRoundedImageAdd01,
-                                    color: context.color.onSurface,
-                                    size: 56,
-                                  ),
-                                  Text(
-                                    context.l10n.send_picture,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  _SendCard(
+                    icon: HugeIcons.strokeRoundedFileAdd,
+                    title: context.l10n.send_file,
+                    subtitle: context.l10n.send_file_subtitle,
+                    onTap: _pickFileToEncode,
                   ),
-                  // Recents sit in the lower half so the send buttons stay
-                  // centered whether or not they are shown.
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Column(
-                        spacing: 16,
-                        children: [
-                          _RecentFilesRow(
-                            entries: _recentFiles,
-                            onFileTap: _showQrPage,
-                            onSendSelected: _showQrPages,
-                          ),
-                          if (!canScanWithCamera)
-                            Text(context.l10n.desktop_receive_unsupported),
-                        ],
-                      ),
-                    ),
+                  _SendCard(
+                    icon: HugeIcons.strokeRoundedImageAdd01,
+                    title: context.l10n.send_picture,
+                    subtitle: context.l10n.send_picture_subtitle,
+                    flipIcon: true,
+                    onTap: _pickImageToEncode,
                   ),
                 ],
               ),
             ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: OutlinedButton(
-                  onPressed: _onTapHelp,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 48),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 8,
-                    children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedHelpCircle,
-                        color: context.color.onSurface,
-                      ),
-                      Text(context.l10n.help),
-                    ],
-                  ),
+            // Recents sit in the lower half so the send buttons stay
+            // centered whether or not they are shown.
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 16),
+                child: Column(
+                  spacing: 16,
+                  children: [
+                    _RecentFilesRow(
+                      entries: _recentFiles,
+                      onFileTap: _showQrPage,
+                      onSendSelected: _showQrPages,
+                    ),
+                    if (!canScanWithCamera)
+                      Text(context.l10n.desktop_receive_unsupported),
+                  ],
                 ),
               ),
             ),
@@ -338,14 +240,94 @@ class _SendPageState extends State<SendPage> {
       },
     );
   }
+}
 
-  void _onTapHelp() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) {
-          return const HelpPage();
-        },
+Color _cardFill(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? context.color.primaryContainer
+    : context.color.surface;
+
+class _SendCard extends StatelessWidget {
+  const _SendCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.flipIcon,
+  });
+
+  final List<List<dynamic>> icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool? flipIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(4);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      borderRadius: radius,
+      onTap: onTap,
+      // Ink rather than Container, so the tap ripple shows over the fill.
+      child: Ink(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: context.color.outline),
+          color: _cardFill(context),
+          borderRadius: radius,
+        ),
+        child: Row(
+          spacing: 14,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: context.color.primary.withValues(
+                  alpha: isDark ? 0.25 : 0.1,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Transform.flip(
+                flipX: flipIcon == true,
+                child: HugeIcon(
+                  icon: icon,
+                  color: context.color.primary,
+                  size: 26,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'Jersey25',
+                      fontSize: 22,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: context.color.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedArrowRight01,
+              color: context.color.onSurfaceVariant,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -483,19 +465,19 @@ class _RecentFileChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(4),
       onTap: onTap,
       onLongPress: onLongPress,
       child: Container(
         width: 140,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
+          color: _cardFill(context),
           border: Border.all(
             color: selected ? context.color.primary : context.color.outline,
             width: selected ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(4),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,

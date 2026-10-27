@@ -66,10 +66,9 @@ class _SendSheetState extends State<_SendSheet> {
   }
 
   void _close(SendOptions options, {bool customPassword = false}) {
-    Navigator.of(context).pop<_SendSheetResult>((
-      options: options,
-      customPassword: customPassword,
-    ));
+    Navigator.of(
+      context,
+    ).pop<_SendSheetResult>((options: options, customPassword: customPassword));
   }
 
   @override
@@ -98,8 +97,9 @@ class _SendSheetState extends State<_SendSheet> {
                 final dotIndex = _nameController.text.lastIndexOf('.');
                 _nameController.selection = TextSelection(
                   baseOffset: 0,
-                  extentOffset:
-                      dotIndex > 0 ? dotIndex : _nameController.text.length,
+                  extentOffset: dotIndex > 0
+                      ? dotIndex
+                      : _nameController.text.length,
                 );
               },
             ),
@@ -113,16 +113,13 @@ class _SendSheetState extends State<_SendSheet> {
         ] else
           FilesPreview(files: widget.files),
         const SizedBox(height: 8),
-        SendTile(
-          onTap: () => _close((password: null, fileName: _fileName)),
-        ),
+        SendTile(onTap: () => _close((password: null, fileName: _fileName))),
         SendEncryptedTile(
           onTap: () => _close(encryptedSend(fileName: _fileName)),
-          onLongPress:
-              () => _close(
-                (password: null, fileName: _fileName),
-                customPassword: true,
-              ),
+          onLongPress: () => _close((
+            password: null,
+            fileName: _fileName,
+          ), customPassword: true),
         ),
         const SizedBox(height: 8),
       ],
@@ -141,7 +138,7 @@ class SendTile extends StatelessWidget {
       dense: true,
       onTap: onTap,
       leading: HugeIcon(
-        icon: HugeIcons.strokeRoundedQrCode,
+        icon: HugeIcons.strokeRoundedSent02,
         color: context.color.primary,
       ),
       title: Text(context.l10n.send),

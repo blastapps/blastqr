@@ -32,15 +32,16 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
   void initState() {
     super.initState();
     if (widget.password != null) return;
-    _countdown = AnimationController(
-      vsync: this,
-      duration: AcousticSuccessOverlay.countdownDuration,
-      value: 1.0,
-    )..addStatusListener((status) {
-      if (status == AnimationStatus.dismissed && mounted) {
-        widget.onDone();
-      }
-    });
+    _countdown =
+        AnimationController(
+          vsync: this,
+          duration: AcousticSuccessOverlay.countdownDuration,
+          value: 1.0,
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.dismissed && mounted) {
+            widget.onDone();
+          }
+        });
     _countdown!.reverse();
   }
 
@@ -77,12 +78,11 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: AnimatedBuilder(
                 animation: _countdown!,
-                builder:
-                    (context, _) => LinearProgressIndicator(
-                      value: _countdown!.value,
-                      color: context.color.primary,
-                      backgroundColor: context.color.surfaceContainerHighest,
-                    ),
+                builder: (context, _) => LinearProgressIndicator(
+                  value: _countdown!.value,
+                  color: context.color.primary,
+                  backgroundColor: context.color.surfaceContainerHighest,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -92,10 +92,15 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
             if (_passwordVisible) ...[
               GestureDetector(
                 onTap: () => setState(() => _passwordVisible = false),
-                child: SelectableText(
-                  widget.password!,
-                  textAlign: TextAlign.center,
-                  style: passwordTextStyle(context, fontSize: 28),
+                child: SizedBox(
+                  height: 48,
+                  child: Center(
+                    child: Text(
+                      widget.password!,
+                      textAlign: TextAlign.center,
+                      style: passwordTextStyle(context, fontSize: 28),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),

@@ -12,6 +12,7 @@ import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/blast_chip.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
+import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/file_preview.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
@@ -255,12 +256,12 @@ class _FilesPageState extends State<FilesPage> {
         backgroundColor: Colors.transparent,
         actions: [
           if (_isSelecting)
-            IconButton(
+            CircleButton(
               icon: const Icon(Icons.more_horiz),
               onPressed: _showMultiSelectSheet,
             )
           else
-            IconButton(
+            CircleButton(
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -270,10 +271,7 @@ class _FilesPageState extends State<FilesPage> {
                   ),
                 );
               },
-              icon: HugeIcon(
-                icon: HugeIcons.strokeRoundedSettings01,
-                color: context.color.onSurface,
-              ),
+              icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
             ),
         ],
         // The chips row tucks 12px under the bar, so fade over those 12px.
@@ -375,7 +373,7 @@ class _FilesPageState extends State<FilesPage> {
                                   offset: const Offset(0, 2),
                                 ),
                               ],
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: file.buildThumbnail(context, size: 56),
                           ),
@@ -387,7 +385,7 @@ class _FilesPageState extends State<FilesPage> {
                                   color: isSelected
                                       ? context.color.primary.withAlpha(180)
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: isSelected
                                     ? const Icon(

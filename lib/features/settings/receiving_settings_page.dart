@@ -6,6 +6,7 @@ import 'package:blast_qr/extensions/string_extension.dart';
 import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
+import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -26,7 +27,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
       appBar: AppBar(
         title: Text(context.l10n.receiving_settings),
         actions: [
-          IconButton(
+          CircleButton(
             onPressed: _restoreDefaults,
             icon: const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
           ),
@@ -60,10 +61,9 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                       selectedItemIndex: appSettings.cameraResolution.index,
                       title: context.l10n.camera_resolution,
                       message: context.l10n.camera_resolution_hint,
-                      items:
-                          ResolutionPreset.values
-                              .map((r) => r.name.capitalize())
-                              .toList(),
+                      items: ResolutionPreset.values
+                          .map((r) => r.name.capitalize())
+                          .toList(),
                       onItemTap: (index) {
                         appSettings.updateCameraResolution(
                           ResolutionPreset.values[index],
@@ -210,28 +210,28 @@ class __ColorPickerState extends State<_ColorPicker> {
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        children:
-            accentColorOptions.map((c) {
-              final isSelected = c == _selectedColor;
-              final outlineColor =
-                  isSelected ? context.color.onSurface : context.color.outline;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedColor = c;
-                  });
-                  widget.onPickColor(c);
-                  Navigator.of(context).pop();
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: outlineColor, width: 3),
-                    shape: BoxShape.circle,
-                    color: c,
-                  ),
-                ),
-              );
-            }).toList(),
+        children: accentColorOptions.map((c) {
+          final isSelected = c == _selectedColor;
+          final outlineColor = isSelected
+              ? context.color.onSurface
+              : context.color.outline;
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedColor = c;
+              });
+              widget.onPickColor(c);
+              Navigator.of(context).pop();
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: outlineColor, width: 3),
+                shape: BoxShape.circle,
+                color: c,
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

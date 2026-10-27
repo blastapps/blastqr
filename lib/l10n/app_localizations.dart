@@ -636,6 +636,18 @@ abstract class AppLocalizations {
   /// **'Send pictures'**
   String get send_picture;
 
+  /// No description provided for @send_file_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Any file type'**
+  String get send_file_subtitle;
+
+  /// No description provided for @send_picture_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'From your photo library'**
+  String get send_picture_subtitle;
+
   /// No description provided for @desktop_receive_unsupported.
   ///
   /// In en, this message translates to:

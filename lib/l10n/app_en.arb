@@ -88,6 +88,8 @@
   "low_speed_warning": "Low transfer speed. Adjust the position of the devices and keep them still for better performance",
   "send_file": "Send files",
   "send_picture": "Send pictures",
+  "send_file_subtitle": "Any file type",
+  "send_picture_subtitle": "From your photo library",
   "desktop_receive_unsupported": "* Receiving files is not supported on Windows yet",
   "recent": "Recent",
   "send_selected": "Send selected",

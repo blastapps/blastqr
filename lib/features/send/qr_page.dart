@@ -10,7 +10,9 @@ import 'package:blast_qr/features/send/widgets/file_too_large_alert_widget.dart'
 import 'package:blast_qr/features/send/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/password_widgets.dart';
+import 'package:blast_qr/widgets/strike_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -51,20 +53,21 @@ class _QrPageState extends State<QrPage> {
   bool _shouldCompressImage = false;
   int? _compressedSize;
 
+  static const _fpsOptions = [15, 16, 20, 22, 25, 30];
+
+  /// Session override of the settings fps, set by the FPS button.
+  int? _fps;
+
   bool _fullscreenMode = false;
 
   AcousticAckListener? _acousticListener;
   StreamSubscription<void>? _acousticSub;
   Timer? _listenerDelayTimer;
   bool _completionDetected = false;
-
-  bool _nearlyComplete = false;
+  bool _dismissed = false;
 
   bool get _showsPasswordButton =>
-      !_fullscreenMode &&
-      widget.password != null &&
-      _nearlyComplete &&
-      !_completionDetected;
+      !_fullscreenMode && widget.password != null && !_completionDetected;
 
   @override
   void initState() {
@@ -96,8 +99,12 @@ class _QrPageState extends State<QrPage> {
   @override
   Widget build(BuildContext context) {
     final qrBoxHeight = MediaQuery.of(context).size.width;
-    final appSettings = Provider.of<AppSettings>(context, listen: false);
-
+    final appSettings = Provider.of<AppSettings>(context);
+    final encodeSettings = Provider.of<EncodeSettings>(context);
+    final fps = _fps ?? encodeSettings.playbackFps;
+    final colors = Theme.of(context).colorScheme;
+    final micOn = appSettings.acousticDetection;
+    final iconColor = context.color.onPrimaryContainer;
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: SafeArea(
@@ -113,6 +120,7 @@ class _QrPageState extends State<QrPage> {
                 encrypted: widget.password != null,
               ),
             Expanded(
+              flex: _fullscreenMode ? 1 : 0,
               key: const ValueKey('qr_container'),
               child: Align(
                 alignment: Alignment.topCenter,
@@ -124,115 +132,150 @@ class _QrPageState extends State<QrPage> {
                           color: context.color.outline,
                           width: 2,
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        color:
-                            _isLargeFile && !_largeFileAcknowledged
-                                ? context.color.primaryContainer
-                                : Colors.white,
+                        color: _isLargeFile && !_largeFileAcknowledged
+                            ? context.color.primaryContainer
+                            : Colors.white,
                       ),
                       child: SizedBox(
                         height: _fullscreenMode ? null : qrBoxHeight + 16,
-                        child:
-                            _isLargeFile && !_largeFileAcknowledged
-                                ? FileTooLargeAlertWidget(
-                                  estimatedSlowestTime: widget.file
-                                      .getEstimateTransferTime(8),
-                                  fileType: widget.file.type,
-                                  onAcknowledge: () {
-                                    setState(() {
-                                      _largeFileAcknowledged = true;
-                                    });
-                                  },
-                                  onRequestCompressedImage: (quality) {
-                                    setState(() {
-                                      _largeFileAcknowledged = true;
-                                      _shouldCompressImage = true;
-                                    });
-                                  },
-                                )
-                                : Consumer<EncodeSettings>(
-                                  builder: (context, state, child) {
-                                    return RaptorQrStreamingWidget(
-                                      controller: _qrController,
-                                      file: widget.file,
+                        child: _isLargeFile && !_largeFileAcknowledged
+                            ? FileTooLargeAlertWidget(
+                                estimatedSlowestTime: widget.file
+                                    .getEstimateTransferTime(8),
+                                fileType: widget.file.type,
+                                onAcknowledge: () {
+                                  setState(() {
+                                    _largeFileAcknowledged = true;
+                                  });
+                                },
+                                onRequestCompressedImage: (quality) {
+                                  setState(() {
+                                    _largeFileAcknowledged = true;
+                                    _shouldCompressImage = true;
+                                  });
+                                },
+                              )
+                            : Consumer<EncodeSettings>(
+                                builder: (context, state, child) {
+                                  return RaptorQrStreamingWidget(
+                                    controller: _qrController,
+                                    file: widget.file,
+                                    mtu: state.mtu,
+                                    fps: fps,
+                                    imageCompressionSettings:
+                                        _shouldCompressImage
+                                        ? appSettings.imageCompressionSettings
+                                        : null,
+                                    password: widget.password,
+                                    fileName: widget.fileName,
+                                    isBundle: widget.isBundle,
+                                    fill: _fullscreenMode,
+                                    onTap: _onToggleFullscreen,
+                                    onStart: (size) => _onStart(
+                                      size,
+                                      multipleQrCodes: state.multipleQrCodes,
+                                      fps: fps,
                                       mtu: state.mtu,
-                                      fps: state.playbackFps,
-                                      imageCompressionSettings:
-                                          _shouldCompressImage
-                                              ? appSettings
-                                                  .imageCompressionSettings
-                                              : null,
-                                      password: widget.password,
-                                      fileName: widget.fileName,
-                                      isBundle: widget.isBundle,
-                                      fill: _fullscreenMode,
-                                      onTap: _onToggleFullscreen,
-                                      onNearlyComplete:
-                                          () => setState(
-                                            () => _nearlyComplete = true,
-                                          ),
-                                      onStart:
-                                          (size) => _onStart(
-                                            size,
-                                            multipleQrCodes:
-                                                state.multipleQrCodes,
-                                            fps: state.playbackFps,
-                                            mtu: state.mtu,
-                                          ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ),
                     if (_completionDetected)
                       Positioned.fill(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: AcousticSuccessOverlay(
-                            onKeepShowing: _onKeepShowingQr,
-                            onDone: _dismiss,
-                            password: widget.password,
-                          ),
+                        child: AcousticSuccessOverlay(
+                          onKeepShowing: _onKeepShowingQr,
+                          onDone: _dismiss,
+                          password: widget.password,
                         ),
                       ),
                   ],
                 ),
               ),
             ),
-            if (!_fullscreenMode &&
-                !_showsPasswordButton &&
-                (!_isLargeFile || _largeFileAcknowledged))
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => const HelpPage(),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    spacing: 8,
+            if (!_fullscreenMode)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
                     children: [
-                      HugeIcon(
-                        icon: HugeIcons.strokeRoundedInformationCircle,
-                        color: context.color.onSurface,
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleButton(
+                            size: 64,
+                            icon: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '$fps',
+                                  style: const TextStyle(
+                                    height: 1,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Text(
+                                  'FPS',
+                                  style: TextStyle(fontSize: 10, height: 1),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: colors.tertiaryContainer,
+                            onPressed: () => _cycleFps(fps),
+                          ),
+                          CircleButton(
+                            size: 64,
+                            icon: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedLayoutGrid,
+                            ),
+                            backgroundColor: colors.tertiaryContainer,
+                            onPressed: _onToggleFullscreen,
+                          ),
+                          CircleButton(
+                            size: 64,
+                            icon: CustomPaint(
+                              foregroundPainter: micOn
+                                  ? null
+                                  : StrikePainter(
+                                      color: iconColor.withValues(alpha: 0.5),
+                                      gapColor: colors.tertiaryContainer,
+                                    ),
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedMic02,
+                                color: micOn
+                                    ? iconColor
+                                    : iconColor.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            backgroundColor: colors.tertiaryContainer,
+                            onPressed: () => _toggleAcousticDetection(!micOn),
+                          ),
+                          CircleButton(
+                            size: 64,
+                            icon: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedHelpCircle,
+                            ),
+                            backgroundColor: colors.tertiaryContainer,
+                            onPressed: _showHelp,
+                          ),
+                        ],
                       ),
-                      Expanded(child: Text(context.l10n.send_help_message)),
+                      const SizedBox(height: 8),
+                      if (_showsPasswordButton)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: PasswordButton(password: widget.password!),
+                        ),
                     ],
                   ),
                 ),
               ),
-            if (_showsPasswordButton)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: PasswordButton(password: widget.password!),
-              ),
+
             if (!_fullscreenMode)
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: ElevatedButton(
                   onPressed: _dismiss,
                   child: Row(
@@ -310,6 +353,36 @@ class _QrPageState extends State<QrPage> {
     startNow();
   }
 
+  void _cycleFps(int current) {
+    final options = {..._fpsOptions, current}.toList()..sort();
+    final next = options[(options.indexOf(current) + 1) % options.length];
+    setState(() => _fps = next);
+  }
+
+  Future<void> _toggleAcousticDetection(bool on) async {
+    final appSettings = Provider.of<AppSettings>(context, listen: false);
+    if (on) {
+      final granted = await AcousticAckListener.requestPermission();
+      if (!mounted || !granted) return;
+      appSettings.updateAcousticDetection(true);
+      if (!_completionDetected) _startAcousticListener();
+    } else {
+      appSettings.updateAcousticDetection(false);
+      _listenerDelayTimer?.cancel();
+      _acousticSub?.cancel();
+      _acousticListener?.stop();
+    }
+  }
+
+  void _showHelp() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => const HelpPage(),
+      ),
+    );
+  }
+
   void _onKeepShowingQr() {
     setState(() => _completionDetected = false);
     _startAcousticListener(); // no fileSize → no delay, position unknown
@@ -334,6 +407,8 @@ class _QrPageState extends State<QrPage> {
   }
 
   void _dismiss() {
+    if (_dismissed) return;
+    _dismissed = true;
     _cleanup();
     Navigator.of(context).pop();
   }

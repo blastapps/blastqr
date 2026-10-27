@@ -22,9 +22,9 @@ class FilesPreview extends StatelessWidget {
         if (hidden > 0)
           Text(
             '+$hidden',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: context.color.secondary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: context.color.secondary),
           ),
       ],
     );
@@ -52,7 +52,7 @@ class FileThumbnail extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: file.buildThumbnail(context, size: size),
     );
@@ -95,7 +95,7 @@ class StackedThumbnail extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Stack(
         children: [
@@ -116,18 +116,14 @@ class StackedThumbnail extends StatelessWidget {
                       offset: const Offset(0, 1),
                     ),
                   ],
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                child:
-                    blurred
-                        ? ImageFiltered(
-                          imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                          child: shown[i].buildThumbnail(
-                            context,
-                            size: cardSize,
-                          ),
-                        )
-                        : shown[i].buildThumbnail(context, size: cardSize),
+                child: blurred
+                    ? ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                        child: shown[i].buildThumbnail(context, size: cardSize),
+                      )
+                    : shown[i].buildThumbnail(context, size: cardSize),
               ),
             ),
         ],
