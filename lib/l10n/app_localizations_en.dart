@@ -617,4 +617,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debug_sample_frames => 'Sample frames (red: no code read)';
+
+  @override
+  String get qr_code => 'QR code';
+
+  @override
+  String get filter_qr => 'QR';
+
+  @override
+  String scanned_at(String date) {
+    return 'Scanned at $date';
+  }
+
+  @override
+  String get copied => 'Copied';
 }

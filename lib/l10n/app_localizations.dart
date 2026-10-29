@@ -1199,6 +1199,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sample frames (red: no code read)'**
   String get debug_sample_frames;
+
+  /// No description provided for @qr_code.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code'**
+  String get qr_code;
+
+  /// No description provided for @filter_qr.
+  ///
+  /// In en, this message translates to:
+  /// **'QR'**
+  String get filter_qr;
+
+  /// No description provided for @scanned_at.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned at {date}'**
+  String scanned_at(String date);
+
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
 }
 
 class _AppLocalizationsDelegate

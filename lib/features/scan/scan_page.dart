@@ -19,6 +19,7 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
+import 'package:blast_qr/model/scanned_qr_code.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/sound_feedback.dart';
@@ -786,20 +787,79 @@ class _ScanPageState extends State<ScanPage> {
       _soundService.playQRCodeResult();
     }
 
-    showMessage(
+    final content = text ?? '';
+    showSheet(
       context: context,
       title: context.l10n.result,
-      message: text ?? '',
-      confirmTitle: context.l10n.copy,
-      secondaryTitle: context.l10n.dismiss,
-      onConfirmTap: () {
-        if (text != null) {
-          Clipboard.setData(ClipboardData(text: text));
-        }
-      },
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: context.color.surfaceContainer,
+                border: Border.all(color: context.color.outline),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SelectableText(
+                      content,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: context.l10n.copy,
+                    onPressed: () => _copyToClipboard(content),
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCopy01,
+                      color: context.color.primary,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _saveRegularQRCode(content),
+              child: Text(context.l10n.save),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(context.l10n.dismiss),
+            ),
+          ],
+        ),
+      ),
     ).then((_) {
       _reset();
     });
+  }
+
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.copied)));
+  }
+
+  Future<void> _saveRegularQRCode(String text) async {
+    final navigator = Navigator.of(context);
+    final badgeCount = Provider.of<FileBadgeCount>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await saveScannedQrCode(text, await qrCodesDirectory());
+      badgeCount.add();
+    } catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+    navigator.pop();
   }
 
   void _reset() async {

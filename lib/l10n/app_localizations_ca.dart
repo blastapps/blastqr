@@ -619,4 +619,18 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get debug_sample_frames =>
       'Fotogrames de mostra (vermell: cap codi llegit)';
+
+  @override
+  String get qr_code => 'Codi QR';
+
+  @override
+  String get filter_qr => 'QR';
+
+  @override
+  String scanned_at(String date) {
+    return 'Escanejat el $date';
+  }
+
+  @override
+  String get copied => 'Copiat';
 }

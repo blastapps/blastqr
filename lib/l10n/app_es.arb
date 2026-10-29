@@ -184,5 +184,9 @@
   "debug_frame_code_read": "código leído",
   "debug_frame_no_code": "ningún código leído",
   "debug_sample_frames_multi": "Fotogramas de muestra (rojo: menos de {max} códigos leídos)",
-  "debug_sample_frames": "Fotogramas de muestra (rojo: ningún código leído)"
+  "debug_sample_frames": "Fotogramas de muestra (rojo: ningún código leído)",
+  "qr_code": "Código QR",
+  "filter_qr": "QR",
+  "scanned_at": "Escaneado el {date}",
+  "copied": "Copiado"
 }

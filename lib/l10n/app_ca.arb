@@ -183,5 +183,9 @@
   "debug_frame_code_read": "codi llegit",
   "debug_frame_no_code": "cap codi llegit",
   "debug_sample_frames_multi": "Fotogrames de mostra (vermell: menys de {max} codis llegits)",
-  "debug_sample_frames": "Fotogrames de mostra (vermell: cap codi llegit)"
+  "debug_sample_frames": "Fotogrames de mostra (vermell: cap codi llegit)",
+  "qr_code": "Codi QR",
+  "filter_qr": "QR",
+  "scanned_at": "Escanejat el {date}",
+  "copied": "Copiat"
 }

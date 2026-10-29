@@ -184,5 +184,9 @@
   "debug_frame_code_read": "코드 읽음",
   "debug_frame_no_code": "읽은 코드 없음",
   "debug_sample_frames_multi": "샘플 프레임 (빨간색: 읽은 코드 {max}개 미만)",
-  "debug_sample_frames": "샘플 프레임 (빨간색: 읽은 코드 없음)"
+  "debug_sample_frames": "샘플 프레임 (빨간색: 읽은 코드 없음)",
+  "qr_code": "QR 코드",
+  "filter_qr": "QR",
+  "scanned_at": "{date}에 스캔함",
+  "copied": "복사됨"
 }

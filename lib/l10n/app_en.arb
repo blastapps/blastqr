@@ -210,5 +210,10 @@
   "debug_frame_no_code": "no code read",
   "debug_sample_frames_multi": "Sample frames (red: fewer than {max} codes read)",
   "@debug_sample_frames_multi": {"placeholders": {"max": {"type": "int"}}},
-  "debug_sample_frames": "Sample frames (red: no code read)"
+  "debug_sample_frames": "Sample frames (red: no code read)",
+  "qr_code": "QR code",
+  "filter_qr": "QR",
+  "scanned_at": "Scanned at {date}",
+  "@scanned_at": {"placeholders": {"date": {"type": "String"}}},
+  "copied": "Copied"
 }

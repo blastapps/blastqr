@@ -599,4 +599,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get debug_sample_frames => '샘플 프레임 (빨간색: 읽은 코드 없음)';
+
+  @override
+  String get qr_code => 'QR 코드';
+
+  @override
+  String get filter_qr => 'QR';
+
+  @override
+  String scanned_at(String date) {
+    return '$date에 스캔함';
+  }
+
+  @override
+  String get copied => '복사됨';
 }
