@@ -473,4 +473,150 @@ class AppLocalizationsCa extends AppLocalizations {
   String sending_files_count(int count) {
     return 'Enviant $count fitxers';
   }
+
+  @override
+  String get debug => 'Depuració';
+
+  @override
+  String get camera_zoom => 'Zoom de la càmera';
+
+  @override
+  String get camera_zoom_hint =>
+      'Fer zoom permet llegir els codis des de més lluny, on la càmera encara pot enfocar. Ajuda en mòbils que no enfoquen de prop.';
+
+  @override
+  String get advanced => 'Avançat';
+
+  @override
+  String get allow_video_hdr => 'Permet el vídeo HDR';
+
+  @override
+  String get allow_video_hdr_hint =>
+      'Desactivat per defecte. L\'HDR pot barrejar dos codis en un mateix fotograma.';
+
+  @override
+  String get exposure_time => 'Temps d\'exposició';
+
+  @override
+  String get exposure_time_hint =>
+      'Les exposicions llargues barregen dos codis en un fotograma quan l\'emissor canvia de codi durant la captura. Una exposició fixa puja l\'ISO per mantenir la brillantor, així que la imatge té més soroll.';
+
+  @override
+  String exposure_auto_capped(String ms) {
+    return 'Automàtic, màx. $ms ms (per defecte)';
+  }
+
+  @override
+  String get exposure_auto => 'Automàtic, sense límit';
+
+  @override
+  String exposure_fixed(String ms) {
+    return 'Fix $ms ms';
+  }
+
+  @override
+  String get camera_fps => 'FPS de la càmera';
+
+  @override
+  String get camera_fps_hint =>
+      'Més fotogrames donen a l\'escàner més oportunitats de llegir cada codi. Només es mostren els que admet aquest mòbil amb la resolució actual.';
+
+  @override
+  String get fps_default => 'Per defecte';
+
+  @override
+  String fps_auto(String fps) {
+    return 'Màxim disponible ($fps FPS)';
+  }
+
+  @override
+  String get debug_share => 'Comparteix';
+
+  @override
+  String get debug_clear => 'Esborra';
+
+  @override
+  String get debug_camera => 'Càmera';
+
+  @override
+  String get debug_device => 'Dispositiu';
+
+  @override
+  String get debug_supported_frame_rates => 'FPS admesos';
+
+  @override
+  String get debug_save_frames => 'Desa fotogrames de mostra';
+
+  @override
+  String get debug_save_frames_hint =>
+      'Desa uns quants fotogrames de la càmera per transferència, per veure\'ls o compartir-los.';
+
+  @override
+  String get debug_last_transfers => 'Últimes transferències';
+
+  @override
+  String get debug_no_transfers => 'Encara no hi ha transferències';
+
+  @override
+  String get debug_transfers_hint =>
+      'Les últimes 5 transferències, desades a la memòria. En compartir s\'hi inclouen tots els detalls. Els codis útils són els que es llegeixen per primer cop.';
+
+  @override
+  String get debug_unavailable => 'No disponible';
+
+  @override
+  String get debug_status_receiving => 'Rebent';
+
+  @override
+  String get debug_status_complete => 'Completada';
+
+  @override
+  String get debug_status_stopped => 'Aturada';
+
+  @override
+  String get debug_useful_codes => 'Codis útils';
+
+  @override
+  String get debug_codes_caught => 'Codis captats';
+
+  @override
+  String debug_codes_caught_value(int caught, int shown, String percent) {
+    return '$caught de $shown mostrats ($percent)';
+  }
+
+  @override
+  String debug_camera_value(String fps, String percent) {
+    return '$fps FPS · $percent dels fotogrames amb un codi';
+  }
+
+  @override
+  String get debug_decode => 'Descodificació';
+
+  @override
+  String debug_decode_value(String average, String p95) {
+    return '$average de mitjana · $p95 p95';
+  }
+
+  @override
+  String get debug_exposure => 'Exposició';
+
+  @override
+  String debug_frame_codes(int read, int max) {
+    return '$read de $max codis llegits';
+  }
+
+  @override
+  String get debug_frame_code_read => 'codi llegit';
+
+  @override
+  String get debug_frame_no_code => 'cap codi llegit';
+
+  @override
+  String debug_sample_frames_multi(int max) {
+    return 'Fotogrames de mostra (vermell: menys de $max codis llegits)';
+  }
+
+  @override
+  String get debug_sample_frames =>
+      'Fotogrames de mostra (vermell: cap codi llegit)';
 }

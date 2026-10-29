@@ -13,6 +13,14 @@ class AppSettings extends ChangeNotifier {
   Color accentColor;
   ImageCompressionSettings imageCompressionSettings;
   ResolutionPreset cameraResolution;
+  /// Null for the camera's default.
+  int? cameraFps;
+  double cameraZoom;
+  bool debugVideoHdr;
+
+  /// Null for the default capped automatic exposure, 0 for uncapped, and
+  /// otherwise a fixed exposure in ms.
+  double? debugExposureMs;
   bool hapticFeedback;
   bool soundFeedback;
   bool acousticDetection;
@@ -27,6 +35,10 @@ class AppSettings extends ChangeNotifier {
       accentColor = AppPreferences.accentColor,
       imageCompressionSettings = AppPreferences.imageCompressionSettings,
       cameraResolution = AppPreferences.cameraResolution,
+      cameraFps = AppPreferences.cameraFps,
+      cameraZoom = AppPreferences.cameraZoom,
+      debugVideoHdr = AppPreferences.debugVideoHdr,
+      debugExposureMs = AppPreferences.debugExposureMs,
       hapticFeedback = AppPreferences.hapticFeedback,
       soundFeedback = AppPreferences.soundFeedback,
       acousticDetection = AppPreferences.acousticDetection,
@@ -73,6 +85,30 @@ class AppSettings extends ChangeNotifier {
   void updateCameraResolution(ResolutionPreset resolution) {
     AppPreferences.setCameraResolution(resolution);
     cameraResolution = resolution;
+    notifyListeners();
+  }
+
+  void updateCameraFps(int? value) {
+    AppPreferences.setCameraFps(value);
+    cameraFps = value;
+    notifyListeners();
+  }
+
+  void updateCameraZoom(double value) {
+    AppPreferences.setCameraZoom(value);
+    cameraZoom = value;
+    notifyListeners();
+  }
+
+  void updateDebugVideoHdr(bool value) {
+    AppPreferences.setDebugVideoHdr(value);
+    debugVideoHdr = value;
+    notifyListeners();
+  }
+
+  void updateDebugExposureMs(double? value) {
+    AppPreferences.setDebugExposureMs(value);
+    debugExposureMs = value;
     notifyListeners();
   }
 

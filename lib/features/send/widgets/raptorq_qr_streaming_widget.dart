@@ -9,17 +9,8 @@ import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-/// Decides which frame each QR code shows, based on elapsed time.
-///
-/// In multi-code mode the codes don't all change at once: code `j` of `n`
-/// changes `j/n` of a frame interval after code 0. A camera exposure that
-/// catches the screen mid-change then loses at most one code instead of all
-/// of them. Each code still changes at the playback fps.
+/// Decides when the QR codes change, based on elapsed time.
 class RaptorQrStreamingWidgetController with ChangeNotifier {
-  /// Notify at this many steps per frame interval. Divisible by every grid
-  /// size (1, 2, 4, 6), so each code's change time lands on a step.
-  static const int _stepsPerFrame = 12;
-
   int _fps = 20;
 
   /// Time since playback started, and the point the current fps applies from.
@@ -28,13 +19,11 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
 
   /// Frames played before the last fps change.
   int _baseFrames = 0;
-  int _lastStep = -1;
+  int _lastFrames = -1;
 
-  /// How many times code [cell] of [cellCount] has changed.
-  int framesAdvanced(int cell, int cellCount) {
-    final frames = _framesSinceOrigin - cell / cellCount;
-    return _baseFrames + math.max(0, frames.floor());
-  }
+  /// How many times the codes have changed.
+  int get framesAdvanced =>
+      _baseFrames + math.max(0, _framesSinceOrigin.floor());
 
   double get _framesSinceOrigin =>
       (_elapsed - _fpsOrigin).inMicroseconds * _fps / 1e6;
@@ -53,16 +42,16 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
     _elapsed = Duration.zero;
     _fpsOrigin = Duration.zero;
     _baseFrames = 0;
-    _lastStep = -1;
+    _lastFrames = -1;
   }
 
   /// Changes fps without jumping: frames already played are kept. The next
   /// tick repaints.
   void setFps(int fps) {
-    _baseFrames = framesAdvanced(0, 1);
+    _baseFrames = framesAdvanced;
     _fpsOrigin = _elapsed;
     _fps = fps;
-    _lastStep = -1;
+    _lastFrames = -1;
   }
 
   /// Called on every screen refresh by the widget's ticker. Time-based, so
@@ -70,9 +59,9 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
   void tick(Duration elapsed) {
     if (_stopped) return;
     _elapsed = elapsed;
-    final step = (_framesSinceOrigin * _stepsPerFrame).floor();
-    if (step != _lastStep) {
-      _lastStep = step;
+    final frames = framesAdvanced;
+    if (frames != _lastFrames) {
+      _lastFrames = frames;
       notifyListeners();
     }
   }
@@ -246,7 +235,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
 
     var changed = false;
     for (var cell = 0; cell < _cellCount; cell++) {
-      final advanced = widget.controller.framesAdvanced(cell, _cellCount);
+      final advanced = widget.controller.framesAdvanced;
       final due = advanced != _cellAdvanced[cell] || _cellImages[cell] == null;
       if (!due) continue;
 

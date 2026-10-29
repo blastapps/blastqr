@@ -47,6 +47,7 @@ dependencies:
     path: ../blastqr_crypto
   share_plus: ^12.0.2
   url_launcher: ^6.3.3
+  image: ^4.8.0
 
 dev_dependencies:
   flutter_test:

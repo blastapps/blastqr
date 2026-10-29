@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/extensions/string_extension.dart';
+import 'package:blast_qr/features/scan/scan_camera.dart';
 import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
@@ -18,6 +21,11 @@ class ReceivingSettingsPage extends StatefulWidget {
   @override
   State<ReceivingSettingsPage> createState() => _ReceivingSettingsPageState();
 }
+
+const _zoomLevels = [1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0];
+
+String _zoomLabel(double zoom) =>
+    '${zoom == zoom.roundToDouble() ? zoom.toInt() : zoom}x';
 
 class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
   @override
@@ -74,11 +82,41 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                 );
               },
             ),
+            if (Platform.isIOS || Platform.isAndroid)
+              Consumer<AppSettings>(
+                builder: (context, state, child) {
+                  return ListTile(
+                    leading: HugeIcon(
+                      icon: HugeIcons.strokeRoundedZoomInArea,
+                      color: context.color.onSurface,
+                    ),
+                    title: Text(context.l10n.camera_zoom),
+                    subtitle: Text(_zoomLabel(state.cameraZoom)),
+                    onTap: () {
+                      showPickerSheet(
+                        context,
+                        selectedItemIndex: _zoomLevels.indexOf(
+                          state.cameraZoom,
+                        ),
+                        title: context.l10n.camera_zoom,
+                        message: context.l10n.camera_zoom_hint,
+                        items: _zoomLevels.map(_zoomLabel).toList(),
+                        onItemTap: (index) {
+                          state.updateCameraZoom(_zoomLevels[index]);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            if (Platform.isIOS || Platform.isAndroid) const _FrameRateSetting(),
+            if (Platform.isIOS) const _AdvancedCameraSettings(),
           ],
           SettingGroupTitle(title: context.l10n.feedback),
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 value: state.hapticFeedback,
                 onChanged: (val) {
                   Provider.of<AppSettings>(
@@ -103,6 +141,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 value: state.soundFeedback,
                 onChanged: (val) {
                   Provider.of<AppSettings>(
@@ -138,7 +177,13 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
       secondaryTitle: context.l10n.cancel,
       onConfirmTap: () {
         final appSettings = Provider.of<AppSettings>(context, listen: false);
-        appSettings.updateCameraResolution(ResolutionPreset.high);
+        appSettings.updateCameraResolution(
+          AppPreferences.defaultCameraResolution,
+        );
+        appSettings.updateCameraFps(null);
+        appSettings.updateCameraZoom(AppPreferences.defaultCameraZoom);
+        appSettings.updateDebugVideoHdr(false);
+        appSettings.updateDebugExposureMs(null);
         appSettings.updateHapticFeedback(false);
         appSettings.updateSoundFeedback(true);
       },
@@ -233,6 +278,111 @@ class __ColorPickerState extends State<_ColorPicker> {
           );
         }).toList(),
       ),
+    );
+  }
+}
+
+/// iPhone camera settings for comparing against the defaults: video HDR off
+/// and exposure capped at [ScanCamera.defaultMaxExposureMs].
+class _AdvancedCameraSettings extends StatelessWidget {
+  const _AdvancedCameraSettings();
+
+  static const _exposures = <double?>[null, 0, 4, 2, 1, 0.5];
+
+  static String _label(BuildContext context, double? ms) => switch (ms) {
+    null => context.l10n.exposure_auto_capped(
+      '${ScanCamera.defaultMaxExposureMs}',
+    ),
+    0 => context.l10n.exposure_auto,
+    final ms => context.l10n.exposure_fixed('$ms'),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<AppSettings>();
+    return ExpansionTile(
+      tilePadding: const EdgeInsetsDirectional.only(start: 16),
+      shape: const Border(),
+      leading: HugeIcon(
+        icon: HugeIcons.strokeRoundedSettings02,
+        color: context.color.onSurface,
+      ),
+      title: Text(context.l10n.advanced),
+      children: [
+        SwitchListTile.adaptive(
+          contentPadding: const EdgeInsetsDirectional.only(start: 16),
+          title: Text(context.l10n.allow_video_hdr),
+          subtitle: Text(context.l10n.allow_video_hdr_hint),
+          value: settings.debugVideoHdr,
+          onChanged: settings.updateDebugVideoHdr,
+          activeTrackColor: context.color.primary,
+        ),
+        ListTile(
+          title: Text(context.l10n.exposure_time),
+          subtitle: Text(_label(context, settings.debugExposureMs)),
+          onTap: () => showPickerSheet(
+            context,
+            title: context.l10n.exposure_time,
+            message: context.l10n.exposure_time_hint,
+            selectedItemIndex: _exposures.indexOf(settings.debugExposureMs),
+            items: [for (final ms in _exposures) _label(context, ms)],
+            onItemTap: (i) => settings.updateDebugExposureMs(_exposures[i]),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The camera frame rates this phone offers at the current resolution.
+class _FrameRateSetting extends StatefulWidget {
+  const _FrameRateSetting();
+
+  @override
+  State<_FrameRateSetting> createState() => _FrameRateSettingState();
+}
+
+class _FrameRateSettingState extends State<_FrameRateSetting> {
+  ResolutionPreset? _resolution;
+  Future<List<int>>? _rates;
+
+  String _label(BuildContext context, int? fps, List<int> rates) {
+    if (fps != null) return '$fps FPS';
+    final auto = rates.where((r) => r <= ScanCamera.maxAutoFps);
+    return auto.isEmpty
+        ? context.l10n.fps_default
+        : context.l10n.fps_auto('${auto.reduce(max)}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = context.watch<AppSettings>();
+    if (settings.cameraResolution != _resolution) {
+      _resolution = settings.cameraResolution;
+      _rates = ScanCamera.supportedFrameRates(settings.cameraResolution);
+    }
+    return FutureBuilder(
+      future: _rates,
+      builder: (context, snapshot) {
+        final rates = snapshot.data ?? const <int>[];
+        final options = <int?>[null, ...rates];
+        return ListTile(
+          leading: HugeIcon(
+            icon: HugeIcons.strokeRoundedDashboardSpeed02,
+            color: context.color.onSurface,
+          ),
+          title: Text(context.l10n.camera_fps),
+          subtitle: Text(_label(context, settings.cameraFps, rates)),
+          onTap: () => showPickerSheet(
+            context,
+            title: context.l10n.camera_fps,
+            message: context.l10n.camera_fps_hint,
+            selectedItemIndex: options.indexOf(settings.cameraFps),
+            items: [for (final fps in options) _label(context, fps, rates)],
+            onItemTap: (i) => settings.updateCameraFps(options[i]),
+          ),
+        );
+      },
     );
   }
 }

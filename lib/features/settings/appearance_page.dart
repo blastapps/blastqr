@@ -84,6 +84,7 @@ class _AppearancePageState extends State<AppearancePage> {
             Consumer<AppSettings>(
               builder: (context, state, child) {
                 return SwitchListTile.adaptive(
+                  contentPadding: const EdgeInsetsDirectional.only(start: 16),
                   key: const Key('pure-black'),
                   value: state.pureBlack,
                   onChanged: (val) {
@@ -106,6 +107,7 @@ class _AppearancePageState extends State<AppearancePage> {
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 value: state.animations,
                 onChanged: (val) {
                   appSettings.updateAnimationsEnabled(val);

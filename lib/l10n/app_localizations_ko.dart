@@ -455,4 +455,148 @@ class AppLocalizationsKo extends AppLocalizations {
   String sending_files_count(int count) {
     return '파일 $count개 보내는 중';
   }
+
+  @override
+  String get debug => '디버그';
+
+  @override
+  String get camera_zoom => '카메라 확대';
+
+  @override
+  String get camera_zoom_hint =>
+      '확대하면 카메라가 초점을 맞출 수 있는 더 먼 거리에서도 코드를 읽을 수 있습니다. 가까이에서 초점을 맞추지 못하는 휴대폰에 도움이 됩니다.';
+
+  @override
+  String get advanced => '고급';
+
+  @override
+  String get allow_video_hdr => '비디오 HDR 허용';
+
+  @override
+  String get allow_video_hdr_hint => '기본값은 꺼짐입니다. HDR은 두 코드를 한 프레임에 섞을 수 있습니다.';
+
+  @override
+  String get exposure_time => '노출 시간';
+
+  @override
+  String get exposure_time_hint =>
+      '노출이 길면 촬영 중에 보내는 기기의 코드가 바뀔 때 두 코드가 한 프레임에 섞입니다. 노출을 고정하면 밝기를 유지하려고 ISO가 올라가서 이미지에 노이즈가 더 생깁니다.';
+
+  @override
+  String exposure_auto_capped(String ms) {
+    return '자동, 최대 ${ms}ms (기본값)';
+  }
+
+  @override
+  String get exposure_auto => '자동, 제한 없음';
+
+  @override
+  String exposure_fixed(String ms) {
+    return '고정 ${ms}ms';
+  }
+
+  @override
+  String get camera_fps => '카메라 FPS';
+
+  @override
+  String get camera_fps_hint =>
+      '속도가 높을수록 스캐너가 각 코드를 읽을 기회가 많아집니다. 현재 해상도에서 이 휴대폰이 지원하는 속도만 표시됩니다.';
+
+  @override
+  String get fps_default => '기본값';
+
+  @override
+  String fps_auto(String fps) {
+    return '가능한 최고 속도 ($fps FPS)';
+  }
+
+  @override
+  String get debug_share => '공유';
+
+  @override
+  String get debug_clear => '지우기';
+
+  @override
+  String get debug_camera => '카메라';
+
+  @override
+  String get debug_device => '기기';
+
+  @override
+  String get debug_supported_frame_rates => '지원되는 FPS';
+
+  @override
+  String get debug_save_frames => '샘플 프레임 저장';
+
+  @override
+  String get debug_save_frames_hint =>
+      '전송마다 카메라 프레임 몇 장을 저장해 확인하거나 공유할 수 있습니다.';
+
+  @override
+  String get debug_last_transfers => '최근 전송';
+
+  @override
+  String get debug_no_transfers => '아직 전송 기록이 없습니다';
+
+  @override
+  String get debug_transfers_hint =>
+      '최근 5개의 전송이 메모리에 보관됩니다. 공유하면 모든 세부 정보가 포함됩니다. 유용한 코드는 처음 읽힌 코드입니다.';
+
+  @override
+  String get debug_unavailable => '사용할 수 없음';
+
+  @override
+  String get debug_status_receiving => '수신 중';
+
+  @override
+  String get debug_status_complete => '완료';
+
+  @override
+  String get debug_status_stopped => '중지됨';
+
+  @override
+  String get debug_useful_codes => '유용한 코드';
+
+  @override
+  String get debug_codes_caught => '포착한 코드';
+
+  @override
+  String debug_codes_caught_value(int caught, int shown, String percent) {
+    return '표시된 $shown개 중 $caught개 ($percent)';
+  }
+
+  @override
+  String debug_camera_value(String fps, String percent) {
+    return '$fps FPS · 프레임의 $percent에서 코드 인식';
+  }
+
+  @override
+  String get debug_decode => '디코딩';
+
+  @override
+  String debug_decode_value(String average, String p95) {
+    return '평균 $average · p95 $p95';
+  }
+
+  @override
+  String get debug_exposure => '노출';
+
+  @override
+  String debug_frame_codes(int read, int max) {
+    return '$max개 중 $read개 코드 읽음';
+  }
+
+  @override
+  String get debug_frame_code_read => '코드 읽음';
+
+  @override
+  String get debug_frame_no_code => '읽은 코드 없음';
+
+  @override
+  String debug_sample_frames_multi(int max) {
+    return '샘플 프레임 (빨간색: 읽은 코드 $max개 미만)';
+  }
+
+  @override
+  String get debug_sample_frames => '샘플 프레임 (빨간색: 읽은 코드 없음)';
 }

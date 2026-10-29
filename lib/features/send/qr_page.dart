@@ -59,6 +59,7 @@ class _QrPageState extends State<QrPage> {
   int? _fps;
 
   bool _fullscreenMode = false;
+  bool _playbackStarted = false;
 
   AcousticAckListener? _acousticListener;
   StreamSubscription<void>? _acousticSub;
@@ -197,7 +198,7 @@ class _QrPageState extends State<QrPage> {
             ),
             if (!_fullscreenMode &&
                 !_completionDetected &&
-                _largeFileAcknowledged) ...[
+                _playbackStarted) ...[
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -303,7 +304,10 @@ class _QrPageState extends State<QrPage> {
     required int fps,
     required int mtu,
   }) {
-    setState(() => _compressedSize = size);
+    setState(() {
+      _compressedSize = size;
+      _playbackStarted = true;
+    });
     if (multipleQrCodes) _enterFullscreen();
     _startAcousticListener(
       fileSize: size,

@@ -93,6 +93,7 @@ class _ImageCompressionSettingsPageState
                 },
               ),
               SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 title: Text(context.l10n.downscaling),
                 value: downscalingEnabled,
                 activeTrackColor: context.color.primary,

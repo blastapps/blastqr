@@ -2,10 +2,12 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
 import 'package:blast_qr/features/settings/appearance_page.dart';
+import 'package:blast_qr/features/settings/debug_page.dart';
 import 'package:blast_qr/features/settings/receiving_settings_page.dart';
 import 'package:blast_qr/features/settings/send_settings_page.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +121,21 @@ class _SettingsPageState extends State<SettingsPage> {
           title: context.l10n.receiving_settings,
           page: const ReceivingSettingsPage(),
         ),
+        _detailTile(
+          context,
+          index: 3,
+          icon: HugeIcons.strokeRoundedHelpCircle,
+          title: context.l10n.help,
+          page: const HelpPage(),
+        ),
+        if (canScanWithCamera)
+          _detailTile(
+            context,
+            index: 4,
+            icon: HugeIcons.strokeRoundedBug02,
+            title: context.l10n.debug,
+            page: const DebugPage(),
+          ),
         Builder(
           builder: (tileContext) => ListTile(
             shape: RoundedRectangleBorder(
@@ -141,13 +158,6 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-        ),
-        _detailTile(
-          context,
-          index: 3,
-          icon: HugeIcons.strokeRoundedHelpCircle,
-          title: context.l10n.help,
-          page: const HelpPage(),
         ),
         const SizedBox(height: 16),
       ],

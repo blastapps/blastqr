@@ -103,6 +103,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
           Consumer<EncodeSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 secondary: HugeIcon(
                   icon: HugeIcons.strokeRoundedQrCode01,
                   color: context.color.onSurface,
@@ -124,6 +125,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 secondary: HugeIcon(
                   icon: HugeIcons.strokeRoundedMic01,
                   color: context.color.onSurface,
@@ -164,6 +166,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 title: Text(context.l10n.always_compress_images),
                 value: state.alwaysCompressImages,
                 activeTrackColor: context.color.primary,
