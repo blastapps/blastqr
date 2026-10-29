@@ -105,7 +105,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               return SwitchListTile.adaptive(
                 contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 secondary: HugeIcon(
-                  icon: HugeIcons.strokeRoundedQrCode01,
+                  icon: HugeIcons.strokeRoundedArrowExpand,
                   color: context.color.onSurface,
                 ),
                 title: Text(context.l10n.multi_qr_mode),
@@ -127,7 +127,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               return SwitchListTile.adaptive(
                 contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 secondary: HugeIcon(
-                  icon: HugeIcons.strokeRoundedMic01,
+                  icon: HugeIcons.strokeRoundedAudioWave01,
                   color: context.color.onSurface,
                 ),
                 title: Text(context.l10n.acoustic_detection),

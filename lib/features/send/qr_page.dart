@@ -247,7 +247,7 @@ class _QrPageState extends State<QrPage> {
                                       gapColor: colors.tertiaryContainer,
                                     ),
                               child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedMic02,
+                                icon: HugeIcons.strokeRoundedAudioWave01,
                                 color: micOn
                                     ? iconColor
                                     : iconColor.withValues(alpha: 0.5),

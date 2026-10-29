@@ -477,7 +477,7 @@ abstract class AppLocalizations {
   /// No description provided for @playback_fps.
   ///
   /// In en, this message translates to:
-  /// **'Sequence playback speed'**
+  /// **'Playback speed'**
   String get playback_fps;
 
   /// No description provided for @licenses.
@@ -723,13 +723,13 @@ abstract class AppLocalizations {
   /// No description provided for @multi_qr_mode.
   ///
   /// In en, this message translates to:
-  /// **'Start in multi QR mode'**
+  /// **'Start in fullscreen'**
   String get multi_qr_mode;
 
   /// No description provided for @multi_qr_mode_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Displays as many codes as fit on screen'**
+  /// **'Show as many codes as fit on screen for a speed boost'**
   String get multi_qr_mode_subtitle;
 
   /// No description provided for @images_section.
@@ -783,19 +783,19 @@ abstract class AppLocalizations {
   /// No description provided for @acoustic_detection.
   ///
   /// In en, this message translates to:
-  /// **'Auto-detect completion'**
+  /// **'Detect completion tone'**
   String get acoustic_detection;
 
   /// No description provided for @acoustic_detection_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use microphone to detect transfer completion'**
+  /// **'Use microphone to detect when a file transfer has finished'**
   String get acoustic_detection_subtitle;
 
   /// No description provided for @acoustic_feedback.
   ///
   /// In en, this message translates to:
-  /// **'Transfer completion'**
+  /// **'Transfer completion tone'**
   String get acoustic_feedback;
 
   /// No description provided for @transfer_complete.

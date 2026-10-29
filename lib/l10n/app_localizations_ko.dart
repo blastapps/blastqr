@@ -201,7 +201,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get chunk_length => 'QR 코드 크기';
 
   @override
-  String get playback_fps => '시퀀스 재생 속도';
+  String get playback_fps => '재생 속도';
 
   @override
   String get licenses => '라이선스';
@@ -324,10 +324,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get playback_fps_hint => '20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다';
 
   @override
-  String get multi_qr_mode => '다중 QR 모드로 시작';
+  String get multi_qr_mode => '전체 화면으로 시작';
 
   @override
-  String get multi_qr_mode_subtitle => '화면에 맞는 만큼 많은 코드를 표시합니다';
+  String get multi_qr_mode_subtitle => '화면에 들어가는 만큼 코드를 표시해 속도를 높입니다';
 
   @override
   String get images_section => '이미지';
@@ -357,13 +357,13 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get acoustic_detection => '완료 자동 감지';
+  String get acoustic_detection => '완료 알림음 감지';
 
   @override
-  String get acoustic_detection_subtitle => '마이크를 사용하여 전송 완료를 감지합니다';
+  String get acoustic_detection_subtitle => '마이크를 사용하여 파일 전송이 끝났는지 감지합니다';
 
   @override
-  String get acoustic_feedback => '전송 완료 감지';
+  String get acoustic_feedback => '전송 완료 알림음';
 
   @override
   String get transfer_complete => '전송 완료!';

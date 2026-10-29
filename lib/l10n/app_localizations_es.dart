@@ -334,11 +334,11 @@ class AppLocalizationsEs extends AppLocalizations {
       '20 FPS es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos';
 
   @override
-  String get multi_qr_mode => 'Iniciar en modo multi-QR';
+  String get multi_qr_mode => 'Iniciar en pantalla completa';
 
   @override
   String get multi_qr_mode_subtitle =>
-      'Muestra tantos códigos como quepan en la pantalla';
+      'Muestra tantos códigos como quepan en pantalla para ir más rápido';
 
   @override
   String get images_section => 'Imágenes';
@@ -370,14 +370,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get acoustic_detection => 'Detección acústica';
+  String get acoustic_detection => 'Detectar tono de finalización';
 
   @override
   String get acoustic_detection_subtitle =>
-      'Usa el micrófono para detectar la finalización de transferencias';
+      'Usa el micrófono para detectar cuándo ha terminado una transferencia de archivos';
 
   @override
-  String get acoustic_feedback => 'Finalización de transferencia';
+  String get acoustic_feedback => 'Tono de finalización de transferencia';
 
   @override
   String get transfer_complete => '¡Transferencia completa!';

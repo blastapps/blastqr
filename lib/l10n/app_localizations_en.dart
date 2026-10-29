@@ -204,7 +204,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chunk_length => 'QR code size';
 
   @override
-  String get playback_fps => 'Sequence playback speed';
+  String get playback_fps => 'Playback speed';
 
   @override
   String get licenses => 'Licenses';
@@ -334,11 +334,11 @@ class AppLocalizationsEn extends AppLocalizations {
       '20 FPS is the recommended value for best performance on most devices';
 
   @override
-  String get multi_qr_mode => 'Start in multi QR mode';
+  String get multi_qr_mode => 'Start in fullscreen';
 
   @override
   String get multi_qr_mode_subtitle =>
-      'Displays as many codes as fit on screen';
+      'Show as many codes as fit on screen for a speed boost';
 
   @override
   String get images_section => 'Images';
@@ -370,14 +370,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get acoustic_detection => 'Auto-detect completion';
+  String get acoustic_detection => 'Detect completion tone';
 
   @override
   String get acoustic_detection_subtitle =>
-      'Use microphone to detect transfer completion';
+      'Use microphone to detect when a file transfer has finished';
 
   @override
-  String get acoustic_feedback => 'Transfer completion';
+  String get acoustic_feedback => 'Transfer completion tone';
 
   @override
   String get transfer_complete => 'Transfer complete!';
