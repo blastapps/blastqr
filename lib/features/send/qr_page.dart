@@ -28,7 +28,7 @@ class QrPage extends StatefulWidget {
     this.fileName,
   });
 
-  static const largeFileBytes = 600000;
+  static const largeFileBytes = 1500000;
 
   final FileWrapper file;
 
