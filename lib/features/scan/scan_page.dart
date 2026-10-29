@@ -222,6 +222,7 @@ class _ScanPageState extends State<ScanPage> {
                           resolution: _cameraResolution,
                           fps: _cameraFps,
                           zoom: appSettings.cameraZoom,
+                          autoRestart: _shouldScan,
                           onCodes: _handleMultiscan,
                           onCameraChanged: _onCameraChanged,
                           onFrame: DecodeStats.instance.record,
@@ -775,7 +776,7 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _handleRegularQRCodeResult(String? text) async {
-    _shouldScan = false;
+    setState(() => _shouldScan = false);
     if (_appSettings.hapticFeedback) {
       HapticFeedback.heavyImpact();
     }

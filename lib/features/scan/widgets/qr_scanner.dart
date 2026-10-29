@@ -18,6 +18,7 @@ class QrScanner extends StatefulWidget {
     required this.onCodes,
     this.fps,
     this.zoom = 1.0,
+    this.autoRestart = true,
     this.onCameraChanged,
     this.onFrame,
   });
@@ -29,6 +30,10 @@ class QrScanner extends StatefulWidget {
 
   /// Starting zoom, clamped to what the camera supports. Pinching starts here.
   final double zoom;
+
+  /// Whether the camera may reopen when nothing is read for a while. Off while
+  /// the page isn't scanning, such as when a sheet covers the preview.
+  final bool autoRestart;
 
   /// Codes read from one frame; never empty.
   final void Function(Codes codes) onCodes;
@@ -103,6 +108,10 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       _open();
     } else if (oldWidget.zoom != widget.zoom) {
       _setZoom(widget.zoom);
+    }
+    if (widget.autoRestart && !oldWidget.autoRestart) {
+      _restartAfter = _firstRestartAfter;
+      _sinceLastCode.reset();
     }
   }
 
@@ -317,6 +326,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       if (generation != _generation || !mounted) return;
 
       if (codes.codes.isEmpty &&
+          widget.autoRestart &&
           (Platform.isAndroid || Platform.isIOS) &&
           _differentCodes.length < _keepAfterCodes &&
           _sinceLastCode.elapsed > _restartAfter) {
