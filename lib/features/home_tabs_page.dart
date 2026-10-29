@@ -12,11 +12,11 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/platform_support.dart';
+import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:blast_qr/widgets/qr_twinkle_background.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -39,39 +39,56 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
   }
 
   Future<void> initPlatformState() async {
-    if (!Platform.isIOS && !Platform.isAndroid) return;
+    if (!Platform.isIOS && !Platform.isAndroid) {
+      await _clearTempFiles();
+      return;
+    }
     final sharing = ReceiveSharingIntent.instance;
-    sharing.getMediaStream().listen((media) {
-      if (!mounted) return;
-      _handleSharedMedia(media);
+    sharing.getMediaStream().listen((media) async {
+      final files = await _takeSharedMedia(media);
+      if (mounted && files.isNotEmpty) _showQrPage(files);
     });
 
     final initial = await sharing.getInitialMedia();
-    if (!mounted) return;
-    if (initial.isNotEmpty) _handleSharedMedia(initial);
     sharing.reset();
+    final files = await _takeSharedMedia(initial);
+    await _clearTempFiles(keep: files.firstOrNull?.parent);
+    if (mounted && files.isNotEmpty) _showQrPage(files);
   }
 
-  Future<void> _handleSharedMedia(List<SharedMediaFile> media) async {
+  Future<void> _clearTempFiles({Directory? keep}) async {
+    try {
+      await clearTempFiles(keep: keep);
+    } catch (error) {
+      debugPrint('Failed to clear temp files: $error');
+    }
+  }
+
+  Future<List<File>> _takeSharedMedia(List<SharedMediaFile> media) async {
+    if (media.isEmpty) return [];
+    final dir = await createSharedFilesDirectory();
     final files = <File>[];
     for (final item in media) {
-      switch (item.type) {
-        case SharedMediaType.text || SharedMediaType.url:
-          if (item.path.isNotEmpty) {
-            files.add(await _writeSharedText(item.path));
-          }
-        default:
-          files.add(File(item.path));
+      try {
+        switch (item.type) {
+          case SharedMediaType.text || SharedMediaType.url:
+            if (item.path.isNotEmpty) {
+              files.add(await _writeSharedText(item.path, dir));
+            }
+          default:
+            files.add(await takeSharedFile(item.path, dir));
+        }
+        if (item.thumbnail case final thumbnail?) {
+          await File(thumbnail).delete();
+        }
+      } on FileSystemException catch (error) {
+        debugPrint('Failed to take shared file: $error');
       }
     }
-    if (files.isNotEmpty) _showQrPage(files);
+    return files;
   }
 
-  Future<File> _writeSharedText(String text) async {
-    final dir = Directory(
-      '${(await getTemporaryDirectory()).path}/shared_text',
-    );
-    await dir.create(recursive: true);
+  Future<File> _writeSharedText(String text, Directory dir) async {
     final firstLine = text.trim().split('\n').first;
     var name = firstLine.replaceAll(RegExp(r'[^\w\- ]'), '').trim();
     if (name.length > 40) name = name.substring(0, 40).trim();

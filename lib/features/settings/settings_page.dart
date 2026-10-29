@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
 import 'package:blast_qr/features/settings/appearance_page.dart';
 import 'package:blast_qr/features/settings/debug_page.dart';
+import 'package:blast_qr/features/settings/files_settings_page.dart';
 import 'package:blast_qr/features/settings/receiving_settings_page.dart';
 import 'package:blast_qr/features/settings/send_settings_page.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
@@ -121,6 +124,14 @@ class _SettingsPageState extends State<SettingsPage> {
           title: context.l10n.receiving_settings,
           page: const ReceivingSettingsPage(),
         ),
+        if (Platform.isIOS)
+          _detailTile(
+            context,
+            index: 5,
+            icon: HugeIcons.strokeRoundedFolder01,
+            title: context.l10n.files_settings,
+            page: const FilesSettingsPage(),
+          ),
         _detailTile(
           context,
           index: 3,

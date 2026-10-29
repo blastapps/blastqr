@@ -1223,6 +1223,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copied'**
   String get copied;
+
+  /// No description provided for @files_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get files_settings;
+
+  /// No description provided for @show_in_files_app.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Files app'**
+  String get show_in_files_app;
+
+  /// No description provided for @show_in_files_app_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets you open received files from the Files app, and from Finder on a connected Mac.'**
+  String get show_in_files_app_hint;
 }
 
 class _AppLocalizationsDelegate

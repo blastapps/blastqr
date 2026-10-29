@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/save_to_downloads.dart';
 import 'package:blast_qr/features/files_received/received_items.dart';
@@ -16,6 +17,7 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/scanned_qr_code.dart';
+import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/widgets/blast_chip.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
@@ -24,7 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class FilesPage extends StatefulWidget {
@@ -42,6 +43,8 @@ class _FilesPageState extends State<FilesPage> {
   bool _isLoading = true;
   ReceivedFilter _selectedFilter = ReceivedFilter.all;
   final Set<ReceivedItem> _selectedItems = {};
+  late final AppSettings _appSettings;
+  late bool _showInFilesApp;
 
   bool get _isSelecting => _selectedItems.isNotEmpty;
 
@@ -56,29 +59,41 @@ class _FilesPageState extends State<FilesPage> {
   @override
   void initState() {
     super.initState();
+    _appSettings = Provider.of<AppSettings>(context, listen: false)
+      ..addListener(_onSettingsChanged);
+    _showInFilesApp = _appSettings.showInFilesApp;
     _loadItems();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<FileBadgeCount>(context, listen: false).clear();
     });
   }
 
-  Future<void> _loadItems() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final itemsDirectory = Directory('${directory.path}/docs');
+  @override
+  void dispose() {
+    _appSettings.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
 
-    final files = await itemsDirectory.exists()
-        ? await Future.wait(
-            itemsDirectory.listSync().whereType<File>().map(
-              (f) => f.toFileWrapper(),
-            ),
-          )
-        : <FileWrapper>[];
+  // Changing the setting moves the files to another directory.
+  void _onSettingsChanged() {
+    if (_appSettings.showInFilesApp == _showInFilesApp) return;
+    _showInFilesApp = _appSettings.showInFilesApp;
+    _selectedItems.clear();
+    _loadItems();
+  }
+
+  Future<void> _loadItems() async {
+    final itemsDirectory = await receivedFilesDirectory();
+    final files = await Future.wait(
+      itemsDirectory.listSync().whereType<File>().map((f) => f.toFileWrapper()),
+    );
     final qrCodes = await loadScannedQrCodes(await qrCodesDirectory());
     _items = [
       ...files.map(ReceivedFile.new),
       ...qrCodes.map(ReceivedQrCode.new),
     ]..sort((l, r) => r.date.compareTo(l.date));
     _isLoading = false;
+    if (!mounted) return;
     setState(() {});
   }
 

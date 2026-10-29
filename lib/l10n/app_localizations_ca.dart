@@ -633,4 +633,14 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get copied => 'Copiat';
+
+  @override
+  String get files_settings => 'Fitxers';
+
+  @override
+  String get show_in_files_app => 'Mostra a l\'app Fitxers';
+
+  @override
+  String get show_in_files_app_hint =>
+      'Permet obrir els fitxers rebuts des de l\'app Fitxers i des del Finder d\'un Mac connectat.';
 }

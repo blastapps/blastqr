@@ -1,0 +1,66 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+
+const _channel = MethodChannel('blastqr/files');
+
+// Desktop temp directories are shared with other apps, so only these are ours.
+const _ownedPrefixes = [
+  'shared_',
+  'dropped_',
+  'bundles',
+  'receiving-',
+  'debug_export',
+];
+
+bool get _ownsTempDirectory => Platform.isIOS || Platform.isAndroid;
+
+/// A new temp directory for files shared into the app.
+Future<Directory> createSharedFilesDirectory() async =>
+    (await getTemporaryDirectory()).createTemp('shared_');
+
+/// Moves a file the share extension (iOS) or share intent (Android) copied
+/// for us into [directory], so it can be deleted later.
+Future<File> takeSharedFile(String path, Directory directory) async {
+  final file = File(path);
+  final target = '${directory.path}/${file.uri.pathSegments.last}';
+  try {
+    return await file.rename(target);
+  } on FileSystemException {
+    final copy = await file.copy(target);
+    await file.delete();
+    return copy;
+  }
+}
+
+/// Deletes copies of files left by earlier sessions: files shared or picked
+/// to send, and unfinished receives. [keep] is a temp directory still in use.
+Future<void> clearTempFiles({Directory? keep}) async {
+  final temp = await getTemporaryDirectory();
+  await for (final entity in temp.list()) {
+    if (entity.path == keep?.path) continue;
+    final name = entity.uri.pathSegments.lastWhere((s) => s.isNotEmpty);
+    if (!_ownsTempDirectory && !_ownedPrefixes.any(name.startsWith)) continue;
+    await _delete(entity);
+  }
+
+  if (Platform.isIOS) {
+    final path = await _channel.invokeMethod<String>('sharedContainerPath');
+    if (path == null) return;
+    // Only visible files: the container also holds the share extension's
+    // settings and a hidden iOS metadata file.
+    await for (final entity in Directory(path).list()) {
+      if (entity is! File || entity.uri.pathSegments.last.startsWith('.')) {
+        continue;
+      }
+      await _delete(entity);
+    }
+  }
+}
+
+Future<void> _delete(FileSystemEntity entity) async {
+  try {
+    await entity.delete(recursive: true);
+  } on FileSystemException catch (_) {}
+}

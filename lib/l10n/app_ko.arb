@@ -188,5 +188,8 @@
   "qr_code": "QR 코드",
   "filter_qr": "QR",
   "scanned_at": "{date}에 스캔함",
-  "copied": "복사됨"
+  "copied": "복사됨",
+  "files_settings": "파일",
+  "show_in_files_app": "파일 앱에 표시",
+  "show_in_files_app_hint": "받은 파일을 파일 앱과 연결된 Mac의 Finder에서 열 수 있습니다."
 }

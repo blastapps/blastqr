@@ -4,6 +4,7 @@ import 'package:blast_qr/features/home_tabs_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
+import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:blastqr_crypto/blastqr_crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -32,6 +33,9 @@ void main() async {
   );
 
   await AppPreferences.read();
+  await syncReceivedFiles().catchError((Object error) {
+    debugPrint('Failed to set up received files: $error');
+  });
   await RaptorQFlutter.init().timeout(
     const Duration(seconds: 1),
     onTimeout: () {

@@ -22,6 +22,7 @@ import 'package:blast_qr/model/receiving_file_metadata.dart';
 import 'package:blast_qr/model/scanned_qr_code.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
+import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/sound_feedback.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
@@ -523,12 +524,7 @@ class _ScanPageState extends State<ScanPage> {
     }
     _loadingResult = false;
 
-    final directory = await getApplicationDocumentsDirectory();
-    final itemsDirectory = Directory('${directory.path}/docs');
-
-    if (await itemsDirectory.exists() == false) {
-      await itemsDirectory.create();
-    }
+    final itemsDirectory = await receivedFilesDirectory();
 
     final List<File> resultFiles;
     try {

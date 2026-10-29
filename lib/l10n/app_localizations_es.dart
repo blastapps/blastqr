@@ -632,4 +632,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get copied => 'Copiado';
+
+  @override
+  String get files_settings => 'Archivos';
+
+  @override
+  String get show_in_files_app => 'Mostrar en la app Archivos';
+
+  @override
+  String get show_in_files_app_hint =>
+      'Permite abrir los archivos recibidos desde la app Archivos y desde el Finder de un Mac conectado.';
 }

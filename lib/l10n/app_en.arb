@@ -215,5 +215,8 @@
   "filter_qr": "QR",
   "scanned_at": "Scanned at {date}",
   "@scanned_at": {"placeholders": {"date": {"type": "String"}}},
-  "copied": "Copied"
+  "copied": "Copied",
+  "files_settings": "Files",
+  "show_in_files_app": "Show in Files app",
+  "show_in_files_app_hint": "Lets you open received files from the Files app, and from Finder on a connected Mac."
 }

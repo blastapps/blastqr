@@ -613,4 +613,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get copied => '복사됨';
+
+  @override
+  String get files_settings => '파일';
+
+  @override
+  String get show_in_files_app => '파일 앱에 표시';
+
+  @override
+  String get show_in_files_app_hint =>
+      '받은 파일을 파일 앱과 연결된 Mac의 Finder에서 열 수 있습니다.';
 }

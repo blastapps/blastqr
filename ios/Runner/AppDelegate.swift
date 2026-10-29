@@ -50,6 +50,31 @@ import UIKit
         default: result(FlutterMethodNotImplemented)
         }
       }
+    FlutterMethodChannel(name: "blastqr/files", binaryMessenger: registrar.messenger())
+      .setMethodCallHandler { call, result in
+        switch call.method {
+        case "sharedContainerPath":
+          let group = "group.\(Bundle.main.bundleIdentifier ?? "")"
+          result(
+            FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)?.path)
+        case "excludeFromBackup":
+          guard let path = call.arguments as? String else {
+            result(FlutterError(code: "bad_args", message: "Missing path", details: nil))
+            return
+          }
+          var url = URL(fileURLWithPath: path, isDirectory: true)
+          var values = URLResourceValues()
+          values.isExcludedFromBackup = true
+          do {
+            try url.setResourceValues(values)
+            result(nil)
+          } catch {
+            result(
+              FlutterError(code: "failed", message: error.localizedDescription, details: nil))
+          }
+        default: result(FlutterMethodNotImplemented)
+        }
+      }
   }
 
   // Live state of the back wide camera, the one the scanner opens. Reading it

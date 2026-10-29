@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:blast_qr/received_files_directory.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,7 @@ class AppSettings extends ChangeNotifier {
   bool acousticDetection;
   bool hasSeenMicPrompt;
   bool alwaysCompressImages;
+  bool showInFilesApp;
 
   AppSettings()
     : locale = AppPreferences.locale,
@@ -43,7 +45,8 @@ class AppSettings extends ChangeNotifier {
       soundFeedback = AppPreferences.soundFeedback,
       acousticDetection = AppPreferences.acousticDetection,
       hasSeenMicPrompt = AppPreferences.hasSeenMicPrompt,
-      alwaysCompressImages = AppPreferences.alwaysCompressImages;
+      alwaysCompressImages = AppPreferences.alwaysCompressImages,
+      showInFilesApp = AppPreferences.showInFilesApp;
 
   void updateLocale(String? localeId) {
     log('Setting locale to $localeId');
@@ -139,6 +142,17 @@ class AppSettings extends ChangeNotifier {
   void updateAlwaysCompressImages(bool value) {
     AppPreferences.setAlwaysCompressImages(value);
     alwaysCompressImages = value;
+    notifyListeners();
+  }
+
+  Future<void> updateShowInFilesApp(bool value) async {
+    await AppPreferences.setShowInFilesApp(value);
+    showInFilesApp = value;
+    try {
+      await syncReceivedFiles();
+    } catch (error) {
+      log('Failed to move received files: $error');
+    }
     notifyListeners();
   }
 }

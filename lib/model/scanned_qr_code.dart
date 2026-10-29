@@ -23,7 +23,17 @@ class ScannedQrCode {
   });
 }
 
+/// On iOS, Documents shows in the Files app, so codes go in Application
+/// Support instead.
 Future<Directory> qrCodesDirectory() async {
+  final base = Platform.isIOS
+      ? await getApplicationSupportDirectory()
+      : await getApplicationDocumentsDirectory();
+  return Directory('${base.path}/qr_codes');
+}
+
+/// Where iOS kept codes before they moved to Application Support.
+Future<Directory> legacyQrCodesDirectory() async {
   final documents = await getApplicationDocumentsDirectory();
   return Directory('${documents.path}/qr_codes');
 }

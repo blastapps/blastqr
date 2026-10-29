@@ -37,6 +37,7 @@ class AppPreferences {
   static bool? _multipleQrCodes;
   static bool? _hasSeenMicPrompt;
   static bool? _alwaysCompressImages;
+  static bool? _showInFilesApp;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
@@ -60,6 +61,7 @@ class AppPreferences {
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
   static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
   static bool get alwaysCompressImages => _alwaysCompressImages ?? true;
+  static bool get showInFilesApp => _showInFilesApp ?? false;
 
   static Future<void> setLocale(String? localeId) async {
     if (localeId == null) {
@@ -188,6 +190,12 @@ class AppPreferences {
     _alwaysCompressImages = value;
   }
 
+  static Future<void> setShowInFilesApp(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('showInFilesApp', value);
+    _showInFilesApp = value;
+  }
+
   static Future<void> read() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     _localeId = sp.getString('locale_id');
@@ -216,5 +224,6 @@ class AppPreferences {
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
     _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
     _alwaysCompressImages = sp.getBool('alwaysCompressImages') ?? true;
+    _showInFilesApp = sp.getBool('showInFilesApp') ?? false;
   }
 }

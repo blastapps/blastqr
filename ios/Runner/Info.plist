@@ -56,7 +56,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<string>No</string>
+	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes</string>
 	<key>NSMicrophoneUsageDescription</key>
