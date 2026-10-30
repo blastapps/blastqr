@@ -89,7 +89,7 @@
   "file_too_large_msg": "This file exceeds the 4 GB limit and cannot be sent.",
   "low_speed_warning": "Low transfer speed. Adjust the position of the devices and keep them still for better performance",
   "send_file": "Send files",
-  "send_picture": "Send pictures",
+  "send_picture": "Send photos & videos",
   "send_file_subtitle": "Any file type",
   "send_picture_subtitle": "From your photo library",
   "desktop_receive_unsupported": "* Receiving files is not supported on Windows yet",

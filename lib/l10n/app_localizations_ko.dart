@@ -285,7 +285,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_file => '파일 보내기';
 
   @override
-  String get send_picture => '사진 보내기';
+  String get send_picture => '사진 및 동영상 보내기';
 
   @override
   String get send_file_subtitle => '모든 파일 형식';

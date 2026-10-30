@@ -645,7 +645,7 @@ abstract class AppLocalizations {
   /// No description provided for @send_picture.
   ///
   /// In en, this message translates to:
-  /// **'Send pictures'**
+  /// **'Send photos & videos'**
   String get send_picture;
 
   /// No description provided for @send_file_subtitle.

@@ -291,7 +291,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get send_file => 'Envia fitxers';
 
   @override
-  String get send_picture => 'Envia imatges';
+  String get send_picture => 'Envia fotos i vídeos';
 
   @override
   String get send_file_subtitle => 'Qualsevol tipus de fitxer';

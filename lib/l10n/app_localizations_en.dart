@@ -291,7 +291,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get send_file => 'Send files';
 
   @override
-  String get send_picture => 'Send pictures';
+  String get send_picture => 'Send photos & videos';
 
   @override
   String get send_file_subtitle => 'Any file type';

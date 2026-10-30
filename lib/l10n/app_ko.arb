@@ -92,7 +92,7 @@
   "downscaling": "다운스케일링",
   "camera_resolution": "카메라 미리보기 해상도",
   "send_file": "파일 보내기",
-  "send_picture": "사진 보내기",
+  "send_picture": "사진 및 동영상 보내기",
   "send_file_subtitle": "모든 파일 형식",
   "send_picture_subtitle": "사진 보관함에서",
   "desktop_receive_unsupported": "* Windows에서는 아직 파일 수신이 지원되지 않습니다",

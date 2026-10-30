@@ -97,7 +97,7 @@ class _SendPageState extends State<SendPage> {
                     title: context.l10n.send_picture,
                     subtitle: context.l10n.send_picture_subtitle,
                     flipIcon: true,
-                    onTap: _pickImageToEncode,
+                    onTap: _pickMediaToEncode,
                   ),
                 ],
               ),
@@ -137,11 +137,11 @@ class _SendPageState extends State<SendPage> {
     }
   }
 
-  void _pickImageToEncode() async {
+  void _pickMediaToEncode() async {
     final picker = ImagePicker();
-    final List<XFile> images = await picker.pickMultiImage();
-    if (images.isNotEmpty && mounted) {
-      _showQrPages(images.map((f) => File(f.path)).toList());
+    final List<XFile> media = await picker.pickMultipleMedia();
+    if (media.isNotEmpty && mounted) {
+      _showQrPages(media.map((f) => File(f.path)).toList());
     }
   }
 
