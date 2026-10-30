@@ -233,6 +233,7 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
 
   void _showQrPage(List<File> files) async {
     Navigator.of(context).popUntil((r) => r.isFirst); // Go back to main screen
+    setState(() => _currentTab = 0);
     final fileWrappers = [for (final f in files) await f.toFileWrapper()];
     if (!mounted) return;
     final options = await chooseSendOptions(context, fileWrappers);
