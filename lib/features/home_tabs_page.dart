@@ -17,6 +17,7 @@ import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:blast_qr/widgets/qr_twinkle_background.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -71,7 +72,8 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     for (final item in media) {
       try {
         switch (item.type) {
-          case SharedMediaType.text || SharedMediaType.url:
+          case SharedMediaType.text || SharedMediaType.url
+              when !await _isSharedTextFile(item):
             if (item.path.isNotEmpty) {
               files.add(await _writeSharedText(item.path, dir));
             }
@@ -86,6 +88,15 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
       }
     }
     return files;
+  }
+
+  /// Android reports shared text/* files (like .txt) as text, with the path
+  /// of the copy it made in the cache directory instead of the contents.
+  Future<bool> _isSharedTextFile(SharedMediaFile item) async {
+    if (!Platform.isAndroid || item.type != SharedMediaType.text) return false;
+    final file = File(item.path);
+    final cache = await getTemporaryDirectory();
+    return file.parent.path == cache.path && await file.exists();
   }
 
   Future<File> _writeSharedText(String text, Directory dir) async {
