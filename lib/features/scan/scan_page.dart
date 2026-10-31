@@ -506,6 +506,7 @@ class _ScanPageState extends State<ScanPage> {
 
     final elapsedTime =
         DateTime.now().difference(_latestScanStartTime).inMilliseconds / 1000;
+    final transferredBytes = data.length;
 
     // Everything has arrived: play the completion tone now
     _playTransferComplete();
@@ -558,6 +559,7 @@ class _ScanPageState extends State<ScanPage> {
     _showResultSheet(
       fileWrappers,
       elapsedTime,
+      transferredBytes,
       encrypted: metadata.isEncrypted,
     ).then((_) async {
       if (fileWrappers.length == 1) {
@@ -653,13 +655,15 @@ class _ScanPageState extends State<ScanPage> {
 
   Future<void> _showResultSheet(
     List<FileWrapper> files,
-    double timeInSeconds, {
+    double timeInSeconds,
+    int transferredBytes, {
     bool encrypted = false,
   }) async {
     final file = files.first;
     _renameController.text = file.name;
-    final totalSize = files.fold(0, (sum, f) => sum + f.size);
-    final speed = ((totalSize / 1000) / timeInSeconds).toStringAsFixed(1);
+    final speed = ((transferredBytes / 1000) / timeInSeconds).toStringAsFixed(
+      1,
+    );
     return showSheet(
       context: context,
       title:
