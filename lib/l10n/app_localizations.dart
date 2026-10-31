@@ -732,6 +732,18 @@ abstract class AppLocalizations {
   /// **'Show as many codes as fit on screen for a speed boost'**
   String get multi_qr_mode_subtitle;
 
+  /// No description provided for @optimize_small_files.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimize small files'**
+  String get optimize_small_files;
+
+  /// No description provided for @optimize_small_files_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use smaller codes at 15 FPS for files under 40 KB, which scan more reliably'**
+  String get optimize_small_files_subtitle;
+
   /// No description provided for @images_section.
   ///
   /// In en, this message translates to:

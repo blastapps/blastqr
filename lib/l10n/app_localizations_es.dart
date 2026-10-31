@@ -341,6 +341,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Muestra tantos códigos como quepan en pantalla para ir más rápido';
 
   @override
+  String get optimize_small_files => 'Optimizar archivos pequeños';
+
+  @override
+  String get optimize_small_files_subtitle =>
+      'Usa códigos más pequeños a 15 FPS para archivos de menos de 40 KB, que se escanean mejor';
+
+  @override
   String get images_section => 'Imágenes';
 
   @override

@@ -106,6 +106,8 @@
   "playback_fps_hint": "20 FPS és el valor recomanat per al millor rendiment a la majoria de dispositius",
   "multi_qr_mode": "Inicia en pantalla completa",
   "multi_qr_mode_subtitle": "Mostra tants codis com càpiguen a la pantalla per anar més ràpid",
+  "optimize_small_files": "Optimitza fitxers petits",
+  "optimize_small_files_subtitle": "Fa servir codis més petits a 15 FPS per a fitxers de menys de 40 KB, que s'escanegen millor",
   "images_section": "Imatges",
   "always_compress_images": "Comprimir imatges sempre",
   "always_compress_images_subtitle": "Omet l'avís de compressió per a fitxers grans",

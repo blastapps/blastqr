@@ -104,6 +104,8 @@
   "playback_fps_hint": "20 FPS is the recommended value for best performance on most devices",
   "multi_qr_mode": "Start in fullscreen",
   "multi_qr_mode_subtitle": "Show as many codes as fit on screen for a speed boost",
+  "optimize_small_files": "Optimize small files",
+  "optimize_small_files_subtitle": "Use smaller codes at 15 FPS for files under 40 KB, which scan more reliably",
   "images_section": "Images",
   "always_compress_images": "Always compress images",
   "always_compress_images_subtitle": "Skip the compression prompt for large files",

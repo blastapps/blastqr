@@ -107,6 +107,8 @@
   "playback_fps_hint": "20 FPS es el valor recomendado para el mejor rendimiento en la mayoría de dispositivos",
   "multi_qr_mode": "Iniciar en pantalla completa",
   "multi_qr_mode_subtitle": "Muestra tantos códigos como quepan en pantalla para ir más rápido",
+  "optimize_small_files": "Optimizar archivos pequeños",
+  "optimize_small_files_subtitle": "Usa códigos más pequeños a 15 FPS para archivos de menos de 40 KB, que se escanean mejor",
   "images_section": "Imágenes",
   "always_compress_images": "Comprimir imágenes siempre",
   "always_compress_images_subtitle": "Omite el aviso de compresión para archivos grandes",

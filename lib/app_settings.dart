@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math' show min;
 
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
@@ -14,6 +15,7 @@ class AppSettings extends ChangeNotifier {
   Color accentColor;
   ImageCompressionSettings imageCompressionSettings;
   ResolutionPreset cameraResolution;
+
   /// Null for the camera's default.
   int? cameraFps;
   double cameraZoom;
@@ -161,11 +163,25 @@ class EncodeSettings extends ChangeNotifier {
   int mtu;
   int playbackFps;
   bool multipleQrCodes;
+  bool optimizeSmallFiles;
 
   EncodeSettings()
     : mtu = AppPreferences.mtu,
       playbackFps = AppPreferences.playbackFps,
-      multipleQrCodes = AppPreferences.multipleQrCodes;
+      multipleQrCodes = AppPreferences.multipleQrCodes,
+      optimizeSmallFiles = AppPreferences.optimizeSmallFiles;
+
+  bool _isOptimized(int fileSize) =>
+      optimizeSmallFiles && fileSize <= AppPreferences.smallFileBytes;
+
+  /// Smaller codes and a slower rate for small files, unless the user's
+  /// settings are already lower.
+  int mtuFor(int fileSize) =>
+      _isOptimized(fileSize) ? min(mtu, AppPreferences.smallFileMtu) : mtu;
+
+  int fpsFor(int fileSize) => _isOptimized(fileSize)
+      ? min(playbackFps, AppPreferences.smallFileFps)
+      : playbackFps;
 
   void updateMtu(int mtu) {
     AppPreferences.setMtu(mtu);
@@ -182,6 +198,12 @@ class EncodeSettings extends ChangeNotifier {
   void updateMultipleQrCodes(bool value) {
     AppPreferences.setMultipleQrCodes(value);
     multipleQrCodes = value;
+    notifyListeners();
+  }
+
+  void updateOptimizeSmallFiles(bool value) {
+    AppPreferences.setOptimizeSmallFiles(value);
+    optimizeSmallFiles = value;
     notifyListeners();
   }
 }

@@ -10,6 +10,12 @@ class AppPreferences {
   static int defaultMtu = 2935;
   static int defaultFps = 20;
 
+  /// Files up to this size are sent with [smallFileMtu] and [smallFileFps]
+  /// when the small file optimization is on.
+  static const smallFileBytes = 40000;
+  static const smallFileMtu = 1000;
+  static const smallFileFps = 15;
+
   /// iPhones can't focus closer than about 15 cm; zooming in fills the frame
   /// with the code from a distance they can focus at.
   static double get defaultCameraZoom => Platform.isIOS ? 1.25 : 1.0;
@@ -35,6 +41,7 @@ class AppPreferences {
   static bool? _soundFeedback;
   static bool? _acousticDetection;
   static bool? _multipleQrCodes;
+  static bool? _optimizeSmallFiles;
   static bool? _hasSeenMicPrompt;
   static bool? _alwaysCompressImages;
   static bool? _showInFilesApp;
@@ -50,6 +57,7 @@ class AppPreferences {
       _imageCompressionSettings ?? ImageCompressionSettings.defaultSettings;
   static ResolutionPreset get cameraResolution =>
       _cameraResolution ?? defaultCameraResolution;
+
   /// Null for the camera's default.
   static int? get cameraFps => _cameraFps;
   static double get cameraZoom => _cameraZoom ?? defaultCameraZoom;
@@ -59,6 +67,7 @@ class AppPreferences {
   static bool get soundFeedback => _soundFeedback ?? true;
   static bool get acousticDetection => _acousticDetection ?? false;
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
+  static bool get optimizeSmallFiles => _optimizeSmallFiles ?? true;
   static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
   static bool get alwaysCompressImages => _alwaysCompressImages ?? true;
   static bool get showInFilesApp => _showInFilesApp ?? false;
@@ -178,6 +187,12 @@ class AppPreferences {
     _multipleQrCodes = value;
   }
 
+  static Future<void> setOptimizeSmallFiles(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('optimizeSmallFiles', value);
+    _optimizeSmallFiles = value;
+  }
+
   static Future<void> setHasSeenMicPrompt(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('hasSeenMicPrompt', value);
@@ -210,10 +225,9 @@ class AppPreferences {
     _imageCompressionSettings = ImageCompressionSettings.parseSafely(
       sp.getString('ic_settings'),
     );
-    _cameraResolution =
-        sp.getInt('camera_resolution') != null
-            ? ResolutionPreset.values[sp.getInt('camera_resolution')!]
-            : defaultCameraResolution;
+    _cameraResolution = sp.getInt('camera_resolution') != null
+        ? ResolutionPreset.values[sp.getInt('camera_resolution')!]
+        : defaultCameraResolution;
     _cameraFps = sp.getInt('cameraFps');
     _cameraZoom = sp.getDouble('cameraZoom') ?? defaultCameraZoom;
     _debugVideoHdr = sp.getBool('debugVideoHdr') ?? false;
@@ -222,6 +236,7 @@ class AppPreferences {
     _soundFeedback = sp.getBool('soundFeedback') ?? true;
     _acousticDetection = sp.getBool('acousticDetection') ?? false;
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
+    _optimizeSmallFiles = sp.getBool('optimizeSmallFiles') ?? true;
     _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
     _alwaysCompressImages = sp.getBool('alwaysCompressImages') ?? true;
     _showInFilesApp = sp.getBool('showInFilesApp') ?? false;

@@ -103,7 +103,7 @@ class _QrPageState extends State<QrPage> {
     final qrBoxHeight = MediaQuery.of(context).size.width;
     final appSettings = Provider.of<AppSettings>(context);
     final encodeSettings = Provider.of<EncodeSettings>(context);
-    final fps = _fps ?? encodeSettings.playbackFps;
+    final fps = _fps ?? encodeSettings.fpsFor(widget.file.size);
     final colors = Theme.of(context).colorScheme;
     final micOn = appSettings.acousticDetection;
     final iconColor = context.color.onPrimaryContainer;
@@ -159,10 +159,11 @@ class _QrPageState extends State<QrPage> {
                               )
                             : Consumer<EncodeSettings>(
                                 builder: (context, state, child) {
+                                  final mtu = state.mtuFor(widget.file.size);
                                   return RaptorQrStreamingWidget(
                                     controller: _qrController,
                                     file: widget.file,
-                                    mtu: state.mtu,
+                                    mtu: mtu,
                                     fps: fps,
                                     imageCompressionSettings:
                                         _shouldCompressImage
@@ -177,7 +178,7 @@ class _QrPageState extends State<QrPage> {
                                       size,
                                       multipleQrCodes: state.multipleQrCodes,
                                       fps: fps,
-                                      mtu: state.mtu,
+                                      mtu: mtu,
                                     ),
                                   );
                                 },
