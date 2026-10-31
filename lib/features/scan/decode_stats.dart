@@ -211,6 +211,14 @@ class TransferStats {
   DateTime? _lastFailedSave;
   DateTime? _lastReadSave;
 
+  // The failed frame budget is used up early in the transfer, so frames from
+  // a later stretch with no codes at all (about 0.5 s or longer) get their own.
+  static const _maxPauseFrames = 6;
+  static const _pauseAfterFrames = 15;
+  int _emptyStreak = 0;
+  int _pauseSaves = 0;
+  DateTime? _lastPauseSave;
+
   int get decoded => _decodeMicros.length;
   int get frames => decoded + skipped;
 
@@ -236,6 +244,18 @@ class TransferStats {
   void _maybeSaveFrame(CameraImage image, int codes, VoidCallback onSaved) {
     final hadCode = codes > 0 && codes >= maxCodesPerFrame;
     final now = DateTime.now();
+    _emptyStreak = codes == 0 ? _emptyStreak + 1 : 0;
+    if (_emptyStreak >= _pauseAfterFrames &&
+        _pauseSaves < _maxPauseFrames &&
+        (_lastPauseSave == null ||
+            now.difference(_lastPauseSave!) >= _failedFrameGap)) {
+      final grey = _GreyFrame.from(image);
+      if (grey == null) return;
+      _pauseSaves++;
+      _lastPauseSave = now;
+      _saveFrame(grey, codes, hadCode: false, now: now, onSaved: onSaved);
+      return;
+    }
     final saved = savedFrames.where((f) => f.hadCode == hadCode).length;
     final last = hadCode ? _lastReadSave : _lastFailedSave;
     if (saved >= (hadCode ? _maxReadFrames : _maxFailedFrames) ||
@@ -251,6 +271,16 @@ class TransferStats {
     } else {
       _lastFailedSave = now;
     }
+    _saveFrame(grey, codes, hadCode: hadCode, now: now, onSaved: onSaved);
+  }
+
+  void _saveFrame(
+    _GreyFrame grey,
+    int codes, {
+    required bool hadCode,
+    required DateTime now,
+    required VoidCallback onSaved,
+  }) {
     final at = now.difference(started);
     compute(_encodePng, grey).then((png) {
       savedFrames.add(
