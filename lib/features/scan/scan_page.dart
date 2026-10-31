@@ -191,14 +191,16 @@ class _ScanPageState extends State<ScanPage> {
           ),
           actions: [
             CircleButton(
-              onPressed: () {
-                Navigator.of(context).push(
+              onPressed: () async {
+                _setCameraOn(false);
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
                       return const SettingsPage();
                     },
                   ),
                 );
+                _setCameraOn(true);
               },
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
             ),
