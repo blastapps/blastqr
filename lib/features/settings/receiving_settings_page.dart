@@ -113,31 +113,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
             if (Platform.isIOS) const _AdvancedCameraSettings(),
           ],
           SettingGroupTitle(title: context.l10n.feedback),
-          Consumer<AppSettings>(
-            builder: (context, state, child) {
-              return SwitchListTile.adaptive(
-                contentPadding: const EdgeInsetsDirectional.only(start: 16),
-                value: state.hapticFeedback,
-                onChanged: (val) {
-                  Provider.of<AppSettings>(
-                    context,
-                    listen: false,
-                  ).updateHapticFeedback(val);
-                },
-                secondary: HugeIcon(
-                  icon: HugeIcons.strokeRoundedSmartPhone03,
-                  color: context.color.onSurface,
-                ),
-                title: Text(context.l10n.haptic_feedback),
-                subtitle: Text(
-                  state.hapticFeedback
-                      ? context.l10n.enabled
-                      : context.l10n.disabled,
-                ),
-                activeTrackColor: context.color.primary,
-              );
-            },
-          ),
+
           Consumer<AppSettings>(
             builder: (context, state, child) {
               return SwitchListTile.adaptive(
@@ -156,6 +132,31 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                 title: Text(context.l10n.sound_feedback),
                 subtitle: Text(
                   state.soundFeedback
+                      ? context.l10n.enabled
+                      : context.l10n.disabled,
+                ),
+                activeTrackColor: context.color.primary,
+              );
+            },
+          ),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
+                value: state.hapticFeedback,
+                onChanged: (val) {
+                  Provider.of<AppSettings>(
+                    context,
+                    listen: false,
+                  ).updateHapticFeedback(val);
+                },
+                secondary: HugeIcon(
+                  icon: HugeIcons.strokeRoundedSmartPhone03,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.haptic_feedback),
+                subtitle: Text(
+                  state.hapticFeedback
                       ? context.l10n.enabled
                       : context.l10n.disabled,
                 ),
