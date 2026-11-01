@@ -11,6 +11,7 @@ import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/platform_support.dart';
+import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
@@ -20,7 +21,6 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:path_provider/path_provider.dart';
 
 class SendPage extends StatefulWidget {
   const SendPage({super.key});
@@ -147,7 +147,7 @@ class _SendPageState extends State<SendPage> {
   /// Dropped files are only readable during the drop (macOS sandbox access is
   /// scoped to it), so copy them somewhere the app can keep using.
   Future<List<File>> _copyDroppedFiles(List<DropItem> items) async {
-    final dir = await (await getTemporaryDirectory()).createTemp('dropped_');
+    final dir = await (await appTempDirectory()).createTemp('dropped_');
     final files = <File>[];
     for (final item in items.whereType<DropItemFile>()) {
       final bookmark = item.extraAppleBookmark;

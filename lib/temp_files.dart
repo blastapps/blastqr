@@ -5,20 +5,17 @@ import 'package:path_provider/path_provider.dart';
 
 const _channel = MethodChannel('blastqr/files');
 
-// Desktop temp directories are shared with other apps, so only these are ours.
-const _ownedPrefixes = [
-  'shared_',
-  'dropped_',
-  'bundles',
-  'receiving-',
-  'debug_export',
-];
-
-bool get _ownsTempDirectory => Platform.isIOS || Platform.isAndroid;
+/// Where the app keeps its temp files. Desktop temp directories are shared
+/// with other apps, so there it's a folder of our own.
+Future<Directory> appTempDirectory() async {
+  final temp = await getTemporaryDirectory();
+  if (Platform.isIOS || Platform.isAndroid) return temp;
+  return Directory('${temp.path}/blastqr').create();
+}
 
 /// A new temp directory for files shared into the app.
 Future<Directory> createSharedFilesDirectory() async =>
-    (await getTemporaryDirectory()).createTemp('shared_');
+    (await appTempDirectory()).createTemp('shared_');
 
 /// Moves a file the share extension (iOS) or share intent (Android) copied
 /// for us into [directory], so it can be deleted later.
@@ -37,11 +34,9 @@ Future<File> takeSharedFile(String path, Directory directory) async {
 /// Deletes copies of files left by earlier sessions: files shared or picked
 /// to send, and unfinished receives. [keep] is a temp directory still in use.
 Future<void> clearTempFiles({Directory? keep}) async {
-  final temp = await getTemporaryDirectory();
+  final temp = await appTempDirectory();
   await for (final entity in temp.list()) {
     if (entity.path == keep?.path) continue;
-    final name = entity.uri.pathSegments.lastWhere((s) => s.isNotEmpty);
-    if (!_ownsTempDirectory && !_ownedPrefixes.any(name.startsWith)) continue;
     await _delete(entity);
   }
 

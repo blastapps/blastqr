@@ -10,9 +10,9 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:blast_qr/temp_files.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 /// Shows the QR page for [files]. Several files are sent as one bundle.
@@ -85,7 +85,7 @@ Future<FileWrapper> createSendBundle(
     entries.add((name: file.name, path: file.file.path, bytes: null));
   }
 
-  final directory = Directory('${(await getTemporaryDirectory()).path}/bundles');
+  final directory = Directory('${(await appTempDirectory()).path}/bundles');
   await directory.create(recursive: true);
   final timestamp = DateFormat('yyyyMMdd-HHmmss').format(DateTime.now());
   final path = '${directory.path}/blastqr-$timestamp.zip';

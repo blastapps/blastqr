@@ -24,6 +24,7 @@ import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/sound_feedback.dart';
+import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
@@ -37,7 +38,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class ScanPage extends StatefulWidget {
@@ -536,7 +536,7 @@ class _ScanPageState extends State<ScanPage> {
         data: data,
         gzipped: metadata.isCompressed,
         directory: itemsDirectory,
-        tempDirectory: await getTemporaryDirectory(),
+        tempDirectory: await appTempDirectory(),
       );
     } catch (error) {
       debugPrint('Failed to save received file: $error');

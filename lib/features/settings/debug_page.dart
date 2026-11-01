@@ -6,10 +6,10 @@ import 'package:blast_qr/features/scan/decode_stats.dart';
 import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/temp_files.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// The shared export stays in English, since it's read by developers.
@@ -108,7 +108,7 @@ class DebugPage extends StatelessWidget {
 
     // Fresh folder each time, so files from an earlier share don't tag along.
     final dir = Directory(
-      '${(await getTemporaryDirectory()).path}/debug_export',
+      '${(await appTempDirectory()).path}/debug_export',
     );
     if (await dir.exists()) await dir.delete(recursive: true);
     await dir.create();
