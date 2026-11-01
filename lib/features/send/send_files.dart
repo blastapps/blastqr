@@ -22,6 +22,14 @@ Future<void> sendFiles(
   List<FileWrapper> files,
   SendOptions options,
 ) async {
+  // Another app may have deleted or moved it since it was listed.
+  final exists = await Future.wait(files.map((f) => f.file.exists()));
+  if (!context.mounted) return;
+  final missing = exists.indexOf(false);
+  if (missing != -1) {
+    await showFileMissing(context, files[missing].name);
+    return;
+  }
   if (files.length == 1) {
     final tooLarge = transferTooLargeMessage(context, files.single);
     if (tooLarge != null) {
@@ -37,10 +45,9 @@ Future<void> sendFiles(
     context,
     createSendBundle(
       files,
-      icSettings:
-          appSettings.alwaysCompressImages
-              ? appSettings.imageCompressionSettings
-              : null,
+      icSettings: appSettings.alwaysCompressImages
+          ? appSettings.imageCompressionSettings
+          : null,
     ),
   );
   try {
@@ -107,20 +114,28 @@ String? transferTooLargeMessage(BuildContext context, FileWrapper file) {
   return null;
 }
 
-Future<void> showFileTooLarge(BuildContext context, String message) {
+Future<void> showFileTooLarge(BuildContext context, String message) =>
+    _showAlert(context, context.l10n.file_too_large, message);
+
+Future<void> showFileMissing(BuildContext context, String name) => _showAlert(
+  context,
+  context.l10n.file_missing,
+  context.l10n.file_missing_msg(name),
+);
+
+Future<void> _showAlert(BuildContext context, String title, String message) {
   return showDialog(
     context: context,
-    builder:
-        (context) => AlertDialog(
-          title: Text(context.l10n.file_too_large),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.ok),
-            ),
-          ],
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.l10n.ok),
         ),
+      ],
+    ),
   );
 }
 
@@ -133,13 +148,12 @@ Future<void> _showQrPage(
   return Navigator.of(context).push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder:
-          (context) => QrPage(
-            file: file,
-            bundledFiles: bundledFiles,
-            password: options.password,
-            fileName: options.fileName,
-          ),
+      builder: (context) => QrPage(
+        file: file,
+        bundledFiles: bundledFiles,
+        password: options.password,
+        fileName: options.fileName,
+      ),
     ),
   );
 }
@@ -149,11 +163,10 @@ Future<T> _withProgress<T>(BuildContext context, Future<T> future) async {
   showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder:
-        (context) => const PopScope(
-          canPop: false,
-          child: Center(child: CircularProgressIndicator.adaptive()),
-        ),
+    builder: (context) => const PopScope(
+      canPop: false,
+      child: Center(child: CircularProgressIndicator.adaptive()),
+    ),
   );
   try {
     return await future;

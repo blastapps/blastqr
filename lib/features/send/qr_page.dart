@@ -47,9 +47,11 @@ class QrPage extends StatefulWidget {
 
 class _QrPageState extends State<QrPage> {
   final _qrController = RaptorQrStreamingWidgetController();
+  final _qrBoxKey = GlobalKey();
 
   bool get _isLargeFile => widget.file.size > QrPage.largeFileBytes;
   bool _largeFileAcknowledged = false;
+  bool get _showsLargeFileAlert => _isLargeFile && !_largeFileAcknowledged;
   bool _shouldCompressImage = false;
   int? _compressedSize;
 
@@ -100,201 +102,200 @@ class _QrPageState extends State<QrPage> {
 
   @override
   Widget build(BuildContext context) {
-    final qrBoxHeight = MediaQuery.of(context).size.width;
-    final appSettings = Provider.of<AppSettings>(context);
-    final encodeSettings = Provider.of<EncodeSettings>(context);
-    final fps = _fps ?? encodeSettings.fpsFor(widget.file.size);
-    final colors = Theme.of(context).colorScheme;
-    final micOn = appSettings.acousticDetection;
-    final iconColor = context.color.onPrimaryContainer;
+    final qrBox = _buildQrBox(context);
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: SafeArea(
-        child: Column(
-          children: [
-            if (!_fullscreenMode)
-              FileHeaderWidget(
-                file: widget.file,
-                name: widget.fileName,
-                bundledFiles: widget.bundledFiles,
-                onTapDismiss: _dismiss,
-                compressedSize: _compressedSize,
-                encrypted: widget.password != null,
-              ),
-            Expanded(
-              flex: _fullscreenMode ? 1 : 0,
-              key: const ValueKey('qr_container'),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: context.color.outline,
-                          width: 2,
+        child: _fullscreenMode
+            ? qrBox
+            : Column(
+                children: [
+                  FileHeaderWidget(
+                    file: widget.file,
+                    name: widget.fileName,
+                    bundledFiles: widget.bundledFiles,
+                    onTapDismiss: _dismiss,
+                    compressedSize: _compressedSize,
+                    encrypted: widget.password != null,
+                  ),
+                  // The QR box takes what the controls leave, so both stay
+                  // visible however wide or short the window is.
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Flexible(
+                          child: CustomSingleChildLayout(
+                            delegate: const _QrBoxLayout(),
+                            child: qrBox,
+                          ),
                         ),
-                        color: _isLargeFile && !_largeFileAcknowledged
-                            ? context.color.primaryContainer
-                            : Colors.white,
+                        // Space is kept while the codes are generated, so the
+                        // QR box doesn't shrink when playback starts.
+                        if (!_completionDetected && !_showsLargeFileAlert)
+                          Visibility(
+                            visible: _playbackStarted,
+                            maintainSize: true,
+                            maintainAnimation: true,
+                            maintainState: true,
+                            child: _buildControls(context),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                    child: ElevatedButton(
+                      onPressed: _dismiss,
+                      child: Text(context.l10n.done),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  /// The QR codes, or the large file prompt before they start. Keyed so the
+  /// animation keeps running when toggling fullscreen moves it in the tree.
+  Widget _buildQrBox(BuildContext context) {
+    final appSettings = Provider.of<AppSettings>(context);
+    return Stack(
+      key: _qrBoxKey,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: context.color.outline, width: 2),
+            color: _showsLargeFileAlert
+                ? context.color.primaryContainer
+                : Colors.white,
+          ),
+          child: _showsLargeFileAlert
+              ? FileTooLargeAlertWidget(
+                  estimatedSlowestTime: widget.file.getEstimateTransferTime(8),
+                  fileType: widget.file.type,
+                  onAcknowledge: () {
+                    setState(() => _largeFileAcknowledged = true);
+                  },
+                  onRequestCompressedImage: (quality) {
+                    setState(() {
+                      _largeFileAcknowledged = true;
+                      _shouldCompressImage = true;
+                    });
+                  },
+                )
+              : Consumer<EncodeSettings>(
+                  builder: (context, state, child) {
+                    final mtu = state.mtuFor(widget.file.size);
+                    final fps = _fps ?? state.fpsFor(widget.file.size);
+                    return RaptorQrStreamingWidget(
+                      controller: _qrController,
+                      file: widget.file,
+                      mtu: mtu,
+                      fps: fps,
+                      imageCompressionSettings: _shouldCompressImage
+                          ? appSettings.imageCompressionSettings
+                          : null,
+                      password: widget.password,
+                      fileName: widget.fileName,
+                      isBundle: widget.isBundle,
+                      fill: _fullscreenMode,
+                      onTap: _onToggleFullscreen,
+                      onStart: (size) => _onStart(
+                        size,
+                        multipleQrCodes: state.multipleQrCodes,
+                        fps: fps,
+                        mtu: mtu,
                       ),
-                      child: SizedBox(
-                        height: _fullscreenMode ? null : qrBoxHeight + 16,
-                        child: _isLargeFile && !_largeFileAcknowledged
-                            ? FileTooLargeAlertWidget(
-                                estimatedSlowestTime: widget.file
-                                    .getEstimateTransferTime(8),
-                                fileType: widget.file.type,
-                                onAcknowledge: () {
-                                  setState(() {
-                                    _largeFileAcknowledged = true;
-                                  });
-                                },
-                                onRequestCompressedImage: (quality) {
-                                  setState(() {
-                                    _largeFileAcknowledged = true;
-                                    _shouldCompressImage = true;
-                                  });
-                                },
-                              )
-                            : Consumer<EncodeSettings>(
-                                builder: (context, state, child) {
-                                  final mtu = state.mtuFor(widget.file.size);
-                                  return RaptorQrStreamingWidget(
-                                    controller: _qrController,
-                                    file: widget.file,
-                                    mtu: mtu,
-                                    fps: fps,
-                                    imageCompressionSettings:
-                                        _shouldCompressImage
-                                        ? appSettings.imageCompressionSettings
-                                        : null,
-                                    password: widget.password,
-                                    fileName: widget.fileName,
-                                    isBundle: widget.isBundle,
-                                    fill: _fullscreenMode,
-                                    onTap: _onToggleFullscreen,
-                                    onStart: (size) => _onStart(
-                                      size,
-                                      multipleQrCodes: state.multipleQrCodes,
-                                      fps: fps,
-                                      mtu: mtu,
-                                    ),
-                                  );
-                                },
-                              ),
+                    );
+                  },
+                ),
+        ),
+        if (_completionDetected)
+          Positioned.fill(
+            child: AcousticSuccessOverlay(
+              onKeepShowing: _onKeepShowingQr,
+              onDone: _dismiss,
+              password: widget.password,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildControls(BuildContext context) {
+    final encodeSettings = Provider.of<EncodeSettings>(context);
+    final fps = _fps ?? encodeSettings.fpsFor(widget.file.size);
+    final micOn = Provider.of<AppSettings>(context).acousticDetection;
+    final colors = Theme.of(context).colorScheme;
+    final iconColor = context.color.onPrimaryContainer;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleButton(
+                size: 64,
+                icon: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$fps',
+                      style: const TextStyle(
+                        height: 1,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (_completionDetected)
-                      Positioned.fill(
-                        child: AcousticSuccessOverlay(
-                          onKeepShowing: _onKeepShowingQr,
-                          onDone: _dismiss,
-                          password: widget.password,
-                        ),
-                      ),
+                    const Text(
+                      'FPS',
+                      style: TextStyle(fontSize: 10, height: 1),
+                    ),
                   ],
                 ),
+                backgroundColor: colors.tertiaryContainer,
+                onPressed: () => _cycleFps(fps),
               ),
-            ),
-            if (!_fullscreenMode &&
-                !_completionDetected &&
-                _playbackStarted) ...[
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircleButton(
-                            size: 64,
-                            icon: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '$fps',
-                                  style: const TextStyle(
-                                    height: 1,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Text(
-                                  'FPS',
-                                  style: TextStyle(fontSize: 10, height: 1),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: colors.tertiaryContainer,
-                            onPressed: () => _cycleFps(fps),
-                          ),
-                          CircleButton(
-                            size: 64,
-                            icon: const HugeIcon(
-                              icon: HugeIcons.strokeRoundedArrowExpand,
-                            ),
-                            backgroundColor: colors.tertiaryContainer,
-                            onPressed: _onToggleFullscreen,
-                          ),
-                          CircleButton(
-                            size: 64,
-                            icon: CustomPaint(
-                              foregroundPainter: micOn
-                                  ? null
-                                  : StrikePainter(
-                                      color: iconColor.withValues(alpha: 0.5),
-                                      gapColor: colors.tertiaryContainer,
-                                    ),
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedAudioWave01,
-                                color: micOn
-                                    ? iconColor
-                                    : iconColor.withValues(alpha: 0.5),
-                              ),
-                            ),
-                            backgroundColor: colors.tertiaryContainer,
-                            onPressed: () => _toggleAcousticDetection(!micOn),
-                          ),
-                          CircleButton(
-                            size: 64,
-                            icon: const HugeIcon(
-                              icon: HugeIcons.strokeRoundedHelpCircle,
-                            ),
-                            backgroundColor: colors.tertiaryContainer,
-                            onPressed: _showHelp,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      if (_showsPasswordButton)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                          child: PasswordButton(password: widget.password!),
+              CircleButton(
+                size: 64,
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowExpand),
+                backgroundColor: colors.tertiaryContainer,
+                onPressed: _onToggleFullscreen,
+              ),
+              CircleButton(
+                size: 64,
+                icon: CustomPaint(
+                  foregroundPainter: micOn
+                      ? null
+                      : StrikePainter(
+                          color: iconColor.withValues(alpha: 0.5),
+                          gapColor: colors.tertiaryContainer,
                         ),
-                    ],
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedAudioWave01,
+                    color: micOn ? iconColor : iconColor.withValues(alpha: 0.5),
                   ),
                 ),
+                backgroundColor: colors.tertiaryContainer,
+                onPressed: () => _toggleAcousticDetection(!micOn),
               ),
-            ] else if (!_fullscreenMode) ...[
-              const Spacer(),
+              CircleButton(
+                size: 64,
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedHelpCircle),
+                backgroundColor: colors.tertiaryContainer,
+                onPressed: _showHelp,
+              ),
             ],
-
-            if (!_fullscreenMode)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: ElevatedButton(
-                  onPressed: _dismiss,
-                  child: Row(
-                    spacing: 8,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Text(context.l10n.done)],
-                  ),
-                ),
-              ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          if (_showsPasswordButton)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: PasswordButton(password: widget.password!),
+            ),
+        ],
       ),
     );
   }
@@ -447,4 +448,34 @@ class _QrPageState extends State<QrPage> {
     _acousticListener?.stop();
     _qrController.stopAnimation();
   }
+}
+
+/// Sizes the QR box to the largest square that fits, plus the frame counter
+/// row under the code, centered horizontally.
+class _QrBoxLayout extends SingleChildLayoutDelegate {
+  const _QrBoxLayout();
+
+  /// The streaming widget keeps even margins around the code when its box
+  /// is this much taller than wide.
+  static const _counterHeight = 20.0;
+
+  double _width(BoxConstraints constraints) =>
+      (constraints.maxHeight - _counterHeight).clamp(0.0, constraints.maxWidth);
+
+  @override
+  Size getSize(BoxConstraints constraints) =>
+      Size(constraints.maxWidth, _width(constraints) + _counterHeight);
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    final width = _width(constraints);
+    return BoxConstraints.tight(Size(width, width + _counterHeight));
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) =>
+      Offset((size.width - childSize.width) / 2, 0);
+
+  @override
+  bool shouldRelayout(_QrBoxLayout oldDelegate) => false;
 }

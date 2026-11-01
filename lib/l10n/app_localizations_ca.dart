@@ -57,6 +57,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get open => 'Obre';
 
   @override
+  String get show_in_file_manager => 'Mostra al gestor de fitxers';
+
+  @override
   String get rename => 'Reanomena';
 
   @override
@@ -110,7 +113,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get send_large_file => 'Envia el fitxer original';
 
   @override
-  String get send_compressed_image => 'Envia imatge comprimida';
+  String get send_compressed_image => 'Envia comprimida';
 
   @override
   String get to_transfer => 'a transferir';
@@ -274,7 +277,23 @@ class AppLocalizationsCa extends AppLocalizations {
       'Segur que vols suprimir els fitxers seleccionats?';
 
   @override
-  String get selected_options => 'Fitxers seleccionats';
+  String files_selected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fitxers seleccionats',
+      one: '1 fitxer seleccionat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get file_missing => 'No s\'ha trobat el fitxer';
+
+  @override
+  String file_missing_msg(String name) {
+    return '$name s\'ha mogut o eliminat.';
+  }
 
   @override
   String get file_too_large => 'Fitxer massa gran';
@@ -300,14 +319,17 @@ class AppLocalizationsCa extends AppLocalizations {
   String get send_picture_subtitle => 'De la teva galeria de fotos';
 
   @override
+  String get drop_files => 'Deixa anar els fitxers aquí';
+
+  @override
+  String get drop_files_subtitle => 'o fes clic per triar-los';
+
+  @override
   String get desktop_receive_unsupported =>
       '* La recepció de fitxers encara no és compatible a Windows';
 
   @override
   String get recent => 'Recents';
-
-  @override
-  String get send_selected => 'Envia els seleccionats';
 
   @override
   String get sending_settings => 'Enviament';
@@ -317,6 +339,9 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get restore_defaults => 'Restaura';
+
+  @override
+  String get reset_to_default => 'Restableix el valor per defecte';
 
   @override
   String get restore_defaults_msg =>

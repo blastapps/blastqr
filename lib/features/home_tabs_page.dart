@@ -7,6 +7,7 @@ import 'package:blast_qr/features/scan/scan_page.dart';
 import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/send/send_page.dart';
+import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
@@ -16,6 +17,9 @@ import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/widgets/navigation_tabs.dart';
 import 'package:blast_qr/widgets/qr_twinkle_background.dart';
+import 'package:blast_qr/widgets/selection_bar.dart';
+import 'package:blast_qr/widgets/side_panel.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:path_provider/path_provider.dart';
@@ -32,7 +36,12 @@ class HomeTabsPage extends StatefulWidget {
 class _HomeTabsPageState extends State<HomeTabsPage> {
   static const _scanTab = 1;
 
+  /// Narrower desktop windows hide the side panel to leave room for the page.
+  static const _sidePanelMinWindowWidth = 500.0;
+
   int _currentTab = 0;
+  final _sendPage = GlobalKey<SendPageState>();
+  bool _settingsOpen = false;
 
   @override
   void initState() {
@@ -116,6 +125,37 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Files dropped anywhere on the window are sent from the send tab.
+    return DropTarget(
+      onDragEntered: (_) {
+        if (_acceptsDrops) _sendPage.currentState?.setDragging(true);
+      },
+      onDragExited: (_) => _sendPage.currentState?.setDragging(false),
+      onDragDone: (details) {
+        _sendPage.currentState?.setDragging(false);
+        if (!_acceptsDrops) return;
+        _selectTab(0);
+        _sendPage.currentState?.sendDroppedFiles(details.files);
+      },
+      // While files are selected, back clears the selection.
+      child: Selector<SelectionBarController, bool>(
+        selector: (_, bar) => bar.isShowing,
+        builder: (context, selecting, child) => PopScope(
+          canPop: !selecting,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) context.read<SelectionBarController>().clear();
+          },
+          child: child!,
+        ),
+        child: _buildContent(context),
+      ),
+    );
+  }
+
+  /// Not while settings, a dialog or the sending page is on top.
+  bool get _acceptsDrops => ModalRoute.of(context)?.isCurrent ?? true;
+
+  Widget _buildContent(BuildContext context) {
     final darkTheme = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -171,9 +211,9 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
           extendBodyBehindAppBar: true,
           extendBody: true,
           backgroundColor: Colors.transparent,
-          bottomNavigationBar: canScanWithCamera
-              ? Consumer2<FileBadgeCount, NavBarVisibility>(
-                  builder: (context, count, navBar, child) {
+          bottomNavigationBar: canScanWithCamera && !context.useDesktopLayout
+              ? Consumer<NavBarVisibility>(
+                  builder: (context, navBar, child) {
                     return AnimatedSlide(
                       offset: navBar.visible ? Offset.zero : const Offset(0, 1),
                       duration: const Duration(milliseconds: 300),
@@ -185,37 +225,28 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
                         child: SafeArea(
                           child: Container(
                             padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                            child: NavigationTabs(
-                              onTap: (index) {
-                                setState(() {
-                                  _currentTab = index;
-                                });
-                              },
-                              currentIndex: _currentTab,
-                              items: [
-                                BottomNavigationBarItem(
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedSent02,
+                            child: Consumer<SelectionBarController>(
+                              builder: (context, bar, child) =>
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    // Same height as the tabs, so the
+                                    // page doesn't move.
+                                    child: bar.isShowing
+                                        ? SizedBox(
+                                            height: NavigationTabs.height,
+                                            child: Center(
+                                              child: SelectionBar(
+                                                controller: bar,
+                                              ),
+                                            ),
+                                          )
+                                        : child,
                                   ),
-                                  label: context.l10n.send,
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: const HugeIcon(
-                                    icon: HugeIcons.strokeRoundedQrCode,
-                                  ),
-                                  label: context.l10n.receive,
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: Badge(
-                                    label: Text('${count.value ?? ''}'),
-                                    isLabelVisible: count.value != null,
-                                    child: const HugeIcon(
-                                      icon: HugeIcons.strokeRoundedFolder01,
-                                    ),
-                                  ),
-                                  label: context.l10n.my_files,
-                                ),
-                              ],
+                              child: NavigationTabs(
+                                onTap: _selectTab,
+                                currentIndex: _currentTab,
+                                items: _tabItems(context),
+                              ),
                             ),
                           ),
                         ),
@@ -224,16 +255,98 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
                   },
                 )
               : null,
-          body: Stack(
-            children: [
-              Offstage(offstage: _currentTab != 0, child: const SendPage()),
-              if (_currentTab == _scanTab) const ScanPage(),
-              if (_currentTab == 2) const FilesPage(),
-            ],
-          ),
+          body: context.useDesktopLayout
+              ? Row(
+                  children: [
+                    if (MediaQuery.sizeOf(context).width >=
+                        _sidePanelMinWindowWidth)
+                      SidePanel(
+                        items: canScanWithCamera ? _tabItems(context) : [],
+                        currentIndex: _currentTab,
+                        onTabTap: _selectTab,
+                        onSettingsTap: _openSettings,
+                      ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          _pages(),
+                          Positioned(
+                            left: 16,
+                            right: 16,
+                            bottom: 16,
+                            child: Center(
+                              child: Consumer<SelectionBarController>(
+                                builder: (context, bar, child) =>
+                                    AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      child: bar.isShowing
+                                          ? SelectionBar(controller: bar)
+                                          : const SizedBox.shrink(),
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : _pages(),
         ),
       ],
     );
+  }
+
+  void _selectTab(int index) {
+    // A selection belongs to the page it was made on.
+    context.read<SelectionBarController>().clear();
+    setState(() => _currentTab = index);
+  }
+
+  Future<void> _openSettings() async {
+    setState(() => _settingsOpen = true);
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SettingsPage()));
+    if (mounted) setState(() => _settingsOpen = false);
+  }
+
+  Widget _pages() {
+    return Stack(
+      children: [
+        Offstage(
+          offstage: _currentTab != 0,
+          child: SendPage(key: _sendPage),
+        ),
+        // Removed while settings is open, so the camera turns off.
+        if (_currentTab == _scanTab && !_settingsOpen) const ScanPage(),
+        if (_currentTab == 2) const FilesPage(),
+      ],
+    );
+  }
+
+  List<BottomNavigationBarItem> _tabItems(BuildContext context) {
+    final count = context.watch<FileBadgeCount>().value;
+    return [
+      BottomNavigationBarItem(
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedSent02),
+        label: context.l10n.send,
+      ),
+      BottomNavigationBarItem(
+        icon: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode),
+        label: context.l10n.receive,
+      ),
+      BottomNavigationBarItem(
+        icon: Badge(
+          label: Text('${count ?? ''}'),
+          isLabelVisible: count != null,
+          child: const HugeIcon(icon: HugeIcons.strokeRoundedFolder01),
+        ),
+        label: context.l10n.my_files,
+      ),
+    ];
   }
 
   void _showQrPage(List<File> files) async {

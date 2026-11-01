@@ -341,21 +341,16 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
           if (widget.fill) {
             return _FlexibleGrid(
               constraints: c,
-              itemBuilder: (gridIndex, totalCount, w, h) {
+              itemBuilder: (gridIndex, totalCount) {
                 // Read by the next tick; cells are filled from there.
                 _cellCount = totalCount;
                 final img = gridIndex < _cellImages.length
                     ? _cellImages[gridIndex]
                     : null;
-                return Container(
-                  padding: const EdgeInsets.all(8),
-                  height: w,
-                  width: h,
-                  // Own layer per code: a change repaints only that code.
-                  child: RepaintBoundary(
-                    child: CustomPaint(
-                      painter: img != null ? _QrImagePainter(img) : null,
-                    ),
+                // Own layer per code: a change repaints only that code.
+                return RepaintBoundary(
+                  child: CustomPaint(
+                    painter: img != null ? _QrImagePainter(img) : null,
                   ),
                 );
               },
@@ -406,12 +401,17 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   }
 }
 
+/// Two rows of 1–3 square codes, by the screen's aspect ratio. The codes
+/// are as large as fits, with a fixed gap, centered as one block so a camera
+/// can frame them all.
 class _FlexibleGrid extends StatelessWidget {
   const _FlexibleGrid({required this.constraints, required this.itemBuilder});
 
+  static const _rows = 2;
+  static const _spacing = 16.0;
+
   final BoxConstraints constraints;
-  final Widget Function(int index, int totalCount, double w, double h)
-  itemBuilder;
+  final Widget Function(int index, int totalCount) itemBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -429,28 +429,33 @@ class _FlexibleGrid extends StatelessWidget {
       columns = 3;
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(2, (rowIndex) {
-        return Expanded(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(columns, (colIndex) {
-              final index = rowIndex * columns + colIndex;
-              return Expanded(
-                child: Center(
-                  child: itemBuilder(
-                    index,
-                    2 * columns,
-                    width / columns,
-                    height / 2,
+    // The gap is also kept around the block.
+    final side = math.max(
+      0.0,
+      math.min(
+        (width - (columns + 1) * _spacing) / columns,
+        (height - (_rows + 1) * _spacing) / _rows,
+      ),
+    );
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: _spacing,
+        children: [
+          for (var row = 0; row < _rows; row++)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: _spacing,
+              children: [
+                for (var column = 0; column < columns; column++)
+                  SizedBox.square(
+                    dimension: side,
+                    child: itemBuilder(row * columns + column, _rows * columns),
                   ),
-                ),
-              );
-            }),
-          ),
-        );
-      }),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

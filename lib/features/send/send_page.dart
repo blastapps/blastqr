@@ -6,6 +6,8 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
+import 'package:blast_qr/features/send/widgets/drop_zone.dart';
+import 'package:blast_qr/features/send/widgets/recent_files.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
@@ -28,11 +30,13 @@ class SendPage extends StatefulWidget {
   const SendPage({super.key});
 
   @override
-  State<SendPage> createState() => _SendPageState();
+  State<SendPage> createState() => SendPageState();
 }
 
-class _SendPageState extends State<SendPage> {
+class SendPageState extends State<SendPage> {
   final List<FileWrapper> _recentFiles = [];
+
+  bool _dragging = false;
 
   void _addRecentFile(FileWrapper fw) {
     setState(() {
@@ -42,14 +46,15 @@ class _SendPageState extends State<SendPage> {
     });
   }
 
-  Widget _dropRegion({required Widget child}) {
-    return DropTarget(
-      onDragDone: (details) async {
-        final files = await _copyDroppedFiles(details.files);
-        if (files.isNotEmpty && mounted) _showQrPages(files);
-      },
-      child: child,
-    );
+  /// Highlights the drop zone while files are dragged over the window.
+  void setDragging(bool dragging) {
+    if (dragging != _dragging) setState(() => _dragging = dragging);
+  }
+
+  /// Sends files dropped anywhere on the window.
+  Future<void> sendDroppedFiles(List<DropItem> items) async {
+    final files = await _copyDroppedFiles(items);
+    if (files.isNotEmpty && mounted) await _showQrPages(files);
   }
 
   @override
@@ -57,72 +62,154 @@ class _SendPageState extends State<SendPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const LogoWidget(),
-        centerTitle: true,
-        toolbarHeight: 80,
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
-        actions: [
-          CircleButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return const SettingsPage();
+      appBar: context.useDesktopLayout
+          ? null
+          : AppBar(
+              title: const LogoWidget(),
+              centerTitle: true,
+              toolbarHeight: 80,
+              surfaceTintColor: Colors.transparent,
+              backgroundColor: Colors.transparent,
+              actions: [
+                CircleButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const SettingsPage();
+                        },
+                      ),
+                    );
                   },
+                  icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
                 ),
-              );
-            },
-            icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
+              ],
+            ),
+      body: context.useDesktopLayout ? _buildDesktopBody() : _buildPhoneBody(),
+    );
+  }
+
+  /// The send buttons in the middle, or with recents the buttons at the top
+  /// and the recents list right under them.
+  Widget _buildPhoneBody() {
+    final buttons = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          _SendCard(
+            icon: HugeIcons.strokeRoundedFileAdd,
+            title: context.l10n.send_file,
+            subtitle: context.l10n.send_file_subtitle,
+            onTap: _pickFileToEncode,
           ),
+          _photosCard(),
         ],
       ),
-      body: _dropRegion(
-        child: Column(
-          children: [
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-              child: Column(
-                spacing: 8,
-                children: [
-                  _SendCard(
-                    icon: HugeIcons.strokeRoundedFileAdd,
-                    title: context.l10n.send_file,
-                    subtitle: context.l10n.send_file_subtitle,
-                    onTap: _pickFileToEncode,
-                  ),
-                  _SendCard(
-                    icon: HugeIcons.strokeRoundedImageAdd01,
-                    title: context.l10n.send_picture,
-                    subtitle: context.l10n.send_picture_subtitle,
-                    flipIcon: true,
-                    onTap: _pickMediaToEncode,
-                  ),
-                ],
+    );
+    if (_recentFiles.isEmpty) return Center(child: buttons);
+    // The scaffold body's padding covers the app bar and the bottom tabs,
+    // which both overlap the page. The list runs on under the tabs.
+    return Builder(
+      builder: (context) {
+        final padding = MediaQuery.paddingOf(context);
+        return Padding(
+          padding: EdgeInsets.only(top: padding.top),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              buttons,
+              const SizedBox(height: 24),
+              Expanded(
+                child: RecentFilesTiles(
+                  entries: _recentFiles,
+                  bottomInset: padding.bottom,
+                  onSend: _showQrPages,
+                ),
               ),
-            ),
-            // Recents sit in the lower half so the send buttons stay
-            // centered whether or not they are shown.
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(top: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// The drop zone alone in the middle, or with recents the top two thirds
+  /// of the page and the recents list the rest.
+  Widget _photosCard() => _SendCard(
+    icon: HugeIcons.strokeRoundedImageAdd01,
+    title: context.l10n.send_picture,
+    subtitle: context.l10n.send_picture_subtitle,
+    flipIcon: true,
+    onTap: _pickMediaToEncode,
+  );
+
+  Widget _buildDesktopBody() {
+    final dropZone = DropZone(highlighted: _dragging, onTap: _pickFileToEncode);
+    // Tablets and Android desktop mode keep the photo library, which the
+    // file picker can't always reach.
+    final photos = [
+      if (!isDesktopOS) ...[const SizedBox(height: 8), _photosCard()],
+    ];
+    final unsupported = Text(context.l10n.desktop_receive_unsupported);
+    if (_recentFiles.isEmpty) {
+      return Column(
+        children: [
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Center(
+              child: SizedBox(
+                width: _desktopContentWidth,
                 child: Column(
-                  spacing: 16,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _RecentFilesRow(
-                      entries: _recentFiles,
-                      onFileTap: _showQrPage,
-                      onSendSelected: _showQrPages,
-                    ),
-                    if (!canScanWithCamera)
-                      Text(context.l10n.desktop_receive_unsupported),
+                    SizedBox(height: 280, child: dropZone),
+                    ...photos,
                   ],
                 ),
               ),
             ),
-          ],
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: canScanWithCamera
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: unsupported,
+                    ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      child: Center(
+        child: SizedBox(
+          width: _desktopContentWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(flex: 2, child: dropZone),
+              ...photos,
+              const SizedBox(height: 24),
+              Expanded(
+                child: RecentFilesList(
+                  entries: _recentFiles,
+                  onSend: _showQrPages,
+                ),
+              ),
+              if (!canScanWithCamera) ...[
+                const SizedBox(height: 12),
+                unsupported,
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -189,11 +276,23 @@ class _SendPageState extends State<SendPage> {
     return files;
   }
 
-  void _showQrPage(File file) {
-    _showQrPages([file]);
-  }
-
-  void _showQrPages(List<File> files) async {
+  Future<void> _showQrPages(List<File> files) async {
+    // Recent files can be deleted or moved by other apps.
+    final exists = await Future.wait(files.map((f) => f.exists()));
+    if (!mounted) return;
+    final missing = [
+      for (final (i, file) in files.indexed)
+        if (!exists[i]) file,
+    ];
+    if (missing.isNotEmpty) {
+      setState(() {
+        _recentFiles.removeWhere(
+          (fw) => missing.any((f) => f.path == fw.file.path),
+        );
+      });
+      await showFileMissing(context, missing.first.uri.pathSegments.last);
+      return;
+    }
     final fileWrappers = await Future.wait(files.map((f) => f.toFileWrapper()));
     if (!mounted) return;
 
@@ -241,10 +340,7 @@ class _SendPageState extends State<SendPage> {
   }
 }
 
-Color _cardFill(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark
-    ? context.color.primaryContainer
-    : context.color.surface;
+const _desktopContentWidth = 720.0;
 
 class _SendCard extends StatelessWidget {
   const _SendCard({
@@ -273,7 +369,7 @@ class _SendCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(color: context.color.outline),
-          color: _cardFill(context),
+          color: context.cardFill,
           borderRadius: radius,
         ),
         child: Row(
@@ -324,189 +420,6 @@ class _SendCard extends StatelessWidget {
               icon: HugeIcons.strokeRoundedArrowRight01,
               color: context.color.onSurfaceVariant,
               size: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RecentFilesRow extends StatefulWidget {
-  const _RecentFilesRow({
-    required this.entries,
-    required this.onFileTap,
-    required this.onSendSelected,
-  });
-
-  final List<FileWrapper> entries;
-  final void Function(File) onFileTap;
-  final void Function(List<File>) onSendSelected;
-
-  @override
-  State<_RecentFilesRow> createState() => _RecentFilesRowState();
-}
-
-class _RecentFilesRowState extends State<_RecentFilesRow> {
-  final Set<String> _selectedPaths = {};
-
-  bool get _selecting => _selectedPaths.isNotEmpty;
-
-  void _toggle(FileWrapper entry) {
-    setState(() {
-      final path = entry.file.path;
-      if (!_selectedPaths.remove(path)) _selectedPaths.add(path);
-    });
-  }
-
-  void _clearSelection() => setState(_selectedPaths.clear);
-
-  void _sendSelected() {
-    final files = [
-      for (final entry in widget.entries)
-        if (_selectedPaths.contains(entry.file.path)) entry.file,
-    ];
-    _clearSelection();
-    if (files.isNotEmpty) widget.onSendSelected(files);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final entries = widget.entries;
-    if (entries.isEmpty) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-          child: SizedBox(
-            height: 24,
-            child: Row(
-              spacing: 4,
-              children: [
-                Text(
-                  _selecting
-                      ? '${_selectedPaths.length} ${context.l10n.selected}'
-                      : context.l10n.recent,
-                  style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
-                ),
-                if (_selecting)
-                  IconButton(
-                    onPressed: _clearSelection,
-                    tooltip: context.l10n.cancel,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 24,
-                      height: 24,
-                    ),
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCancel01,
-                      color: context.color.onSurface,
-                      size: 16,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 52,
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-            scrollDirection: Axis.horizontal,
-            itemCount: entries.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              return _RecentFileChip(
-                entry: entry,
-                selected: _selectedPaths.contains(entry.file.path),
-                onTap: _selecting
-                    ? () => _toggle(entry)
-                    : () => widget.onFileTap(entry.file),
-                onLongPress: () => _toggle(entry),
-              );
-            },
-          ),
-        ),
-        Visibility(
-          visible: _selecting,
-          maintainSize: true,
-          maintainAnimation: true,
-          maintainState: true,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-            child: OutlinedButton(
-              onPressed: _sendSelected,
-              child: Text(context.l10n.send_selected),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RecentFileChip extends StatelessWidget {
-  const _RecentFileChip({
-    required this.entry,
-    required this.selected,
-    required this.onTap,
-    required this.onLongPress,
-  });
-
-  final FileWrapper entry;
-  final bool selected;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(4),
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        width: 140,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-        decoration: BoxDecoration(
-          color: _cardFill(context),
-          border: Border.all(
-            color: selected ? context.color.primary : context.color.outline,
-            width: selected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 6,
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
-              child: selected
-                  ? ColoredBox(
-                      color: context.color.primary,
-                      child: Center(
-                        child: HugeIcon(
-                          icon: HugeIcons.strokeRoundedTick02,
-                          color: context.color.onPrimary,
-                          size: 20,
-                        ),
-                      ),
-                    )
-                  : entry.buildThumbnail(context, size: 36),
-            ),
-            Expanded(
-              child: Text(
-                entry.name,
-                style: Theme.of(context).textTheme.labelSmall,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
             ),
           ],
         ),

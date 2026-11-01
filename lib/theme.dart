@@ -1,4 +1,5 @@
 import 'package:blast_qr/color_scheme.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -46,8 +47,34 @@ enum BlastTheme {
       elevatedButtonTheme: elevatedButtonTheme(colorScheme),
       snackBarTheme: snackBarTheme(colorScheme),
       chipTheme: chipTheme(colorScheme),
+      pageTransitionsTheme: pageTransitionsTheme,
     );
   }
+}
+
+/// Desktop pages switch without the phone-style slide. Phones keep
+/// Flutter's defaults.
+const pageTransitionsTheme = PageTransitionsTheme(
+  builders: {
+    TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    TargetPlatform.macOS: _NoPageTransitionsBuilder(),
+    TargetPlatform.windows: _NoPageTransitionsBuilder(),
+    TargetPlatform.linux: _NoPageTransitionsBuilder(),
+  },
+);
+
+class _NoPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => child;
 }
 
 ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {

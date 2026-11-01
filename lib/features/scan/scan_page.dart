@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
@@ -21,6 +22,7 @@ import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
 import 'package:blast_qr/model/scanned_qr_code.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/sound_feedback.dart';
@@ -143,7 +145,7 @@ class _ScanPageState extends State<ScanPage> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const LogoWidget(),
+          title: context.useDesktopLayout ? null : const LogoWidget(),
           centerTitle: true,
           toolbarHeight: 80,
           surfaceTintColor: Colors.transparent,
@@ -190,20 +192,21 @@ class _ScanPageState extends State<ScanPage> {
             ],
           ),
           actions: [
-            CircleButton(
-              onPressed: () async {
-                _setCameraOn(false);
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return const SettingsPage();
-                    },
-                  ),
-                );
-                _setCameraOn(true);
-              },
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
-            ),
+            if (!context.useDesktopLayout)
+              CircleButton(
+                onPressed: () async {
+                  _setCameraOn(false);
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const SettingsPage();
+                      },
+                    ),
+                  );
+                  _setCameraOn(true);
+                },
+                icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
+              ),
           ],
         ),
         body: Stack(
@@ -1199,7 +1202,8 @@ class ScanProgressWidget extends StatelessWidget {
                     curve: Curves.easeOutBack,
                   ),
         ),
-        SizedBox(height: MediaQuery.of(context).padding.bottom - 64),
+        // The bottom tabs overlap the page on phones; desktop has none.
+        SizedBox(height: max(16, MediaQuery.of(context).padding.bottom - 64)),
       ],
     );
   }

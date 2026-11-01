@@ -6,6 +6,7 @@ import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/theme.dart';
+import 'package:blast_qr/widgets/selection_bar.dart';
 import 'package:blastqr_crypto/blastqr_crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<NavBarVisibility>(
           create: (context) => NavBarVisibility(),
+        ),
+        ChangeNotifierProvider<SelectionBarController>(
+          create: (context) => SelectionBarController(),
         ),
       ],
       child: Consumer<AppSettings>(

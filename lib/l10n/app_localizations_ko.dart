@@ -57,6 +57,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get open => '열기';
 
   @override
+  String get show_in_file_manager => '파일 관리자에서 보기';
+
+  @override
   String get rename => '이름 변경';
 
   @override
@@ -108,7 +111,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_large_file => '그래도 큰 파일 보내기';
 
   @override
-  String get send_compressed_image => '압축된 이미지 파일 보내기';
+  String get send_compressed_image => '압축해서 보내기';
 
   @override
   String get to_transfer => '전송';
@@ -270,7 +273,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get delete_files_msg => '선택한 파일을 삭제하시겠습니까?';
 
   @override
-  String get selected_options => '선택된 파일';
+  String files_selected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 선택됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get file_missing => '파일을 찾을 수 없음';
+
+  @override
+  String file_missing_msg(String name) {
+    return '$name 파일이 이동되었거나 삭제되었습니다.';
+  }
 
   @override
   String get file_too_large => '파일이 너무 큽니다';
@@ -294,13 +312,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_picture_subtitle => '사진 보관함에서';
 
   @override
+  String get drop_files => '여기에 파일을 놓으세요';
+
+  @override
+  String get drop_files_subtitle => '또는 클릭하여 선택하세요';
+
+  @override
   String get desktop_receive_unsupported => '* Windows에서는 아직 파일 수신이 지원되지 않습니다';
 
   @override
   String get recent => '최근';
-
-  @override
-  String get send_selected => '선택 항목 보내기';
 
   @override
   String get sending_settings => '전송 설정';
@@ -310,6 +331,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get restore_defaults => '기본값 복원';
+
+  @override
+  String get reset_to_default => '기본값으로 재설정';
 
   @override
   String get restore_defaults_msg => '이 설정을 기본값으로 복원하시겠습니까?';

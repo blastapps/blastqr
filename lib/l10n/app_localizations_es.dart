@@ -57,6 +57,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get open => 'Abrir';
 
   @override
+  String get show_in_file_manager => 'Ver en el administrador de archivos';
+
+  @override
   String get rename => 'Renombrar';
 
   @override
@@ -110,7 +113,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get send_large_file => 'Enviar archivo original de todos modos';
 
   @override
-  String get send_compressed_image => 'Enviar imagen comprimida';
+  String get send_compressed_image => 'Enviar comprimida';
 
   @override
   String get to_transfer => 'para transferir';
@@ -274,7 +277,23 @@ class AppLocalizationsEs extends AppLocalizations {
       '¿Estás seguro de que deseas eliminar los archivos seleccionados?';
 
   @override
-  String get selected_options => 'Archivos seleccionados';
+  String files_selected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archivos seleccionados',
+      one: '1 archivo seleccionado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get file_missing => 'Archivo no encontrado';
+
+  @override
+  String file_missing_msg(String name) {
+    return '$name se ha movido o eliminado.';
+  }
 
   @override
   String get file_too_large => 'Archivo demasiado grande';
@@ -300,14 +319,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get send_picture_subtitle => 'De tu galería de fotos';
 
   @override
+  String get drop_files => 'Suelta los archivos aquí';
+
+  @override
+  String get drop_files_subtitle => 'o haz clic para elegirlos';
+
+  @override
   String get desktop_receive_unsupported =>
       '* La recepción de archivos aún no es compatible en Windows';
 
   @override
   String get recent => 'Recientes';
-
-  @override
-  String get send_selected => 'Enviar seleccionados';
 
   @override
   String get sending_settings => 'Envío';
@@ -317,6 +339,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get restore_defaults => 'Restaurar';
+
+  @override
+  String get reset_to_default => 'Restablecer el valor predeterminado';
 
   @override
   String get restore_defaults_msg =>

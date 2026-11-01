@@ -198,6 +198,12 @@ abstract class AppLocalizations {
   /// **'Open'**
   String get open;
 
+  /// No description provided for @show_in_file_manager.
+  ///
+  /// In en, this message translates to:
+  /// **'See in file manager'**
+  String get show_in_file_manager;
+
   /// No description provided for @rename.
   ///
   /// In en, this message translates to:
@@ -303,7 +309,7 @@ abstract class AppLocalizations {
   /// No description provided for @send_compressed_image.
   ///
   /// In en, this message translates to:
-  /// **'Send compressed image file'**
+  /// **'Send compressed'**
   String get send_compressed_image;
 
   /// No description provided for @to_transfer.
@@ -612,11 +618,23 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to delete the selected files?'**
   String get delete_files_msg;
 
-  /// No description provided for @selected_options.
+  /// No description provided for @files_selected.
   ///
   /// In en, this message translates to:
-  /// **'Selected files'**
-  String get selected_options;
+  /// **'{count, plural, =1{1 file selected} other{{count} files selected}}'**
+  String files_selected(int count);
+
+  /// No description provided for @file_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'File not found'**
+  String get file_missing;
+
+  /// No description provided for @file_missing_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was moved or deleted.'**
+  String file_missing_msg(String name);
 
   /// No description provided for @file_too_large.
   ///
@@ -660,6 +678,18 @@ abstract class AppLocalizations {
   /// **'From your photo library'**
   String get send_picture_subtitle;
 
+  /// No description provided for @drop_files.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop files here'**
+  String get drop_files;
+
+  /// No description provided for @drop_files_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'or click to choose'**
+  String get drop_files_subtitle;
+
   /// No description provided for @desktop_receive_unsupported.
   ///
   /// In en, this message translates to:
@@ -671,12 +701,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recent'**
   String get recent;
-
-  /// No description provided for @send_selected.
-  ///
-  /// In en, this message translates to:
-  /// **'Send selected'**
-  String get send_selected;
 
   /// No description provided for @sending_settings.
   ///
@@ -695,6 +719,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore'**
   String get restore_defaults;
+
+  /// No description provided for @reset_to_default.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get reset_to_default;
 
   /// No description provided for @restore_defaults_msg.
   ///

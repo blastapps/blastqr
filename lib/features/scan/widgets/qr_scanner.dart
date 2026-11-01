@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:blast_qr/features/scan/scan_camera.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:camera/camera.dart' hide ImageFormat;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -82,9 +83,6 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   double _maxZoom = 1.0;
   double _pinchStartZoom = 1.0;
 
-  bool get _isDesktop =>
-      Platform.isMacOS || Platform.isLinux || Platform.isWindows;
-
   @override
   void initState() {
     super.initState();
@@ -136,7 +134,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       // A desktop window goes inactive whenever it loses focus, and reopening
       // the camera takes about a second.
       case AppLifecycleState.inactive:
-        if (!_isDesktop) _closeForLifecycle();
+        if (!isDesktopOS) _closeForLifecycle();
       case AppLifecycleState.detached:
         break;
     }

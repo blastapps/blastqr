@@ -1,5 +1,6 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/widgets/blast_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -246,39 +247,41 @@ Future<void> showMessage({
     context: context,
     title: title,
     backgroundColor: backgroundColor,
-    body: Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(message, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 16),
-          if (confirmTitle != null)
-            ElevatedButton(
-              onPressed: () {
-                onConfirmTap?.call();
-                Navigator.of(context).pop();
-              },
-              style: confirmButtonStyle,
-              child: Text(confirmTitle),
-            ),
-          const SizedBox(height: 8),
-          if (secondaryTitle != null)
-            OutlinedButton(
-              onPressed:
-                  onSecondaryTap ??
-                  () {
-                    Navigator.of(context).pop();
-                  },
-              style: secondaryButtonStyle,
-              child: Text(secondaryTitle),
-            ),
-        ],
+    // Closes with the sheet's own context: [context] can belong to a nested
+    // navigator (the settings pane) while desktop dialogs open above it.
+    body: Builder(
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 16),
+            if (confirmTitle != null)
+              ElevatedButton(
+                onPressed: () {
+                  onConfirmTap?.call();
+                  Navigator.of(sheetContext).pop();
+                },
+                style: confirmButtonStyle,
+                child: Text(confirmTitle),
+              ),
+            const SizedBox(height: 8),
+            if (secondaryTitle != null)
+              OutlinedButton(
+                onPressed:
+                    onSecondaryTap ?? () => Navigator.of(sheetContext).pop(),
+                style: secondaryButtonStyle,
+                child: Text(secondaryTitle),
+              ),
+          ],
+        ),
       ),
     ),
   );
 }
 
+/// A bottom sheet on phones, a centered dialog on desktop.
 Future<T?> showSheet<T>({
   required BuildContext context,
   required String title,
@@ -288,12 +291,42 @@ Future<T?> showSheet<T>({
   Widget? titleTrailing,
   double messageBottomPadding = 24,
 }) {
-  FocusManager.instance.primaryFocus?.unfocus();
+  // Closes the phone keyboard. On desktop focus stays, so it's restored when
+  // the dialog closes, like the selection keys in a file list.
+  if (!context.useDesktopLayout) FocusManager.instance.primaryFocus?.unfocus();
+  final color =
+      backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
+  final content = _SheetContent(
+    title: title,
+    message: message,
+    titleTrailing: titleTrailing,
+    messageBottomPadding: messageBottomPadding,
+    body: body,
+    showClose: context.useDesktopLayout,
+  );
+  if (context.useDesktopLayout) {
+    return showDialog<T>(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: color,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          width: 440,
+          child: SingleChildScrollView(
+            // The close button already adds room above the title.
+            padding: const EdgeInsets.only(top: 12, bottom: 8),
+            child: content,
+          ),
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<T>(
     context: context,
     showDragHandle: true,
-    backgroundColor:
-        backgroundColor ?? Theme.of(context).colorScheme.primaryContainer,
+    backgroundColor: color,
     enableDrag: true,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -311,49 +344,87 @@ Future<T?> showSheet<T>({
           MediaQuery.of(context).viewInsets.bottom +
               MediaQuery.of(context).viewPadding.bottom,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(title, style: Theme.of(context).textTheme.titleLarge),
-                  ?titleTrailing,
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (message?.isNotEmpty == true)
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, 0, 16, messageBottomPadding),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: context.color.surfaceContainer,
-                    border: Border.all(color: context.color.outline),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    spacing: 12,
-                    children: [
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedInformationCircle,
-                      ),
-                      Expanded(child: Text(message!)),
-                    ],
-                  ),
-                ),
-              ),
-            body,
-          ],
-        ),
+        child: content,
       );
     },
   );
+}
+
+class _SheetContent extends StatelessWidget {
+  const _SheetContent({
+    required this.title,
+    required this.message,
+    required this.titleTrailing,
+    required this.messageBottomPadding,
+    required this.body,
+    required this.showClose,
+  });
+
+  final String title;
+  final String? message;
+  final Widget? titleTrailing;
+  final double messageBottomPadding;
+  final Widget body;
+
+  /// Dialogs on desktop, which can't be swiped away like sheets.
+  final bool showClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, 0, showClose ? 8 : 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              ?titleTrailing,
+              if (showClose)
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCancel01,
+                    color: context.color.onSurface,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (message?.isNotEmpty == true)
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, messageBottomPadding),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: context.color.surfaceContainer,
+                border: Border.all(color: context.color.outline),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: 12,
+                children: [
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedInformationCircle,
+                  ),
+                  Expanded(child: Text(message!)),
+                ],
+              ),
+            ),
+          ),
+        body,
+      ],
+    );
+  }
 }
 
 Future<void> showTextInputSheet(
@@ -429,8 +500,12 @@ Future<void> showSliderSheet(
     title: title,
     message: message,
     titleTrailing: IconButton(
+      tooltip: context.l10n.reset_to_default,
       onPressed: () => sliderKey.currentState?.reset(),
-      icon: const HugeIcon(icon: HugeIcons.strokeRoundedUndo),
+      icon: HugeIcon(
+        icon: HugeIcons.strokeRoundedUndo,
+        color: context.color.onSurface,
+      ),
     ),
     body: Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),

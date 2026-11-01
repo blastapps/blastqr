@@ -119,4 +119,12 @@ ColorScheme blackColorScheme(Color primaryColor) {
 
 extension BuildContextHelper on BuildContext {
   ColorScheme get color => Theme.of(this).colorScheme;
+
+  /// For panels over the animated background, which stays faintly visible.
+  Color get translucentSurface => color.surface.withAlpha(215);
+
+  /// Fill for cards and drop areas on the send page.
+  Color get cardFill => Theme.of(this).brightness == Brightness.dark
+      ? color.primaryContainer
+      : color.surface;
 }

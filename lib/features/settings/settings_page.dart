@@ -48,6 +48,10 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  static const _tileShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  );
+
   Widget _detailTile(
     BuildContext context, {
     required int index,
@@ -60,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return ListTile(
       selected: selected,
       selectedTileColor: context.color.primaryContainer,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: _tileShape,
       leading: HugeIcon(
         icon: icon,
         color: selected ? context.color.primary : context.color.onSurface,
@@ -82,6 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       children: [
         ListTile(
+          shape: _tileShape,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedLanguageSkill,
             color: context.color.onSurface,
@@ -149,9 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         Builder(
           builder: (tileContext) => ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: _tileShape,
             leading: HugeIcon(
               icon: HugeIcons.strokeRoundedShare08,
               color: context.color.onSurface,
@@ -241,7 +244,7 @@ class _SettingsPageState extends State<SettingsPage> {
         body: Row(
           children: [
             SizedBox(
-              width: 280,
+              width: 260,
               child: Scaffold(
                 appBar: AppBar(
                   title: Text(context.l10n.settings),

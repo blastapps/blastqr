@@ -17,6 +17,7 @@ Future<void> showFileOptionsSheet(
   BuildContext context,
   FileWrapper file, {
   required VoidCallback onOpen,
+  VoidCallback? onShowInFileManager,
   required VoidCallback onSaveToDownloads,
   required VoidCallback onRename,
   required void Function(SendOptions options) onSend,
@@ -33,6 +34,25 @@ Future<void> showFileOptionsSheet(
           onTapThumbnail: onOpen,
         ),
         const SizedBox(height: 8),
+        SendTile(
+          onTap: () {
+            Navigator.of(context).pop();
+            onSend(plainSend);
+          },
+        ),
+        SendEncryptedTile(
+          onTap: () {
+            Navigator.of(context).pop();
+            onSend(encryptedSend());
+          },
+          onLongPress: () async {
+            Navigator.of(context).pop();
+            final password = await showCustomPasswordSheet(context);
+            if (password == null || !context.mounted) return;
+            onSend((password: password, fileName: null));
+          },
+        ),
+        const Divider(indent: 16, endIndent: 16),
         ListTile(
           dense: true,
           onTap: onOpen,
@@ -42,6 +62,16 @@ Future<void> showFileOptionsSheet(
           ),
           title: Text(context.l10n.open),
         ),
+        if (onShowInFileManager != null)
+          ListTile(
+            dense: true,
+            onTap: onShowInFileManager,
+            leading: HugeIcon(
+              icon: HugeIcons.strokeRoundedFolderOpen,
+              color: context.color.primary,
+            ),
+            title: Text(context.l10n.show_in_file_manager),
+          ),
         if (Platform.isAndroid)
           ListTile(
             dense: true,
@@ -60,24 +90,6 @@ Future<void> showFileOptionsSheet(
             color: context.color.primary,
           ),
           title: Text(context.l10n.rename),
-        ),
-        SendTile(
-          onTap: () {
-            Navigator.of(context).pop();
-            onSend(plainSend);
-          },
-        ),
-        SendEncryptedTile(
-          onTap: () {
-            Navigator.of(context).pop();
-            onSend(encryptedSend());
-          },
-          onLongPress: () async {
-            Navigator.of(context).pop();
-            final password = await showCustomPasswordSheet(context);
-            if (password == null || !context.mounted) return;
-            onSend((password: password, fileName: null));
-          },
         ),
         ListTile(
           dense: true,

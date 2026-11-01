@@ -31,72 +31,84 @@ class _FileTooLargeAlertWidgetState extends State<FileTooLargeAlertWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 8,
-        children: [
+    // Centered when it fits, scrollable when the window is too short.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: (constraints.maxHeight - 32).clamp(0, double.infinity),
+          ),
+          child: _buildContent(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 8,
+      children: [
+        Row(
+          spacing: 4,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.info_outline),
+            Text(
+              context.l10n.large_file,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            style: Theme.of(context).textTheme.bodyMedium,
+            children: [
+              TextSpan(text: context.l10n.large_file_msg_1),
+              TextSpan(
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                text: ' $_estimateInMinutes ${context.l10n.minutes} ',
+              ),
+              TextSpan(text: context.l10n.large_file_msg_2),
+              if (widget.fileType.allowsImageCompression)
+                TextSpan(text: '\n${context.l10n.large_file_msg_3}'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (widget.fileType.allowsImageCompression)
           Row(
             spacing: 4,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.info_outline),
-              Text(
-                context.l10n.large_file,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => widget.onRequestCompressedImage(_quality),
+                  child: Text(context.l10n.send_compressed_image),
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
+                  onPressed: _showImageCompressionSettings,
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedSettings01,
+                    size: 20,
+                  ),
+                ),
               ),
             ],
           ),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium,
-              children: [
-                TextSpan(text: context.l10n.large_file_msg_1),
-                TextSpan(
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                  text: ' $_estimateInMinutes ${context.l10n.minutes} ',
-                ),
-                TextSpan(text: context.l10n.large_file_msg_2),
-                if (widget.fileType.allowsImageCompression)
-                  TextSpan(text: '\n${context.l10n.large_file_msg_3}'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (widget.fileType.allowsImageCompression)
-            Row(
-              spacing: 4,
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => widget.onRequestCompressedImage(_quality),
-                    child: Text(context.l10n.send_compressed_image),
-                  ),
-                ),
-                SizedBox(
-                  width: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
-                    onPressed: _showImageCompressionSettings,
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedSettings01,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          OutlinedButton(
-            onPressed: widget.onAcknowledge,
-            child: Text(context.l10n.send_large_file),
-          ),
-        ],
-      ),
+        OutlinedButton(
+          onPressed: widget.onAcknowledge,
+          child: Text(context.l10n.send_large_file),
+        ),
+      ],
     );
   }
 

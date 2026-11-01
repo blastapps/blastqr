@@ -15,6 +15,7 @@
   "result": "Result",
   "file_name": "File name",
   "open": "Open",
+  "show_in_file_manager": "See in file manager",
   "rename": "Rename",
   "delete": "Delete",
   "delete_msg": "Are you sure you want to delete this file?",
@@ -32,7 +33,7 @@
   "image_compression": "Image compression",
   "image_quality": "Quality",
   "send_large_file": "Send original file anyway",
-  "send_compressed_image": "Send compressed image file",
+  "send_compressed_image": "Send compressed",
   "to_transfer": "to transfer",
   "generating_codes": "Generating codes...",
   "send_help_message": "Scan this QR code using the blastQR app on the device where you want to receive the file",
@@ -84,7 +85,23 @@
   "select_all": "Select all",
   "selected": "selected",
   "delete_files_msg": "Are you sure you want to delete the selected files?",
-  "selected_options": "Selected files",
+  "files_selected": "{count, plural, =1{1 file selected} other{{count} files selected}}",
+  "@files_selected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "file_missing": "File not found",
+  "file_missing_msg": "{name} was moved or deleted.",
+  "@file_missing_msg": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "file_too_large": "File too large",
   "file_too_large_msg": "This file exceeds the 4 GB limit and cannot be sent.",
   "low_speed_warning": "Low transfer speed. Adjust the position of the devices and keep them still for better performance",
@@ -92,12 +109,14 @@
   "send_picture": "Send photos & videos",
   "send_file_subtitle": "Any file type",
   "send_picture_subtitle": "From your photo library",
+  "drop_files": "Drop files here",
+  "drop_files_subtitle": "or click to choose",
   "desktop_receive_unsupported": "* Receiving files is not supported on Windows yet",
   "recent": "Recent",
-  "send_selected": "Send selected",
   "sending_settings": "Sending",
   "receiving_settings": "Receiving",
   "restore_defaults": "Restore",
+  "reset_to_default": "Reset to default",
   "restore_defaults_msg": "Are you sure you want to restore these settings to their default values?",
   "qr_codes_section": "QR Codes",
   "chunk_length_hint": "2935 bytes is the recommended value for best performance on most devices",

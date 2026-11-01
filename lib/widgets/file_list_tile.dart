@@ -1,24 +1,26 @@
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/features/files_received/received_items.dart';
-import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/model/file_wrapper.dart';
-import 'package:blast_qr/widgets/qr_code_thumbnail.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-class ReceivedItemTile extends StatelessWidget {
-  const ReceivedItemTile({
+/// A phone list tile for a file: a thumbnail that shows a checkmark when
+/// selected, a title and a subtitle.
+class FileListTile extends StatelessWidget {
+  const FileListTile({
     super.key,
-    required this.item,
+    required this.thumbnail,
+    required this.title,
+    required this.subtitle,
     required this.isSelecting,
     required this.isSelected,
     required this.onTap,
     required this.onLongPress,
   });
 
-  static const _thumbnailSize = 56.0;
+  /// Size for [thumbnail].
+  static const thumbnailSize = 56.0;
 
-  final ReceivedItem item;
+  final Widget thumbnail;
+  final String title;
+  final String subtitle;
   final bool isSelecting;
   final bool isSelected;
   final VoidCallback onTap;
@@ -26,22 +28,6 @@ class ReceivedItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (thumbnail, title, subtitle) = switch (item) {
-      ReceivedFile(:final file) => (
-        file.buildThumbnail(context, size: _thumbnailSize),
-        file.name,
-        file.sizeInkB,
-      ),
-      ReceivedQrCode(:final code) => (
-        QrCodeThumbnail(text: code.text, size: _thumbnailSize),
-        context.l10n.scanned_at(
-          DateFormat.yMd(
-            Localizations.localeOf(context).languageCode,
-          ).add_Hm().format(code.scanned),
-        ),
-        code.sizeLabel,
-      ),
-    };
     return ListTile(
       selected: isSelecting && isSelected,
       onTap: onTap,
@@ -49,8 +35,8 @@ class ReceivedItemTile extends StatelessWidget {
       leading: Stack(
         children: [
           Container(
-            width: _thumbnailSize,
-            height: _thumbnailSize,
+            width: thumbnailSize,
+            height: thumbnailSize,
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               boxShadow: [
