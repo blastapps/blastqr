@@ -429,7 +429,10 @@ class _FilesPageState extends State<FilesPage> {
     Navigator.of(context).pop();
     // To select only filename without extension
     final dotIndex = file.name.indexOf('.');
-    final selection = TextSelection(baseOffset: 0, extentOffset: dotIndex);
+    final selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: dotIndex > 0 ? dotIndex : file.name.length,
+    );
     showTextInputSheet(
       context,
       title: context.l10n.rename,
