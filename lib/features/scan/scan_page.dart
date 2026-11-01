@@ -561,8 +561,8 @@ class _ScanPageState extends State<ScanPage> {
       elapsedTime,
       transferredBytes,
       encrypted: metadata.isEncrypted,
-    ).then((_) async {
-      if (fileWrappers.length == 1) {
+    ).then((discarded) async {
+      if (discarded != true && fileWrappers.length == 1) {
         final file = fileWrappers.single;
         final newFilename = sanitizeFileName(_renameController.text);
         if (mounted && newFilename != file.name) {
@@ -653,7 +653,8 @@ class _ScanPageState extends State<ScanPage> {
     ).then((_) => _reset());
   }
 
-  Future<void> _showResultSheet(
+  /// Completes with true if the user discarded the files.
+  Future<bool?> _showResultSheet(
     List<FileWrapper> files,
     double timeInSeconds,
     int transferredBytes, {
@@ -759,7 +760,7 @@ class _ScanPageState extends State<ScanPage> {
                         await f.file.delete();
                       }
                       if (mounted) {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(true);
                       }
                     },
                     child: Text(context.l10n.discard),
