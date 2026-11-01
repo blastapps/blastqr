@@ -1140,10 +1140,14 @@ class ScanProgressWidget extends StatelessWidget {
                                 width: 44,
                                 height: 44,
                               ),
-                              HugeIcon(
-                                icon: HugeIcons.strokeRoundedFile01,
-                                size: 24,
-                                color: context.color.onSurface,
+                              Text(
+                                '${(progress.clamp(0, 1) * 100).floor()}%',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'Jersey25',
+                                  color: context.color.onSurface,
+                                  height: 1,
+                                ),
                               ),
                             ],
                           ),

@@ -23,7 +23,7 @@ Future<SendOptions?> chooseSendOptions(
 ) async {
   final result = await showSheet<_SendSheetResult>(
     context: context,
-    title: context.l10n.send,
+    title: context.l10n.file_options,
     body: _SendSheet(files: files),
   );
   if (result == null) return null;
