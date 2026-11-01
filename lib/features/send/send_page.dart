@@ -8,7 +8,6 @@ import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/platform_support.dart';
@@ -180,19 +179,11 @@ class _SendPageState extends State<SendPage> {
     final fileWrappers = await Future.wait(files.map((f) => f.toFileWrapper()));
     if (!mounted) return;
 
-    final mtu = Provider.of<EncodeSettings>(context, listen: false).mtu;
-    final symbolSize = BlastQrcodeData.symbolSizeForMtu(mtu);
+    // Checked before the send options too, so the user isn't asked first.
     for (final fileWrapper in fileWrappers) {
-      if (fileWrapper.size > BlastQrcodeData.maxFileBytes) {
-        showFileTooLarge(context, context.l10n.file_too_large_msg);
-        return;
-      }
-      // Receivers reject transfers with too many symbols, which only happens
-      // with big files at a small QR code size.
-      final transferLength =
-          fileWrapper.size + BlastQrcodeData.maxMetadataBytes;
-      if (!BlastQrcodeData.fitsSymbolLimit(transferLength, symbolSize)) {
-        showFileTooLarge(context, context.l10n.file_too_large_for_qr_size_msg);
+      final tooLarge = transferTooLargeMessage(context, fileWrapper);
+      if (tooLarge != null) {
+        showFileTooLarge(context, tooLarge);
         return;
       }
     }

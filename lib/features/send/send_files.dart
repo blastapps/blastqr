@@ -23,6 +23,11 @@ Future<void> sendFiles(
   SendOptions options,
 ) async {
   if (files.length == 1) {
+    final tooLarge = transferTooLargeMessage(context, files.single);
+    if (tooLarge != null) {
+      await showFileTooLarge(context, tooLarge);
+      return;
+    }
     await _showQrPage(context, files.single, options);
     return;
   }
