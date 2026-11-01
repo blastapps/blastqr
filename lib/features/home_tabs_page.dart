@@ -8,6 +8,7 @@ import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/features/send/send_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
+import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
@@ -104,7 +105,11 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     var name = firstLine.replaceAll(RegExp(r'[^\w\- ]'), '').trim();
     if (name.length > 40) name = name.substring(0, 40).trim();
     if (name.isEmpty) name = 'text';
-    final file = File('${dir.path}/$name.txt');
+    final fileName = uniqueFileName(
+      '$name.txt',
+      (candidate) => File('${dir.path}/$candidate').existsSync(),
+    );
+    final file = File('${dir.path}/$fileName');
     await file.writeAsString(text);
     return file;
   }
