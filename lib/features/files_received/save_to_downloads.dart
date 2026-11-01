@@ -9,19 +9,13 @@ const androidDownloadsPath = '/storage/emulated/0/Download';
 /// If the name is taken, a timestamp is added to it.
 Future<String> saveToDownloads(File file) async {
   final name = p.basename(file.path);
-  try {
-    return await _copy(file, name);
-  } on PathExistsException {
+  var path = '$androidDownloadsPath/$name';
+  // File.copy overwrites an existing file instead of failing.
+  if (await File(path).exists()) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return _copy(
-      file,
-      '${p.basenameWithoutExtension(name)}_$timestamp${p.extension(name)}',
-    );
+    path =
+        '$androidDownloadsPath/${p.basenameWithoutExtension(name)}_$timestamp${p.extension(name)}';
   }
-}
-
-Future<String> _copy(File file, String name) async {
-  final path = '$androidDownloadsPath/$name';
   await file.copy(path);
   MediaScanner.loadMedia(path: path);
   return path;
