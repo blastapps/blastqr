@@ -15,12 +15,14 @@ import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 
 class SendPage extends StatefulWidget {
   const SendPage({super.key});
@@ -139,9 +141,25 @@ class _SendPageState extends State<SendPage> {
   void _pickMediaToEncode() async {
     final picker = ImagePicker();
     final List<XFile> media = await picker.pickMultipleMedia();
-    if (media.isNotEmpty && mounted) {
-      _showQrPages(media.map((f) => File(f.path)).toList());
-    }
+    if (media.isEmpty) return;
+    final files = await _renamePickedMedia(media);
+    if (mounted) _showQrPages(files);
+  }
+
+  /// On iOS the picker names files `image_picker_<UUID>`, so give them short
+  /// camera-style names instead.
+  Future<List<File>> _renamePickedMedia(List<XFile> media) async {
+    if (!Platform.isIOS) return [for (final f in media) File(f.path)];
+    final dir = await (await appTempDirectory()).createTemp('picked_');
+    final stamp = DateFormat('yyyyMMdd-HHmmss').format(DateTime.now());
+    return Future.wait([
+      for (final (i, f) in media.indexed)
+        moveFile(
+          File(f.path),
+          '${dir.path}/IMG_$stamp${media.length > 1 ? '-${i + 1}' : ''}'
+          '${p.extension(f.path)}',
+        ),
+    ]);
   }
 
   /// Dropped files are only readable during the drop (macOS sandbox access is

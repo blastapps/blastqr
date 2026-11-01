@@ -19,9 +19,13 @@ Future<Directory> createSharedFilesDirectory() async =>
 
 /// Moves a file the share extension (iOS) or share intent (Android) copied
 /// for us into [directory], so it can be deleted later.
-Future<File> takeSharedFile(String path, Directory directory) async {
-  final file = File(path);
-  final target = '${directory.path}/${file.uri.pathSegments.last}';
+Future<File> takeSharedFile(String path, Directory directory) => moveFile(
+  File(path),
+  '${directory.path}/${File(path).uri.pathSegments.last}',
+);
+
+/// Moves [file] to [target], copying when a rename can't cross volumes.
+Future<File> moveFile(File file, String target) async {
   try {
     return await file.rename(target);
   } on FileSystemException {
