@@ -19,6 +19,7 @@ import 'package:blast_qr/widgets/file_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:open_file/open_file.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// What can be done with received items: the options dialogs, and opening,
 /// renaming, deleting, saving and sending them.
@@ -44,6 +45,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
           context,
           file,
           onOpen: () => _onTapOpen(file),
+          onShare: isDesktopOS ? null : (origin) => _onTapShare(file, origin),
           onShowInFileManager: isDesktopOS
               ? () => _onTapShowInFileManager(file.file)
               : null,
@@ -63,6 +65,19 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
     } catch (error) {
       Navigator.of(context).pop();
       _showError(error);
+    }
+  }
+
+  Future<void> _onTapShare(FileWrapper file, Rect origin) async {
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.file.path, mimeType: file.type.mimeType)],
+          sharePositionOrigin: origin,
+        ),
+      );
+    } catch (error) {
+      if (mounted) _showError(error);
     }
   }
 

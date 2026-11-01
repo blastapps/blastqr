@@ -17,6 +17,7 @@ Future<void> showFileOptionsSheet(
   BuildContext context,
   FileWrapper file, {
   required VoidCallback onOpen,
+  void Function(Rect origin)? onShare,
   VoidCallback? onShowInFileManager,
   required VoidCallback onSaveToDownloads,
   required VoidCallback onRename,
@@ -62,6 +63,21 @@ Future<void> showFileOptionsSheet(
           ),
           title: Text(context.l10n.open),
         ),
+        if (onShare != null)
+          Builder(
+            builder: (tileContext) => ListTile(
+              dense: true,
+              onTap: () {
+                final box = tileContext.findRenderObject() as RenderBox;
+                onShare(box.localToGlobal(Offset.zero) & box.size);
+              },
+              leading: HugeIcon(
+                icon: HugeIcons.strokeRoundedShare08,
+                color: context.color.primary,
+              ),
+              title: Text(context.l10n.share),
+            ),
+          ),
         if (onShowInFileManager != null)
           ListTile(
             dense: true,

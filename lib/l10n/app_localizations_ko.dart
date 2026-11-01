@@ -57,6 +57,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get open => '열기';
 
   @override
+  String get share => '공유';
+
+  @override
   String get show_in_file_manager => '파일 관리자에서 보기';
 
   @override

@@ -57,6 +57,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get open => 'Obre';
 
   @override
+  String get share => 'Comparteix';
+
+  @override
   String get show_in_file_manager => 'Mostra al gestor de fitxers';
 
   @override

@@ -32,12 +32,6 @@ Future<Directory> qrCodesDirectory() async {
   return Directory('${base.path}/qr_codes');
 }
 
-/// Where iOS kept codes before they moved to Application Support.
-Future<Directory> legacyQrCodesDirectory() async {
-  final documents = await getApplicationDocumentsDirectory();
-  return Directory('${documents.path}/qr_codes');
-}
-
 Future<ScannedQrCode> saveScannedQrCode(
   String text,
   Directory directory,

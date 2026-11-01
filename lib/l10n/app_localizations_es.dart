@@ -57,6 +57,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get open => 'Abrir';
 
   @override
+  String get share => 'Compartir';
+
+  @override
   String get show_in_file_manager => 'Ver en el administrador de archivos';
 
   @override

@@ -8,19 +8,17 @@ import 'package:path_provider/path_provider.dart';
 
 const _channel = MethodChannel('blastqr/files');
 
-const _legacyName = 'docs';
-
 // Linux and Windows keep it in the user's own Documents folder, which may
 // already have a folder called "Received".
-final _name = Platform.isLinux || Platform.isWindows ? _legacyName : 'Received';
+final _name = Platform.isLinux || Platform.isWindows ? 'docs' : 'Received';
 
 /// On iOS, Documents shows in the Files app, so received files stay in
 /// Application Support unless the user turns on [AppPreferences.showInFilesApp].
-Future<Directory> _directory({required bool visible, String? name}) async {
+Future<Directory> _directory({required bool visible}) async {
   final base = !Platform.isIOS || visible
       ? await getApplicationDocumentsDirectory()
       : await getApplicationSupportDirectory();
-  return Directory('${base.path}/${name ?? _name}');
+  return Directory('${base.path}/$_name');
 }
 
 Future<Directory> receivedFilesDirectory() async {
@@ -29,35 +27,20 @@ Future<Directory> receivedFilesDirectory() async {
   return directory;
 }
 
-/// Moves received files and saved QR codes to where they belong and keeps
-/// them out of iCloud backups.
+/// Moves received files to where the setting points and keeps them and saved
+/// QR codes out of iCloud backups.
 Future<void> syncReceivedFiles() async {
-  final directory = await _moveReceivedFiles();
+  final directory = await receivedFilesDirectory();
   if (!Platform.isIOS) return;
+  await _moveFiles(
+    await _directory(visible: !AppPreferences.showInFilesApp),
+    directory,
+  );
   final qrCodes = await qrCodesDirectory();
-  await _moveFiles(await legacyQrCodesDirectory(), qrCodes);
   for (final dir in [directory, qrCodes]) {
     await dir.create(recursive: true);
     await _channel.invokeMethod('excludeFromBackup', dir.path);
   }
-}
-
-/// Moves received files into the directory the setting points at, including
-/// any left in the old `docs` folder.
-Future<Directory> _moveReceivedFiles() async {
-  final to = await receivedFilesDirectory();
-  final sources = [
-    if (_name != _legacyName) ...[
-      await _directory(visible: true, name: _legacyName),
-      if (Platform.isIOS) await _directory(visible: false, name: _legacyName),
-    ],
-    if (Platform.isIOS)
-      await _directory(visible: !AppPreferences.showInFilesApp),
-  ];
-  for (final from in sources) {
-    await _moveFiles(from, to);
-  }
-  return to;
 }
 
 /// Moves the files in [from] into [to] and deletes [from].
