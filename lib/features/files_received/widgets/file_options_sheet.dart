@@ -53,7 +53,7 @@ Future<void> showFileOptionsSheet(
             onSend((password: password, fileName: null));
           },
         ),
-        const Divider(indent: 16, endIndent: 16),
+        const Divider(indent: 16, endIndent: 16, thickness: 0.25),
         ListTile(
           dense: true,
           onTap: onOpen,
