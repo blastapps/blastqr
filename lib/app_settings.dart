@@ -163,23 +163,20 @@ class EncodeSettings extends ChangeNotifier {
   int mtu;
   int playbackFps;
   bool multipleQrCodes;
-  bool optimizeSmallFiles;
 
   EncodeSettings()
     : mtu = AppPreferences.mtu,
       playbackFps = AppPreferences.playbackFps,
-      multipleQrCodes = AppPreferences.multipleQrCodes,
-      optimizeSmallFiles = AppPreferences.optimizeSmallFiles;
+      multipleQrCodes = AppPreferences.multipleQrCodes;
 
-  bool _isOptimized(int fileSize) =>
-      optimizeSmallFiles && fileSize <= AppPreferences.smallFileBytes;
+  bool _isSmall(int fileSize) => fileSize <= AppPreferences.smallFileBytes;
 
   /// Smaller codes and a slower rate for small files, unless the user's
   /// settings are already lower.
   int mtuFor(int fileSize) =>
-      _isOptimized(fileSize) ? min(mtu, AppPreferences.smallFileMtu) : mtu;
+      _isSmall(fileSize) ? min(mtu, AppPreferences.smallFileMtu) : mtu;
 
-  int fpsFor(int fileSize) => _isOptimized(fileSize)
+  int fpsFor(int fileSize) => _isSmall(fileSize)
       ? min(playbackFps, AppPreferences.smallFileFps)
       : playbackFps;
 
@@ -198,12 +195,6 @@ class EncodeSettings extends ChangeNotifier {
   void updateMultipleQrCodes(bool value) {
     AppPreferences.setMultipleQrCodes(value);
     multipleQrCodes = value;
-    notifyListeners();
-  }
-
-  void updateOptimizeSmallFiles(bool value) {
-    AppPreferences.setOptimizeSmallFiles(value);
-    optimizeSmallFiles = value;
     notifyListeners();
   }
 }

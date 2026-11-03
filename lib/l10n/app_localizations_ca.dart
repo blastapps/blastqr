@@ -369,13 +369,6 @@ class AppLocalizationsCa extends AppLocalizations {
       'Mostra tants codis com càpiguen a la pantalla per anar més ràpid';
 
   @override
-  String get optimize_small_files => 'Optimitza fitxers petits';
-
-  @override
-  String get optimize_small_files_subtitle =>
-      'Fa servir codis més petits a 15 FPS per a fitxers de menys de 40 KB, que s\'escanegen millor';
-
-  @override
   String get images_section => 'Imatges';
 
   @override

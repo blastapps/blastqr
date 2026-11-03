@@ -10,9 +10,8 @@ class AppPreferences {
   static int defaultMtu = 2935;
   static int defaultFps = 20;
 
-  /// Files up to this size are sent with [smallFileMtu] and [smallFileFps]
-  /// when the small file optimization is on.
-  static const smallFileBytes = 40000;
+  /// Files up to this size are sent with [smallFileMtu] and [smallFileFps].
+  static const smallFileBytes = 30000;
   static const smallFileMtu = 1000;
   static const smallFileFps = 15;
 
@@ -41,7 +40,6 @@ class AppPreferences {
   static bool? _soundFeedback;
   static bool? _acousticDetection;
   static bool? _multipleQrCodes;
-  static bool? _optimizeSmallFiles;
   static bool? _hasSeenMicPrompt;
   static bool? _alwaysCompressImages;
   static bool? _showInFilesApp;
@@ -67,7 +65,6 @@ class AppPreferences {
   static bool get soundFeedback => _soundFeedback ?? true;
   static bool get acousticDetection => _acousticDetection ?? false;
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
-  static bool get optimizeSmallFiles => _optimizeSmallFiles ?? true;
   static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
   static bool get alwaysCompressImages => _alwaysCompressImages ?? true;
   static bool get showInFilesApp => _showInFilesApp ?? false;
@@ -187,12 +184,6 @@ class AppPreferences {
     _multipleQrCodes = value;
   }
 
-  static Future<void> setOptimizeSmallFiles(bool value) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    sp.setBool('optimizeSmallFiles', value);
-    _optimizeSmallFiles = value;
-  }
-
   static Future<void> setHasSeenMicPrompt(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('hasSeenMicPrompt', value);
@@ -236,7 +227,6 @@ class AppPreferences {
     _soundFeedback = sp.getBool('soundFeedback') ?? true;
     _acousticDetection = sp.getBool('acousticDetection') ?? false;
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
-    _optimizeSmallFiles = sp.getBool('optimizeSmallFiles') ?? true;
     _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
     _alwaysCompressImages = sp.getBool('alwaysCompressImages') ?? true;
     _showInFilesApp = sp.getBool('showInFilesApp') ?? false;

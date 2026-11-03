@@ -121,27 +121,6 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               );
             },
           ),
-          Consumer<EncodeSettings>(
-            builder: (context, state, child) {
-              return SwitchListTile.adaptive(
-                contentPadding: const EdgeInsetsDirectional.only(start: 16),
-                secondary: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFlash,
-                  color: context.color.onSurface,
-                ),
-                title: Text(context.l10n.optimize_small_files),
-                subtitle: Text(context.l10n.optimize_small_files_subtitle),
-                value: state.optimizeSmallFiles,
-                activeTrackColor: context.color.primary,
-                onChanged: (value) {
-                  Provider.of<EncodeSettings>(
-                    context,
-                    listen: false,
-                  ).updateOptimizeSmallFiles(value);
-                },
-              );
-            },
-          ),
           SettingGroupTitle(title: context.l10n.acoustic_feedback),
           Consumer<AppSettings>(
             builder: (context, state, child) {
@@ -220,7 +199,6 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
         encodeSettings.updateMtu(AppPreferences.defaultMtu);
         encodeSettings.updatePlaybackFps(AppPreferences.defaultFps);
         encodeSettings.updateMultipleQrCodes(false);
-        encodeSettings.updateOptimizeSmallFiles(true);
         Provider.of<AppSettings>(
           context,
           listen: false,

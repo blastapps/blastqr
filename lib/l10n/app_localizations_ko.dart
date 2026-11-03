@@ -357,13 +357,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get multi_qr_mode_subtitle => '화면에 들어가는 만큼 코드를 표시해 속도를 높입니다';
 
   @override
-  String get optimize_small_files => '작은 파일 최적화';
-
-  @override
-  String get optimize_small_files_subtitle =>
-      '40KB 미만 파일은 더 작은 코드를 15 FPS로 표시해 더 안정적으로 스캔됩니다';
-
-  @override
   String get images_section => '이미지';
 
   @override

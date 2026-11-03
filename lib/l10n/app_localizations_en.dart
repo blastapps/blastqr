@@ -369,13 +369,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show as many codes as fit on screen for a speed boost';
 
   @override
-  String get optimize_small_files => 'Optimize small files';
-
-  @override
-  String get optimize_small_files_subtitle =>
-      'Use smaller codes at 15 FPS for files under 40 KB, which scan more reliably';
-
-  @override
   String get images_section => 'Images';
 
   @override

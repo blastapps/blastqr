@@ -113,8 +113,6 @@
   "playback_fps_hint": "20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다",
   "multi_qr_mode": "전체 화면으로 시작",
   "multi_qr_mode_subtitle": "화면에 들어가는 만큼 코드를 표시해 속도를 높입니다",
-  "optimize_small_files": "작은 파일 최적화",
-  "optimize_small_files_subtitle": "40KB 미만 파일은 더 작은 코드를 15 FPS로 표시해 더 안정적으로 스캔됩니다",
   "images_section": "이미지",
   "always_compress_images": "항상 이미지 압축",
   "always_compress_images_subtitle": "대용량 파일의 압축 확인 건너뜀",
