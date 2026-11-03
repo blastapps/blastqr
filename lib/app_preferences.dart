@@ -15,9 +15,7 @@ class AppPreferences {
   static const smallFileMtu = 1000;
   static const smallFileFps = 15;
 
-  /// iPhones can't focus closer than about 15 cm; zooming in fills the frame
-  /// with the code from a distance they can focus at.
-  static double get defaultCameraZoom => Platform.isIOS ? 1.25 : 1.0;
+  static double get defaultCameraZoom => 1.25;
 
   /// iPhones read codes more reliably at 1080p.
   static ResolutionPreset get defaultCameraResolution =>

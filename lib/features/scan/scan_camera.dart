@@ -12,7 +12,7 @@ abstract final class ScanCamera {
   /// The iPhone exposes for up to 1/120 s and merges frames for video HDR.
   /// Either blends two QR codes into one frame whenever the sender changes
   /// code mid-capture, so both are kept short or off by default.
-  static const defaultMaxExposureMs = 2.0;
+  static const defaultMaxExposureMs = 3.0;
 
   /// [maxExposureMs] caps automatic exposure, null leaves it uncapped.
   /// [exposureMs] fixes the exposure instead, for testing.
@@ -41,9 +41,8 @@ abstract final class ScanCamera {
 
   /// Highest frame rate picked automatically. Every frame is copied from the
   /// camera to Dart, so the 120 and 240 FPS slow-motion modes some phones
-  /// offer cost far too much to pick without asking. iPhones read codes more
-  /// reliably at 30 than at 60.
-  static int get maxAutoFps => Platform.isIOS ? 30 : 60;
+  /// offer cost far too much to pick without asking.
+  static int get maxAutoFps => 60;
 
   /// The highest supported rate up to [maxAutoFps], or null for the camera's
   /// default when the rates can't be found out.

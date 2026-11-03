@@ -288,7 +288,7 @@ class __ColorPickerState extends State<_ColorPicker> {
 class _AdvancedCameraSettings extends StatelessWidget {
   const _AdvancedCameraSettings();
 
-  static const _exposures = <double?>[null, 0, 4, 2, 1, 0.5];
+  static const _exposures = <double?>[null, 0, 4, 3, 2, 1, 0.5];
 
   static String _label(BuildContext context, double? ms) => switch (ms) {
     null => context.l10n.exposure_auto_capped(
