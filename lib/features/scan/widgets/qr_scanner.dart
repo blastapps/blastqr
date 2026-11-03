@@ -366,6 +366,18 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     if (controller == null || !controller.value.isInitialized) {
       return const ColoredBox(color: Colors.black, child: SizedBox.expand());
     }
+    final preview = CameraPreview(
+      controller,
+      child: _results.codes.isEmpty
+          ? null
+          : MultiResultOverlay(results: _results.codes, controller: controller),
+    );
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return ColoredBox(
+        color: Colors.black,
+        child: SizedBox.expand(child: Center(child: preview)),
+      );
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final media = MediaQuery.sizeOf(context);
@@ -384,18 +396,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
                 child: OverflowBox(
                   child: FittedBox(
                     fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: side,
-                      child: CameraPreview(
-                        controller,
-                        child: _results.codes.isEmpty
-                            ? null
-                            : MultiResultOverlay(
-                                results: _results.codes,
-                                controller: controller,
-                              ),
-                      ),
-                    ),
+                    child: SizedBox(width: side, child: preview),
                   ),
                 ),
               ),
