@@ -34,6 +34,37 @@ device's camera reads them.
 | Windows | ✓ | |
 | Linux | ✓ | ✓ |
 
+You can also send from a terminal with the `blastqr` command-line tool.
+
+## Command-line tool
+
+`cli/` has a small Rust program that sends files to the app from a terminal.
+It shows the QR codes in the terminal window, and you scan them with the app.
+It only sends; receiving needs the app.
+
+Install it with [Rust](https://www.rust-lang.org/tools/install):
+
+```sh
+cd cli
+cargo install --path .
+```
+
+Then send one or more files:
+
+```sh
+blastqr report.pdf
+blastqr photos/*            # several files go as one zip
+blastqr -e secrets.txt      # encrypt with a generated code
+blastqr -c 4 --fps 30 a.zip # 4 codes at once, 30 frames per second
+```
+
+While it runs, ↑/↓ change the speed, space pauses and q quits.
+
+In Kitty, Ghostty, iTerm2 and WezTerm the codes are drawn as images. Other
+terminals use Unicode block characters, so make the window large or the font
+small to fit bigger codes. Run `blastqr --help` for all options, or see
+[cli/README.md](cli/README.md).
+
 ## Security note
 
 Without encryption, anyone who can see or record the QR codes can read the
@@ -111,6 +142,7 @@ not in the repo. Without it, use `flutter run` or a debug build.
 | `lib/crypto/` | Passwords and the wrapper around `blastqr_crypto` |
 | `lib/l10n/` | Translations (`.arb` files) |
 | `docs/` | Protocol documentation |
+| `cli/` | Command-line sender (Rust) |
 
 ## Translations
 
