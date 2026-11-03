@@ -1,4 +1,4 @@
-# BlastQR transfer protocol, version 2
+# BlastQR transfer protocol, version 3
 
 BlastQR sends a file from one device's screen to another device's camera as a
 stream of QR codes. This document describes what's in those QR codes and what
@@ -26,7 +26,7 @@ All integers are big-endian.
 ```
 offset  size  field
 0       3     signature       "bQR" (0x62 0x51 0x52)
-3       1     version         2
+3       1     version         3
 4       1     flags
 5       1     kind            0 = file
 6       2     session id      random per transfer, 1 to 65535
@@ -72,20 +72,10 @@ called the stream key.
 
 ## RaptorQ packet
 
-```
-offset  size  field
-0       1     SBN   source block number
-1       3     ESI   encoding symbol id
-4       T     symbol data
-```
-
-If the ESI is lower than the block's number of source symbols, the packet is a
-source packet. Otherwise it's a repair packet.
-
-Both sides build RaptorQ with the default parameters of the `raptorq` crate,
-`ObjectTransmissionInformation::with_defaults(transfer length, T)`. That way
-the receiver can work out the block layout from the header alone. Large
-transfers are split into blocks of at most 56,403 symbols.
+A packet as serialized by the [raptorq](https://crates.io/crates/raptorq)
+crate, version 2.0.1. Both sides use
+`ObjectTransmissionInformation::with_defaults(transfer length, T)`, so the
+receiver can work out the block layout from the header alone.
 
 T is a multiple of 8. The reference sender uses T between 96 and 2928.
 
@@ -93,8 +83,8 @@ T is a multiple of 8. The reference sender uses T between 96 and 2928.
 
 The sender first sends all source packets, block by block. After that it
 sends new repair packets forever, one per block in turn: block 0 repair 0,
-block 1 repair 0, and so on, then block 0 repair 1. The ESI has 24 bits, so
-repair ids would only start repeating after about 16 million repair packets
+block 1 repair 0, and so on, then block 0 repair 1. Packet ids have 24 bits,
+so repair ids would only start repeating after about 16 million repair packets
 per block.
 
 ## Transfer object
@@ -203,10 +193,10 @@ limits files to about 144 MB. With T = 2928 it allows about 4.3 GB.
 | the code | the receiver |
 |---|---|
 | doesn't start with `bQR` | treats it as an ordinary QR code |
-| has a version above 2 | asks the user to update |
+| has a version above 3 | asks the user to update |
 | has an unknown must-understand flag | asks the user to update |
-| has a version below 2, or the wrong length | ignores it |
-| is a valid version 2 frame | decodes it |
+| has a version below 3, or the wrong length | ignores it |
+| is a valid version 3 frame | decodes it |
 
 The receiver also ignores frames whose symbol size is below 64 or not a
 multiple of 8, whose transfer length is below 2, or that would need more than
@@ -224,7 +214,7 @@ The first valid frame sets the stream key, and the decoder is built for it.
 - Packets for a block that doesn't exist are dropped.
 
 The camera reads the same QR code several times, so the receiver skips packets
-it already has, using the SBN and ESI.
+it already has, using the packet's first 4 bytes (block number and packet id).
 
 ### Rebuilding the file
 

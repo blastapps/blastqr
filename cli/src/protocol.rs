@@ -1,4 +1,4 @@
-//! BlastQR protocol version 2, sender side. See `blastqr/docs/protocol.md`.
+//! BlastQR protocol version 3, sender side. See `blastqr/docs/protocol.md`.
 
 use std::io::Write;
 
@@ -8,7 +8,7 @@ use flate2::write::GzEncoder;
 use crate::{envelope, password};
 
 pub const SIGNATURE: &[u8; 3] = b"bQR";
-pub const PROTOCOL_VERSION: u8 = 2;
+pub const PROTOCOL_VERSION: u8 = 3;
 pub const HEADER_LEN: usize = 14;
 pub const PACKET_ID_LEN: usize = 4;
 

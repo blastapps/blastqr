@@ -225,9 +225,7 @@ class _SettingsPageState extends State<SettingsPage> {
             future: PackageInfo.fromPlatform(),
             builder: (context, s) {
               if (s.hasData) {
-                return Text(
-                  'blastQR version ${s.data?.version}.${s.data?.buildNumber}',
-                );
+                return Text('blastQR version ${s.data?.version}');
               }
               return const SizedBox();
             },

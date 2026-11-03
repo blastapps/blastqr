@@ -51,7 +51,7 @@ fn send_and_receive(content: &[u8], name: &str, code: Option<&str>, symbol_size:
         assert_eq!(scanned, frame);
 
         assert_eq!(&scanned[0..3], b"bQR");
-        assert_eq!(scanned[3], 2);
+        assert_eq!(scanned[3], protocol::PROTOCOL_VERSION);
         let transfer_len = u32::from_be_bytes(scanned[8..12].try_into().unwrap()) as u64;
         let t = u16::from_be_bytes([scanned[12], scanned[13]]);
         assert_eq!(scanned.len(), 14 + 4 + t as usize);

@@ -4,7 +4,7 @@ import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// A v2 frame as the sender builds it.
-Uint8List _v2Bytes({
+Uint8List _v3Bytes({
   int flags = 0,
   int kind = BlastQrcodeData.kindFile,
   int sessionId = 0x1234,
@@ -26,7 +26,7 @@ Uint8List _v2Bytes({
   return Uint8List.fromList([...header, ...packet]);
 }
 
-BlastQrcodeData _v2({
+BlastQrcodeData _v3({
   int flags = 0,
   int sessionId = 0x1234,
   int transferLength = 50000,
@@ -34,7 +34,7 @@ BlastQrcodeData _v2({
   int sourceBlock = 0,
 }) {
   final parsed = BlastQrcodeData.parse(
-    _v2Bytes(
+    _v3Bytes(
       flags: flags,
       sessionId: sessionId,
       transferLength: transferLength,
@@ -47,7 +47,7 @@ BlastQrcodeData _v2({
 }
 
 void main() {
-  group('v2 header', () {
+  group('v3 header', () {
     test('exact bytes (wire format, change only on purpose)', () {
       final header = BlastQrcodeData.buildHeader(
         flags: BlastQrcodeData.flagGzip,
@@ -58,7 +58,7 @@ void main() {
       );
       expect(header, [
         0x62, 0x51, 0x52, // "bQR"
-        0x02, // version
+        0x03, // version
         0x01, // flags: gzip
         0x03, // kind
         0xBE, 0xEF, // sessionId
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('round-trips through parse', () {
-      final frame = _v2(
+      final frame = _v3(
         flags: BlastQrcodeData.flagGzip,
         sessionId: 0xBEEF,
         transferLength: 123456,
@@ -94,12 +94,12 @@ void main() {
     });
 
     test('newer versions ask for an update', () {
-      final bytes = _v2Bytes()..[3] = 3;
+      final bytes = _v3Bytes()..[3] = 4;
       expect(BlastQrcodeData.parse(bytes).verdict, FrameVerdict.newerVersion);
     });
 
     test('unknown must-understand flags ask for an update', () {
-      final bytes = _v2Bytes(flags: 0x04);
+      final bytes = _v3Bytes(flags: 0x04);
       expect(
         BlastQrcodeData.parse(bytes).verdict,
         FrameVerdict.unsupportedFlags,
@@ -107,31 +107,31 @@ void main() {
     });
 
     test('encrypted frames are accepted', () {
-      final frame = _v2(
+      final frame = _v3(
         flags: BlastQrcodeData.flagEncrypted | BlastQrcodeData.flagGzip,
       );
       expect(frame.isEncrypted, isTrue);
       expect(frame.isCompressedData, isTrue);
-      expect(_v2().isEncrypted, isFalse);
+      expect(_v3().isEncrypted, isFalse);
     });
 
     test('unknown optional flags are ignored', () {
-      final frame = _v2(flags: 0x10 | BlastQrcodeData.flagGzip);
+      final frame = _v3(flags: 0x10 | BlastQrcodeData.flagGzip);
       expect(frame.isCompressedData, isTrue);
     });
 
     test('frame length must match the declared symbol size', () {
-      final bytes = _v2Bytes(symbolSize: 1000, packetLength: 900);
+      final bytes = _v3Bytes(symbolSize: 1000, packetLength: 900);
       expect(BlastQrcodeData.parse(bytes).verdict, FrameVerdict.malformed);
     });
 
     test('older versions (and 0) are malformed', () {
       expect(
-        BlastQrcodeData.parse(_v2Bytes()..[3] = 0).verdict,
+        BlastQrcodeData.parse(_v3Bytes()..[3] = 0).verdict,
         FrameVerdict.malformed,
       );
       expect(
-        BlastQrcodeData.parse(_v2Bytes()..[3] = 1).verdict,
+        BlastQrcodeData.parse(_v3Bytes()..[3] = 1).verdict,
         FrameVerdict.malformed,
       );
     });
@@ -141,12 +141,12 @@ void main() {
     test('accepts frames from any MTU setting', () {
       for (final mtu in [100, 500, 1000, 2000, 2935]) {
         final symbolSize = BlastQrcodeData.symbolSizeForMtu(mtu);
-        expect(_v2(symbolSize: symbolSize).isDecodable, isTrue, reason: '$mtu');
+        expect(_v3(symbolSize: symbolSize).isDecodable, isTrue, reason: '$mtu');
       }
     });
 
     test('accepts a ~4 GB transfer at the default MTU', () {
-      final frame = _v2(
+      final frame = _v3(
         transferLength: BlastQrcodeData.maxFileBytes,
         symbolSize: 2928,
       );
@@ -155,37 +155,37 @@ void main() {
 
     test('rejects a huge transfer with tiny symbols', () {
       // ~45M symbols: would make the decoder reserve ~1 GB.
-      final frame = _v2(transferLength: 0xFFFFFFFF, symbolSize: 96);
+      final frame = _v3(transferLength: 0xFFFFFFFF, symbolSize: 96);
       expect(frame.isDecodable, isFalse);
     });
 
     test('rejects empty transfers', () {
-      expect(_v2(transferLength: 0).isDecodable, isFalse);
-      expect(_v2(transferLength: 1).isDecodable, isFalse);
-      expect(_v2(transferLength: 2).isDecodable, isTrue);
+      expect(_v3(transferLength: 0).isDecodable, isFalse);
+      expect(_v3(transferLength: 1).isDecodable, isFalse);
+      expect(_v3(transferLength: 2).isDecodable, isTrue);
     });
 
     test('rejects symbol sizes no sender produces', () {
-      expect(_v2(symbolSize: 56).isDecodable, isFalse);
-      expect(_v2(symbolSize: 101).isDecodable, isFalse);
+      expect(_v3(symbolSize: 56).isDecodable, isFalse);
+      expect(_v3(symbolSize: 101).isDecodable, isFalse);
     });
   });
 
   group('streamKey', () {
     test('is equal for frames of the same transfer', () {
-      expect(_v2(sourceBlock: 0).streamKey, _v2(sourceBlock: 1).streamKey);
+      expect(_v3(sourceBlock: 0).streamKey, _v3(sourceBlock: 1).streamKey);
     });
 
     test('differs for another session, even with identical settings', () {
-      expect(_v2(sessionId: 1).streamKey, isNot(_v2(sessionId: 2).streamKey));
+      expect(_v3(sessionId: 1).streamKey, isNot(_v3(sessionId: 2).streamKey));
     });
 
     test('differs when any fixed field differs', () {
-      final base = _v2();
-      expect(_v2(transferLength: 50001).streamKey, isNot(base.streamKey));
-      expect(_v2(symbolSize: 1000).streamKey, isNot(base.streamKey));
+      final base = _v3();
+      expect(_v3(transferLength: 50001).streamKey, isNot(base.streamKey));
+      expect(_v3(symbolSize: 1000).streamKey, isNot(base.streamKey));
       expect(
-        _v2(flags: BlastQrcodeData.flagGzip).streamKey,
+        _v3(flags: BlastQrcodeData.flagGzip).streamKey,
         isNot(base.streamKey),
       );
     });

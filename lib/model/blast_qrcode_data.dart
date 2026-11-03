@@ -25,10 +25,10 @@ typedef StreamKey =
 
 /// One BlastQR frame: a header plus one RaptorQ packet.
 ///
-/// Version 2, 14-byte header:
+/// Version 3, 14-byte header:
 /// ```
 /// 0  3  signature       "bQR"
-/// 3  1  version         2
+/// 3  1  version         3
 /// 4  1  flags           see flag* constants
 /// 5  1  kind            see kind* constants
 /// 6  2  sessionId       u16 BE, random per send
@@ -41,7 +41,7 @@ class BlastQrcodeData {
   /// byte, so receivers can say "update the app".
   static final signatureBytes = Uint8List.fromList([0x62, 0x51, 0x52]);
 
-  static const int protocolVersion = 2;
+  static const int protocolVersion = 3;
   static const int headerLength = 14;
 
   /// Flags. The low 4 bits must be understood: a frame with an unknown bit
@@ -109,7 +109,7 @@ class BlastQrcodeData {
 
   bool get isEncrypted => flags & flagEncrypted != 0;
 
-  /// Builds the 14-byte v2 header. Every frame of a transfer shares it.
+  /// Builds the 14-byte v3 header. Every frame of a transfer shares it.
   static Uint8List buildHeader({
     required int flags,
     required int kind,

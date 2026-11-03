@@ -43,7 +43,10 @@ void main() {
     });
 
     test('newer versions and unknown features ask for an update', () {
-      expect(act(_frame(version: 3), 0), ScanAction.updateRequired);
+      expect(
+        act(_frame(version: BlastQrcodeData.protocolVersion + 1), 0),
+        ScanAction.updateRequired,
+      );
       expect(act(_frame(flags: 0x04), 0), ScanAction.updateRequired);
       expect(tracker.current, isNull);
     });
