@@ -93,7 +93,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<AppSettings>(
         builder: (context, state, child) {
           return MaterialApp(
-            title: 'blastqr',
+            title: 'blastQR',
             theme: BlastTheme.light.buildTheme(state.accentColor, false),
             darkTheme: BlastTheme.dark.buildTheme(
               state.accentColor,
