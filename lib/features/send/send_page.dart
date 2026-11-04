@@ -401,6 +401,7 @@ class _SendCard extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'Jersey25',
                       fontSize: 22,
+                      height: 1,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
