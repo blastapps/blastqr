@@ -418,7 +418,9 @@ class _SendCard extends StatelessWidget {
               ),
             ),
             HugeIcon(
-              icon: HugeIcons.strokeRoundedArrowRight01,
+              icon: context.isRtl
+                  ? HugeIcons.strokeRoundedArrowLeft01
+                  : HugeIcons.strokeRoundedArrowRight01,
               color: context.color.onSurfaceVariant,
               size: 20,
             ),

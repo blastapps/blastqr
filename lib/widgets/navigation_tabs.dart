@@ -37,12 +37,12 @@ class NavigationTabs extends StatelessWidget {
                 borderRadius: BorderRadius.circular(36),
               ),
             ),
-            AnimatedPositioned(
+            AnimatedPositionedDirectional(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOutCubic,
-              left: currentIndex * tabWidth,
+              start: currentIndex * tabWidth,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(4, 4, 0, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(4, 4, 0, 0),
                 child: Container(
                   height: 64,
                   width: tabWidth,

@@ -93,7 +93,12 @@ class _SendSheetState extends State<_SendSheet> {
                     color: context.color.onSurface,
                   ),
                 ),
-                contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
+                contentPadding: const EdgeInsetsDirectional.fromSTEB(
+                  48,
+                  0,
+                  0,
+                  8,
+                ),
               ),
               onTap: () {
                 final dotIndex = _nameController.text.lastIndexOf('.');

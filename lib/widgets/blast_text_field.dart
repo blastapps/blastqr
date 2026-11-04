@@ -79,7 +79,7 @@ class _BlastTextFieldState extends State<BlastTextField> {
       style: widget.style,
       textAlign: widget.textAlign ?? TextAlign.start,
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.fromLTRB(
+        contentPadding: EdgeInsetsDirectional.fromSTEB(
           widget.textAlign == TextAlign.center ? 48 : 12,
           0,
           8,
@@ -96,7 +96,7 @@ class _BlastTextFieldState extends State<BlastTextField> {
   Widget? _buildSuffix() {
     if (_hasTrailingHint) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 0, 0),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 0, 0),
         child: Text(widget.trailingHintText!, style: _hintStyle),
       );
     }

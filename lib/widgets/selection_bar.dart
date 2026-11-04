@@ -146,7 +146,9 @@ class SelectionBar extends StatelessWidget {
                   IconButton(
                     onPressed: controller.open,
                     icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      icon: context.isRtl
+                          ? HugeIcons.strokeRoundedArrowLeft01
+                          : HugeIcons.strokeRoundedArrowRight01,
                       color: color,
                     ),
                   ),

@@ -34,7 +34,7 @@ class FileHeaderWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Stack(
-        alignment: Alignment.topRight,
+        alignment: AlignmentDirectional.topEnd,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -89,7 +89,7 @@ class FileHeaderWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(right: 36),
+                      padding: const EdgeInsetsDirectional.only(end: 36),
                       child: Text(
                         bundledFiles.length > 1
                             ? context.l10n.sending_files_count(

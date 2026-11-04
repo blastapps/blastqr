@@ -377,7 +377,7 @@ class _SheetContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 0, showClose ? 8 : 16, 0),
+          padding: EdgeInsetsDirectional.fromSTEB(16, 0, showClose ? 8 : 16, 0),
           child: Row(
             children: [
               Expanded(

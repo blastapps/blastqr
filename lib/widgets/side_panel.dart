@@ -27,7 +27,9 @@ class SidePanel extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.translucentSurface,
-        border: Border(right: BorderSide(color: context.color.outline)),
+        border: BorderDirectional(
+          end: BorderSide(color: context.color.outline),
+        ),
       ),
       // Hover highlights paint on the nearest Material, which would otherwise
       // be below the panel's background.

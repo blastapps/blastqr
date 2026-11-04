@@ -160,7 +160,7 @@ class _TransferTile extends StatelessWidget {
           Flexible(child: Text(_transferSummary(t, context.l10n))),
           if (t.nearOptimal)
             const Padding(
-              padding: EdgeInsets.only(left: 4),
+              padding: EdgeInsetsDirectional.only(start: 4),
               child: Icon(Icons.check_circle, size: 16, color: Colors.green),
             ),
         ],

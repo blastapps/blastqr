@@ -154,7 +154,7 @@ class _ScanPageState extends State<ScanPage> {
           leading: Row(
             children: [
               CircleButton(
-                padding: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsetsDirectional.only(start: 8),
                 onPressed: () {
                   appSettings.updateHapticFeedback(!appSettings.hapticFeedback);
                 },
@@ -733,7 +733,12 @@ class _ScanPageState extends State<ScanPage> {
                       color: context.color.onSurface,
                     ),
                   ),
-                  contentPadding: const EdgeInsets.fromLTRB(48, 0, 0, 8),
+                  contentPadding: const EdgeInsetsDirectional.fromSTEB(
+                    48,
+                    0,
+                    0,
+                    8,
+                  ),
                 ),
                 onTap: () {
                   final dotIndex = _renameController.text.indexOf('.');
@@ -805,7 +810,7 @@ class _ScanPageState extends State<ScanPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
+              padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 4, 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 color: context.color.surfaceContainer,
@@ -1046,7 +1051,7 @@ class _HelpMessageWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(64),
           color: Colors.black.withAlpha(140),

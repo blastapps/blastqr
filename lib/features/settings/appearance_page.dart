@@ -51,7 +51,7 @@ class _AppearancePageState extends State<AppearancePage> {
                 ),
                 title: Text(context.l10n.accent_color),
                 trailing: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
+                  padding: const EdgeInsetsDirectional.only(end: 8.0),
                   child: Container(
                     width: 28,
                     height: 28,
