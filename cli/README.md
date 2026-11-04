@@ -59,7 +59,7 @@ shows through the code.
 
 ## Protocol
 
-Frames follow BlastQR protocol version 2 ([docs/protocol.md](../docs/protocol.md)).
+Frames follow BlastQR protocol version 3 ([docs/protocol.md](../docs/protocol.md)).
 Encryption comes from the
 [`blastqr_envelope`](../packages/blastqr_envelope/) crate, which the app uses
 too.
