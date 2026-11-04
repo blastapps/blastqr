@@ -363,7 +363,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get always_compress_images => '항상 이미지 압축';
 
   @override
-  String get always_compress_images_subtitle => '대용량 파일의 압축 확인 건너뜀';
+  String get always_compress_images_subtitle => '이미지를 보내기 전에 압축합니다';
 
   @override
   String get camera_section => '카메라';

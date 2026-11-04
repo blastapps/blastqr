@@ -783,7 +783,7 @@ abstract class AppLocalizations {
   /// No description provided for @always_compress_images_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Skip the compression prompt for large files'**
+  /// **'Images are compressed before sending'**
   String get always_compress_images_subtitle;
 
   /// No description provided for @camera_section.

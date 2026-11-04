@@ -376,7 +376,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get always_compress_images_subtitle =>
-      'Omet l\'avís de compressió per a fitxers grans';
+      'Les imatges es comprimeixen abans d\'enviar-les';
 
   @override
   String get camera_section => 'Càmera';

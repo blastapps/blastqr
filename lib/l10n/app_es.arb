@@ -115,7 +115,7 @@
   "multi_qr_mode_subtitle": "Muestra tantos códigos como quepan en pantalla para ir más rápido",
   "images_section": "Imágenes",
   "always_compress_images": "Comprimir imágenes siempre",
-  "always_compress_images_subtitle": "Omite el aviso de compresión para archivos grandes",
+  "always_compress_images_subtitle": "Las imágenes se comprimen antes de enviarlas",
   "camera_section": "Cámara",
   "camera_resolution_hint": "La mayoría de dispositivos funcionarán mejor con este ajuste en \"High\"",
   "error": "Error",
