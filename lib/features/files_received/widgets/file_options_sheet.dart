@@ -53,7 +53,7 @@ Future<void> showFileOptionsSheet(
             onSend((password: password, fileName: null));
           },
         ),
-        const Divider(indent: 16, endIndent: 16, thickness: 0.25),
+        const _DottedDivider(),
         ListTile(
           dense: true,
           onTap: onOpen,
@@ -155,4 +155,43 @@ class _FilePreview extends StatelessWidget {
       ],
     );
   }
+}
+
+class _DottedDivider extends StatelessWidget {
+  const _DottedDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        height: 16,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: _DottedLinePainter(color: Theme.of(context).dividerColor),
+        ),
+      ),
+    );
+  }
+}
+
+class _DottedLinePainter extends CustomPainter {
+  const _DottedLinePainter({required this.color});
+
+  final Color color;
+
+  static const _radius = 1.0;
+  static const _spacing = 8.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final y = size.height / 2;
+    for (var x = _radius; x < size.width; x += _spacing) {
+      canvas.drawCircle(Offset(x, y), _radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DottedLinePainter old) => old.color != color;
 }
