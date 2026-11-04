@@ -90,18 +90,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get received_in => 'Received in';
 
   @override
-  String get large_file => 'Large file';
+  String get large_file => 'Long transfer';
 
   @override
-  String get large_file_msg_1 =>
-      'The file you selected is large and could take up to';
+  String get large_file_msg_1 => 'This transfer is large and could take up to';
 
   @override
   String get large_file_msg_2 => 'to transfer.';
 
   @override
-  String get large_file_msg_3 =>
-      'Would you like to send a compresed, lower quality version of this image?';
+  String large_file_msg_3(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Would you like to send compressed, lower quality versions of these $count images?',
+      one:
+          'Would you like to send a compressed, lower quality version of this image?',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get minutes => 'minutes';
@@ -113,7 +121,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get image_quality => 'Quality';
 
   @override
-  String get send_large_file => 'Send original file anyway';
+  String get send_large_file => 'Send anyway';
 
   @override
   String get send_compressed_image => 'Send compressed';

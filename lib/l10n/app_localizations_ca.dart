@@ -90,18 +90,27 @@ class AppLocalizationsCa extends AppLocalizations {
   String get received_in => 'Rebut en';
 
   @override
-  String get large_file => 'Fitxer gran';
+  String get large_file => 'Transferència llarga';
 
   @override
   String get large_file_msg_1 =>
-      'El fitxer que has seleccionat és gran i podria tardar fins a';
+      'Aquesta transferència és gran i podria tardar fins a';
 
   @override
   String get large_file_msg_2 => 'a transferir-se.';
 
   @override
-  String get large_file_msg_3 =>
-      'Vols enviar una versió comprimida de menor qualitat d\'aquesta imatge?';
+  String large_file_msg_3(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Vols enviar versions comprimides de menor qualitat d\'aquestes $count imatges?',
+      one:
+          'Vols enviar una versió comprimida de menor qualitat d\'aquesta imatge?',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get minutes => 'minuts';
@@ -113,7 +122,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get image_quality => 'Qualitat';
 
   @override
-  String get send_large_file => 'Envia el fitxer original';
+  String get send_large_file => 'Envia igualment';
 
   @override
   String get send_compressed_image => 'Envia comprimida';

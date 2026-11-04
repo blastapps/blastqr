@@ -1,20 +1,22 @@
 import 'package:blast_qr/features/settings/image_compression_settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/model/file_type.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 class FileTooLargeAlertWidget extends StatefulWidget {
   const FileTooLargeAlertWidget({
     super.key,
-    required this.estimatedSlowestTime,
-    required this.fileType,
+    required this.transferBytes,
+    required this.compressibleImages,
     required this.onAcknowledge,
     required this.onRequestCompressedImage,
   });
 
-  final double estimatedSlowestTime;
-  final FileType fileType;
+  final int transferBytes;
+
+  /// How many images compressing would re-encode. With none, only sending
+  /// as is is offered.
+  final int compressibleImages;
   final VoidCallback onAcknowledge;
   final void Function(int quality) onRequestCompressedImage;
 
@@ -24,8 +26,10 @@ class FileTooLargeAlertWidget extends StatefulWidget {
 }
 
 class _FileTooLargeAlertWidgetState extends State<FileTooLargeAlertWidget> {
+  static const _slowestKBps = 8;
+
   String get _estimateInMinutes =>
-      (widget.estimatedSlowestTime / 60).toStringAsFixed(0);
+      (widget.transferBytes / 1000 / _slowestKBps / 60).toStringAsFixed(0);
 
   final int _quality = 90;
 
@@ -75,13 +79,16 @@ class _FileTooLargeAlertWidgetState extends State<FileTooLargeAlertWidget> {
                 text: ' $_estimateInMinutes ${context.l10n.minutes} ',
               ),
               TextSpan(text: context.l10n.large_file_msg_2),
-              if (widget.fileType.allowsImageCompression)
-                TextSpan(text: '\n${context.l10n.large_file_msg_3}'),
+              if (widget.compressibleImages > 0)
+                TextSpan(
+                  text:
+                      '\n${context.l10n.large_file_msg_3(widget.compressibleImages)}',
+                ),
             ],
           ),
         ),
         const SizedBox(height: 8),
-        if (widget.fileType.allowsImageCompression)
+        if (widget.compressibleImages > 0)
           Row(
             spacing: 4,
             children: [

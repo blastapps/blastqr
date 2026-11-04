@@ -10,15 +10,15 @@ import 'package:hugeicons/hugeicons.dart';
 class FileHeaderWidget extends StatelessWidget {
   const FileHeaderWidget({
     super.key,
-    required this.file,
+    required this.files,
     required this.onTapDismiss,
     this.compressedSize,
     this.encrypted = false,
     this.name,
-    this.bundledFiles = const [],
   });
 
-  final FileWrapper file;
+  /// The files picked to send. Several are sent as one bundle.
+  final List<FileWrapper> files;
   final VoidCallback onTapDismiss;
   final int? compressedSize;
 
@@ -26,11 +26,11 @@ class FileHeaderWidget extends StatelessWidget {
 
   final String? name;
 
-  /// The files inside [file] when several are sent as one bundle.
-  final List<FileWrapper> bundledFiles;
-
   @override
   Widget build(BuildContext context) {
+    final file = files.first;
+    final size = files.fold(0, (sum, f) => sum + f.size);
+    final sizeLabel = '${(size / 1000).toStringAsFixed(0)} KB';
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Stack(
@@ -40,12 +40,12 @@ class FileHeaderWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             spacing: 12,
             children: [
-              bundledFiles.length > 1
+              files.length > 1
                   ? Stack(
                       alignment: Alignment.center,
                       children: [
                         StackedThumbnail(
-                          files: bundledFiles,
+                          files: files,
                           size: 56,
                           blurred: encrypted,
                         ),
@@ -91,10 +91,8 @@ class FileHeaderWidget extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsetsDirectional.only(end: 36),
                       child: Text(
-                        bundledFiles.length > 1
-                            ? context.l10n.sending_files_count(
-                                bundledFiles.length,
-                              )
+                        files.length > 1
+                            ? context.l10n.sending_files_count(files.length)
                             : name ?? file.name,
                         style: Theme.of(context).textTheme.titleMedium,
                         overflow: TextOverflow.ellipsis,
@@ -102,12 +100,12 @@ class FileHeaderWidget extends StatelessWidget {
                         softWrap: false,
                       ),
                     ),
-                    if (compressedSize != null && compressedSize != file.size)
+                    if (compressedSize != null && compressedSize != size)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         spacing: 4,
                         children: [
-                          Text(file.sizeInkB),
+                          Text(sizeLabel),
                           const Icon(Icons.arrow_forward, size: 14),
                           Text(
                             '${(compressedSize! / 1000).toStringAsFixed(0)} KB',
@@ -115,7 +113,7 @@ class FileHeaderWidget extends StatelessWidget {
                         ],
                       )
                     else
-                      Text(file.sizeInkB),
+                      Text(sizeLabel),
                   ],
                 ),
               ),

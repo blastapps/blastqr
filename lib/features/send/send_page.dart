@@ -298,7 +298,7 @@ class SendPageState extends State<SendPage> {
 
     // Checked before the send options too, so the user isn't asked first.
     for (final fileWrapper in fileWrappers) {
-      final tooLarge = transferTooLargeMessage(context, fileWrapper);
+      final tooLarge = transferTooLargeMessage(context, fileWrapper.size);
       if (tooLarge != null) {
         showFileTooLarge(context, tooLarge);
         return;

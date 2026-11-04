@@ -4,6 +4,7 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/file_bundle.dart';
 import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
+import 'package:blast_qr/features/send/send_plan.dart';
 import 'package:blast_qr/features/send/send_options.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
@@ -15,8 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-/// Shows the QR page for [files]. Several files are sent as one bundle.
-/// Completes when the QR page is closed.
+/// Shows the QR page for [files]. Several files are sent as one bundle,
+/// which the QR page builds. Completes when the QR page is closed.
 Future<void> sendFiles(
   BuildContext context,
   List<FileWrapper> files,
@@ -30,37 +31,26 @@ Future<void> sendFiles(
     await showFileMissing(context, files[missing].name);
     return;
   }
-  if (files.length == 1) {
-    final tooLarge = transferTooLargeMessage(context, files.single);
+  // Compressing images can bring a bundle under the limit, so such a bundle
+  // is only checked once built.
+  if (files.length == 1 || !files.any(isCompressibleInBundle)) {
+    final size = files.fold(0, (sum, f) => sum + f.size);
+    final tooLarge = transferTooLargeMessage(context, size);
     if (tooLarge != null) {
       await showFileTooLarge(context, tooLarge);
       return;
     }
-    await _showQrPage(context, files.single, options);
-    return;
   }
-
-  final appSettings = Provider.of<AppSettings>(context, listen: false);
-  final bundle = await _withProgress(
-    context,
-    createSendBundle(
-      files,
-      icSettings: appSettings.alwaysCompressImages
-          ? appSettings.imageCompressionSettings
-          : null,
+  await Navigator.of(context).push(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (context) => QrPage(
+        files: files,
+        password: options.password,
+        fileName: options.fileName,
+      ),
     ),
   );
-  try {
-    if (!context.mounted) return;
-    final tooLarge = transferTooLargeMessage(context, bundle);
-    if (tooLarge != null) {
-      await showFileTooLarge(context, tooLarge);
-      return;
-    }
-    await _showQrPage(context, bundle, options, bundledFiles: files);
-  } finally {
-    await bundle.file.delete();
-  }
 }
 
 /// Zips [files] into a temporary file. Large images are re-encoded first
@@ -71,9 +61,7 @@ Future<FileWrapper> createSendBundle(
 }) async {
   final entries = <BundleEntry>[];
   for (final file in files) {
-    if (icSettings != null &&
-        file.type.allowsImageCompression &&
-        file.size > QrPage.largeFileBytes) {
+    if (icSettings != null && isCompressibleInBundle(file)) {
       final bytes = await FileQrEncoder.compressImage(
         await file.file.readAsBytes(),
         icSettings,
@@ -100,14 +88,15 @@ Future<FileWrapper> createSendBundle(
   return File(path).toFileWrapper();
 }
 
-/// The reason [file] can't be sent with the current QR code size, if any.
-String? transferTooLargeMessage(BuildContext context, FileWrapper file) {
-  if (file.size > BlastQrcodeData.maxFileBytes) {
+/// The reason [size] bytes can't be sent with the current QR code size, if
+/// any.
+String? transferTooLargeMessage(BuildContext context, int size) {
+  if (size > BlastQrcodeData.maxFileBytes) {
     return context.l10n.file_too_large_msg;
   }
   final mtu = Provider.of<EncodeSettings>(context, listen: false).mtu;
   final symbolSize = BlastQrcodeData.symbolSizeForMtu(mtu);
-  final transferLength = file.size + BlastQrcodeData.maxMetadataBytes;
+  final transferLength = size + BlastQrcodeData.maxMetadataBytes;
   if (!BlastQrcodeData.fitsSymbolLimit(transferLength, symbolSize)) {
     return context.l10n.file_too_large_for_qr_size_msg;
   }
@@ -137,40 +126,4 @@ Future<void> _showAlert(BuildContext context, String title, String message) {
       ],
     ),
   );
-}
-
-Future<void> _showQrPage(
-  BuildContext context,
-  FileWrapper file,
-  SendOptions options, {
-  List<FileWrapper> bundledFiles = const [],
-}) {
-  return Navigator.of(context).push(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => QrPage(
-        file: file,
-        bundledFiles: bundledFiles,
-        password: options.password,
-        fileName: options.fileName,
-      ),
-    ),
-  );
-}
-
-Future<T> _withProgress<T>(BuildContext context, Future<T> future) async {
-  final navigator = Navigator.of(context);
-  showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) => const PopScope(
-      canPop: false,
-      child: Center(child: CircularProgressIndicator.adaptive()),
-    ),
-  );
-  try {
-    return await future;
-  } finally {
-    navigator.pop();
-  }
 }

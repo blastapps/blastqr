@@ -28,10 +28,6 @@ class FileWrapper {
     required this.size,
     required this.modified,
   });
-
-  double getEstimateTransferTime(int speedInkBps) {
-    return (size / 1000) / speedInkBps;
-  }
 }
 
 extension FileWrapperThumbnailExtension on FileWrapper {

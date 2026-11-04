@@ -26,14 +26,21 @@
   "no_files_msg": "No files yet.",
   "saved_to": "Saved to",
   "received_in": "Received in",
-  "large_file": "Large file",
-  "large_file_msg_1": "The file you selected is large and could take up to",
+  "large_file": "Long transfer",
+  "large_file_msg_1": "This transfer is large and could take up to",
   "large_file_msg_2": "to transfer.",
-  "large_file_msg_3": "Would you like to send a compresed, lower quality version of this image?",
+  "large_file_msg_3": "{count, plural, =1{Would you like to send a compressed, lower quality version of this image?} other{Would you like to send compressed, lower quality versions of these {count} images?}}",
+  "@large_file_msg_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "minutes": "minutes",
   "image_compression": "Image compression",
   "image_quality": "Quality",
-  "send_large_file": "Send original file anyway",
+  "send_large_file": "Send anyway",
   "send_compressed_image": "Send compressed",
   "to_transfer": "to transfer",
   "generating_codes": "Generating codes...",

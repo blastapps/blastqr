@@ -269,13 +269,13 @@ abstract class AppLocalizations {
   /// No description provided for @large_file.
   ///
   /// In en, this message translates to:
-  /// **'Large file'**
+  /// **'Long transfer'**
   String get large_file;
 
   /// No description provided for @large_file_msg_1.
   ///
   /// In en, this message translates to:
-  /// **'The file you selected is large and could take up to'**
+  /// **'This transfer is large and could take up to'**
   String get large_file_msg_1;
 
   /// No description provided for @large_file_msg_2.
@@ -287,8 +287,8 @@ abstract class AppLocalizations {
   /// No description provided for @large_file_msg_3.
   ///
   /// In en, this message translates to:
-  /// **'Would you like to send a compresed, lower quality version of this image?'**
-  String get large_file_msg_3;
+  /// **'{count, plural, =1{Would you like to send a compressed, lower quality version of this image?} other{Would you like to send compressed, lower quality versions of these {count} images?}}'**
+  String large_file_msg_3(int count);
 
   /// No description provided for @minutes.
   ///
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @send_large_file.
   ///
   /// In en, this message translates to:
-  /// **'Send original file anyway'**
+  /// **'Send anyway'**
   String get send_large_file;
 
   /// No description provided for @send_compressed_image.

@@ -90,16 +90,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get received_in => '받은 날짜';
 
   @override
-  String get large_file => '큰 파일';
+  String get large_file => '긴 전송';
 
   @override
-  String get large_file_msg_1 => '선택한 파일이 크기 때문에 최대';
+  String get large_file_msg_1 => '이 전송은 크기 때문에 최대';
 
   @override
   String get large_file_msg_2 => '까지 시간이 걸릴 수 있습니다.';
 
   @override
-  String get large_file_msg_3 => '이 이미지의 압축된 저화질 버전을 전송하시겠습니까?';
+  String large_file_msg_3(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이 이미지 $count개의 압축된 저화질 버전을 전송하시겠습니까?',
+      one: '이 이미지의 압축된 저화질 버전을 전송하시겠습니까?',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get minutes => '분';
@@ -111,7 +119,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get image_quality => '화질';
 
   @override
-  String get send_large_file => '그래도 큰 파일 보내기';
+  String get send_large_file => '그래도 보내기';
 
   @override
   String get send_compressed_image => '압축해서 보내기';
