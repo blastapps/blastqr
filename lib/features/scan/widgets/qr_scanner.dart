@@ -370,7 +370,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       controller,
       child: _results.codes.isEmpty
           ? null
-          : MultiResultOverlay(results: _results.codes, controller: controller),
+          : _CodeOutlineOverlay(codes: _results.codes, controller: controller),
     );
     if (!Platform.isAndroid && !Platform.isIOS) {
       return ColoredBox(
@@ -415,4 +415,66 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       },
     );
   }
+}
+
+class _CodeOutlineOverlay extends StatelessWidget {
+  const _CodeOutlineOverlay({required this.codes, required this.controller});
+
+  final List<Code> codes;
+  final CameraController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: RotatedBox(
+        quarterTurns: _quarterTurns(),
+        child: CustomPaint(
+          painter: _CodeOutlinePainter(
+            codes: codes,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Matches flutter_zxing's MultiResultOverlay rotation.
+  int _quarterTurns() {
+    if (!Platform.isAndroid) return 0;
+    return switch (controller.value.deviceOrientation) {
+      DeviceOrientation.portraitUp || DeviceOrientation.portraitDown => 1,
+      DeviceOrientation.landscapeRight => 2,
+      DeviceOrientation.landscapeLeft => 0,
+    };
+  }
+}
+
+class _CodeOutlinePainter extends CustomPainter {
+  _CodeOutlinePainter({required this.codes, required this.color});
+
+  final List<Code> codes;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+    for (final code in codes) {
+      final pos = code.position;
+      if (pos == null) continue;
+      final scale = size.width / pos.imageWidth;
+      final path = Path()
+        ..moveTo(pos.topLeftX * scale, pos.topLeftY * scale)
+        ..lineTo(pos.topRightX * scale, pos.topRightY * scale)
+        ..lineTo(pos.bottomRightX * scale, pos.bottomRightY * scale)
+        ..lineTo(pos.bottomLeftX * scale, pos.bottomLeftY * scale)
+        ..close();
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_CodeOutlinePainter oldDelegate) => true;
 }
