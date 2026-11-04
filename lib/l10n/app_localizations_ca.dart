@@ -177,7 +177,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- Les transferències de fitxers de blastQR funcionen completament sense connexió a internet.\n\n- La informació transferida NO està encriptada i pot ser llegida per qualsevol que tingui accés a la seqüència de codis QR, tret que s\'utilitzi la funció \'Enviar xifrat amb contrasenya\'. Eviteu utilitzar blastQR per transmetre informació sensible sense activar abans el xifratge i utilitzeu sempre contrasenyes segures.\n\n- A causa de la tecnologia utilitzada, les transferències de fitxers amb blastQR són lentes (amb un màxim d\'uns 110kB/s). Es recomana enviar fitxers petits o comprimir-los abans.\n\n- També pots utilitzar blastQR per escanejar codis QR normals.\n\n- blastQR és un projecte de codi obert. Pots trobar el codi font a:';
+      '- Les transferències de fitxers de blastQR funcionen completament sense connexió a internet.\n\n- La informació transferida NO està encriptada i pot ser llegida per qualsevol que tingui accés a la seqüència de codis QR, tret que s\'utilitzi la funció \'Enviar xifrat amb contrasenya\'. Eviteu utilitzar blastQR per transmetre informació sensible sense activar abans el xifratge i utilitzeu sempre contrasenyes segures.\n\n- A causa de la tecnologia utilitzada, les transferències de fitxers amb blastQR no són gaire ràpides per defecte. Tot i així, mostrar diversos codis alhora (botó de pantalla completa) i augmentar la \'Velocitat de reproducció\' a la Configuració pot augmentar molt la velocitat.\n\n- També pots utilitzar blastQR per escanejar codis QR normals.\n\n- blastQR és un projecte de codi obert. Pots trobar el codi font a:';
 
   @override
   String get settings => 'Configuració';

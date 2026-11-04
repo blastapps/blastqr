@@ -177,7 +177,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get help_message_4 =>
-      '- Las transferencias de archivos de blastQR funcionan completamente sin conexión.\n\n- La información transferida NO está encriptada y puede ser leída por cualquiera que tenga acceso a la secuencia de códigos QR, a menos que uses la función \'Enviar cifrado con contraseña\'. Evita usar blastQR para transmitir información sensible sin activar antes el cifrado y usa siempre contraseñas seguras.\n\n- Debido a la tecnología utilizada, las transferencias de archivos con blastQR son lentas (alcanzando un máximo de aproximadamente 110kB/s). Se recomienda enviar archivos pequeños o comprimirlos previamente.\n\n- También puedes usar blastQR para escanear códigos QR normales.\n\n- blastQR es un proyecto de código abierto. Puedes encontrar el código fuente en:';
+      '- Las transferencias de archivos de blastQR funcionan completamente sin conexión.\n\n- La información transferida NO está encriptada y puede ser leída por cualquiera que tenga acceso a la secuencia de códigos QR, a menos que uses la función \'Enviar cifrado con contraseña\'. Evita usar blastQR para transmitir información sensible sin activar antes el cifrado y usa siempre contraseñas seguras.\n\n- Debido a la tecnología utilizada, las transferencias de archivos con blastQR no son muy rápidas por defecto. Sin embargo, mostrar varios códigos a la vez (botón de pantalla completa) y aumentar la \'Velocidad de reproducción\' en la Configuración puede aumentar mucho la velocidad.\n\n- También puedes usar blastQR para escanear códigos QR normales.\n\n- blastQR es un proyecto de código abierto. Puedes encontrar el código fuente en:';
 
   @override
   String get settings => 'Configuración';
