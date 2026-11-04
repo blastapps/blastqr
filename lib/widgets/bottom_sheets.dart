@@ -329,6 +329,7 @@ Future<T?> showSheet<T>({
     backgroundColor: color,
     enableDrag: true,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(24),
@@ -344,7 +345,7 @@ Future<T?> showSheet<T>({
           MediaQuery.of(context).viewInsets.bottom +
               MediaQuery.of(context).viewPadding.bottom,
         ),
-        child: content,
+        child: SingleChildScrollView(child: content),
       );
     },
   );
