@@ -3,10 +3,11 @@
 
 use std::io::Read;
 
+use blastqr::password;
 use blastqr::protocol::{self, TransferObject};
 use blastqr::qr::{self, Matrix};
 use blastqr::stream::PacketStream;
-use blastqr::{envelope, password};
+use blastqr_envelope as envelope;
 use raptorq::{Decoder, EncodingPacket, ObjectTransmissionInformation};
 
 /// Draws the matrix with a 4-module quiet zone and scans it back.

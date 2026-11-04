@@ -101,29 +101,17 @@ You need:
   (`libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
   gstreamer1.0-plugins-good` on Ubuntu/Debian).
 
-Two native packages live in separate repos and must be checked out next to
-this one: `raptorq_flutter` (RaptorQ) and `blastqr_crypto` (encryption).
-
 ```sh
-git clone https://codeberg.org/cukha/raptorq_flutter.git
-git clone https://codeberg.org/cukha/blastqr_crypto.git
 git clone https://codeberg.org/cukha/blastqr.git
 cd blastqr
 flutter pub get
 flutter run
 ```
 
-<!-- TODO: publish raptorq_flutter and blastqr_crypto and confirm the URLs above. -->
-
 ### Running the tests
 
-`flutter test` runs everything. The round-trip tests load both native
-libraries built for your computer, and are skipped until they're built:
-
-```sh
-(cd ../raptorq_flutter/rust && cargo build --release)
-(cd ../blastqr_crypto/rust && cargo build --release)
-```
+`flutter test` runs everything. It builds the RaptorQ and encryption
+libraries for your computer first, which takes a while the first time.
 
 ### Release signing (Android)
 
@@ -140,6 +128,8 @@ not in the repo. Without it, use `flutter run` or a debug build.
 | `lib/features/settings/` | Settings screens |
 | `lib/raptorq/` | Wrappers around the RaptorQ encoder and decoder |
 | `lib/crypto/` | Passwords and the wrapper around `blastqr_crypto` |
+| `packages/blastqr_crypto/` | Flutter wrapper around `blastqr_envelope` |
+| `packages/blastqr_envelope/` | Encryption (Rust), shared by the app and the CLI |
 | `lib/l10n/` | Translations (`.arb` files) |
 | `docs/` | Protocol documentation |
 | `cli/` | Command-line sender (Rust) |

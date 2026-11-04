@@ -1,6 +1,6 @@
 // End-to-end tests of the endless sender stream and the receiver's decoder,
-// using the real RaptorQ library built for this machine. Build it first:
-//   (cd ../raptorq_flutter/rust && cargo build --release)
+// using the real RaptorQ library, which `flutter test` builds for this
+// machine.
 import 'dart:io';
 import 'dart:math';
 
@@ -11,8 +11,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:raptorq_flutter/src/rust/frb_generated.dart';
 
-const _libraryPath =
-    '../raptorq_flutter/rust/target/release/librust_lib_raptorq_dart.dylib';
+const _libraryPath = 'build/native_assets/macos/libraptorq_flutter.dylib';
 
 final _skip =
     File(_libraryPath).existsSync()

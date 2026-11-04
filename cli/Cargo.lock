@@ -126,9 +126,8 @@ dependencies = [
 name = "blastqr"
 version = "3.0.0"
 dependencies = [
- "argon2",
  "base64",
- "chacha20poly1305",
+ "blastqr_envelope",
  "chrono",
  "clap",
  "crossterm",
@@ -139,8 +138,17 @@ dependencies = [
  "raptorq",
  "rpassword",
  "rqrr",
- "zeroize",
  "zip",
+]
+
+[[package]]
+name = "blastqr_envelope"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "chacha20poly1305",
+ "rand_core",
+ "zeroize",
 ]
 
 [[package]]

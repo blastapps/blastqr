@@ -270,5 +270,6 @@ update.
 
 The frame and transfer object are in `lib/model/`, the sender in
 `lib/features/send/`, the receiver in `lib/features/scan/` and the password
-handling in `lib/crypto/`. RaptorQ comes from `../raptorq_flutter` (Rust crate
-`raptorq` 1.8.1) and encryption from `../blastqr_crypto`.
+handling in `lib/crypto/`. RaptorQ comes from the
+[raptorq_flutter](https://pub.dev/packages/raptorq_flutter) package (Rust
+crate `raptorq` 2.0.1) and encryption from `packages/blastqr_envelope/`.

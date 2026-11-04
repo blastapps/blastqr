@@ -5,7 +5,8 @@ use std::io::Write;
 use flate2::Compression;
 use flate2::write::GzEncoder;
 
-use crate::{envelope, password};
+use crate::password;
+use blastqr_envelope as envelope;
 
 pub const SIGNATURE: &[u8; 3] = b"bQR";
 pub const PROTOCOL_VERSION: u8 = 3;

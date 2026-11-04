@@ -60,5 +60,6 @@ shows through the code.
 ## Protocol
 
 Frames follow BlastQR protocol version 2 ([docs/protocol.md](../docs/protocol.md)).
-`src/envelope.rs` is a copy of `rust/src/envelope.rs` in `blastqr_crypto`; keep
-the two in sync.
+Encryption comes from the
+[`blastqr_envelope`](../packages/blastqr_envelope/) crate, which the app uses
+too.

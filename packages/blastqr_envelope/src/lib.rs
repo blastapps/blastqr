@@ -1,8 +1,5 @@
 //! Password-based encryption of a whole transfer object.
 //!
-//! Copied from `blastqr_crypto/rust/src/envelope.rs`, which is built only as
-//! a C library for Flutter. Keep the two in sync.
-//!
 //! Envelope layout (all integers big-endian):
 //!
 //! ```text
