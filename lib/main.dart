@@ -26,6 +26,21 @@ void main() async {
     final license = await rootBundle.loadString('assets/licenses/raptorq.txt');
     yield LicenseEntryWithLineBreaks(['raptorq'], license);
   });
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString(
+      'assets/licenses/rustcrypto.txt',
+    );
+    yield LicenseEntryWithLineBreaks([
+      'argon2',
+      'chacha20poly1305',
+      'rand_core',
+      'zeroize',
+    ], license);
+  });
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('assets/licenses/subtle.txt');
+    yield LicenseEntryWithLineBreaks(['subtle'], license);
+  });
 
   //Setting SystmeUIMode
   SystemChrome.setEnabledSystemUIMode(

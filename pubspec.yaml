@@ -68,6 +68,8 @@ flutter:
     - assets/download-qr.png 
     - fonts/Jersey25/OFL.txt
     - assets/licenses/raptorq.txt
+    - assets/licenses/rustcrypto.txt
+    - assets/licenses/subtle.txt
   fonts:
     - family: Jersey25
       fonts:
