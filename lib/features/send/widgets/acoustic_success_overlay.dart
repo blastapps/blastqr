@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/widgets/password_widgets.dart';
@@ -27,6 +29,7 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
     with SingleTickerProviderStateMixin {
   AnimationController? _countdown;
   bool _passwordVisible = false;
+  Timer? _hidePasswordTimer;
 
   @override
   void initState() {
@@ -47,8 +50,20 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
 
   @override
   void dispose() {
+    _hidePasswordTimer?.cancel();
     _countdown?.dispose();
     super.dispose();
+  }
+
+  void _setPasswordVisible(bool visible) {
+    _hidePasswordTimer?.cancel();
+    if (visible) {
+      _hidePasswordTimer = Timer(
+        passwordRevealDuration,
+        () => _setPasswordVisible(false),
+      );
+    }
+    setState(() => _passwordVisible = visible);
   }
 
   @override
@@ -91,7 +106,7 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
             const SizedBox(height: 24),
             if (_passwordVisible) ...[
               GestureDetector(
-                onTap: () => setState(() => _passwordVisible = false),
+                onTap: () => _setPasswordVisible(false),
                 child: SizedBox(
                   height: 48,
                   child: Center(
@@ -106,7 +121,7 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
               const SizedBox(height: 8),
             ] else ...[
               OutlinedButton.icon(
-                onPressed: () => setState(() => _passwordVisible = true),
+                onPressed: () => _setPasswordVisible(true),
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedSquareLock02,
                   size: 18,
