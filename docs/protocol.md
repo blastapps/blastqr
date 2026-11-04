@@ -194,8 +194,9 @@ limits files to about 144 MB. With T = 2928 it allows about 4.3 GB.
 |---|---|
 | doesn't start with `bQR` | treats it as an ordinary QR code |
 | has a version above 3 | asks the user to update |
+| has version 2 | asks the user to have the sender update |
 | has an unknown must-understand flag | asks the user to update |
-| has a version below 3, or the wrong length | ignores it |
+| has version 0 or 1, or the wrong length | ignores it |
 | is a valid version 3 frame | decodes it |
 
 The receiver also ignores frames whose symbol size is below 64 or not a

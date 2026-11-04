@@ -133,6 +133,7 @@
   "receiving_generic": "Rebent fitxer...",
   "update_required_title": "Cal actualitzar",
   "update_required_msg": "Això s'ha enviat amb una versió més recent de blastQR. Actualitza l'aplicació per rebre-ho.",
+  "sender_update_required_msg": "Això s'ha enviat amb una versió antiga de blastQR. Demana a qui ho envia que actualitzi l'aplicació.",
   "send_encrypted": "Enviar xifrat amb contrasenya",
   "receiving_encrypted": "S'està rebent un fitxer xifrat...",
   "enter_password": "Introdueix la contrasenya",

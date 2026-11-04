@@ -427,6 +427,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '최신 버전의 blastQR로 보낸 파일입니다. 받으려면 앱을 업데이트하세요.';
 
   @override
+  String get sender_update_required_msg =>
+      '이전 버전의 blastQR로 보낸 파일입니다. 보낸 사람에게 앱을 업데이트하도록 요청하세요.';
+
+  @override
   String get send_encrypted => '비밀번호로 암호화해서 보내기';
 
   @override

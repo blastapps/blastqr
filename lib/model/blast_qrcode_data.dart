@@ -11,6 +11,9 @@ enum FrameVerdict {
   /// A BlastQR frame from a newer protocol version.
   newerVersion,
 
+  /// A BlastQR frame from an older protocol version.
+  olderVersion,
+
   /// A BlastQR frame using a feature this app doesn't support (an unknown
   /// must-understand flag).
   unsupportedFlags,
@@ -20,8 +23,13 @@ enum FrameVerdict {
 }
 
 /// Values that stay the same for every frame of one transfer.
-typedef StreamKey =
-    ({int sessionId, int transferLength, int symbolSize, int flags, int kind});
+typedef StreamKey = ({
+  int sessionId,
+  int transferLength,
+  int symbolSize,
+  int flags,
+  int kind,
+});
 
 /// One BlastQR frame: a header plus one RaptorQ packet.
 ///
@@ -143,8 +151,12 @@ class BlastQrcodeData {
     }
 
     final version = bytes[3];
-    if (version < protocolVersion) {
+    // Version 2 was the first to use the "bQR" signature.
+    if (version < 2) {
       return (verdict: FrameVerdict.malformed, frame: null);
+    }
+    if (version < protocolVersion) {
+      return (verdict: FrameVerdict.olderVersion, frame: null);
     }
     if (version > protocolVersion) {
       return (verdict: FrameVerdict.newerVersion, frame: null);

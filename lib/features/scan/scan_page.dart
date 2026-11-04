@@ -402,7 +402,9 @@ class _ScanPageState extends State<ScanPage> {
       case ScanAction.foreign:
         _handleRegularQRCodeResult(result.text);
       case ScanAction.updateRequired:
-        _showUpdateRequired();
+        _showUpdateRequired(context.l10n.update_required_msg);
+      case ScanAction.senderUpdateRequired:
+        _showUpdateRequired(context.l10n.sender_update_required_msg);
       case ScanAction.ignore:
         break;
       case ScanAction.switchTransfer:
@@ -451,9 +453,8 @@ class _ScanPageState extends State<ScanPage> {
     _dataLengthInLastPeriod = 0;
   }
 
-  /// The stream needs a newer app (newer protocol version, or a feature such
-  /// as encryption that this version doesn't support).
-  void _showUpdateRequired() {
+  /// The stream can't be read until the receiver or sender updates.
+  void _showUpdateRequired(String message) {
     _shouldScan = false;
     if (_appSettings.hapticFeedback) {
       HapticFeedback.heavyImpact();
@@ -461,7 +462,7 @@ class _ScanPageState extends State<ScanPage> {
     showMessage(
       context: context,
       title: context.l10n.update_required_title,
-      message: context.l10n.update_required_msg,
+      message: message,
       confirmTitle: context.l10n.ok,
     ).then((_) => _reset());
   }

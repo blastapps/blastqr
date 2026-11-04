@@ -12,6 +12,9 @@ enum ScanAction {
   /// feature such as encryption): ask the user to update.
   updateRequired,
 
+  /// A stream from an older app: ask the sender to update.
+  senderUpdateRequired,
+
   /// Nothing to do (misread, unsafe header, an ordinary QR code during a
   /// transfer, or another transfer that isn't taking over).
   ignore,
@@ -64,6 +67,8 @@ class TransferTracker {
       case FrameVerdict.newerVersion:
       case FrameVerdict.unsupportedFlags:
         return (action: ScanAction.updateRequired, frame: null);
+      case FrameVerdict.olderVersion:
+        return (action: ScanAction.senderUpdateRequired, frame: null);
       case FrameVerdict.malformed:
         return (action: ScanAction.ignore, frame: null);
       case FrameVerdict.ok:
@@ -96,8 +101,7 @@ class TransferTracker {
 
   /// Whether the current transfer is still arriving (or being saved).
   bool _isActive(DateTime now, bool busy) =>
-      _current != null &&
-      (busy || now.difference(_lastFrameAt!) < switchAfter);
+      _current != null && (busy || now.difference(_lastFrameAt!) < switchAfter);
 
   /// Forgets the current transfer.
   void reset() {

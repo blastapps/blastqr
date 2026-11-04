@@ -134,6 +134,7 @@
   "receiving_generic": "Recibiendo archivo...",
   "update_required_title": "Actualización necesaria",
   "update_required_msg": "Esto se ha enviado con una versión más reciente de blastQR. Actualiza la aplicación para recibirlo.",
+  "sender_update_required_msg": "Esto se ha enviado con una versión antigua de blastQR. Pide a quien lo envía que actualice la aplicación.",
   "send_encrypted": "Enviar cifrado con contraseña",
   "receiving_encrypted": "Recibiendo archivo cifrado...",
   "enter_password": "Introducir contraseña",

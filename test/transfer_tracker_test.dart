@@ -51,6 +51,11 @@ void main() {
       expect(tracker.current, isNull);
     });
 
+    test('older versions ask the sender to update', () {
+      expect(act(_frame(version: 2), 0), ScanAction.senderUpdateRequired);
+      expect(tracker.current, isNull);
+    });
+
     test('encrypted transfers are received', () {
       expect(
         act(_frame(flags: BlastQrcodeData.flagEncrypted), 0),

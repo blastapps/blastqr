@@ -98,6 +98,11 @@ void main() {
       expect(BlastQrcodeData.parse(bytes).verdict, FrameVerdict.newerVersion);
     });
 
+    test('older versions are recognized', () {
+      final bytes = _v3Bytes()..[3] = 2;
+      expect(BlastQrcodeData.parse(bytes).verdict, FrameVerdict.olderVersion);
+    });
+
     test('unknown must-understand flags ask for an update', () {
       final bytes = _v3Bytes(flags: 0x04);
       expect(

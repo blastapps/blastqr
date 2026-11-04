@@ -442,6 +442,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This was sent with a newer version of blastQR. Update the app to receive it.';
 
   @override
+  String get sender_update_required_msg =>
+      'This was sent with an older version of blastQR. Ask the sender to update the app.';
+
+  @override
   String get send_encrypted => 'Send password-encrypted';
 
   @override

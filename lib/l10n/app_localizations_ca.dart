@@ -442,6 +442,10 @@ class AppLocalizationsCa extends AppLocalizations {
       'Això s\'ha enviat amb una versió més recent de blastQR. Actualitza l\'aplicació per rebre-ho.';
 
   @override
+  String get sender_update_required_msg =>
+      'Això s\'ha enviat amb una versió antiga de blastQR. Demana a qui ho envia que actualitzi l\'aplicació.';
+
+  @override
   String get send_encrypted => 'Enviar xifrat amb contrasenya';
 
   @override

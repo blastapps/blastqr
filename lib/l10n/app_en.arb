@@ -152,6 +152,7 @@
   "receiving_generic": "Receiving file...",
   "update_required_title": "Update needed",
   "update_required_msg": "This was sent with a newer version of blastQR. Update the app to receive it.",
+  "sender_update_required_msg": "This was sent with an older version of blastQR. Ask the sender to update the app.",
   "send_encrypted": "Send password-encrypted",
   "receiving_encrypted": "Receiving encrypted file...",
   "enter_password": "Enter password",

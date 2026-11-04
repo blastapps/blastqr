@@ -894,6 +894,12 @@ abstract class AppLocalizations {
   /// **'This was sent with a newer version of blastQR. Update the app to receive it.'**
   String get update_required_msg;
 
+  /// No description provided for @sender_update_required_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This was sent with an older version of blastQR. Ask the sender to update the app.'**
+  String get sender_update_required_msg;
+
   /// No description provided for @send_encrypted.
   ///
   /// In en, this message translates to:
