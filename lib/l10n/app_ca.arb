@@ -145,7 +145,7 @@
   "password": "Contrasenya",
   "new_password": "Nova contrasenya",
   "edit_password": "Editar la contrasenya",
-  "password_short_warning": "Les contrasenyes curtes no són segures.",
+  "password_short_warning": "Fes servir almenys {min} caràcters.",
   "custom_password_title": "Contrasenya personalitzada",
   "custom_password_msg": "El fitxer es xifrarà amb la contrasenya següent.",
   "files_count": "{count, plural, =1{1 fitxer} other{{count} fitxers}}",

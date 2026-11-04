@@ -33,8 +33,7 @@ class _CustomPasswordSheetState extends State<_CustomPasswordSheet> {
   String get _password => _controller.text.trim();
 
   bool get _isShort =>
-      !isGeneratedCode(_password) &&
-      _password.length < minRecommendedPasswordLength;
+      !isGeneratedCode(_password) && _password.length < minPasswordLength;
 
   @override
   void initState() {
@@ -66,7 +65,7 @@ class _CustomPasswordSheetState extends State<_CustomPasswordSheet> {
   }
 
   void _sendEncrypted() {
-    if (_password.isEmpty) return;
+    if (_password.isEmpty || _isShort) return;
     Navigator.of(context).pop<String>(formatPassword(_password));
   }
 
@@ -133,13 +132,13 @@ class _CustomPasswordSheetState extends State<_CustomPasswordSheet> {
         ),
         if (_isShort && _password.isNotEmpty)
           Text(
-            context.l10n.password_short_warning,
+            context.l10n.password_short_warning(minPasswordLength),
             style: TextStyle(color: context.color.error),
           ),
 
         const SizedBox(height: 8),
         ElevatedButton(
-          onPressed: _password.isEmpty ? null : _sendEncrypted,
+          onPressed: _password.isEmpty || _isShort ? null : _sendEncrypted,
           child: Text(context.l10n.send_encrypted),
         ),
         OutlinedButton(

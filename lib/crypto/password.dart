@@ -6,7 +6,7 @@ const _alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 const generatedPasswordLength = 12;
 
-const minRecommendedPasswordLength = 8;
+const minPasswordLength = 8;
 
 String generatePassword() {
   final random = Random.secure();

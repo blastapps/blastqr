@@ -146,7 +146,7 @@
   "password": "비밀번호",
   "new_password": "새 비밀번호",
   "edit_password": "비밀번호 편집",
-  "password_short_warning": "짧은 비밀번호는 안전하지 않습니다.",
+  "password_short_warning": "{min}자 이상 입력하세요.",
   "custom_password_title": "사용자 지정 비밀번호",
   "custom_password_msg": "파일이 다음 비밀번호로 암호화됩니다.",
   "files_count": "{count, plural, other{파일 {count}개}}",

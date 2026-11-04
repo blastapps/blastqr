@@ -969,8 +969,8 @@ abstract class AppLocalizations {
   /// No description provided for @password_short_warning.
   ///
   /// In en, this message translates to:
-  /// **'Short passwords are not secure.'**
-  String get password_short_warning;
+  /// **'Use at least {min} characters.'**
+  String password_short_warning(int min);
 
   /// No description provided for @custom_password_title.
   ///

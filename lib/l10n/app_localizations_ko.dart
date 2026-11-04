@@ -464,7 +464,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get edit_password => '비밀번호 편집';
 
   @override
-  String get password_short_warning => '짧은 비밀번호는 안전하지 않습니다.';
+  String password_short_warning(int min) {
+    return '$min자 이상 입력하세요.';
+  }
 
   @override
   String get custom_password_title => '사용자 지정 비밀번호';

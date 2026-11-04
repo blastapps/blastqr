@@ -164,7 +164,14 @@
   "password": "Password",
   "new_password": "New password",
   "edit_password": "Edit password",
-  "password_short_warning": "Short passwords are not secure.",
+  "password_short_warning": "Use at least {min} characters.",
+  "@password_short_warning": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
   "custom_password_title": "Custom password",
   "custom_password_msg": "The file will be encrypted with the following password.",
   "files_count": "{count, plural, =1{1 file} other{{count} files}}",

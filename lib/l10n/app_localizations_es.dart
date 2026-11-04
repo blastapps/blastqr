@@ -480,7 +480,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get edit_password => 'Editar contraseña';
 
   @override
-  String get password_short_warning => 'Las contraseñas cortas no son seguras.';
+  String password_short_warning(int min) {
+    return 'Usa al menos $min caracteres.';
+  }
 
   @override
   String get custom_password_title => 'Contraseña personalizada';
