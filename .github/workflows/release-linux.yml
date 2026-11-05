@@ -1,0 +1,99 @@
+name: Release Linux
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: 3.47.8
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-22.04
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          # Preinstalled on GitHub's image and conflicts with libunwind-dev,
+          # which libgstreamer1.0-dev needs.
+          sudo apt-get remove -y libunwind-14-dev || true
+          sudo apt-get install -y cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev libasound2-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+
+      # Ubuntu 22.04's clang 14 can't compile flutter_zxing's C++20 ranges code.
+      - name: Install clang 18
+        run: |
+          wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 18
+          echo /usr/lib/llvm-18/bin >> "$GITHUB_PATH"
+
+      # GitHub's runners have rustup; local act images don't.
+      - name: Install Rust
+        run: |
+          if ! command -v rustup >/dev/null; then
+            curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" \
+            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Check tag matches pubspec version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version=$(grep '^version:' pubspec.yaml | sed 's/version: *//; s/+.*//')
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match pubspec version $version"
+            exit 1
+          fi
+
+      - name: Build
+        env:
+          # The app only plays generated WAVs, so skip SoLoud's prebuilt
+          # Ogg/Opus/FLAC libraries (x64-only).
+          NO_XIPH_LIBS: 1
+        run: |
+          flutter --disable-analytics
+          flutter pub get
+          flutter build linux --release
+
+      - name: Package
+        run: |
+          name="blastqr-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}"
+          tar -czf "$name.tar.gz" -C build/linux/${{ matrix.arch }}/release \
+            --transform "s/^bundle/blastqr/" bundle
+          echo "ARCHIVE=$name.tar.gz" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: linux-${{ matrix.arch }}
+          path: ${{ env.ARCHIVE }}
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: '*.tar.gz'
+          draft: true
