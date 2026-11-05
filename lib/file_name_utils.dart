@@ -66,13 +66,11 @@ Future<String> resolveUniqueFileName(
   Directory directory,
   String fileName,
 ) async {
-  if (!await File('${directory.path}/$fileName').exists()) {
-    return fileName;
-  }
-  return uniqueFileName(
-    fileName,
-    (candidate) => File('${directory.path}/$candidate').existsSync(),
-  );
+  // Folders count too, like the qrcodes folder among received files.
+  bool isTaken(String name) =>
+      FileSystemEntity.typeSync('${directory.path}/$name') !=
+      FileSystemEntityType.notFound;
+  return uniqueFileName(fileName, isTaken);
 }
 
 /// [fileName], or `name(1).ext`, `name(2).ext`… if [isTaken] says it's used.

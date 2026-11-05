@@ -119,7 +119,7 @@ I don't consider the app "vibe coded", and I plan to keep developing it together
 
 ## License
 
-blastQR is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+blastQR is licensed under the [GNU Affero General Public License v3.0](LICENSE) or any later version.
 
 Bundled third-party components keep their own licenses:
 

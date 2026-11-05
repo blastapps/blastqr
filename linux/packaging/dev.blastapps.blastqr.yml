@@ -1,0 +1,35 @@
+id: dev.blastapps.blastqr
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: blastqr
+
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  # The camera goes through the Camera portal; raw device access is the
+  # fallback for systems where the portal finds no camera.
+  - --device=all
+  # Microphone, for the transfer-complete tone.
+  - --socket=pulseaudio
+  # Where received files and saved QR codes go.
+  - --filesystem=xdg-documents/blastQR:create
+  # "Show in folder" for received files.
+  - --talk-name=org.freedesktop.FileManager1
+
+modules:
+  - name: blastqr
+    buildsystem: simple
+    build-options:
+      no-debuginfo: true
+    build-commands:
+      - mkdir -p /app/blastqr /app/bin
+      - cp -r blastQR lib data /app/blastqr/
+      - ln -s /app/blastqr/blastQR /app/bin/blastqr
+      - cp -r share /app/
+    sources:
+      # The release tarball from CI, renamed. Flathub's copy of this manifest
+      # points at the GitHub release URLs instead.
+      - type: archive
+        path: blastqr-linux.tar.gz

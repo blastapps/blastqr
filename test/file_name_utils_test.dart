@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,5 +49,12 @@ void main() {
       expect(result, endsWith('.txt'));
       expect(() => utf8.decode(utf8.encode(result)), returnsNormally);
     });
+  });
+
+  test('resolveUniqueFileName avoids existing folders', () async {
+    final dir = await Directory.systemTemp.createTemp('names');
+    addTearDown(() => dir.delete(recursive: true));
+    await Directory('${dir.path}/qrcodes').create();
+    expect(await resolveUniqueFileName(dir, 'qrcodes'), 'qrcodes(1)');
   });
 }

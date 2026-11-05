@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:blast_qr/received_files_directory.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// A regular (non-transfer) QR code the user saved after scanning, stored as
@@ -23,9 +24,13 @@ class ScannedQrCode {
   });
 }
 
-/// On iOS, Documents shows in the Files app, so codes go in Application
-/// Support instead.
+/// On Linux and Windows, codes go inside the received files folder so the app
+/// adds only one folder to the user's Documents. On iOS, Documents shows in
+/// the Files app, so codes go in Application Support instead.
 Future<Directory> qrCodesDirectory() async {
+  if (Platform.isLinux || Platform.isWindows) {
+    return Directory('${(await receivedFilesDirectory()).path}/qrcodes');
+  }
   final base = Platform.isIOS
       ? await getApplicationSupportDirectory()
       : await getApplicationDocumentsDirectory();

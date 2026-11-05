@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.blastapps.blastqr</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+
+  <name>blastQR</name>
+  <summary>Send files offline through QR codes</summary>
+  <developer id="dev.blastapps">
+    <name>Joe Khan</name>
+  </developer>
+
+  <description>
+    <p>
+      blastQR transfers files completely offline. The sender shows a sequence
+      of QR codes on screen and the receiver scans them with its camera. The
+      only link between the devices is the screen and the camera, which makes
+      it useful for air-gapped computers.
+    </p>
+    <ul>
+      <li>Resilient to missed frames: any large enough set of frames rebuilds the file</li>
+      <li>Up to 6 QR codes on screen at once for higher speed</li>
+      <li>Optional password encryption</li>
+      <li>Several files at once</li>
+      <li>Plays a tone when the transfer is done, so the sender stops automatically</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">dev.blastapps.blastqr.desktop</launchable>
+
+  <url type="homepage">https://codeberg.org/cukha/blastqr</url>
+  <url type="bugtracker">https://codeberg.org/cukha/blastqr/issues</url>
+  <url type="vcs-browser">https://codeberg.org/cukha/blastqr</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://codeberg.org/cukha/blastqr/raw/branch/main/docs/desktop.png</image>
+      <caption>Sending a file as QR codes</caption>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
+  <!-- CI adds the release being built. -->
+  <releases>
+  </releases>
+</component>

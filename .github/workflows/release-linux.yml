@@ -70,8 +70,49 @@ jobs:
           flutter pub get
           flutter build linux --release
 
+      # Release notes come from the tag message (git tag -a v1.2.3 -m "...").
+      - name: Add release to metainfo
+        run: |
+          version=$(grep '^version:' pubspec.yaml | sed 's/version: *//; s/+.*//')
+          notes=""
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            # checkout leaves annotated tags as lightweight ones.
+            git fetch --force --depth=1 origin \
+              "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
+            if [ "$(git cat-file -t "$GITHUB_REF_NAME")" = tag ]; then
+              notes=$(git tag -l --format='%(contents:subject)%0a%0a%(contents:body)' "$GITHUB_REF_NAME")
+            fi
+          fi
+          VERSION="$version" NOTES="$notes" python3 - \
+            linux/packaging/dev.blastapps.blastqr.metainfo.xml <<'EOF'
+          import datetime, os, sys
+          from xml.sax.saxutils import escape
+
+          path = sys.argv[1]
+          paragraphs = [
+              " ".join(p.split())
+              for p in os.environ["NOTES"].split("\n\n")
+              if p.strip()
+          ]
+          entry = f'    <release version="{os.environ["VERSION"]}" date="{datetime.date.today()}"'
+          if paragraphs:
+              body = "".join(f"        <p>{escape(p)}</p>\n" for p in paragraphs)
+              entry += f">\n      <description>\n{body}      </description>\n    </release>\n"
+          else:
+              entry += "/>\n"
+          xml = open(path).read()
+          xml = xml.replace("  <releases>\n", "  <releases>\n" + entry, 1)
+          open(path, "w").write(xml)
+          EOF
+          cat linux/packaging/dev.blastapps.blastqr.metainfo.xml
+
       - name: Package
         run: |
+          bundle=build/linux/${{ matrix.arch }}/release/bundle
+          id=dev.blastapps.blastqr
+          install -Dm644 linux/packaging/$id.desktop -t $bundle/share/applications
+          install -Dm644 linux/packaging/$id.metainfo.xml -t $bundle/share/metainfo
+          install -Dm644 linux/packaging/$id.png -t $bundle/share/icons/hicolor/512x512/apps
           name="blastqr-${GITHUB_REF_NAME}-linux-${{ matrix.arch }}"
           tar -czf "$name.tar.gz" -C build/linux/${{ matrix.arch }}/release \
             --transform "s/^bundle/blastqr/" bundle
@@ -82,9 +123,43 @@ jobs:
           name: linux-${{ matrix.arch }}
           path: ${{ env.ARCHIVE }}
 
+  flatpak:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            flatpak-arch: x86_64
+            runner: ubuntu-24.04
+          - arch: arm64
+            flatpak-arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: linux-${{ matrix.arch }}
+          path: tarball
+
+      - name: Use the tarball as the manifest's source
+        run: mv tarball/*.tar.gz linux/packaging/blastqr-linux.tar.gz
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          manifest-path: linux/packaging/dev.blastapps.blastqr.yml
+          bundle: blastqr-${{ github.ref_name }}-linux-${{ matrix.arch }}.flatpak
+          arch: ${{ matrix.flatpak-arch }}
+          artifact-name: flatpak-${{ matrix.arch }}
+          cache-key: flatpak-builder-${{ matrix.arch }}
+
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: build
+    needs: [build, flatpak]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -95,5 +170,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v3
         with:
-          files: '*.tar.gz'
+          files: |
+            *.tar.gz
+            *.flatpak
           draft: true

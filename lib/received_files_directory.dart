@@ -10,7 +10,7 @@ const _channel = MethodChannel('blastqr/files');
 
 // Linux and Windows keep it in the user's own Documents folder, which may
 // already have a folder called "Received".
-final _name = Platform.isLinux || Platform.isWindows ? 'docs' : 'Received';
+final _name = Platform.isLinux || Platform.isWindows ? 'blastQR' : 'Received';
 
 /// On iOS, Documents shows in the Files app, so received files stay in
 /// Application Support unless the user turns on [AppPreferences.showInFilesApp].
