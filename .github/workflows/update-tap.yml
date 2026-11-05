@@ -1,0 +1,90 @@
+name: Update Homebrew tap
+
+# Runs when a release is published, since draft downloads aren't public.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, like v3.0.1
+        required: true
+
+env:
+  TAP_REPO: cu-kha/homebrew-tap
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download CLI archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'blastqr-cli-*-apple-darwin.tar.gz' \
+            --pattern 'blastqr-cli-*-linux-musl.tar.gz'
+          ls -l
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.TAP_REPO }}
+          token: ${{ secrets.TAP_TOKEN }}
+          path: tap
+
+      - name: Write formula
+        run: |
+          version="${TAG#v}"
+          base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
+          asset() {
+            local file="blastqr-cli-$TAG-$1.tar.gz"
+            echo "      url \"$base/$file\""
+            echo "      sha256 \"$(sha256sum "$file" | cut -d' ' -f1)\""
+          }
+          mkdir -p tap/Formula
+          cat > tap/Formula/blastqr.rb <<EOF
+          class Blastqr < Formula
+            desc "Send files to the blastQR app as QR codes shown in the terminal"
+            homepage "https://codeberg.org/cukha/blastqr"
+            version "$version"
+            license "AGPL-3.0-or-later"
+
+            on_macos do
+              on_arm do
+          $(asset aarch64-apple-darwin)
+              end
+              on_intel do
+          $(asset x86_64-apple-darwin)
+              end
+            end
+
+            on_linux do
+              on_arm do
+          $(asset aarch64-unknown-linux-musl)
+              end
+              on_intel do
+          $(asset x86_64-unknown-linux-musl)
+              end
+            end
+
+            def install
+              bin.install "blastqr"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/blastqr --version")
+            end
+          end
+          EOF
+          cat tap/Formula/blastqr.rb
+
+      - name: Push formula
+        working-directory: tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/blastqr.rb
+          git diff --cached --quiet && exit 0
+          git commit -m "blastqr ${TAG#v}"
+          git push

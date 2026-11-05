@@ -1,4 +1,4 @@
-name: Release Linux
+name: Release
 
 on:
   push:
@@ -157,9 +157,74 @@ jobs:
           artifact-name: flatpak-${{ matrix.arch }}
           cache-key: flatpak-builder-${{ matrix.arch }}
 
+  cli:
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-24.04
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-24.04-arm
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+          - target: x86_64-apple-darwin
+            runner: macos-latest
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+          - target: aarch64-pc-windows-msvc
+            runner: windows-latest
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: cli
+    env:
+      # No Visual C++ runtime needed on Windows.
+      RUSTFLAGS: ${{ contains(matrix.target, 'windows') && '-C target-feature=+crt-static' || '' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check tag matches CLI version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | sed 's/.*"\(.*\)"/\1/')
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match CLI version $version"
+            exit 1
+          fi
+
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Build
+        run: |
+          rustup target add ${{ matrix.target }}
+          cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Package
+        run: |
+          name="blastqr-cli-${GITHUB_REF_NAME}-${{ matrix.target }}"
+          mkdir dist
+          cp ../LICENSE README.md dist/
+          if [[ "${{ matrix.target }}" == *windows* ]]; then
+            cp target/${{ matrix.target }}/release/blastqr.exe dist/
+            (cd dist && 7z a "../$name.zip" .)
+            echo "ARCHIVE=cli/$name.zip" >> "$GITHUB_ENV"
+          else
+            cp target/${{ matrix.target }}/release/blastqr dist/
+            tar -czf "$name.tar.gz" -C dist blastqr LICENSE README.md
+            echo "ARCHIVE=cli/$name.tar.gz" >> "$GITHUB_ENV"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: cli-${{ matrix.target }}
+          path: ${{ env.ARCHIVE }}
+
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [build, flatpak]
+    needs: [build, flatpak, cli]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -172,5 +237,6 @@ jobs:
         with:
           files: |
             *.tar.gz
+            *.zip
             *.flatpak
           draft: true
