@@ -13,8 +13,10 @@ without folders; pass the files in them instead (`blastqr photos/*`).
 
 ## Install
 
+With [Homebrew](https://brew.sh):
+
 ```
-cargo install --path .
+brew install cu-kha/tap/blastqr
 ```
 
 ## Options

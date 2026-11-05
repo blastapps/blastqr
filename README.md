@@ -12,17 +12,23 @@ The app is written in Flutter and Rust and currently available for Linux, Androi
 
 ## Get it
 
-| Platform | Send | Receive | Download |
-|---|:-:|:-:|---|
-| Android | ✓ | ✓ | <!-- TODO: link --> |
-| iOS | ✓ | ✓ | <!-- TODO: link --> |
-| macOS | ✓ | ✓ | <!-- TODO: link --> |
-| Linux | ✓ | ✓ | <!-- TODO: link --> |
-| Windows | ✓ | | <!-- TODO: link --> |
+| Platform | Send | Receive | App | Command-line tool |
+|---|:-:|:-:|---|---|
+| Android | ✓ | ✓ | <!-- TODO: link --> | |
+| iOS | ✓ | ✓ | <!-- TODO: link --> | |
+| macOS | ✓ | ✓ | <!-- TODO: link --> | [Homebrew](#command-line-tool) |
+| Linux | ✓ | ✓ | [Flatpak](#linux) | [Homebrew](#command-line-tool) |
+| Windows | ✓ | | <!-- TODO: link --> | [`.zip`](https://github.com/cu-kha/blastqr/releases/latest) |
 
 Windows can't receive yet because the app has no camera support there.
 
-The command-line tool runs on macOS, Linux and Windows. See [Command-line tool](#command-line-tool) below.
+### Linux
+
+Download the `.flatpak` file for your computer from the [latest release](https://github.com/cu-kha/blastqr/releases/latest), then install it:
+
+```sh
+flatpak install blastqr-*-linux-x64.flatpak
+```
 
 ## Features
 
@@ -41,11 +47,10 @@ The command-line tool runs on macOS, Linux and Windows. See [Command-line tool](
 
 `cli/` has a small Rust program that sends files from a terminal. It shows the QR codes in the terminal window, and you scan them with the app. It only sends; receiving needs the app.
 
-Install it with [Rust](https://www.rust-lang.org/tools/install):
+Install it with [Homebrew](https://brew.sh):
 
 ```sh
-cd cli
-cargo install --path .
+brew install cu-kha/tap/blastqr
 ```
 
 Then send one or more files:
