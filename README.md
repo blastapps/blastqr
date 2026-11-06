@@ -1,55 +1,68 @@
 <p align="center"><img src="docs/logo.jpg" width="120"/></p>
-<h3 align="center">Fast & secure offline file transfers using QR codes</h3>
+<h3 align="center">Easy offline file transfers over QR codes</h3>
 <p align="center">
-<img src="docs/hero.webp" width="700"/>
+<img src="docs/hero.webp" width="800"/>
 </p>
 
 ## Introduction
 
-blastQR is an open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera. Typical transfer speeds reach around 60 kB/s and can go much higher when displaying multiple codes or increasing the frame rate, if the devices can handle it.
+blastQR is an open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera.
 
-It works for everyday transfers, and it's especially useful for air-gapped systems (computers that are completely cut off from any network). Transfers can optionally be encrypted with a password to prevent interception.
+It's fast enough for simple everyday picture and file transfers, and it's especially useful for air-gapped systems (computers that are completely cut off from any network). Transfers can optionally be encrypted with a password to prevent interception.
 
 The protocol is an open spec so that other software can freely add support for sending and receiving blastQR transfers.
 
-The app is written in Flutter and Rust and currently available for Linux, Android, iOS, macOS and Windows. There is also a command-line tool built in Rust for easy sending of files from the terminal.
+Written in Flutter and Rust and currently available for Linux, Android, iOS, macOS and Windows.
 
-## Get it
+## Downloads
 
 | Platform | Send | Receive | App | Command-line tool |
 |---|:-:|:-:|---|---|
-| Android | ✓ | ✓ | <!-- TODO: link --> | |
-| iOS | ✓ | ✓ | <!-- TODO: link --> | |
-| macOS | ✓ | ✓ | <!-- TODO: link --> | [Homebrew](#command-line-tool) |
+| Android | ✓ | ✓ | F-Droid, [APK](https://github.com/cu-kha/blastqr/releases/latest), Google Play |
+| iOS | ✓ | ✓ | AppStore | |
+| macOS | ✓ | ✓ | [Dmg](https://github.com/cu-kha/blastqr/releases/latest) | [Homebrew](#command-line-tool) |
 | Linux | ✓ | ✓ | [Flatpak](#linux) | [Homebrew](#command-line-tool), [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
-| Windows | ✓ | | <!-- TODO: link --> | [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
+| Windows | ✓ | | [Exe](https://github.com/cu-kha/blastqr/releases/latest) | [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
 
 Windows can't receive yet because the app has no camera support there.
-
-### Linux
-
-Download the `.flatpak` file for your computer from the [latest release](https://github.com/cu-kha/blastqr/releases/latest), then install it:
-
-```sh
-flatpak install blastqr-*-linux-x64.flatpak
-```
 
 ## Features
 
 <!-- TODO: video -->
 
-- **Works fully offline.** The only link between devices is the screen and the camera.
-- **Resilient to missed frames.** Files are encoded with [RaptorQ](https://en.wikipedia.org/wiki/Raptor_code), a fountain code, so the receiver can rebuild the file from any large enough set of frames, in any order.
-- **Multiple codes on screen.** Shows up to 6 QR codes at once for higher speed. With 6 codes at 30 fps, transfers peak at around 500 kB/s.
-- **Completion signal by sound.** When the receiver has the whole file it plays a short tone, and the sender's microphone picks it up to stop the transfer.
-- **Several files at once.** They're zipped into one transfer and unpacked into separate files on the receiver.
-- **Optional password encryption.** The sender gets a generated password to share with the receiver, who types it in once the file has arrived.
-- **Optional image compression and gzip** to shrink files before sending.
-- **Regular QR scanner.** Normal QR codes are shown as text.
+- **Works fully offline:** No internet, Wi-Fi, Bluetooth or servers. The only link between devices is the screen and the camera. Your data stays offline.
+- **Runs everywhere:** Android, iOS, macOS, Linux and Windows, plus a command-line tool that can send from a terminal, even over SSH.
+- **Multiple codes on screen:** Shows up to 6 QR codes at once for higher speed. With 6 codes at 30 fps, transfers peak at around 500 kB/s.
+- **Send multiple files in one go:** They're zipped into one transfer and unpacked into separate files on the receiver.
+- **Sound feedback:** The receiver plays a short tone when it has the whole file, and the sender stops automatically when it hears it.
+- **Password encryption:** You can optionally encrypt files with an auto-generated password or a custom one.
+- **File compression:** The app supports lossy and lossless compression of images and files (gzip) for quicker transfers.
+- **No need to catch every code:** Start scanning at any point and keep the camera on the screen until it's done. Blurry or missed codes don't matter.
+- **Regular QR scanner:** You can also scan normal QR codes and save them.
+
+## Real-world benchmarks
+
+| Codes on screen | Sender FPS | iPhone 17 | Galaxy S22 | Galaxy S10e |
+|:-:|:-:|--:|--:|--:|
+| 1 | 25 | 64 kB/s · 41.9 s | 59 kB/s · 45.3 s | 65 kB/s · 40.5 s |
+| 1 | 30 | 75 kB/s · 35.3 s | 88 kB/s · 30.3 s | 80 kB/s · 33.3 s |
+| 1 | 60 | 173 kB/s · 15.3 s | – | – |
+| 2 | 25 | – | – | 119 kB/s · 22.3 s |
+| 2 | 30 | 174 kB/s · 15.2 s | 169 kB/s · 15.7 s | 113 kB/s · 23.6 s |
+| 2 | 60 | 284 kB/s · 9.3 s | – | – |
+| 6 | 25 | 384 kB/s · 6.9 s | 222 kB/s · 11.9 s | 172 kB/s · 15.4 s |
+| 6 | 30 | **526 kB/s · 5.0 s** | **364 kB/s · 7.3 s** | – |
+
+Each test sent a 3.9 MB file (`com.termux.api_1002.apk`), which the app compressed to 2.6 MB before sending. Speeds are measured on the compressed data, and each result is the best of 4 attempts.
+
+The camera preview ran at 60 fps on the iPhone and 30 fps on the Samsung phones.
 
 ## Command-line tool
 
-`cli/` has a small Rust program that sends files from a terminal. It shows the QR codes in the terminal window, and you scan them with the app. It only sends; receiving needs the app.
+The `blastqr` command-line tool is a small Rust program that sends files from a terminal. It shows the QR code sequence in the terminal window, and you scan it with the app. Receiving is not supported.
+
+> [!NOTE]
+> Most terminals draw the codes with simple Unicode characters, which limits speed a lot, so only small files are practical there. Alternatives like Kitty, Ghostty, iTerm2 and WezTerm can draw much denser codes as images at high frame rates, reaching speeds similar to the app.
 
 Install it with [Homebrew](https://brew.sh):
 
@@ -67,8 +80,7 @@ blastqr -c 4 --fps 30 a.zip # 4 codes at once, 30 frames per second
 ```
 
 While it runs, ↑/↓ change the speed, space pauses and q quits.
-
-In Kitty, Ghostty, iTerm2 and WezTerm the codes are drawn as images. Other terminals draw them with Unicode block characters, which can't fit the densest codes, so transfers are slower there. Run `blastqr --help` for all options, or see [cli/README.md](cli/README.md).
+Run `blastqr --help` for all options, or see [cli/README.md](cli/README.md).
 
 ## Encryption
 
@@ -76,11 +88,11 @@ Without encryption, anyone who can see or record the QR codes can read the file.
 
 With "Send password-encrypted" in the app, or `blastqr -e`, the file and its name are encrypted, and a recording of the codes is useless without the password.
 
-Some things to keep in mind:
-- Don't show the password where a camera could record it.
-- The size of the file can still be seen.
-- A weak custom password can be guessed from a recording.
-- Received files are saved unencrypted on the receiving device.
+> [!WARNING]
+> - Don't show the password where a camera could record it.
+> - A weak custom password can be guessed from a recording.
+> - Encryption only protects the transfer. Once received, the file is saved decrypted like any other file.
+> - Information about the file size is currently not encrypted and can be seen.
 
 Files are encrypted with ChaCha20-Poly1305, and the key is derived from the password with Argon2id. Generated passwords are 12 random [Crockford Base32](https://www.crockford.com/base32.html) characters (60 bits), like `7K3M-Q9TX-2HVD`.
 
@@ -148,3 +160,9 @@ Bundled third-party components keep their own licenses:
 
 - [txqr](https://github.com/divan/txqr): data transfer over animated QR codes
 - [libcimbar](https://github.com/sz3/libcimbar): high-density color barcodes for file transfer
+- [qrs](https://github.com/qifi-dev/qrs): Stream data through multiple QRCodes 
+- [decimen](https://github.com/bashalarmistalt/decimen-optical-transfer): fountain-coded QR file transfer
+
+## Why another QR code file transfer project?
+
+Sending files over QR codes isn't a new idea, but most of the tools I tried were web apps hosted on a server, which defeats the point of a truly offline, air-gapped transfer. blastQR is a native app that runs entirely on your device. It also adds password encryption and a completion tone that stops the sender automatically, neither of which I'd seen elsewhere.
