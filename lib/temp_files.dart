@@ -10,7 +10,7 @@ const _channel = MethodChannel('blastqr/files');
 Future<Directory> appTempDirectory() async {
   final temp = await getTemporaryDirectory();
   if (Platform.isIOS || Platform.isAndroid) return temp;
-  return Directory('${temp.path}/blastqr').create();
+  return Directory('${temp.path}/blastqr').create(recursive: true);
 }
 
 /// A new temp directory for files shared into the app.
