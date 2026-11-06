@@ -54,7 +54,7 @@ import UIKit
       .setMethodCallHandler { call, result in
         switch call.method {
         case "sharedContainerPath":
-          let group = "group.\(Bundle.main.bundleIdentifier ?? "")"
+          let group = Bundle.main.object(forInfoDictionaryKey: "AppGroupId") as? String ?? ""
           result(
             FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)?.path)
         case "excludeFromBackup":
