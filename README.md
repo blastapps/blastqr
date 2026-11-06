@@ -1,4 +1,10 @@
-# blastQR
+<p align="center"><img src="docs/logo.jpg" width="120"/></p>
+<h3 align="center">Fast & secure offline file transfers using QR codes</h3>
+<p align="center">
+<img src="docs/hero.webp" width="700"/>
+</p>
+
+## Introduction
 
 blastQR is an open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera. Typical transfer speeds reach around 60 kB/s and can go much higher when displaying multiple codes or increasing the frame rate, if the devices can handle it.
 
@@ -7,8 +13,6 @@ It works for everyday transfers, and it's especially useful for air-gapped syste
 The protocol is an open spec so that other software can freely add support for sending and receiving blastQR transfers.
 
 The app is written in Flutter and Rust and currently available for Linux, Android, iOS, macOS and Windows. There is also a command-line tool built in Rust for easy sending of files from the terminal.
-
-<img src="docs/desktop.png" width="400"/>
 
 ## Get it
 
