@@ -527,6 +527,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Hacer zoom permite leer los códigos desde más lejos, donde la cámara aún puede enfocar. Ayuda en móviles que no enfocan de cerca.';
 
   @override
+  String get crop_camera_preview => 'Recortar vista de la cámara';
+
+  @override
+  String get crop_camera_preview_hint =>
+      'Llena la pantalla pero oculta los bordes.';
+
+  @override
   String get advanced => 'Avanzado';
 
   @override

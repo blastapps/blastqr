@@ -200,6 +200,8 @@
   "debug": "Debug",
   "camera_zoom": "Camera zoom",
   "camera_zoom_hint": "Zooming in lets the camera read codes from further away, where it can still focus. Helps on phones that can't focus up close.",
+  "crop_camera_preview": "Crop camera preview",
+  "crop_camera_preview_hint": "Fills the screen but hides the edges.",
   "advanced": "Advanced",
   "allow_video_hdr": "Allow video HDR",
   "allow_video_hdr_hint": "Off by default. HDR can blend two codes into one frame.",

@@ -508,6 +508,12 @@ class AppLocalizationsKo extends AppLocalizations {
       '확대하면 카메라가 초점을 맞출 수 있는 더 먼 거리에서도 코드를 읽을 수 있습니다. 가까이에서 초점을 맞추지 못하는 휴대폰에 도움이 됩니다.';
 
   @override
+  String get crop_camera_preview => '카메라 미리보기 자르기';
+
+  @override
+  String get crop_camera_preview_hint => '화면을 채우지만 가장자리가 가려집니다.';
+
+  @override
   String get advanced => '고급';
 
   @override

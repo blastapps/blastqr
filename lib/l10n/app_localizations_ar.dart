@@ -538,6 +538,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'يتيح التكبير للكاميرا قراءة الرموز من مسافة أبعد يمكنها التركيز عليها. يفيد في الهواتف التي لا تستطيع التركيز عن قرب.';
 
   @override
+  String get crop_camera_preview => 'قص معاينة الكاميرا';
+
+  @override
+  String get crop_camera_preview_hint => 'تملأ الشاشة لكنها تخفي الأطراف.';
+
+  @override
   String get advanced => 'متقدم';
 
   @override

@@ -153,6 +153,8 @@
   "debug": "Depuració",
   "camera_zoom": "Zoom de la càmera",
   "camera_zoom_hint": "Fer zoom permet llegir els codis des de més lluny, on la càmera encara pot enfocar. Ajuda en mòbils que no enfoquen de prop.",
+  "crop_camera_preview": "Retallar la vista de la càmera",
+  "crop_camera_preview_hint": "Omple la pantalla però amaga les vores.",
   "advanced": "Avançat",
   "allow_video_hdr": "Permet el vídeo HDR",
   "allow_video_hdr_hint": "Desactivat per defecte. L'HDR pot barrejar dos codis en un mateix fotograma.",

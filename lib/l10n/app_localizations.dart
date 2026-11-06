@@ -1016,6 +1016,18 @@ abstract class AppLocalizations {
   /// **'Zooming in lets the camera read codes from further away, where it can still focus. Helps on phones that can\'t focus up close.'**
   String get camera_zoom_hint;
 
+  /// No description provided for @crop_camera_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop camera preview'**
+  String get crop_camera_preview;
+
+  /// No description provided for @crop_camera_preview_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fills the screen but hides the edges.'**
+  String get crop_camera_preview_hint;
+
   /// No description provided for @advanced.
   ///
   /// In en, this message translates to:

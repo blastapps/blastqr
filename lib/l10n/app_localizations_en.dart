@@ -526,6 +526,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Zooming in lets the camera read codes from further away, where it can still focus. Helps on phones that can\'t focus up close.';
 
   @override
+  String get crop_camera_preview => 'Crop camera preview';
+
+  @override
+  String get crop_camera_preview_hint =>
+      'Fills the screen but hides the edges.';
+
+  @override
   String get advanced => 'Advanced';
 
   @override

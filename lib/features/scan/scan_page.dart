@@ -227,6 +227,7 @@ class _ScanPageState extends State<ScanPage> {
                           resolution: _cameraResolution,
                           fps: _cameraFps,
                           zoom: appSettings.cameraZoom,
+                          cropPreview: appSettings.cropCameraPreview,
                           autoRestart: _shouldScan,
                           onCodes: _handleMultiscan,
                           onCameraChanged: _onCameraChanged,
@@ -935,7 +936,7 @@ class _ScanPageState extends State<ScanPage> {
         (_readerKey.currentContext?.findRenderObject() as RenderBox?)?.size;
     if (size == null || size.isEmpty) return;
 
-    // QrScanner cover-fits the preview, centered in its box.
+    // QrScanner cover- or contain-fits the preview, centered in its box.
     final value = controller.value;
     final orientation =
         value.lockedCaptureOrientation ?? value.deviceOrientation;
@@ -945,7 +946,8 @@ class _ScanPageState extends State<ScanPage> {
     final previewAspect = isLandscape
         ? value.aspectRatio
         : 1 / value.aspectRatio;
-    final preview = size.width / size.height > previewAspect
+    final wider = size.width / size.height > previewAspect;
+    final preview = wider == _appSettings.cropCameraPreview
         ? Size(size.width, size.width / previewAspect)
         : Size(size.height * previewAspect, size.height);
     final point = Offset(

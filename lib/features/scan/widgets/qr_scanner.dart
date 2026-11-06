@@ -19,6 +19,7 @@ class QrScanner extends StatefulWidget {
     required this.onCodes,
     this.fps,
     this.zoom = 1.0,
+    this.cropPreview = false,
     this.autoRestart = true,
     this.onCameraChanged,
     this.onFrame,
@@ -31,6 +32,10 @@ class QrScanner extends StatefulWidget {
 
   /// Starting zoom, clamped to what the camera supports. Pinching starts here.
   final double zoom;
+
+  /// Whether the preview fills the box, cutting off the frame's edges, rather
+  /// than showing the whole frame.
+  final bool cropPreview;
 
   /// Whether the camera may reopen when nothing is read for a while. Off while
   /// the page isn't scanning, such as when a sheet covers the preview.
@@ -316,6 +321,10 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
           format: Format.qrCode,
           width: image.width,
           height: image.height,
+          // When tryHarder is enabled it unlocks much higher performance on
+          // iphone and high-end devices because it finds more codes in high
+          // fps modes.
+          tryHarder: true,
           tryRotate: false,
           isMultiScan: true,
         ),
@@ -385,18 +394,21 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
           constraints.hasBoundedWidth ? constraints.maxWidth : media.width,
           constraints.hasBoundedHeight ? constraints.maxHeight : media.height,
         );
-        // The preview covers the box, centered. ScanPage's tap-to-focus maps
-        // taps onto the frame assuming this layout.
+        // The preview covers or fits the box, centered. ScanPage's
+        // tap-to-focus maps taps onto the frame assuming this layout.
         return Stack(
           children: [
-            SizedBox(
-              width: side,
-              height: side,
-              child: ClipRect(
-                child: OverflowBox(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(width: side, child: preview),
+            ColoredBox(
+              color: Colors.black,
+              child: SizedBox(
+                width: side,
+                height: side,
+                child: ClipRect(
+                  child: OverflowBox(
+                    child: FittedBox(
+                      fit: widget.cropPreview ? BoxFit.cover : BoxFit.contain,
+                      child: SizedBox(width: side, child: preview),
+                    ),
                   ),
                 ),
               ),

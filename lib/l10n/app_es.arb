@@ -154,6 +154,8 @@
   "debug": "Depuración",
   "camera_zoom": "Zoom de la cámara",
   "camera_zoom_hint": "Hacer zoom permite leer los códigos desde más lejos, donde la cámara aún puede enfocar. Ayuda en móviles que no enfocan de cerca.",
+  "crop_camera_preview": "Recortar vista de la cámara",
+  "crop_camera_preview_hint": "Llena la pantalla pero oculta los bordes.",
   "advanced": "Avanzado",
   "allow_video_hdr": "Permitir vídeo HDR",
   "allow_video_hdr_hint": "Desactivado por defecto. El HDR puede mezclar dos códigos en un mismo fotograma.",

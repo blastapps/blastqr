@@ -110,6 +110,23 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
                 },
               ),
             if (Platform.isIOS || Platform.isAndroid) const _FrameRateSetting(),
+            if (Platform.isIOS || Platform.isAndroid)
+              Consumer<AppSettings>(
+                builder: (context, state, child) {
+                  return SwitchListTile.adaptive(
+                    contentPadding: const EdgeInsetsDirectional.only(start: 16),
+                    value: state.cropCameraPreview,
+                    onChanged: state.updateCropCameraPreview,
+                    secondary: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCrop,
+                      color: context.color.onSurface,
+                    ),
+                    title: Text(context.l10n.crop_camera_preview),
+                    subtitle: Text(context.l10n.crop_camera_preview_hint),
+                    activeTrackColor: context.color.primary,
+                  );
+                },
+              ),
             if (Platform.isIOS) const _AdvancedCameraSettings(),
           ],
           SettingGroupTitle(title: context.l10n.feedback),
@@ -183,6 +200,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
         );
         appSettings.updateCameraFps(null);
         appSettings.updateCameraZoom(AppPreferences.defaultCameraZoom);
+        appSettings.updateCropCameraPreview(false);
         appSettings.updateDebugVideoHdr(false);
         appSettings.updateDebugExposureMs(null);
         appSettings.updateHapticFeedback(false);

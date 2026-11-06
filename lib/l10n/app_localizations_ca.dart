@@ -527,6 +527,13 @@ class AppLocalizationsCa extends AppLocalizations {
       'Fer zoom permet llegir els codis des de més lluny, on la càmera encara pot enfocar. Ajuda en mòbils que no enfoquen de prop.';
 
   @override
+  String get crop_camera_preview => 'Retallar la vista de la càmera';
+
+  @override
+  String get crop_camera_preview_hint =>
+      'Omple la pantalla però amaga les vores.';
+
+  @override
   String get advanced => 'Avançat';
 
   @override
