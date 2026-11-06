@@ -17,8 +17,8 @@ The app is written in Flutter and Rust and currently available for Linux, Androi
 | Android | ✓ | ✓ | <!-- TODO: link --> | |
 | iOS | ✓ | ✓ | <!-- TODO: link --> | |
 | macOS | ✓ | ✓ | <!-- TODO: link --> | [Homebrew](#command-line-tool) |
-| Linux | ✓ | ✓ | [Flatpak](#linux) | [Homebrew](#command-line-tool) |
-| Windows | ✓ | | <!-- TODO: link --> | [`.zip`](https://github.com/cu-kha/blastqr/releases/latest) |
+| Linux | ✓ | ✓ | [Flatpak](#linux) | [Homebrew](#command-line-tool), [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
+| Windows | ✓ | | <!-- TODO: link --> | [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
 
 Windows can't receive yet because the app has no camera support there.
 
