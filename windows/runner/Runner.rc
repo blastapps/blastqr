@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "cat.cukha" "\0"
+            VALUE "CompanyName", "blastapps.dev" "\0"
             VALUE "FileDescription", "blastQR" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "blastQR" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 cat.cukha. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 Blast Studio Inc." "\0"
             VALUE "OriginalFilename", "blastQR.exe" "\0"
             VALUE "ProductName", "blastQR" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

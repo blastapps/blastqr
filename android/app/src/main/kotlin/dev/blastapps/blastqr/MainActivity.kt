@@ -1,4 +1,4 @@
-package cat.cukha.blastqr
+package dev.blastapps.blastqr
 
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
