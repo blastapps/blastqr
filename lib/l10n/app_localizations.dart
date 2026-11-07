@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @fps_auto.
   ///
   /// In en, this message translates to:
-  /// **'Highest available ({fps} FPS)'**
+  /// **'Automatic ({fps} FPS)'**
   String fps_auto(String fps);
 
   /// No description provided for @debug_share.

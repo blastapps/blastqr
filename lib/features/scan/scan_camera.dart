@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
@@ -39,19 +38,19 @@ abstract final class ScanCamera {
         .catchError((_) => const <int>[]);
   }
 
-  /// Highest frame rate picked automatically. Every frame is copied from the
-  /// camera to Dart, so the 120 and 240 FPS slow-motion modes some phones
+  /// Rates picked automatically, preferred first. Every frame is copied from
+  /// the camera to Dart, so the 120 and 240 FPS slow-motion modes some phones
   /// offer cost far too much to pick without asking.
-  static int get maxAutoFps => 60;
+  static const autoFrameRates = [60, 30];
 
-  /// The highest supported rate up to [maxAutoFps], or null for the camera's
-  /// default when the rates can't be found out.
-  static Future<int?> highestFrameRate(ResolutionPreset resolution) async {
-    final rates = (await supportedFrameRates(
-      resolution,
-    )).where((fps) => fps <= maxAutoFps);
-    return rates.isEmpty ? null : rates.reduce(max);
-  }
+  /// The first of [autoFrameRates] in [rates], or null for the camera's
+  /// default.
+  static int? autoFrameRate(List<int> rates) =>
+      autoFrameRates.where(rates.contains).firstOrNull;
+
+  /// [autoFrameRate] for the back camera at [resolution].
+  static Future<int?> autoFrameRateFor(ResolutionPreset resolution) async =>
+      autoFrameRate(await supportedFrameRates(resolution));
 
   static Future<void> configure({
     required bool videoHdr,

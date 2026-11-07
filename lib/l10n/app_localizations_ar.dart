@@ -585,7 +585,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String fps_auto(String fps) {
-    return 'أعلى معدل متاح ($fps إطار/ث)';
+    return 'تلقائي ($fps إطار/ث)';
   }
 
   @override

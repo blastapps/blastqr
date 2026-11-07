@@ -27,7 +27,7 @@ class QrScanner extends StatefulWidget {
 
   final ResolutionPreset resolution;
 
-  /// Null picks the highest supported rate, see [ScanCamera.highestFrameRate].
+  /// Null picks a rate automatically, see [ScanCamera.autoFrameRateFor].
   final int? fps;
 
   /// Starting zoom, clamped to what the camera supports. Pinching starts here.
@@ -169,7 +169,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     try {
       final cameras = await availableCameras();
       final fps =
-          widget.fps ?? await ScanCamera.highestFrameRate(widget.resolution);
+          widget.fps ?? await ScanCamera.autoFrameRateFor(widget.resolution);
       if (!isCurrent() || cameras.isEmpty) return;
       final camera = cameras.firstWhere(
         (c) => c.lensDirection == CameraLensDirection.back,

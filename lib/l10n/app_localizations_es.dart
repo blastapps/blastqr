@@ -575,7 +575,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String fps_auto(String fps) {
-    return 'Máximo disponible ($fps FPS)';
+    return 'Automático ($fps FPS)';
   }
 
   @override

@@ -166,7 +166,7 @@
   "camera_fps": "FPS de la càmera",
   "camera_fps_hint": "Més fotogrames donen a l'escàner més oportunitats de llegir cada codi. Només es mostren els que admet aquest mòbil amb la resolució actual.",
   "fps_default": "Per defecte",
-  "fps_auto": "Màxim disponible ({fps} FPS)",
+  "fps_auto": "Automàtic ({fps} FPS)",
   "debug_share": "Comparteix",
   "debug_clear": "Esborra",
   "debug_camera": "Càmera",

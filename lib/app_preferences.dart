@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:camera/camera.dart';
@@ -8,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
   static int defaultMtu = 2935;
-  static int defaultFps = 20;
+  static int defaultFps = 25;
 
   /// Files up to this size are sent with [smallFileMtu] and [smallFileFps].
   static const smallFileBytes = 30000;
@@ -17,9 +15,8 @@ class AppPreferences {
 
   static double get defaultCameraZoom => 1.25;
 
-  /// iPhones read codes more reliably at 1080p.
   static ResolutionPreset get defaultCameraResolution =>
-      Platform.isIOS ? ResolutionPreset.veryHigh : ResolutionPreset.high;
+      ResolutionPreset.veryHigh;
 
   static String? _localeId;
   static ThemeMode? _theme;
@@ -46,7 +43,7 @@ class AppPreferences {
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
   static ThemeMode get theme => _theme ?? ThemeMode.system;
   static int get mtu => _mtu ?? defaultMtu;
-  static int get playbackFps => _playbackFps ?? 20;
+  static int get playbackFps => _playbackFps ?? defaultFps;
   static bool get animations => _animations ?? true;
   static bool get pureBlack => _pureBlack ?? false;
   static Color get accentColor => _accentColor ?? accentColorOptions[0];
@@ -213,7 +210,7 @@ class AppPreferences {
     _localeId = sp.getString('locale_id');
     _theme = ThemeMode.values.byName(sp.getString('theme') ?? 'system');
     _mtu = sp.getInt('mtu') ?? defaultMtu;
-    _playbackFps = sp.getInt('playback_fps') ?? 20;
+    _playbackFps = sp.getInt('playback_fps') ?? defaultFps;
     _animations = sp.getBool('animations') ?? true;
     _pureBlack = sp.getBool('pureBlack') ?? false;
     _accentColor = Color(

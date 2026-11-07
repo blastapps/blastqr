@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
@@ -367,10 +366,10 @@ class _FrameRateSettingState extends State<_FrameRateSetting> {
 
   String _label(BuildContext context, int? fps, List<int> rates) {
     if (fps != null) return '$fps FPS';
-    final auto = rates.where((r) => r <= ScanCamera.maxAutoFps);
-    return auto.isEmpty
+    final auto = ScanCamera.autoFrameRate(rates);
+    return auto == null
         ? context.l10n.fps_default
-        : context.l10n.fps_auto('${auto.reduce(max)}');
+        : context.l10n.fps_auto('$auto');
   }
 
   @override

@@ -167,7 +167,7 @@
   "camera_fps": "카메라 FPS",
   "camera_fps_hint": "속도가 높을수록 스캐너가 각 코드를 읽을 기회가 많아집니다. 현재 해상도에서 이 휴대폰이 지원하는 속도만 표시됩니다.",
   "fps_default": "기본값",
-  "fps_auto": "가능한 최고 속도 ({fps} FPS)",
+  "fps_auto": "자동 ({fps} FPS)",
   "debug_share": "공유",
   "debug_clear": "지우기",
   "debug_camera": "카메라",

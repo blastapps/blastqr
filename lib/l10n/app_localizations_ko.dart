@@ -554,7 +554,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String fps_auto(String fps) {
-    return '가능한 최고 속도 ($fps FPS)';
+    return '자동 ($fps FPS)';
   }
 
   @override

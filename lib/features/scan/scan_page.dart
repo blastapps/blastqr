@@ -81,9 +81,20 @@ class _ScanPageState extends State<ScanPage> {
   final _readerKey = GlobalKey<QrScannerState>();
   Offset? _focusIndicator;
 
-  /// Quick taps in a row; the third restarts the camera.
+  // Focus locks once a transfer's codes have been read without a break for
+  // a while. Locking on the first code would often lock it while the phone
+  // is still moving into place.
+  static const _steadyFor = Duration(seconds: 1);
+  static const _maxReadGap = Duration(milliseconds: 500);
+  DateTime? _steadySince;
+  DateTime? _lastReadAt;
+
+  /// Quick taps in a row; the second restarts the camera.
   int _taps = 0;
   final _sinceLastTap = Stopwatch();
+
+  /// Where the camera refocuses once it's reopened by a double tap.
+  Offset? _refocusAt;
 
   @override
   void initState() {
@@ -114,7 +125,7 @@ class _ScanPageState extends State<ScanPage> {
       if (fps == null)
         'default FPS'
       else
-        '$fps FPS${_cameraFps == null ? ' (highest)' : ''}',
+        '$fps FPS${_cameraFps == null ? ' (auto)' : ''}',
       '${_appSettings.cameraZoom}x zoom',
       if (Platform.isIOS) ...[
         _appSettings.debugVideoHdr ? 'HDR on' : 'HDR off',
@@ -382,6 +393,19 @@ class _ScanPageState extends State<ScanPage> {
     codes.codes.forEach(_handleScan);
     // After handling, so the codes that start a transfer count towards it.
     DecodeStats.instance.recordCodesRead(codes.codes.length);
+    if (codes.codes.isNotEmpty) _lockFocusOnceSteady();
+  }
+
+  void _lockFocusOnceSteady() {
+    final now = DateTime.now();
+    final last = _lastReadAt;
+    _lastReadAt = now;
+    if (last == null || now.difference(last) > _maxReadGap) {
+      _steadySince = now;
+    }
+    if (_isReceivingData && now.difference(_steadySince!) >= _steadyFor) {
+      _lockFocus();
+    }
   }
 
   void _handleScan(Code result) {
@@ -440,7 +464,6 @@ class _ScanPageState extends State<ScanPage> {
     });
     _latestScanStartTime = DateTime.now();
     debugPrint('Scanning file with: ${_fileMetadata.toString()}');
-    _lockFocus();
   }
 
   /// Drops the current transfer's progress and starts on a new one right
@@ -909,7 +932,7 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
-  /// Tapping again and again usually means scanning is stuck, which focusing
+  /// A quick second tap usually means scanning is stuck, which focusing
   /// doesn't fix but reopening the camera does.
   void _onPreviewTap(Offset tap) {
     _taps =
@@ -920,11 +943,12 @@ class _ScanPageState extends State<ScanPage> {
     _sinceLastTap
       ..reset()
       ..start();
-    if (_taps < 3) {
+    if (_taps < 2) {
       _focusAt(tap);
       return;
     }
     _taps = 0;
+    _refocusAt = tap;
     _readerKey.currentState?.restart();
   }
 
@@ -981,11 +1005,17 @@ class _ScanPageState extends State<ScanPage> {
   void _onCameraChanged(CameraController? controller) {
     _cameraController = controller;
     _focusLocked = false;
+    _lastReadAt = null;
     if (controller != null) {
       _openedFps = controller.mediaSettings.fps;
       _updateCameraLabel();
     }
     _configureCamera();
+    final refocusAt = _refocusAt;
+    if (controller != null && refocusAt != null) {
+      _refocusAt = null;
+      _focusAt(refocusAt);
+    }
   }
 
   /// A fixed exposure from the Debug page, which automatic exposure mustn't
@@ -1024,6 +1054,7 @@ class _ScanPageState extends State<ScanPage> {
 
   void _unlockFocus() {
     _focusLocked = false;
+    _lastReadAt = null;
     if (_cameraController != null && (Platform.isIOS || Platform.isAndroid)) {
       unawaited(_cameraController!.setFocusMode(FocusMode.auto));
       if (_fixedExposure) return;

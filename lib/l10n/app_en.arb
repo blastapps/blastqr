@@ -215,7 +215,7 @@
   "camera_fps": "Camera FPS",
   "camera_fps_hint": "Higher rates give the scanner more chances to read each code. Only the rates this phone supports at the current resolution are listed.",
   "fps_default": "Default",
-  "fps_auto": "Highest available ({fps} FPS)",
+  "fps_auto": "Automatic ({fps} FPS)",
   "@fps_auto": {"placeholders": {"fps": {"type": "String"}}},
   "debug_share": "Share",
   "debug_clear": "Clear",

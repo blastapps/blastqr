@@ -167,7 +167,7 @@
   "camera_fps": "FPS de la cámara",
   "camera_fps_hint": "Más fotogramas dan al escáner más oportunidades de leer cada código. Solo se muestran los que admite este móvil con la resolución actual.",
   "fps_default": "Por defecto",
-  "fps_auto": "Máximo disponible ({fps} FPS)",
+  "fps_auto": "Automático ({fps} FPS)",
   "debug_share": "Compartir",
   "debug_clear": "Borrar",
   "debug_camera": "Cámara",
