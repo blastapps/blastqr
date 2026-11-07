@@ -270,6 +270,15 @@ jobs:
             https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
           echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
 
+      # Flutter gives build hooks (the Rust libraries) the NDK from
+      # ANDROID_NDK_HOME, which on the runner is an older NDK that links with
+      # 4 KB pages. Google Play requires 16 KB, which NDK 28+ uses by default.
+      - name: Use the app's NDK for build hooks
+        run: |
+          ndk=$(grep -o 'ndkVersion = "[^"]*"' android/app/build.gradle.kts | cut -d'"' -f2)
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$ndk" >/dev/null
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ndk" >> "$GITHUB_ENV"
+
       - name: Write signing key
         env:
           KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
@@ -294,6 +303,22 @@ jobs:
           apk="blastqr-${GITHUB_REF_NAME}-android.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "$apk"
           echo "APK=$apk" >> "$GITHUB_ENV"
+
+      - name: Check native libraries are 16 KB aligned
+        run: |
+          readelf="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
+          mkdir "$RUNNER_TEMP/aab"
+          unzip -q build/app/outputs/bundle/release/app-release.aab 'base/lib/*' -d "$RUNNER_TEMP/aab"
+          bad=0
+          for so in $(find "$RUNNER_TEMP/aab" -name '*.so'); do
+            for align in $("$readelf" -lW "$so" | awk '/LOAD/{print $NF}'); do
+              if (( align < 0x4000 )); then
+                echo "::error::$(basename "$so") has $align alignment"
+                bad=1
+              fi
+            done
+          done
+          exit $bad
 
       - uses: actions/upload-artifact@v7
         with:
