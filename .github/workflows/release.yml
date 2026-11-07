@@ -9,7 +9,28 @@ env:
   FLUTTER_VERSION: 3.47.8
 
 jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust
+        run: |
+          if ! command -v rustup >/dev/null; then
+            curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch "$FLUTTER_VERSION" \
+            https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - run: scripts/test.sh
+
   build:
+    needs: test
     strategy:
       matrix:
         include:
@@ -158,6 +179,7 @@ jobs:
           cache-key: flatpak-builder-${{ matrix.arch }}
 
   cli:
+    needs: test
     strategy:
       matrix:
         include:
@@ -223,6 +245,7 @@ jobs:
           path: ${{ env.ARCHIVE }}
 
   android:
+    needs: test
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -290,6 +313,7 @@ jobs:
           status: draft
 
   windows:
+    needs: test
     runs-on: windows-latest
     defaults:
       run:
@@ -351,6 +375,7 @@ jobs:
 
   # Unsigned DMG for direct download; the App Store build comes from Xcode Cloud.
   macos:
+    needs: test
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7

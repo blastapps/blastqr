@@ -36,6 +36,8 @@ if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
   exit 1
 fi
 
+scripts/test.sh
+
 current=$(sed -n 's/^version: *\([^+]*\)+\(.*\)/\1/p' pubspec.yaml)
 build=$(sed -n 's/^version: *\([^+]*\)+\(.*\)/\2/p' pubspec.yaml)
 newest=$(printf '%s\n%s\n' "$current" "$version" | sort -V | tail -1)

@@ -8,7 +8,7 @@
 
 blastQR is an open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera.
 
-It's fast enough for simple everyday picture and file transfers, and it's especially useful for air-gapped systems (computers that are completely cut off from any network). Transfers can optionally be encrypted with a password to prevent interception.
+When using compression and displaying multiple codes, it's fast enough for simple everyday picture and file transfers. It's also especially useful for air-gapped systems (computers that are completely cut off from any network). Transfers can optionally be encrypted with a password to prevent interception.
 
 The protocol is an open spec so that other software can freely add support for sending and receiving blastQR transfers.
 
@@ -53,9 +53,7 @@ Windows can't receive yet because the app has no camera support there.
 | 6 | 25 | 384 kB/s · 6.9 s | 222 kB/s · 11.9 s | 172 kB/s · 15.4 s |
 | 6 | 30 | **526 kB/s · 5.0 s** | **364 kB/s · 7.3 s** | – |
 
-Each test sent a 3.9 MB file (`com.termux.api_1002.apk`), which the app compressed to 2.6 MB before sending. Speeds are measured on the compressed data, and each result is the best of 4 attempts.
-
-The camera preview ran at 60 fps on the iPhone and 30 fps on the Samsung phones.
+Each test sent a 2.6 MB file and each result is the best of 4 attempts. The camera preview ran at 60 fps on the iPhone and 30 fps on the Samsung phones.
 
 ## Command-line tool
 
