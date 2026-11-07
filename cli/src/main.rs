@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io::{self, BufRead, IsTerminal, Read, Write};
 use std::path::PathBuf;
 use std::process::ExitCode;
 use std::sync::mpsc::{Receiver, sync_channel};
@@ -20,12 +20,11 @@ use blastqr::{bundle, password};
 #[command(version)]
 struct Args {
     /// Files to send. Several files are sent together as one zip, which the
-    /// app unpacks.
-    #[arg(required = true)]
+    /// app unpacks. Use - (or no files) to send what's piped in.
     files: Vec<PathBuf>,
 
     /// Frames per second.
-    #[arg(long, default_value_t = 20, value_parser = clap::value_parser!(u32).range(1..=60))]
+    #[arg(long, default_value_t = 25, value_parser = clap::value_parser!(u32).range(1..=60))]
     fps: u32,
 
     /// Draw with Unicode block characters even if the terminal can show images.
@@ -42,7 +41,7 @@ struct Args {
     #[arg(short, long, default_value_t = 1, value_parser = clap::value_parser!(u32).range(1..=12))]
     codes: u32,
 
-    /// Encrypt with a generated code, shown below the QR code.
+    /// Encrypt with a generated code. Press space to show it.
     #[arg(short, long, conflicts_with = "password")]
     encrypt: bool,
 
@@ -50,8 +49,8 @@ struct Args {
     #[arg(short, long)]
     password: bool,
 
-    /// File name the receiver sees (default: the file's own name, or
-    /// blastqr-<date>-<time>.zip for several files).
+    /// File name the receiver sees (default: the file's own name,
+    /// blastqr-<date>-<time>.zip for several files, or .txt/.bin for stdin).
     #[arg(long)]
     name: Option<String>,
 
@@ -70,6 +69,9 @@ struct Args {
 
 /// Sending more than this asks for confirmation.
 const CONFIRM_BYTES: u64 = 10_000_000;
+
+/// How long space shows the password for, as in the app.
+const PASSWORD_REVEAL: Duration = Duration::from_secs(10);
 
 fn main() -> ExitCode {
     match run(Args::parse()) {
@@ -93,17 +95,43 @@ fn run(args: Args) -> Result<(), String> {
     let codes = args.codes as usize;
     let max_symbol_size = max_symbol_size(args.mtu, backend, codes, term)?;
 
-    // Checked from file sizes alone, before anything is read or zipped.
-    let total = total_size(&args.files)?;
+    let from_stdin = match args.files.as_slice() {
+        [] if io::stdin().is_terminal() => {
+            return Err("no files given. Pass files, or pipe data in (e.g. ls | blastqr).".into());
+        }
+        [] => true,
+        [file] if file.as_os_str() == "-" => true,
+        files if files.iter().any(|f| f.as_os_str() == "-") => {
+            return Err("- (stdin) can't be combined with files".into());
+        }
+        _ => false,
+    };
+    // Stdin is read up front so its size is known and nothing else reads the
+    // terminal while the program feeding it might.
+    let stdin_input = if from_stdin {
+        Some(read_stdin(args.name.as_deref())?)
+    } else {
+        None
+    };
+
+    // For files, checked from file sizes alone, before anything is read or zipped.
+    let total = match &stdin_input {
+        Some(input) => input.size as u64,
+        None => total_size(&args.files)?,
+    };
     if total > CONFIRM_BYTES && !args.yes {
         let version = qr::version_for(max_symbol_size + protocol::FRAME_OVERHEAD)
             .expect("symbol size fits version 40");
         let per_frame = Renderer::new(backend, version, codes, term).codes();
         let needed = (total as usize).div_ceil(max_symbol_size);
         let seconds = needed as f64 / (args.fps as usize * per_frame) as f64;
-        let may_shrink = !args.no_gzip
-            && (args.files.len() > 1
-                || !protocol::is_precompressed(&args.files[0].to_string_lossy()));
+        let single_name = match &stdin_input {
+            Some(input) => Some(input.name.clone()),
+            None if args.files.len() == 1 => Some(args.files[0].to_string_lossy().into_owned()),
+            None => None,
+        };
+        let may_shrink =
+            !args.no_gzip && single_name.is_none_or(|n| !protocol::is_precompressed(&n));
         let question = format!(
             "This sends {}: about {needed} codes, at least {} at {} fps{}. Continue? [y/N] ",
             human_size(total as usize),
@@ -130,7 +158,10 @@ fn run(args: Args) -> Result<(), String> {
     };
 
     eprintln!("Preparing…");
-    let input = read_input(&args.files, args.name.as_deref())?;
+    let input = match stdin_input {
+        Some(input) => input,
+        None => read_input(&args.files, args.name.as_deref())?,
+    };
     // A bundle has a .zip name, but its entries are stored uncompressed.
     let try_gzip = !args.no_gzip && (input.is_bundle || !protocol::is_precompressed(&input.name));
     let transfer = TransferObject::build(
@@ -249,6 +280,38 @@ fn read_input(paths: &[PathBuf], name: Option<&str>) -> Result<Input, String> {
         label: format!("{} files", files.len()),
         content: bundle::build(&files),
         size,
+    })
+}
+
+fn read_stdin(name: Option<&str>) -> Result<Input, String> {
+    let mut content = vec![];
+    io::stdin()
+        .lock()
+        .take(protocol::MAX_CONTENT_BYTES + 1)
+        .read_to_end(&mut content)
+        .map_err(|e| format!("can't read stdin: {e}"))?;
+    if content.len() as u64 > protocol::MAX_CONTENT_BYTES {
+        return Err("too large: a transfer holds at most 4 GB".into());
+    }
+    let name = name.map_or_else(
+        || {
+            let ext = if std::str::from_utf8(&content).is_ok() {
+                "txt"
+            } else {
+                "bin"
+            };
+            chrono::Local::now()
+                .format(&format!("blastqr-%Y%m%d-%H%M%S.{ext}"))
+                .to_string()
+        },
+        str::to_string,
+    );
+    Ok(Input {
+        label: name.clone(),
+        name,
+        is_bundle: false,
+        size: content.len(),
+        content,
     })
 }
 
@@ -371,13 +434,17 @@ fn play(
     };
     let mut current = take(renderer.codes());
     let mut shown = current.len() as u64;
-    let mut paused = false;
+    let mut hide_password_at: Option<Instant> = None;
     let mut redraw = true;
     let mut due = Instant::now() + Duration::from_secs(1) / fps;
 
     loop {
         let now = Instant::now();
-        if !paused && now >= due {
+        if hide_password_at.is_some_and(|at| now >= at) {
+            hide_password_at = None;
+            redraw = true;
+        }
+        if now >= due {
             current = take(renderer.codes());
             shown += current.len() as u64;
             redraw = true;
@@ -385,16 +452,16 @@ fn play(
             due = (due + Duration::from_secs(1) / fps).max(now);
         }
         if redraw {
-            out.write_all(&renderer.frame(&current, &status(info, shown, fps, paused)))?;
+            out.write_all(&renderer.frame(
+                &current,
+                &status(info, shown, fps, hide_password_at.is_some()),
+            ))?;
             out.flush()?;
             redraw = false;
         }
 
-        let timeout = if paused {
-            Duration::from_millis(250)
-        } else {
-            due.saturating_duration_since(Instant::now())
-        };
+        let wake = hide_password_at.map_or(due, |at| at.min(due));
+        let timeout = wake.saturating_duration_since(Instant::now());
         while !redraw && event::poll(timeout)? {
             match event::read()? {
                 Event::Key(key) if key.kind == KeyEventKind::Press => match key.code {
@@ -410,9 +477,11 @@ fn play(
                         fps = fps.saturating_sub(1).max(1);
                         redraw = true;
                     }
-                    KeyCode::Char(' ') => {
-                        paused = !paused;
-                        due = Instant::now();
+                    KeyCode::Char(' ') if info.code.is_some() => {
+                        hide_password_at = match hide_password_at {
+                            Some(_) => None,
+                            None => Some(Instant::now() + PASSWORD_REVEAL),
+                        };
                         redraw = true;
                     }
                     _ => {}
@@ -441,32 +510,37 @@ fn finish(out: &mut io::Stdout, renderer: &Renderer, shown: u64) -> io::Result<u
     Ok(shown)
 }
 
-fn status(info: &Info, shown: u64, fps: u32, paused: bool) -> String {
+fn status(info: &Info, shown: u64, fps: u32, show_password: bool) -> String {
     let mut parts = vec![];
     if let Some(code) = &info.code {
+        let code = if show_password {
+            code.clone()
+        } else {
+            code.chars()
+                .map(|c| if c == '-' { c } else { '•' })
+                .collect()
+        };
         parts.push(format!("password {code}"));
     }
     parts.push(format!("{} ({})", info.name, human_size(info.size)));
     parts.push(format!("code {shown} / ~{}", info.source_count));
-    parts.push(if paused {
-        "paused".into()
+    parts.push(format!("{fps} fps"));
+    if info.code.is_some() {
+        parts.push("↑↓ speed · space password · q quit".into());
     } else {
-        format!("{fps} fps")
-    });
-    parts.push("↑↓ speed · space pause · q quit".into());
+        parts.push("↑↓ speed · q quit".into());
+    }
     format!(" {}", parts.join(" · "))
 }
 
-/// Asks a yes/no question on the terminal. Without a terminal to ask on,
-/// the answer is no.
+/// Asks a yes/no question on the terminal, even if stdin is a pipe. Without
+/// a terminal to ask on, it fails.
 fn confirm(question: &str) -> Result<bool, String> {
-    use std::io::IsTerminal;
-    if !io::stdin().is_terminal() {
-        return Err("large transfer; pass --yes to send it without asking".into());
-    }
+    let tty = std::fs::File::open(if cfg!(windows) { "CONIN$" } else { "/dev/tty" })
+        .map_err(|_| "large transfer; pass --yes to send it without asking")?;
     eprint!("{question}");
     let mut answer = String::new();
-    io::stdin()
+    io::BufReader::new(tty)
         .read_line(&mut answer)
         .map_err(|e| e.to_string())?;
     Ok(matches!(answer.trim().to_lowercase().as_str(), "y" | "yes"))

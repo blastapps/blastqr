@@ -1,6 +1,6 @@
-# BlastQR transfer protocol, version 3
+# blastQR transfer protocol, version 3
 
-BlastQR sends a file from one device's screen to another device's camera as a
+blastQR sends a file from one device's screen to another device's camera as a
 stream of QR codes. This document describes what's in those QR codes and what
 each side has to do with them.
 
@@ -44,8 +44,8 @@ the QR code only needs to survive a few bad pixels.
 ### Signature and version
 
 Every frame starts with `bQR`. Future versions keep the signature and change
-the version byte. A receiver can then tell a newer BlastQR stream (ask the user
-to update) from a QR code that isn't BlastQR at all.
+the version byte. A receiver can then tell a newer blastQR stream (ask the user
+to update) from a QR code that isn't blastQR at all.
 
 ### Flags
 

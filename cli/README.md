@@ -1,15 +1,35 @@
-# blastqr
+# blastqr command-line tool
 
-Send files to the BlastQR app from a terminal. The files are shown as a
-stream of QR codes; scan the screen with the app.
+Send files to the blastQR app from a terminal. The files are shown as a
+stream of QR codes that you can scan with the blastQR app.
 
 ```
 blastqr <file>...
+
+# Send one file
+blastqr photo.jpg
+
+# Send several files
+blastqr notes.txt slides.pdf
+
+# Send all files in a folder
+blastqr photos/*
+
+# Send a command's output, here the macOS clipboard
+pbpaste | blastqr
+
+# Send a command's output with a custom file name
+pg_dump mydb | blastqr --name mydb.sql
+
+# Type or paste text, then press Ctrl-D to send it
+blastqr -
 ```
 
-Several files are sent together as one zip, which the app unpacks into
-separate files. Folders aren't supported, since the app receives files
-without folders; pass the files in them instead (`blastqr photos/*`).
+When sending multiple files, they are zipped and sent together. The app
+automatically unpacks the zip into separate files.
+
+Folders aren't supported, since the app receives files without folders.
+Pass the files in them instead, as in `blastqr photos/*` above.
 
 ## Install
 
@@ -23,18 +43,19 @@ brew install cu-kha/tap/blastqr
 
 | option | |
 |---|---|
-| `--fps N` | frames per second, 1 to 60 (default 20) |
+| `--fps N` | frames per second, 1 to 60 (default 25) |
 | `-u`, `--unicode` | draw with Unicode block characters even if the terminal can show images |
 | `-d`, `--dense` | draw with Unicode quadrant blocks, 2×2 modules per character (see below) |
 | `-c`, `--codes N` | show up to N codes per frame side by side, 1 to 12 (default 1) |
-| `-e`, `--encrypt` | encrypt with a generated code, shown in the status line |
+| `-e`, `--encrypt` | encrypt with a generated code; space shows it in the status line |
 | `-p`, `--password` | encrypt with your own password, asked for at the start |
-| `--name NAME` | file name the receiver sees (for several files, the zip's name) |
+| `--name NAME` | file name the receiver sees (default: the file's name, `blastqr-<date>-<time>.zip` for several files, or `blastqr-<date>-<time>.txt`/`.bin` for piped data) |
 | `--mtu N` | bytes of file data per QR code, 96 to 2928 (default: as much as fits) |
 | `--no-gzip` | don't try to compress the file |
 | `-y`, `--yes` | don't ask before sending more than 10 MB |
 
-While it runs: ↑/↓ change the speed, space pauses, q quits.
+While it runs: ↑/↓ change the speed, q quits. With `-e`, the password is
+hidden and the space key shows it for 10 seconds.
 
 ## Display
 
@@ -58,10 +79,3 @@ the window gets too small, fewer are shown.
 Codes are drawn mostly with background colors, so set the window opacity to
 100% (Terminal.app: Settings → Profiles → Window), or what's behind the window
 shows through the code.
-
-## Protocol
-
-Frames follow BlastQR protocol version 3 ([docs/protocol.md](../docs/protocol.md)).
-Encryption comes from the
-[`blastqr_envelope`](../packages/blastqr_envelope/) crate, which the app uses
-too.

@@ -1,10 +1,10 @@
 # blastqr_crypto
 
-Password-based encryption for BlastQR transfer objects, in Rust via
+Password-based encryption for blastQR transfer objects, in Rust via
 flutter_rust_bridge. Argon2id derives the key, ChaCha20-Poly1305 encrypts.
 The encryption itself is in the `blastqr_envelope` crate next to this
 package, which the CLI uses too. The envelope format is documented there and
-in BlastQR's `docs/protocol.md`.
+in blastQR's `docs/protocol.md`.
 
 Build/test the Rust side: `cd rust && cargo test && cargo build --release`,
 After changing `rust/src/api/`, regenerate bindings with

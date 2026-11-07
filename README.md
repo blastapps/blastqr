@@ -74,12 +74,15 @@ Then send one or more files:
 
 ```sh
 blastqr report.pdf
-blastqr photos/*            # several files go as one zip
+blastqr photos/*            # several files
 blastqr -e secrets.txt      # encrypt with a generated password
 blastqr -c 4 --fps 30 a.zip # 4 codes at once, 30 frames per second
+pbpaste | blastqr           # send the clipboard (macOS)
+pg_dump mydb | blastqr --name mydb.sql
+blastqr -                   # type or paste text, then Ctrl-D
 ```
 
-While it runs, ↑/↓ change the speed, space pauses and q quits.
+While it runs, ↑/↓ change the speed and q quits. With `-e`, space shows the hidden password for 10 seconds.
 Run `blastqr --help` for all options, or see [cli/README.md](cli/README.md).
 
 ## Encryption
