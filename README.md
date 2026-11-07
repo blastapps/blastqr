@@ -4,6 +4,13 @@
 <img src="docs/hero.webp" width="800"/>
 </p>
 
+<p align="center">
+<a href="https://f-droid.org/packages/dev.blastapps.blastqr"><img src="docs/f-droid-badge.png" alt="Get it on F-Droid" height="44"/></a>
+<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/cu-kha/blastqr"><img src="docs/obtainium-badge.png" alt="Get it on Obtainium" height="44"/></a>
+<a href="https://play.google.com/store/apps/details?id=dev.blastapps.blastqr"><img src="docs/google-play-badge.png" alt="Get it on Google Play" height="44"/></a>
+<a href="https://apps.apple.com/app/id6831422458"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" height="44"/></a>
+</p>
+
 ## Introduction
 
 blastQR is an open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera.
@@ -16,15 +23,15 @@ Written in Flutter and Rust and currently available for Linux, Android, iOS, mac
 
 ## Downloads
 
-| Platform | Send | Receive | App | Command-line tool |
-|---|:-:|:-:|---|---|
-| Android | ✓ | ✓ | F-Droid, [APK](https://github.com/cu-kha/blastqr/releases/latest), Google Play |
-| iOS | ✓ | ✓ | AppStore | |
-| macOS | ✓ | ✓ | [Dmg](https://github.com/cu-kha/blastqr/releases/latest) | [Homebrew](#command-line-tool) |
-| Linux | ✓ | ✓ | [Flatpak](#linux) | [Homebrew](#command-line-tool), [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
-| Windows | ✓ | | [Exe](https://github.com/cu-kha/blastqr/releases/latest) | [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
+| Platform | App | Command-line tool |
+|---|---|---|
+| Android | [F-Droid](https://f-droid.org/packages/dev.blastapps.blastqr), [APK](https://github.com/cu-kha/blastqr/releases/latest), [Google Play](https://play.google.com/store/apps/details?id=dev.blastapps.blastqr) | |
+| iOS | [App Store](https://apps.apple.com/app/id6831422458) | |
+| macOS | [DMG](https://github.com/cu-kha/blastqr/releases/latest), [App Store](https://apps.apple.com/app/id6831422458) | [Homebrew](#command-line-tool) |
+| Linux | [Flatpak](https://github.com/cu-kha/blastqr/releases/latest), [Tarball](https://github.com/cu-kha/blastqr/releases/latest) | [Homebrew](#command-line-tool), [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
+| Windows | [Installer](https://github.com/cu-kha/blastqr/releases/latest) | [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
 
-Windows can't receive yet because the app has no camera support there.
+Windows can only send for now, because the app has no camera support there.
 
 ## Features
 
