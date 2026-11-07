@@ -7,12 +7,14 @@ import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/platform_support.dart';
+import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/widgets/file_list_row.dart';
 import 'package:blast_qr/widgets/selection_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,9 +22,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   late Directory received;
 
-  setUp(() {
+  setUp(() async {
     final documents = Directory.systemTemp.createTempSync('blastqr_test');
-    received = Directory('${documents.path}/Received')..createSync();
+    PathProviderPlatform.instance = _FakePathProvider(documents.path);
+    SharedPreferences.setMockInitialValues({});
+    received = await receivedFilesDirectory();
     // Newest first: f0, f1, ...
     final now = DateTime.now();
     for (var i = 0; i < 4; i++) {
@@ -30,12 +34,6 @@ void main() {
         ..writeAsStringSync('x')
         ..setLastModifiedSync(now.subtract(Duration(minutes: i)));
     }
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          (call) async => documents.path,
-        );
-    SharedPreferences.setMockInitialValues({});
   });
 
   tearDown(() => received.parent.deleteSync(recursive: true));
@@ -220,4 +218,16 @@ void main() {
     // Stops the folder watchers before the folder is deleted.
     await tester.pumpWidget(const SizedBox());
   }, skip: !isDesktopOS);
+}
+
+class _FakePathProvider extends PathProviderPlatform {
+  _FakePathProvider(this.path);
+
+  final String path;
+
+  @override
+  Future<String?> getApplicationDocumentsPath() async => path;
+
+  @override
+  Future<String?> getApplicationSupportPath() async => path;
 }

@@ -20,10 +20,11 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:raptorq_flutter/src/rust/frb_generated.dart';
 
-const _libraryPath = 'build/native_assets/macos/libraptorq_flutter.dylib';
+import 'native_library.dart';
 
-const _cryptoLibraryPath =
-    'build/native_assets/macos/librust_lib_blastqr_crypto.dylib';
+final _libraryPath = nativeLibraryPath('raptorq_flutter');
+
+final _cryptoLibraryPath = nativeLibraryPath('rust_lib_blastqr_crypto');
 
 final _skip =
     File(_libraryPath).existsSync() && File(_cryptoLibraryPath).existsSync()
