@@ -71,6 +71,7 @@ class _ScanPageState extends State<ScanPage> {
   DateTime? _lowSpeedStartTime;
   late SoundFeedbackService _soundService;
   late AppSettings _appSettings;
+  late final NavBarVisibility _navBar;
   DateTime _latestScanStartTime = DateTime.now();
   ReceivingFileMetadata? _fileMetadata;
 
@@ -101,6 +102,7 @@ class _ScanPageState extends State<ScanPage> {
     super.initState();
     _createDecoder();
     _soundService = SoundFeedbackService();
+    _navBar = context.read<NavBarVisibility>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => _cameraLoaded = true);
     });
@@ -144,6 +146,8 @@ class _ScanPageState extends State<ScanPage> {
     _decoder.dispose();
     DecodeStats.instance.endTransfer();
     _soundService.dispose();
+    // Leaving mid-transfer skips _reset. The tree is locked while disposing.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _navBar.show());
     super.dispose();
   }
 
@@ -283,16 +287,17 @@ class _ScanPageState extends State<ScanPage> {
                 ),
               ),
             // Top gradient
-            Container(
-              height: 92 + MediaQuery.of(context).viewPadding.top,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black, Colors.transparent],
+            if (!context.useDesktopLayout)
+              Container(
+                height: 92 + MediaQuery.of(context).viewPadding.top,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black, Colors.transparent],
+                  ),
                 ),
               ),
-            ),
             Align(
                   alignment: Alignment.topCenter,
                   child: SafeArea(
@@ -303,7 +308,11 @@ class _ScanPageState extends State<ScanPage> {
                 )
                 .animate(target: _isReceivingData ? 0 : 1)
                 .fade(delay: 1.seconds, begin: -0.5)
-                .moveY(delay: 1.seconds),
+                .moveY(
+                  delay: 1.seconds,
+                  begin: -24,
+                  end: context.useDesktopLayout ? -16 : 0,
+                ),
             Align(
                   alignment: Alignment.topCenter,
                   child: SafeArea(
@@ -314,7 +323,11 @@ class _ScanPageState extends State<ScanPage> {
                 )
                 .animate(target: _showLowSpeedWarning ? 1 : 0)
                 .fade(delay: 300.ms, begin: -0.5)
-                .moveY(delay: 300.ms),
+                .moveY(
+                  delay: 300.ms,
+                  begin: -24,
+                  end: context.useDesktopLayout ? -16 : 0,
+                ),
             ScanProgressWidget(
               chunkCount: _decodedChunkCount,
               speed: '${_speed.toStringAsFixed(1)}kB/s',
@@ -500,7 +513,7 @@ class _ScanPageState extends State<ScanPage> {
     });
 
     // Hide bottom bar
-    context.read<NavBarVisibility>().hide();
+    _navBar.hide();
 
     if (_appSettings.hapticFeedback) {
       HapticFeedback.lightImpact();
@@ -881,9 +894,9 @@ class _ScanPageState extends State<ScanPage> {
 
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(context.l10n.copied)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.copied, textAlign: TextAlign.center)),
+    );
   }
 
   Future<void> _saveRegularQRCode(String text) async {
@@ -894,7 +907,9 @@ class _ScanPageState extends State<ScanPage> {
       await saveScannedQrCode(text, await qrCodesDirectory());
       badgeCount.add();
     } catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text(error.toString())));
+      messenger.showSnackBar(
+        SnackBar(content: Text(error.toString(), textAlign: TextAlign.center)),
+      );
     }
     navigator.pop();
   }
@@ -920,7 +935,7 @@ class _ScanPageState extends State<ScanPage> {
     _unlockFocus();
 
     // Re-show bottom navigation
-    context.read<NavBarVisibility>().show();
+    _navBar.show();
 
     // Wait a second to start scanning again
     await Future.delayed(const Duration(seconds: 1));
@@ -1068,7 +1083,9 @@ class _ScanPageState extends State<ScanPage> {
       OpenFile.open(file.file.path, type: file.type.mimeType ?? '');
     } catch (error) {
       Navigator.of(context).pop();
-      final snackBar = SnackBar(content: Text(error.toString()));
+      final snackBar = SnackBar(
+        content: Text(error.toString(), textAlign: TextAlign.center),
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
@@ -1098,13 +1115,14 @@ class _HelpMessageWidget extends StatelessWidget {
           ],
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           spacing: 12,
           children: [
             const HugeIcon(
               icon: HugeIcons.strokeRoundedInformationCircle,
               color: Colors.white,
             ),
-            Expanded(
+            Flexible(
               child: Text(message, style: const TextStyle(color: Colors.white)),
             ),
           ],

@@ -681,7 +681,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get copied => 'Copiado';
+  String get copied => '¡Copiado!';
 
   @override
   String get files_settings => 'Archivos';

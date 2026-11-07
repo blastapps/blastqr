@@ -318,7 +318,11 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
       children: [
         Offstage(
           offstage: _currentTab != 0,
-          child: SendPage(key: _sendPage),
+          // Stops the hidden send page keeping keyboard focus.
+          child: ExcludeFocus(
+            excluding: _currentTab != 0,
+            child: SendPage(key: _sendPage),
+          ),
         ),
         // Removed while settings is open, so the camera turns off.
         if (_currentTab == _scanTab && !_settingsOpen) const ScanPage(),

@@ -679,7 +679,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get copied => 'Copied';
+  String get copied => 'Copied!';
 
   @override
   String get files_settings => 'Files';

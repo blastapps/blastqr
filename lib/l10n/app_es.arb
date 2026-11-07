@@ -197,7 +197,7 @@
   "qr_code": "Código QR",
   "filter_qr": "QR",
   "scanned_at": "Escaneado el {date}",
-  "copied": "Copiado",
+  "copied": "¡Copiado!",
   "files_settings": "Archivos",
   "show_in_files_app": "Mostrar en la app Archivos",
   "show_in_files_app_hint": "Permite abrir los archivos recibidos desde la app Archivos y desde el Finder de un Mac conectado."

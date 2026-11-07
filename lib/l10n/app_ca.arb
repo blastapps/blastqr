@@ -196,7 +196,7 @@
   "qr_code": "Codi QR",
   "filter_qr": "QR",
   "scanned_at": "Escanejat el {date}",
-  "copied": "Copiat",
+  "copied": "Copiat!",
   "files_settings": "Fitxers",
   "show_in_files_app": "Mostra a l'app Fitxers",
   "show_in_files_app_hint": "Permet obrir els fitxers rebuts des de l'app Fitxers i des del Finder d'un Mac connectat."

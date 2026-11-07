@@ -46,9 +46,11 @@ Future<void> showQrCodeSheet(
           onTap: () {
             Navigator.of(context).pop();
             Clipboard.setData(ClipboardData(text: code.text));
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(context.l10n.copied)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.copied, textAlign: TextAlign.center),
+              ),
+            );
           },
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedCopy01,

@@ -269,8 +269,8 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
   void _showError(Object error) => _showSnackBar(error.toString());
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, textAlign: TextAlign.center)),
+    );
   }
 }

@@ -681,7 +681,7 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get copied => 'Copiat';
+  String get copied => 'Copiat!';
 
   @override
   String get files_settings => 'Fitxers';

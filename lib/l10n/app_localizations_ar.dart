@@ -691,7 +691,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get copied => 'تم النسخ';
+  String get copied => 'تم النسخ!';
 
   @override
   String get files_settings => 'الملفات';

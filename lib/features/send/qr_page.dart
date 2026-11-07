@@ -107,6 +107,17 @@ class _QrPageState extends State<QrPage> {
   @override
   Widget build(BuildContext context) {
     final qrBox = _buildQrBox(context);
+    // Like the CLI: up and down step the fps.
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowUp): () => _stepFps(1),
+        const SingleActivator(LogicalKeyboardKey.arrowDown): () => _stepFps(-1),
+      },
+      child: Focus(autofocus: true, child: _buildScaffold(context, qrBox)),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, Widget qrBox) {
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: SafeArea(
@@ -369,10 +380,24 @@ class _QrPageState extends State<QrPage> {
   }
 
   void _cycleFps(int current) {
-    final options = {..._fpsOptions, current}.toList()..sort();
+    final options = _fpsOptionsWith(current);
     final next = options[(options.indexOf(current) + 1) % options.length];
     setState(() => _fps = next);
   }
+
+  void _stepFps(int step) {
+    if (!_playbackStarted || _completionDetected) return;
+    final current = _fps ?? context.read<EncodeSettings>().fpsFor(_plan.size);
+    final options = _fpsOptionsWith(current);
+    final index = (options.indexOf(current) + step).clamp(
+      0,
+      options.length - 1,
+    );
+    setState(() => _fps = options[index]);
+  }
+
+  List<int> _fpsOptionsWith(int current) =>
+      {..._fpsOptions, current}.toList()..sort();
 
   Future<void> _toggleAcousticDetection(bool on) async {
     final appSettings = Provider.of<AppSettings>(context, listen: false);

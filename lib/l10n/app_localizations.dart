@@ -1277,7 +1277,7 @@ abstract class AppLocalizations {
   /// No description provided for @copied.
   ///
   /// In en, this message translates to:
-  /// **'Copied'**
+  /// **'Copied!'**
   String get copied;
 
   /// No description provided for @files_settings.

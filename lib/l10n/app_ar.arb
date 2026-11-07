@@ -245,7 +245,7 @@
   "filter_qr": "QR",
   "scanned_at": "تم المسح في {date}",
   "@scanned_at": {"placeholders": {"date": {"type": "String"}}},
-  "copied": "تم النسخ",
+  "copied": "تم النسخ!",
   "files_settings": "الملفات",
   "show_in_files_app": "العرض في تطبيق الملفات",
   "show_in_files_app_hint": "يتيح لك فتح الملفات المستلمة من تطبيق الملفات، ومن Finder على جهاز Mac متصل."

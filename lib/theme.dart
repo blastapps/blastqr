@@ -173,8 +173,14 @@ InputDecorationTheme textFieldTheme(ColorScheme colorScheme) {
 
 SnackBarThemeData snackBarTheme(ColorScheme colorScheme) {
   return SnackBarThemeData(
-    backgroundColor: colorScheme.primaryContainer,
-    contentTextStyle: TextStyle(color: colorScheme.onPrimaryContainer),
+    backgroundColor: colorScheme.secondary,
+    behavior: SnackBarBehavior.floating,
+    width: 160,
+    shape: const StadiumBorder(),
+    contentTextStyle: TextStyle(
+      fontFamily: 'Jersey25',
+      color: colorScheme.onPrimary,
+    ),
   );
 }
 
