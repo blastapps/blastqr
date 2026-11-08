@@ -88,6 +88,7 @@ class RaptorqDecoder {
         _handleOutput(result);
         return true;
       }
+      if (complete) return false;
     } catch (error) {
       // A malformed packet must not take the whole transfer down.
       debugPrint('RaptorQ rejected packet: $error');
@@ -107,6 +108,7 @@ class RaptorqDecoder {
     if (bytes.isNotEmpty && !complete) {
       latestResult = bytes;
       complete = true;
+      onTransferComplete?.call();
       onReceiveResult(latestResult);
     }
   }
