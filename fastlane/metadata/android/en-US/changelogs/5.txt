@@ -1,0 +1,3 @@
+- Show HD button toggle for photo compression
+- Add button to clear recently sent file list
+- Fix minor UI bugs in scanning screen

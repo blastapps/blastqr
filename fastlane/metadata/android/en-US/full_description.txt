@@ -1,0 +1,9 @@
+blastQR is an open-source file transfer app that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera.
+
+It's fast enough for simple everyday picture and file transfers, and it's especially useful for air-gapped systems (computers that are completely cut off from any network). Transfers can optionally be encrypted with a password to prevent interception.
+
+- Offline & Private File Sharing
+- No Internet, No Servers
+- No WiFi, No Bluetooth, No Cloud
+- True Air-Gap Communication
+- Your Data Stays Offline

@@ -3,8 +3,9 @@
 #
 #   scripts/release.sh 3.1.0 "Faster scanning on low-end cameras."
 #
-# Without the notes argument, git opens an editor for them. The notes become
-# the tag message, which CI uses as the Linux release notes.
+# Without the notes argument, git's editor opens for them. The notes become
+# the tag message, which CI uses as the Linux release notes, and the F-Droid
+# changelog.
 set -e
 
 version=$1
@@ -52,13 +53,26 @@ perl -pi -e "s/^version: .*/version: $version+$build/" pubspec.yaml
 perl -pi -e "s/^version = \".*\"/version = \"$version\"/ if 1 .. /^\\[dependencies\\]/" cli/Cargo.toml
 (cd cli && cargo update --workspace --offline -q)
 
-git add pubspec.yaml cli/Cargo.toml cli/Cargo.lock
-git commit -q -m "Release $tag"
+changelog="fastlane/metadata/android/en-US/changelogs/$build.txt"
 if [ -n "$notes" ]; then
-  git tag -a "$tag" -m "$notes"
+  printf '%s\n' "$notes" > "$changelog"
 else
-  git tag -a "$tag"
+  : > "$changelog"
+  $(git var GIT_EDITOR) "$changelog"
 fi
+if [ ! -s "$changelog" ]; then
+  echo "Release notes are empty." >&2
+  git checkout -q -- pubspec.yaml cli/Cargo.toml cli/Cargo.lock
+  rm "$changelog"
+  exit 1
+fi
+if [ "$(wc -c < "$changelog")" -gt 500 ]; then
+  echo "Warning: F-Droid cuts release notes off after 500 characters." >&2
+fi
+
+git add pubspec.yaml cli/Cargo.toml cli/Cargo.lock "$changelog"
+git commit -q -m "Release $tag"
+git tag -a "$tag" -F "$changelog"
 
 git push -q origin main "$tag"
 # Skips the wait for the Codeberg mirror, so release builds start right away.

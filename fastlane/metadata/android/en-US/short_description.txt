@@ -1,0 +1,1 @@
+Easy offline file transfers over QR codes
