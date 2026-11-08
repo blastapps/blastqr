@@ -382,10 +382,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get images_section => 'الصور';
 
   @override
-  String get always_compress_images => 'ضغط الصور دائمًا';
+  String get compress_photos_by_default => 'ضغط الصور افتراضيًا';
 
   @override
-  String get always_compress_images_subtitle => 'يتم ضغط الصور قبل إرسالها';
+  String get compress_photos_by_default_subtitle =>
+      'فعّل HD عند الإرسال للحفاظ على الجودة الأصلية';
+
+  @override
+  String get hd_tooltip => 'فعّله لإرسال الصور بالجودة الكاملة';
 
   @override
   String get camera_section => 'الكاميرا';

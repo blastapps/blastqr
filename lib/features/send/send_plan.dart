@@ -2,13 +2,15 @@ import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:flutter/foundation.dart';
 
 /// Sends larger than this get a warning first.
-const largeTransferBytes = 1500000;
+const largeTransferBytes = 2500000;
 
-/// Whether zipping re-encodes [file] when images are compressed.
-bool isCompressibleInBundle(FileWrapper file) =>
-    file.type.allowsImageCompression && file.size > largeTransferBytes;
+/// Images up to this size aren't worth re-encoding.
+const minCompressibleImageBytes = 400000;
 
-/// Zips the files into one bundle, re-encoding large images if asked.
+bool isCompressibleImage(FileWrapper file) =>
+    file.type.allowsImageCompression && file.size > minCompressibleImageBytes;
+
+/// Zips the files into one bundle, re-encoding images if asked.
 typedef ZipFiles = Future<FileWrapper> Function({required bool compressImages});
 
 /// What happens before a send starts: whether a long transfer is warned
@@ -19,21 +21,14 @@ typedef ZipFiles = Future<FileWrapper> Function({required bool compressImages});
 /// soon as that choice is made: right away, unless the warning has to offer
 /// compressing first.
 class SendPlan extends ChangeNotifier {
-  SendPlan(
-    this.files, {
-    required bool alwaysCompressImages,
-    required this.zip,
-  }) {
-    _compressibleImages = isBundle
-        ? files.where(isCompressibleInBundle).length
-        : (files.single.type.allowsImageCompression ? 1 : 0);
-    _compressImages =
-        alwaysCompressImages && _isLarge && _compressibleImages > 0;
+  SendPlan(this.files, {required bool compressImages, required this.zip}) {
+    _compressibleImages = files.where(isCompressibleImage).length;
+    _compressImages = compressImages && _compressibleImages > 0;
     if (!isBundle) {
       _file = files.single;
       // A single image's compressed size is only known once sending starts.
       _acknowledged = _compressImages;
-    } else if (compressibleImages == 0) {
+    } else if (compressibleImages == 0 || !_isLarge) {
       _zip();
     }
   }

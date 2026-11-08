@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:blast_qr/features/send/widgets/file_header_widget.dart';
 import 'package:blast_qr/features/send/widgets/file_too_large_alert_widget.dart';
+import 'package:blast_qr/features/send/widgets/hd_toggle.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/model/file_type.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/widgets/centered_with_trailing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,8 +44,8 @@ void main() {
     );
 
     testWidgets('estimates the time at the slowest speed', (tester) async {
-      // 2400 KB at 8 KB/s is 300 s.
-      await pumpAlert(tester);
+      // 7200 KB at 24 KB/s is 300 s.
+      await pumpAlert(tester, transferBytes: 7200000);
 
       expect(_text(' 5 minutes '), findsOneWidget);
     });
@@ -112,6 +114,44 @@ void main() {
       expect(find.text('doc.pdf'), findsOneWidget);
       expect(find.text('4000 KB'), findsOneWidget);
       expect(find.byIcon(Icons.arrow_forward), findsNothing);
+    });
+  });
+
+  group('HD toggle', () {
+    testWidgets('flips on tap', (tester) async {
+      final hd = ValueNotifier(false);
+      await _pump(tester, HdToggle(hd: hd));
+
+      await tester.tap(find.text('HD'));
+
+      expect(hd.value, isTrue);
+    });
+
+    testWidgets('sits beside the thumbnail, keeping it centred', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        // Like a sheet: a full-width column that centres its children.
+        Column(
+          children: [
+            const SizedBox(width: double.infinity),
+            CenteredWithTrailing(
+              trailing: HdToggle(hd: ValueNotifier(false)),
+              child: const Text('thumbnail'),
+            ),
+          ],
+        ),
+      );
+
+      final screen = tester.getCenter(find.byType(Scaffold));
+      final thumbnail = find.text('thumbnail');
+      expect(tester.getCenter(thumbnail).dx, screen.dx);
+      final toggle = find.text('HD').hitTestable();
+      expect(
+        tester.getCenter(toggle).dx - tester.getTopRight(thumbnail).dx,
+        lessThan(40),
+      );
     });
   });
 }

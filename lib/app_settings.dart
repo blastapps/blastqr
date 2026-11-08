@@ -29,7 +29,7 @@ class AppSettings extends ChangeNotifier {
   bool soundFeedback;
   bool acousticDetection;
   bool hasSeenMicPrompt;
-  bool alwaysCompressImages;
+  bool compressPhotosByDefault;
   bool showInFilesApp;
 
   AppSettings()
@@ -49,7 +49,7 @@ class AppSettings extends ChangeNotifier {
       soundFeedback = AppPreferences.soundFeedback,
       acousticDetection = AppPreferences.acousticDetection,
       hasSeenMicPrompt = AppPreferences.hasSeenMicPrompt,
-      alwaysCompressImages = AppPreferences.alwaysCompressImages,
+      compressPhotosByDefault = AppPreferences.compressPhotosByDefault,
       showInFilesApp = AppPreferences.showInFilesApp;
 
   void updateLocale(String? localeId) {
@@ -149,9 +149,9 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAlwaysCompressImages(bool value) {
-    AppPreferences.setAlwaysCompressImages(value);
-    alwaysCompressImages = value;
+  void updateCompressPhotosByDefault(bool value) {
+    AppPreferences.setCompressPhotosByDefault(value);
+    compressPhotosByDefault = value;
     notifyListeners();
   }
 

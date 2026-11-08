@@ -534,6 +534,8 @@ class _ScanPageState extends State<ScanPage> {
     _decodedChunkCount = 0;
     _shouldScan = false;
     _loadingResult = true;
+    _showLowSpeedWarning = false;
+    _lowSpeedStartTime = null;
     _speedTimer?.cancel();
     setState(() {});
   }

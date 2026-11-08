@@ -4,8 +4,8 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/file_bundle.dart';
 import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
-import 'package:blast_qr/features/send/send_plan.dart';
 import 'package:blast_qr/features/send/send_options.dart';
+import 'package:blast_qr/features/send/send_plan.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
@@ -33,7 +33,7 @@ Future<void> sendFiles(
   }
   // Compressing images can bring a bundle under the limit, so such a bundle
   // is only checked once built.
-  if (files.length == 1 || !files.any(isCompressibleInBundle)) {
+  if (files.length == 1 || !files.any(isCompressibleImage)) {
     final size = files.fold(0, (sum, f) => sum + f.size);
     final tooLarge = transferTooLargeMessage(context, size);
     if (tooLarge != null) {
@@ -48,12 +48,13 @@ Future<void> sendFiles(
         files: files,
         password: options.password,
         fileName: options.fileName,
+        compressImages: options.compressImages,
       ),
     ),
   );
 }
 
-/// Zips [files] into a temporary file. Large images are re-encoded first
+/// Zips [files] into a temporary file. Photos are re-encoded first
 /// when [icSettings] is given, as for a single file.
 Future<FileWrapper> createSendBundle(
   List<FileWrapper> files, {
@@ -61,7 +62,7 @@ Future<FileWrapper> createSendBundle(
 }) async {
   final entries = <BundleEntry>[];
   for (final file in files) {
-    if (icSettings != null && isCompressibleInBundle(file)) {
+    if (icSettings != null && isCompressibleImage(file)) {
       final bytes = await FileQrEncoder.compressImage(
         await file.file.readAsBytes(),
         icSettings,

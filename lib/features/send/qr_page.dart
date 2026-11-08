@@ -22,7 +22,13 @@ import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class QrPage extends StatefulWidget {
-  const QrPage({super.key, required this.files, this.password, this.fileName});
+  const QrPage({
+    super.key,
+    required this.files,
+    this.password,
+    this.fileName,
+    required this.compressImages,
+  });
 
   /// The files to send. Several are zipped into one bundle first.
   final List<FileWrapper> files;
@@ -30,6 +36,9 @@ class QrPage extends StatefulWidget {
   final String? password;
 
   final String? fileName;
+
+  /// Whether photos are compressed, as chosen with the HD toggle.
+  final bool compressImages;
 
   @override
   State<QrPage> createState() => _QrPageState();
@@ -64,10 +73,9 @@ class _QrPageState extends State<QrPage> {
   void initState() {
     super.initState();
     WakelockPlus.enable();
-    final appSettings = Provider.of<AppSettings>(context, listen: false);
     _plan = SendPlan(
       widget.files,
-      alwaysCompressImages: appSettings.alwaysCompressImages,
+      compressImages: widget.compressImages,
       zip: _zip,
     )..addListener(() => setState(() {}));
   }

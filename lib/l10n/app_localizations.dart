@@ -776,17 +776,23 @@ abstract class AppLocalizations {
   /// **'Images'**
   String get images_section;
 
-  /// No description provided for @always_compress_images.
+  /// No description provided for @compress_photos_by_default.
   ///
   /// In en, this message translates to:
-  /// **'Always compress images'**
-  String get always_compress_images;
+  /// **'Compress photos by default'**
+  String get compress_photos_by_default;
 
-  /// No description provided for @always_compress_images_subtitle.
+  /// No description provided for @compress_photos_by_default_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Images are compressed before sending'**
-  String get always_compress_images_subtitle;
+  /// **'Turn on HD when sending to keep a photo\'s full quality'**
+  String get compress_photos_by_default_subtitle;
+
+  /// No description provided for @hd_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable to send photos in full quality'**
+  String get hd_tooltip;
 
   /// No description provided for @camera_section.
   ///

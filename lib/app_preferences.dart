@@ -13,6 +13,9 @@ class AppPreferences {
   static const smallFileMtu = 1000;
   static const smallFileFps = 15;
 
+  // Named after the setting's old "always compress images" title.
+  static const _compressPhotosKey = 'alwaysCompressImages';
+
   static double get defaultCameraZoom => 1.25;
 
   static ResolutionPreset get defaultCameraResolution =>
@@ -37,7 +40,7 @@ class AppPreferences {
   static bool? _acousticDetection;
   static bool? _multipleQrCodes;
   static bool? _hasSeenMicPrompt;
-  static bool? _alwaysCompressImages;
+  static bool? _compressPhotosByDefault;
   static bool? _showInFilesApp;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
@@ -63,7 +66,7 @@ class AppPreferences {
   static bool get acousticDetection => _acousticDetection ?? false;
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
   static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
-  static bool get alwaysCompressImages => _alwaysCompressImages ?? true;
+  static bool get compressPhotosByDefault => _compressPhotosByDefault ?? true;
   static bool get showInFilesApp => _showInFilesApp ?? false;
 
   static Future<void> setLocale(String? localeId) async {
@@ -193,10 +196,10 @@ class AppPreferences {
     _hasSeenMicPrompt = value;
   }
 
-  static Future<void> setAlwaysCompressImages(bool value) async {
+  static Future<void> setCompressPhotosByDefault(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    sp.setBool('alwaysCompressImages', value);
-    _alwaysCompressImages = value;
+    sp.setBool(_compressPhotosKey, value);
+    _compressPhotosByDefault = value;
   }
 
   static Future<void> setShowInFilesApp(bool value) async {
@@ -232,7 +235,7 @@ class AppPreferences {
     _acousticDetection = sp.getBool('acousticDetection') ?? false;
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
     _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
-    _alwaysCompressImages = sp.getBool('alwaysCompressImages') ?? true;
+    _compressPhotosByDefault = sp.getBool(_compressPhotosKey) ?? true;
     _showInFilesApp = sp.getBool('showInFilesApp') ?? false;
   }
 }

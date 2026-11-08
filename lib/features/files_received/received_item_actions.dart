@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/received_items.dart';
 import 'package:blast_qr/features/files_received/save_to_downloads.dart';
@@ -7,18 +8,22 @@ import 'package:blast_qr/features/files_received/widgets/file_options_sheet.dart
 import 'package:blast_qr/features/files_received/widgets/qr_code_sheet.dart';
 import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
+import 'package:blast_qr/features/send/send_plan.dart';
 import 'package:blast_qr/features/send/widgets/custom_password_sheet.dart';
+import 'package:blast_qr/features/send/widgets/hd_toggle.dart';
 import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/reveal_in_file_manager.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
+import 'package:blast_qr/widgets/centered_with_trailing.dart';
 import 'package:blast_qr/widgets/file_list_selection.dart';
 import 'package:blast_qr/widgets/file_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:open_file/open_file.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// What can be done with received items: the options dialogs, and opening,
@@ -95,29 +100,43 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
       selection.selected.map((item) => item.toFileWrapper()),
     );
     if (!mounted) return;
+    final hd = ValueNotifier(
+      !Provider.of<AppSettings>(context, listen: false).compressPhotosByDefault,
+    );
+    final showsHd = files.any(isCompressibleImage);
     showSheet(
       context: context,
       title: context.l10n.files_selected(files.length),
       body: Column(
         children: [
-          FilesPreview(files: files),
+          CenteredWithTrailing(
+            trailing: showsHd ? HdToggle(hd: hd) : null,
+            child: FilesPreview(files: files, maxShown: showsHd ? 3 : 4),
+          ),
           const SizedBox(height: 8),
           SendTile(
             onTap: () {
               Navigator.of(context).pop();
-              _sendSelectedFiles(files, plainSend);
+              _sendSelectedFiles(files, plainSend(compressImages: !hd.value));
             },
           ),
           SendEncryptedTile(
             onTap: () {
               Navigator.of(context).pop();
-              _sendSelectedFiles(files, encryptedSend());
+              _sendSelectedFiles(
+                files,
+                encryptedSend(compressImages: !hd.value),
+              );
             },
             onLongPress: () async {
               Navigator.of(context).pop();
               final password = await showCustomPasswordSheet(context);
               if (password == null || !mounted) return;
-              _sendSelectedFiles(files, (password: password, fileName: null));
+              _sendSelectedFiles(files, (
+                password: password,
+                fileName: null,
+                compressImages: !hd.value,
+              ));
             },
           ),
           if (Platform.isAndroid)

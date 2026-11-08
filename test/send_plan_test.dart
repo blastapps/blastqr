@@ -16,6 +16,8 @@ FileWrapper _file(String name, int size) {
       extension: extension,
       mimeType: switch (extension) {
         'jpg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
         'pdf' => 'application/pdf',
         _ => 'application/zip',
       },
@@ -63,18 +65,47 @@ void main() {
 
   tearDown(() => temp.deleteSync(recursive: true));
 
-  SendPlan plan(List<FileWrapper> files, {bool alwaysCompress = false}) =>
-      SendPlan(files, alwaysCompressImages: alwaysCompress, zip: zip.call);
+  SendPlan plan(List<FileWrapper> files, {bool compress = false}) =>
+      SendPlan(files, compressImages: compress, zip: zip.call);
 
   group('single file', () {
     test('a small file is sent as is, without a warning', () {
       final file = _jpg(1 * _mb);
-      final p = plan([file], alwaysCompress: true);
+      final p = plan([file]);
 
       expect(p.showsWarning, isFalse);
       expect(p.compressImages, isFalse);
       expect(p.file, file);
       expect(zip.calls, isEmpty);
+    });
+
+    test('a small image is compressed when asked', () {
+      final p = plan([_jpg(1 * _mb)], compress: true);
+
+      expect(p.showsWarning, isFalse);
+      expect(p.compressImages, isTrue);
+      expect(zip.calls, isEmpty);
+    });
+
+    test('an image under 400 KB is never compressed', () {
+      final p = plan([_jpg(400000)], compress: true);
+
+      expect(p.compressImages, isFalse);
+    });
+
+    test('a PNG is compressed', () {
+      final p = plan([_file('shot.png', 3 * _mb)], compress: true);
+
+      expect(p.showsWarning, isFalse);
+      expect(p.compressImages, isTrue);
+    });
+
+    test('a GIF is never compressed', () {
+      final p = plan([_file('anim.gif', 3 * _mb)], compress: true);
+
+      expect(p.showsWarning, isTrue);
+      expect(p.compressibleImages, 0);
+      expect(p.compressImages, isFalse);
     });
 
     test('a large image warns and offers compressing', () {
@@ -100,15 +131,15 @@ void main() {
       expect(p.compressImages, isFalse);
     });
 
-    test('a large image is compressed without a warning when always on', () {
-      final p = plan([_jpg(3 * _mb)], alwaysCompress: true);
+    test('a large image is compressed without a warning when asked', () {
+      final p = plan([_jpg(3 * _mb)], compress: true);
 
       expect(p.showsWarning, isFalse);
       expect(p.compressImages, isTrue);
     });
 
-    test('a large non-image warns even when always compressing', () {
-      final p = plan([_pdf(3 * _mb)], alwaysCompress: true);
+    test('a large non-image warns even when compressing', () {
+      final p = plan([_pdf(3 * _mb)], compress: true);
 
       expect(p.showsWarning, isTrue);
       expect(p.compressibleImages, 0);
@@ -132,17 +163,17 @@ void main() {
       expect(p.showsWarning, isFalse);
     });
 
-    test('a large bundle without large images warns once zipped', () async {
-      final p = plan([_pdf(1 * _mb), _jpg(1 * _mb)]);
+    test('a large bundle without images warns once zipped', () async {
+      final p = plan([_pdf(2 * _mb), _pdf(2 * _mb)]);
 
       expect(zip.calls, [false]);
       expect(p.showsWarning, isFalse);
 
-      await zip.finish(2 * _mb);
+      await zip.finish(4 * _mb);
 
       expect(p.showsWarning, isTrue);
       expect(p.compressibleImages, 0);
-      expect(p.size, 2 * _mb);
+      expect(p.size, 4 * _mb);
 
       p.sendAsIs();
 
@@ -150,11 +181,11 @@ void main() {
       expect(zip.calls, [false]);
     });
 
-    test('large images are offered for compressing before zipping', () {
+    test('images are offered for compressing before zipping', () {
       final p = plan([_jpg(3 * _mb), _jpg(2 * _mb), _jpg(1 * _mb), _pdf(10)]);
 
       expect(p.showsWarning, isTrue);
-      expect(p.compressibleImages, 2);
+      expect(p.compressibleImages, 3);
       expect(p.size, 6 * _mb + 10);
       expect(zip.calls, isEmpty);
     });
@@ -184,33 +215,44 @@ void main() {
       expect(p.showsWarning, isFalse);
     });
 
-    test('always compressing zips right away without a warning', () {
-      final p = plan([_jpg(3 * _mb), _jpg(3 * _mb)], alwaysCompress: true);
+    test('compressing zips right away without a warning', () {
+      final p = plan([_jpg(3 * _mb), _jpg(3 * _mb)], compress: true);
 
       expect(zip.calls, [true]);
       expect(p.compressImages, isTrue);
       expect(p.showsWarning, isFalse);
     });
 
-    test('always compressing still warns if the bundle stays large', () async {
-      final p = plan([_jpg(3 * _mb), _jpg(3 * _mb)], alwaysCompress: true);
+    test('compressing still warns if the bundle stays large', () async {
+      final p = plan([_jpg(3 * _mb), _jpg(3 * _mb)], compress: true);
 
-      await zip.finish(2 * _mb);
+      await zip.finish(3 * _mb);
 
       expect(p.showsWarning, isTrue);
       expect(p.compressibleImages, 0);
     });
 
-    test(
-      'always compressing skips the warning if the bundle is small',
-      () async {
-        final p = plan([_jpg(3 * _mb), _jpg(3 * _mb)], alwaysCompress: true);
+    test('compressing skips the warning if the bundle is small', () async {
+      final p = plan([_jpg(3 * _mb), _jpg(3 * _mb)], compress: true);
 
-        await zip.finish(1 * _mb);
+      await zip.finish(1 * _mb);
 
-        expect(p.showsWarning, isFalse);
-      },
-    );
+      expect(p.showsWarning, isFalse);
+    });
+
+    test('small images in a bundle are compressed when asked', () {
+      final p = plan([_jpg(500000), _pdf(500000)], compress: true);
+
+      expect(zip.calls, [true]);
+      expect(p.compressImages, isTrue);
+    });
+
+    test('images under 400 KB in a bundle are never compressed', () {
+      final p = plan([_jpg(300000), _pdf(300000)], compress: true);
+
+      expect(zip.calls, [false]);
+      expect(p.compressImages, isFalse);
+    });
 
     test('listeners hear when zipping finishes', () async {
       final p = plan([_pdf(10), _pdf(10)]);

@@ -32,7 +32,14 @@ class FileType {
           mimeType?.contains('ebook') == true ||
           mimeType?.contains('epub') == true;
 
-  bool get allowsImageCompression => isImage;
+  /// GIF is left out to keep its animation, AVIF as it doesn't decode
+  /// reliably.
+  bool get allowsImageCompression =>
+      isHeifImage ||
+      isWebpImage ||
+      mimeType == 'image/jpeg' ||
+      mimeType == 'image/png' ||
+      const ['jpg', 'jpeg', 'png'].contains(extension);
 
   bool get isPrecompressed => isAudio || isVideo;
 }

@@ -26,7 +26,7 @@ class FileTooLargeAlertWidget extends StatefulWidget {
 }
 
 class _FileTooLargeAlertWidgetState extends State<FileTooLargeAlertWidget> {
-  static const _slowestKBps = 8;
+  static const _slowestKBps = 24;
 
   String get _estimateInMinutes =>
       (widget.transferBytes / 1000 / _slowestKBps / 60).toStringAsFixed(0);

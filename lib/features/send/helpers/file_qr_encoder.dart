@@ -19,8 +19,12 @@ import 'package:qr/qr.dart';
 /// One rendered QR frame. [seq] is its position in the stream (0, 1, 2, ...).
 typedef QrPixelData = ({int seq, int moduleCount, Uint8List pixels});
 
-typedef _WorkerInit =
-    ({SendPort setup, SendPort results, Uint8List header, int qrVersion});
+typedef _WorkerInit = ({
+  SendPort setup,
+  SendPort results,
+  Uint8List header,
+  int qrVersion,
+});
 
 /// Render worker: turns packets into RGBA pixel buffers until it gets `null`.
 void _renderWorker(_WorkerInit init) {
@@ -39,7 +43,11 @@ void _renderWorker(_WorkerInit init) {
       init.qrVersion,
     );
     // TransferableTypedData hands the buffer over without copying.
-    init.results.send((seq, moduleCount, TransferableTypedData.fromList([pixels])));
+    init.results.send((
+      seq,
+      moduleCount,
+      TransferableTypedData.fromList([pixels]),
+    ));
   });
 }
 
@@ -246,9 +254,7 @@ class FileQrEncoder {
     var fileExtension = file.type.extension;
     var reencoded = false;
 
-    // Image compression. The settings can be passed for any file (e.g. with
-    // "always compress images"), so only images are re-encoded, and only a
-    // re-encoded image takes the output format's extension.
+    // A re-encoded image takes the output format's extension.
     if (icSettings != null && file.type.allowsImageCompression) {
       final compressedImage = await compressImage(bytes, icSettings);
       if (compressedImage != null) {
@@ -263,7 +269,8 @@ class FileQrEncoder {
     // still takes the output format's extension.
     final sentName = switch (fileName) {
       null => '${file.nameWithoutExtension}.$fileExtension',
-      _ when reencoded => '${p.basenameWithoutExtension(fileName)}.$fileExtension',
+      _ when reencoded =>
+        '${p.basenameWithoutExtension(fileName)}.$fileExtension',
       _ => fileName,
     };
 

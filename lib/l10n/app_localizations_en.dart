@@ -380,11 +380,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get images_section => 'Images';
 
   @override
-  String get always_compress_images => 'Always compress images';
+  String get compress_photos_by_default => 'Compress photos by default';
 
   @override
-  String get always_compress_images_subtitle =>
-      'Images are compressed before sending';
+  String get compress_photos_by_default_subtitle =>
+      'Turn on HD when sending to keep a photo\'s full quality';
+
+  @override
+  String get hd_tooltip => 'Enable to send photos in full quality';
 
   @override
   String get camera_section => 'Camera';

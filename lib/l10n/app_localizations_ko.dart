@@ -368,10 +368,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get images_section => '이미지';
 
   @override
-  String get always_compress_images => '항상 이미지 압축';
+  String get compress_photos_by_default => '기본으로 사진 압축';
 
   @override
-  String get always_compress_images_subtitle => '이미지를 보내기 전에 압축합니다';
+  String get compress_photos_by_default_subtitle => '보낼 때 HD를 켜면 원본 화질로 보냅니다';
+
+  @override
+  String get hd_tooltip => '켜면 사진을 원본 화질로 보냅니다';
 
   @override
   String get camera_section => '카메라';
