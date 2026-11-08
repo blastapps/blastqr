@@ -344,6 +344,9 @@ class AppLocalizationsCa extends AppLocalizations {
   String get recent => 'Recents';
 
   @override
+  String get clear_recent => 'Esborra';
+
+  @override
   String get sending_settings => 'Enviament';
 
   @override

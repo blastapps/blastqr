@@ -335,6 +335,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get recent => '최근';
 
   @override
+  String get clear_recent => '지우기';
+
+  @override
   String get sending_settings => '전송 설정';
 
   @override

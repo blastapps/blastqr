@@ -102,6 +102,7 @@
   "drop_files_subtitle": "o fes clic per triar-los",
   "desktop_receive_unsupported": "* La recepció de fitxers encara no és compatible a Windows",
   "recent": "Recents",
+  "clear_recent": "Esborra",
   "sending_settings": "Enviament",
   "receiving_settings": "Recepció",
   "restore_defaults": "Restaura",

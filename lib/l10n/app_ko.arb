@@ -103,6 +103,7 @@
   "drop_files_subtitle": "또는 클릭하여 선택하세요",
   "desktop_receive_unsupported": "* Windows에서는 아직 파일 수신이 지원되지 않습니다",
   "recent": "최근",
+  "clear_recent": "지우기",
   "sending_settings": "전송 설정",
   "receiving_settings": "수신 설정",
   "restore_defaults": "기본값 복원",

@@ -345,6 +345,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recent => 'الأخيرة';
 
   @override
+  String get clear_recent => 'مسح';
+
+  @override
   String get sending_settings => 'الإرسال';
 
   @override

@@ -46,6 +46,8 @@ class SendPageState extends State<SendPage> {
     });
   }
 
+  void _clearRecentFiles() => setState(_recentFiles.clear);
+
   /// Highlights the drop zone while files are dragged over the window.
   void setDragging(bool dragging) {
     if (dragging != _dragging) setState(() => _dragging = dragging);
@@ -126,6 +128,7 @@ class SendPageState extends State<SendPage> {
                   entries: _recentFiles,
                   bottomInset: padding.bottom,
                   onSend: _showQrPages,
+                  onClear: _clearRecentFiles,
                 ),
               ),
             ],
@@ -202,6 +205,7 @@ class SendPageState extends State<SendPage> {
                 child: RecentFilesList(
                   entries: _recentFiles,
                   onSend: _showQrPages,
+                  onClear: _clearRecentFiles,
                 ),
               ),
               if (!canScanWithCamera) ...[

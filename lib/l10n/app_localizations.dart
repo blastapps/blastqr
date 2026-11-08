@@ -710,6 +710,12 @@ abstract class AppLocalizations {
   /// **'Recent'**
   String get recent;
 
+  /// No description provided for @clear_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear_recent;
+
   /// No description provided for @sending_settings.
   ///
   /// In en, this message translates to:

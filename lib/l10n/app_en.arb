@@ -121,6 +121,7 @@
   "drop_files_subtitle": "or click to choose",
   "desktop_receive_unsupported": "* Receiving files is not supported on Windows yet",
   "recent": "Recent",
+  "clear_recent": "Clear",
   "sending_settings": "Sending",
   "receiving_settings": "Receiving",
   "restore_defaults": "Restore",

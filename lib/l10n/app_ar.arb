@@ -114,6 +114,7 @@
   "drop_files_subtitle": "أو انقر للاختيار",
   "desktop_receive_unsupported": "* استلام الملفات غير مدعوم على Windows بعد",
   "recent": "الأخيرة",
+  "clear_recent": "مسح",
   "sending_settings": "الإرسال",
   "receiving_settings": "الاستقبال",
   "restore_defaults": "استعادة",

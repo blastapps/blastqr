@@ -16,6 +16,7 @@ class RecentFilesTiles extends StatefulWidget {
     required this.entries,
     required this.bottomInset,
     required this.onSend,
+    required this.onClear,
   });
 
   final List<FileWrapper> entries;
@@ -23,6 +24,7 @@ class RecentFilesTiles extends StatefulWidget {
   /// The height of the bottom tabs, which the list runs under.
   final double bottomInset;
   final void Function(List<File>) onSend;
+  final VoidCallback onClear;
 
   @override
   State<RecentFilesTiles> createState() => _RecentFilesTilesState();
@@ -54,19 +56,18 @@ class _RecentFilesTilesState extends State<RecentFilesTiles>
     }
   }
 
+  void _clear() {
+    _selection.clear();
+    widget.onClear();
+  }
+
   @override
   Widget build(BuildContext context) {
     final entries = widget.entries;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            context.l10n.recent,
-            style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
-          ),
-        ),
+        _RecentHeader(horizontalPadding: 16, onClear: _clear),
         Expanded(
           child: ListView.builder(
             // Room to scroll the last file above the tabs.
@@ -103,10 +104,12 @@ class RecentFilesList extends StatefulWidget {
     super.key,
     required this.entries,
     required this.onSend,
+    required this.onClear,
   });
 
   final List<FileWrapper> entries;
   final void Function(List<File>) onSend;
+  final VoidCallback onClear;
 
   @override
   State<RecentFilesList> createState() => _RecentFilesListState();
@@ -134,6 +137,11 @@ class _RecentFilesListState extends State<RecentFilesList>
     widget.onSend([for (final entry in entries) entry.file]);
   }
 
+  void _clear() {
+    _selection.clear();
+    widget.onClear();
+  }
+
   @override
   Widget build(BuildContext context) {
     final entries = widget.entries;
@@ -141,13 +149,7 @@ class _RecentFilesListState extends State<RecentFilesList>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 8,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            context.l10n.recent,
-            style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
-          ),
-        ),
+        _RecentHeader(horizontalPadding: 8, onClear: _clear),
         Expanded(
           child: FileListKeyboard(
             selection: _selection,
@@ -181,6 +183,43 @@ class _RecentFilesListState extends State<RecentFilesList>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RecentHeader extends StatelessWidget {
+  const _RecentHeader({required this.horizontalPadding, required this.onClear});
+
+  final double horizontalPadding;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        start: horizontalPadding,
+        end: horizontalPadding - 8,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              context.l10n.recent,
+              style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
+            ),
+          ),
+          TextButton(
+            onPressed: onClear,
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+            ),
+            child: Text(context.l10n.clear_recent),
+          ),
+        ],
+      ),
     );
   }
 }

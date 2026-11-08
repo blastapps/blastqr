@@ -343,6 +343,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recent => 'Recent';
 
   @override
+  String get clear_recent => 'Clear';
+
+  @override
   String get sending_settings => 'Sending';
 
   @override
