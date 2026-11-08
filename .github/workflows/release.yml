@@ -470,17 +470,104 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
+
       - uses: actions/download-artifact@v8
         with:
+          path: dist
           merge-multiple: true
+
+      - name: Write release notes
+        run: |
+          # checkout leaves annotated tags as lightweight ones.
+          git fetch --force --depth=1 origin \
+            "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
+          notes=""
+          if [ "$(git cat-file -t "$GITHUB_REF_NAME")" = tag ]; then
+            notes=$(git tag -l --format='%(contents:subject)%0a%0a%(contents:body)' "$GITHUB_REF_NAME")
+          fi
+          NOTES="$notes" python3 - > notes.md <<'EOF'
+          import os
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          base = f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/releases/download/{tag}"
+          files = set(os.listdir("dist"))
+
+          def links(*items):
+              out = []
+              for label, name in items:
+                  if name.startswith("https://"):
+                      out.append(f"[{label}]({name})")
+                  elif name in files:
+                      out.append(f"[{label}]({base}/{name})")
+              return ", ".join(out)
+
+          app = lambda s: f"blastqr-{tag}-{s}"
+          cli = lambda s: f"blastqr-cli-{tag}-{s}"
+          rows = [
+              ("Android", links(
+                  ("F-Droid", "https://f-droid.org/packages/dev.blastapps.blastqr"),
+                  ("Google Play", "https://play.google.com/store/apps/details?id=dev.blastapps.blastqr"),
+                  ("APK", app("android.apk")),
+              ), ""),
+              ("iOS", links(("App Store", "https://apps.apple.com/app/id6831422458")), ""),
+              ("macOS", links(
+                  ("App Store", "https://apps.apple.com/app/id6831422458"),
+                  ("DMG", app("macos.dmg")),
+              ), links(
+                  ("Apple Silicon", cli("aarch64-apple-darwin.tar.gz")),
+                  ("Intel", cli("x86_64-apple-darwin.tar.gz")),
+              )),
+              ("Linux", links(
+                  ("Flatpak x64", app("linux-x64.flatpak")),
+                  ("Flatpak arm64", app("linux-arm64.flatpak")),
+                  ("Tarball x64", app("linux-x64.tar.gz")),
+                  ("Tarball arm64", app("linux-arm64.tar.gz")),
+              ), links(
+                  ("x64", cli("x86_64-unknown-linux-musl.tar.gz")),
+                  ("arm64", cli("aarch64-unknown-linux-musl.tar.gz")),
+              )),
+              ("Windows", links(
+                  ("Installer", app("windows-x64-setup.exe")),
+                  ("Portable zip", app("windows-x64.zip")),
+              ), links(
+                  ("x64", cli("x86_64-pc-windows-msvc.zip")),
+                  ("arm64", cli("aarch64-pc-windows-msvc.zip")),
+              )),
+          ]
+
+          notes = os.environ["NOTES"].strip()
+          if notes:
+              print(notes + "\n")
+          print("## Downloads\n")
+          print("| Platform | App | Command-line tool |")
+          print("|---|---|---|")
+          for row in rows:
+              print("| " + " | ".join(row) + " |")
+
+          docs = f"https://raw.githubusercontent.com/{os.environ['GITHUB_REPOSITORY']}/main/docs"
+          badges = [
+              ("https://f-droid.org/packages/dev.blastapps.blastqr", f"{docs}/f-droid-badge.png", "Get it on F-Droid"),
+              (f"https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/{os.environ['GITHUB_REPOSITORY']}", f"{docs}/obtainium-badge.png", "Get it on Obtainium"),
+              ("https://play.google.com/store/apps/details?id=dev.blastapps.blastqr", f"{docs}/google-play-badge.png", "Get it on Google Play"),
+              ("https://apps.apple.com/app/id6831422458", "https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us", "Download on the App Store"),
+          ]
+          print('\n<p align="center">')
+          for href, src, alt in badges:
+              print(f'<a href="{href}"><img src="{src}" alt="{alt}" height="38"/></a>')
+          print("</p>")
+          print("\nThe command-line tool can also be installed with `brew install cu-kha/tap/blastqr`.")
+          EOF
+          cat notes.md
 
       - uses: softprops/action-gh-release@v3
         with:
+          body_path: notes.md
           files: |
-            *.tar.gz
-            *.zip
-            *.flatpak
-            *.apk
-            *.exe
-            *.dmg
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.flatpak
+            dist/*.apk
+            dist/*.exe
+            dist/*.dmg
           draft: true
