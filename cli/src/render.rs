@@ -112,8 +112,10 @@ struct Placement {
     row: usize,
     /// Codes across and down.
     grid: (usize, usize),
-    /// Pixels per module (image backends only).
+    /// Pixels per module on screen (image backends only).
     module_px: usize,
+    /// Cells covered, across and down.
+    cells: (usize, usize),
 }
 
 /// Where `count` codes of `version` go, if they fit. Text backends prefer the
@@ -133,6 +135,7 @@ fn place(backend: Backend, version: u8, count: usize, term: TermSize) -> Option<
                 row: (term.code_rows() - rows) / 2,
                 grid,
                 module_px: 0,
+                cells: (cols, rows),
             })
         })
     } else {
@@ -151,11 +154,14 @@ fn place(backend: Backend, version: u8, count: usize, term: TermSize) -> Option<
         if module_px < MIN_MODULE_PX {
             return None;
         }
+        let cols = (grid.0 * tile * module_px).div_ceil(cell_w);
+        let rows = (grid.1 * tile * module_px).div_ceil(cell_h);
         Some(Placement {
-            col: (term.cols - (grid.0 * tile * module_px).div_ceil(cell_w)) / 2,
-            row: (term.code_rows() - (grid.1 * tile * module_px).div_ceil(cell_h)) / 2,
+            col: (term.cols - cols) / 2,
+            row: (term.code_rows() - rows) / 2,
             grid,
             module_px,
+            cells: (cols, rows),
         })
     }
 }
@@ -331,8 +337,11 @@ impl Renderer {
     }
 }
 
+/// Kitty images go out at about half size and the terminal scales them up to
+/// fill `p.cells`, which keeps each frame small to send and decode. Scaling
+/// blurs edges (Ghostty filters linearly), so it's kept to at most 2×.
 fn kitty(out: &mut String, canvas: &Canvas, p: Placement) {
-    let png = BASE64.encode(png(canvas, p.module_px));
+    let png = BASE64.encode(png(canvas, p.module_px.div_ceil(2)));
     let _ = write!(out, "\x1b[{};{}H", p.row + 1, p.col + 1);
     // Replace the previous frame: free it, then transmit and place.
     out.push_str("\x1b_Ga=d,d=I,i=1,q=2\x1b\\");
@@ -344,7 +353,12 @@ fn kitty(out: &mut String, canvas: &Canvas, p: Placement) {
     for (i, chunk) in chunks.iter().enumerate() {
         let more = (i + 1 < chunks.len()) as u8;
         if i == 0 {
-            let _ = write!(out, "\x1b_Ga=T,f=100,i=1,q=2,C=1,m={more};{chunk}\x1b\\");
+            let _ = write!(
+                out,
+                "\x1b_Ga=T,f=100,i=1,q=2,C=1,c={},r={},m={more};{chunk}\x1b\\",
+                p.cells.0,
+                p.cells.1
+            );
         } else {
             let _ = write!(out, "\x1b_Gm={more};{chunk}\x1b\\");
         }

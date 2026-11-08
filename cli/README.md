@@ -43,7 +43,7 @@ brew install cu-kha/tap/blastqr
 
 | option | |
 |---|---|
-| `--fps N` | frames per second, 1 to 60 (default 25) |
+| `--fps N` | frames per second, 1 to 240 (default 25) |
 | `-u`, `--unicode` | draw with Unicode block characters even if the terminal can show images |
 | `-d`, `--dense` | draw with Unicode quadrant blocks, 2×2 modules per character (see below) |
 | `-c`, `--codes N` | show up to N codes per frame side by side, 1 to 12 (default 1) |

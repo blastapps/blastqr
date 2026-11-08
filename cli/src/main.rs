@@ -24,7 +24,7 @@ struct Args {
     files: Vec<PathBuf>,
 
     /// Frames per second.
-    #[arg(long, default_value_t = 25, value_parser = clap::value_parser!(u32).range(1..=60))]
+    #[arg(long, default_value_t = 25, value_parser = clap::value_parser!(u32).range(1..=240))]
     fps: u32,
 
     /// Draw with Unicode block characters even if the terminal can show images.
@@ -436,6 +436,9 @@ fn play(
     let mut shown = current.len() as u64;
     let mut hide_password_at: Option<Instant> = None;
     let mut redraw = true;
+    let mut wait_for_terminal = true;
+    let mut measured = None;
+    let mut window = (Instant::now(), 0u32);
     let mut due = Instant::now() + Duration::from_secs(1) / fps;
 
     loop {
@@ -448,16 +451,27 @@ fn play(
             current = take(renderer.codes());
             shown += current.len() as u64;
             redraw = true;
+            window.1 += 1;
+            let elapsed = now - window.0;
+            if elapsed >= Duration::from_secs(1) {
+                measured = Some((window.1 as f64 / elapsed.as_secs_f64()).round() as u32);
+                window = (now, 0);
+            }
             // Don't try to catch up after a slow frame.
             due = (due + Duration::from_secs(1) / fps).max(now);
         }
         if redraw {
             out.write_all(&renderer.frame(
                 &current,
-                &status(info, shown, fps, hide_password_at.is_some()),
+                &status(info, shown, fps, measured, hide_password_at.is_some()),
             ))?;
             out.flush()?;
             redraw = false;
+            // The terminal answers this query only after drawing everything
+            // before it, so frames never queue up behind input.
+            if wait_for_terminal && cursor::position().is_err() {
+                wait_for_terminal = false;
+            }
         }
 
         let wake = hide_password_at.map_or(due, |at| at.min(due));
@@ -470,7 +484,7 @@ fn play(
                         return finish(out, renderer, shown);
                     }
                     KeyCode::Up | KeyCode::Char('+') | KeyCode::Char('=') => {
-                        fps = (fps + 1).min(60);
+                        fps = (fps + 1).min(240);
                         redraw = true;
                     }
                     KeyCode::Down | KeyCode::Char('-') => {
@@ -510,7 +524,13 @@ fn finish(out: &mut io::Stdout, renderer: &Renderer, shown: u64) -> io::Result<u
     Ok(shown)
 }
 
-fn status(info: &Info, shown: u64, fps: u32, show_password: bool) -> String {
+fn status(
+    info: &Info,
+    shown: u64,
+    fps: u32,
+    measured: Option<u32>,
+    show_password: bool,
+) -> String {
     let mut parts = vec![];
     if let Some(code) = &info.code {
         let code = if show_password {
@@ -524,7 +544,10 @@ fn status(info: &Info, shown: u64, fps: u32, show_password: bool) -> String {
     }
     parts.push(format!("{} ({})", info.name, human_size(info.size)));
     parts.push(format!("code {shown} / ~{}", info.source_count));
-    parts.push(format!("{fps} fps"));
+    match measured {
+        Some(real) => parts.push(format!("{fps} fps (real {real})")),
+        None => parts.push(format!("{fps} fps")),
+    }
     if info.code.is_some() {
         parts.push("↑↓ speed · space password · q quit".into());
     } else {
