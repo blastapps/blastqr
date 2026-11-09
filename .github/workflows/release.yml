@@ -178,8 +178,15 @@ jobs:
           name: linux-${{ matrix.arch }}
           path: tarball
 
+      # flatpak-builder doesn't hash a local archive without a sha256, so the
+      # cached build from an older release would be reused.
       - name: Use the tarball as the manifest's source
-        run: mv tarball/*.tar.gz linux/packaging/blastqr-linux.tar.gz
+        run: |
+          manifest=linux/packaging/dev.blastapps.blastqr.yml
+          mv tarball/*.tar.gz linux/packaging/blastqr-linux.tar.gz
+          sha=$(sha256sum linux/packaging/blastqr-linux.tar.gz | cut -d' ' -f1)
+          sed -i "s|^\( *\)path: blastqr-linux.tar.gz$|&\n\1sha256: $sha|" $manifest
+          grep -A1 "path: blastqr-linux.tar.gz" $manifest | grep -q "sha256: $sha"
 
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
