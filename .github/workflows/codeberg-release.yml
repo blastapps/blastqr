@@ -25,37 +25,47 @@ jobs:
           CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
         run: |
           set -euo pipefail
-          auth="Authorization: token $CODEBERG_TOKEN"
+          if [ -z "$CODEBERG_TOKEN" ]; then
+            echo "CODEBERG_TOKEN secret is not set" >&2
+            exit 1
+          fi
+
+          # api METHOD PATH [curl args...]: prints the response body, fails with it on HTTP errors.
+          api() {
+            local method=$1 path=$2 status
+            shift 2
+            status=$(curl -s -o resp.json -w '%{http_code}' -X "$method" \
+              -H "Authorization: token $CODEBERG_TOKEN" "$@" "$CODEBERG_API$path")
+            if [ "$status" -ge 400 ]; then
+              echo "$method $path failed with HTTP $status: $(cat resp.json)" >&2
+              return 1
+            fi
+            cat resp.json
+          }
 
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" \
             --json name,body,isPrerelease,assets > gh.json
           jq '{tag_name: env.TAG, name: .name, body: .body, prerelease: .isPrerelease, draft: false}' \
             gh.json > release.json
 
-          status=$(curl -s -o existing.json -w '%{http_code}' -H "$auth" \
-            "$CODEBERG_API/releases/tags/$TAG")
-          if [ "$status" = 200 ]; then
-            id=$(jq -r .id existing.json)
-            curl -sf -X PATCH -H "$auth" -H 'Content-Type: application/json' \
-              -d @release.json "$CODEBERG_API/releases/$id" > /dev/null
+          json=(-H 'Content-Type: application/json' -d @release.json)
+          if existing=$(api GET "/releases/tags/$TAG" 2>/dev/null); then
+            id=$(jq -r .id <<< "$existing")
+            api PATCH "/releases/$id" "${json[@]}" > /dev/null
           else
-            id=$(curl -sf -X POST -H "$auth" -H 'Content-Type: application/json' \
-              -d @release.json "$CODEBERG_API/releases" | jq -r .id)
+            id=$(api POST /releases "${json[@]}" | jq -r .id)
           fi
           echo "Codeberg release id: $id"
 
-          curl -sf -H "$auth" "$CODEBERG_API/releases/$id/assets" \
-            | jq -r '.[].name' > have.txt
+          api GET "/releases/$id/assets" | jq -r '.[].name' > have.txt
           base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
           jq -r '.assets[].name' gh.json |
             while read -r name; do
-              url="$base/$name"
               if grep -qxF "$name" have.txt; then
                 echo "skip $name"
                 continue
               fi
-              curl -sf -X POST -H "$auth" \
-                "$CODEBERG_API/releases/$id/assets?name=$(jq -rn --arg n "$name" '$n|@uri')" \
-                -F "external_url=$url" > /dev/null
+              api POST "/releases/$id/assets?name=$(jq -rn --arg n "$name" '$n|@uri')" \
+                -F "external_url=$base/$name" > /dev/null
               echo "linked $name"
             done
