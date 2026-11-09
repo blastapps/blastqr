@@ -1,0 +1,61 @@
+name: Mirror release to Codeberg
+
+# Copies the published GitHub release to Codeberg, with its downloads
+# added as links to the GitHub files.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, like v3.0.1
+        required: true
+
+env:
+  CODEBERG_API: https://codeberg.org/api/v1/repos/cukha/blastqr
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update Codeberg release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+        run: |
+          set -euo pipefail
+          auth="Authorization: token $CODEBERG_TOKEN"
+
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" \
+            --json name,body,isPrerelease,assets > gh.json
+          jq '{tag_name: env.TAG, name: .name, body: .body, prerelease: .isPrerelease, draft: false}' \
+            gh.json > release.json
+
+          status=$(curl -s -o existing.json -w '%{http_code}' -H "$auth" \
+            "$CODEBERG_API/releases/tags/$TAG")
+          if [ "$status" = 200 ]; then
+            id=$(jq -r .id existing.json)
+            curl -sf -X PATCH -H "$auth" -H 'Content-Type: application/json' \
+              -d @release.json "$CODEBERG_API/releases/$id" > /dev/null
+          else
+            id=$(curl -sf -X POST -H "$auth" -H 'Content-Type: application/json' \
+              -d @release.json "$CODEBERG_API/releases" | jq -r .id)
+          fi
+          echo "Codeberg release id: $id"
+
+          curl -sf -H "$auth" "$CODEBERG_API/releases/$id/assets" \
+            | jq -r '.[].name' > have.txt
+          base="https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG"
+          jq -r '.assets[].name' gh.json |
+            while read -r name; do
+              url="$base/$name"
+              if grep -qxF "$name" have.txt; then
+                echo "skip $name"
+                continue
+              fi
+              curl -sf -X POST -H "$auth" \
+                "$CODEBERG_API/releases/$id/assets?name=$(jq -rn --arg n "$name" '$n|@uri')" \
+                -F "external_url=$url" > /dev/null
+              echo "linked $name"
+            done
