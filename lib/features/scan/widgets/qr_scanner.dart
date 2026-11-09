@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:blast_qr/features/scan/decode_pool.dart';
 import 'package:blast_qr/features/scan/scan_camera.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:camera/camera.dart' hide ImageFormat;
@@ -48,7 +49,7 @@ class QrScanner extends StatefulWidget {
   final void Function(CameraController? controller)? onCameraChanged;
 
   /// Every camera frame, after [onCodes], with how long decoding it took, or
-  /// with null when it was skipped because the previous one was still decoding.
+  /// with null when it was skipped because every decoder was busy.
   final void Function(Duration? decodeTime, CameraImage image)? onFrame;
 
   @override
@@ -79,7 +80,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   /// one (late frames, a slow initialize) know to do nothing.
   int _generation = 0;
 
-  bool _decoding = false;
+  final _decoder = DecodePool();
   bool _closedForLifecycle = false;
   Codes _results = Codes();
 
@@ -96,7 +97,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     // The camera doesn't wait for the decoder: frames that arrive before it's
     // ready are skipped.
     unawaited(
-      zx.startCameraProcessing().catchError(
+      _decoder.start().catchError(
         (Object e) => debugPrint('QrScanner: decoder failed to start: $e'),
       ),
     );
@@ -156,7 +157,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _close(notify: false);
-    zx.stopCameraProcessing();
+    _decoder.stop();
     super.dispose();
   }
 
@@ -180,12 +181,11 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
         widget.resolution,
         enableAudio: false,
         fps: fps,
-        // Frames the decoder can read directly: luminance first on Android,
-        // BGRA on iOS. Left unset, some Android devices deliver NV21.
-        imageFormatGroup: Platform.isAndroid
+        // Luminance first, which is all the decoder reads. BGRA is 4 times
+        // the bytes to move per frame. Left unset, some Android devices
+        // deliver NV21.
+        imageFormatGroup: Platform.isAndroid || Platform.isIOS
             ? ImageFormatGroup.yuv420
-            : Platform.isIOS
-            ? ImageFormatGroup.bgra8888
             : ImageFormatGroup.unknown,
       );
     } catch (e) {
@@ -269,7 +269,6 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   /// [dispose].
   Future<void> _close({bool notify = true}) async {
     _generation++;
-    _decoding = false;
     final controller = _controller;
     if (controller == null) return;
     _controller = null;
@@ -297,11 +296,10 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
 
   Future<void> _onImage(CameraImage image, int generation) async {
     if (generation != _generation || !mounted) return;
-    if (_decoding) {
+    if (!_decoder.hasIdleWorker) {
       widget.onFrame?.call(null, image);
       return;
     }
-    _decoding = true;
     try {
       final imageFormat = cameraImageFormat(image);
       if (imageFormat == ImageFormat.none) {
@@ -314,7 +312,7 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
         return;
       }
       final stopwatch = Stopwatch()..start();
-      final codes = await zx.processCameraImageMulti(
+      final codes = await _decoder.decode(
         image,
         DecodeParams(
           imageFormat: imageFormat,
@@ -364,8 +362,6 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       widget.onFrame?.call(decodeTime, image);
     } catch (e) {
       debugPrint('QrScanner: decode failed: $e');
-    } finally {
-      if (generation == _generation) _decoding = false;
     }
   }
 
