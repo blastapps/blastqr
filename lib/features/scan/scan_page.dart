@@ -165,33 +165,42 @@ class _ScanPageState extends State<ScanPage> {
           toolbarHeight: 80,
           surfaceTintColor: Colors.transparent,
           backgroundColor: Colors.transparent,
-          leadingWidth: 104,
+          leadingWidth: isDesktopOS ? 56 : 104,
           leading: Row(
             children: [
-              CircleButton(
-                padding: const EdgeInsetsDirectional.only(start: 8),
-                onPressed: () {
-                  appSettings.updateHapticFeedback(!appSettings.hapticFeedback);
-                },
-                icon: CustomPaint(
-                  foregroundPainter: appSettings.hapticFeedback
-                      ? null
-                      : StrikePainter(
-                          color: darkColors.onPrimaryContainer.withValues(
-                            alpha: 0.5,
+              if (!isDesktopOS)
+                CircleButton(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  tooltip: context.l10n.haptic_feedback,
+                  onPressed: () {
+                    appSettings.updateHapticFeedback(
+                      !appSettings.hapticFeedback,
+                    );
+                  },
+                  icon: CustomPaint(
+                    foregroundPainter: appSettings.hapticFeedback
+                        ? null
+                        : StrikePainter(
+                            color: darkColors.onPrimaryContainer.withValues(
+                              alpha: 0.5,
+                            ),
+                            gapColor: darkColors.primaryContainer,
                           ),
-                          gapColor: darkColors.primaryContainer,
-                        ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedSmartPhone03,
-                    color: appSettings.hapticFeedback
-                        ? darkColors.onPrimaryContainer
-                        : darkColors.onPrimaryContainer.withValues(alpha: 0.5),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedSmartPhone03,
+                      color: appSettings.hapticFeedback
+                          ? darkColors.onPrimaryContainer
+                          : darkColors.onPrimaryContainer.withValues(
+                              alpha: 0.5,
+                            ),
+                    ),
                   ),
                 ),
-              ),
               CircleButton(
-                padding: EdgeInsets.zero,
+                padding: isDesktopOS
+                    ? const EdgeInsetsDirectional.only(start: 8)
+                    : EdgeInsets.zero,
+                tooltip: context.l10n.sound_feedback,
                 onPressed: () {
                   appSettings.updateSoundFeedback(!appSettings.soundFeedback);
                 },

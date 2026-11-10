@@ -709,4 +709,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get show_in_files_app_hint =>
       'يتيح لك فتح الملفات المستلمة من تطبيق الملفات، ومن Finder على جهاز Mac متصل.';
+
+  @override
+  String get qr_tooltip_fps => 'تغيير سرعة التشغيل';
+
+  @override
+  String get qr_tooltip_fullscreen => 'ملء الشاشة';
+
+  @override
+  String get qr_tooltip_tone_on => 'إيقاف اكتشاف نغمة الاكتمال';
+
+  @override
+  String get qr_tooltip_tone_off => 'اكتشاف نغمة الاكتمال عبر الميكروفون';
 }

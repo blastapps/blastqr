@@ -699,4 +699,17 @@ class AppLocalizationsCa extends AppLocalizations {
   @override
   String get show_in_files_app_hint =>
       'Permet obrir els fitxers rebuts des de l\'app Fitxers i des del Finder d\'un Mac connectat.';
+
+  @override
+  String get qr_tooltip_fps => 'Canvia la velocitat de reproducció';
+
+  @override
+  String get qr_tooltip_fullscreen => 'Pantalla completa';
+
+  @override
+  String get qr_tooltip_tone_on => 'Deixa de detectar el to de finalització';
+
+  @override
+  String get qr_tooltip_tone_off =>
+      'Detecta el to de finalització amb el micròfon';
 }

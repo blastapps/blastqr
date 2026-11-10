@@ -696,4 +696,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get show_in_files_app_hint =>
       'Lets you open received files from the Files app, and from Finder on a connected Mac.';
+
+  @override
+  String get qr_tooltip_fps => 'Change playback speed';
+
+  @override
+  String get qr_tooltip_fullscreen => 'Full screen';
+
+  @override
+  String get qr_tooltip_tone_on => 'Stop detecting the completion tone';
+
+  @override
+  String get qr_tooltip_tone_off =>
+      'Detect the completion tone with the microphone';
 }

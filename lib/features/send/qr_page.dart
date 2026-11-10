@@ -12,14 +12,17 @@ import 'package:blast_qr/features/send/widgets/file_too_large_alert_widget.dart'
 import 'package:blast_qr/features/send/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/password_widgets.dart';
 import 'package:blast_qr/widgets/strike_painter.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:window_manager/window_manager.dart';
 
 class QrPage extends StatefulWidget {
   const QrPage({
@@ -44,7 +47,7 @@ class QrPage extends StatefulWidget {
   State<QrPage> createState() => _QrPageState();
 }
 
-class _QrPageState extends State<QrPage> {
+class _QrPageState extends State<QrPage> with WindowListener {
   final _qrController = RaptorQrStreamingWidgetController();
   final _qrBoxKey = GlobalKey();
 
@@ -57,6 +60,14 @@ class _QrPageState extends State<QrPage> {
   int? _fps;
 
   bool _fullscreenMode = false;
+
+  /// Whether this page put the desktop window in full screen, so leaving
+  /// only undoes that and not a full screen the user set up.
+  bool _windowFullScreen = false;
+
+  /// For telling a double tap on the codes from a single one.
+  DateTime? _lastTap;
+  bool _windowFullScreenBeforeTap = false;
   bool _playbackStarted = false;
 
   AcousticAckListener? _acousticListener;
@@ -72,6 +83,7 @@ class _QrPageState extends State<QrPage> {
   @override
   void initState() {
     super.initState();
+    if (isDesktopOS) windowManager.addListener(this);
     WakelockPlus.enable();
     _plan = SendPlan(
       widget.files,
@@ -104,6 +116,10 @@ class _QrPageState extends State<QrPage> {
 
   @override
   void dispose() {
+    if (isDesktopOS) {
+      windowManager.removeListener(this);
+      if (_windowFullScreen) windowManager.setFullScreen(false);
+    }
     _plan.dispose();
     _listenerDelayTimer?.cancel();
     _acousticSub?.cancel();
@@ -120,6 +136,9 @@ class _QrPageState extends State<QrPage> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.arrowUp): () => _stepFps(1),
         const SingleActivator(LogicalKeyboardKey.arrowDown): () => _stepFps(-1),
+        const SingleActivator(LogicalKeyboardKey.escape): () {
+          if (_fullscreenMode) _exitFullscreen();
+        },
       },
       child: Focus(autofocus: true, child: _buildScaffold(context, qrBox)),
     );
@@ -148,12 +167,7 @@ class _QrPageState extends State<QrPage> {
                   Expanded(
                     child: Column(
                       children: [
-                        Flexible(
-                          child: CustomSingleChildLayout(
-                            delegate: const _QrBoxLayout(),
-                            child: qrBox,
-                          ),
-                        ),
+                        Flexible(child: qrBox),
                         // Space is kept while the codes are generated, so the
                         // QR box doesn't shrink when playback starts.
                         if (!_completionDetected && !_plan.showsWarning)
@@ -167,13 +181,14 @@ class _QrPageState extends State<QrPage> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                    child: ElevatedButton(
-                      onPressed: _dismiss,
-                      child: Text(context.l10n.done),
+                  if (!context.useDesktopLayout)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                      child: ElevatedButton(
+                        onPressed: _dismiss,
+                        child: Text(context.l10n.done),
+                      ),
                     ),
-                  ),
                 ],
               ),
       ),
@@ -212,6 +227,7 @@ class _QrPageState extends State<QrPage> {
                       file: _plan.file!,
                       mtu: mtu,
                       fps: fps,
+                      fill: _fullscreenMode,
                       imageCompressionSettings:
                           _plan.compressImages && !_plan.isBundle
                           ? appSettings.imageCompressionSettings
@@ -219,8 +235,7 @@ class _QrPageState extends State<QrPage> {
                       password: widget.password,
                       fileName: widget.fileName,
                       isBundle: _plan.isBundle,
-                      fill: _fullscreenMode,
-                      onTap: _onToggleFullscreen,
+                      onTap: _onTapCodes,
                       onStart: (size) => _onStart(
                         size,
                         multipleQrCodes: state.multipleQrCodes,
@@ -250,7 +265,7 @@ class _QrPageState extends State<QrPage> {
     final colors = Theme.of(context).colorScheme;
     final iconColor = context.color.onPrimaryContainer;
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -278,12 +293,14 @@ class _QrPageState extends State<QrPage> {
                 ),
                 backgroundColor: colors.tertiaryContainer,
                 onPressed: () => _cycleFps(fps),
+                tooltip: context.l10n.qr_tooltip_fps,
               ),
               CircleButton(
                 size: 64,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowExpand),
                 backgroundColor: colors.tertiaryContainer,
                 onPressed: _onToggleFullscreen,
+                tooltip: context.l10n.qr_tooltip_fullscreen,
               ),
               CircleButton(
                 size: 64,
@@ -301,12 +318,16 @@ class _QrPageState extends State<QrPage> {
                 ),
                 backgroundColor: colors.tertiaryContainer,
                 onPressed: () => _toggleAcousticDetection(!micOn),
+                tooltip: micOn
+                    ? context.l10n.qr_tooltip_tone_on
+                    : context.l10n.qr_tooltip_tone_off,
               ),
               CircleButton(
                 size: 64,
                 icon: const HugeIcon(icon: HugeIcons.strokeRoundedHelpCircle),
                 backgroundColor: colors.tertiaryContainer,
                 onPressed: _showHelp,
+                tooltip: context.l10n.help,
               ),
             ],
           ),
@@ -336,7 +357,9 @@ class _QrPageState extends State<QrPage> {
       fileSize: size,
       fps: fps,
       mtu: mtu,
-      codesPerFrame: _maxQrCodesPerFrame(),
+      codesPerFrame: RaptorQrStreamingWidget.maxCodesFor(
+        MediaQuery.sizeOf(context),
+      ),
     );
   }
 
@@ -436,18 +459,71 @@ class _QrPageState extends State<QrPage> {
     _startAcousticListener(); // no fileSize → no delay, position unknown
   }
 
-  void _enterFullscreen() {
+  /// [window] also puts the desktop window in full screen.
+  void _enterFullscreen({bool window = true}) {
     setState(() => _fullscreenMode = true);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    if (window && isDesktopOS) _setWindowFullScreen(true);
   }
 
   void _exitFullscreen() {
     setState(() => _fullscreenMode = false);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (isDesktopOS) _setWindowFullScreen(false);
+  }
+
+  Future<void> _setWindowFullScreen(bool on) async {
+    if (on) {
+      if (_windowFullScreen || await windowManager.isFullScreen()) return;
+      _windowFullScreen = true;
+      await windowManager.setFullScreen(true);
+    } else if (_windowFullScreen) {
+      _windowFullScreen = false;
+      await windowManager.setFullScreen(false);
+    }
+  }
+
+  /// Leaving with the window's own controls also leaves the codes' full
+  /// screen.
+  @override
+  void onWindowLeaveFullScreen() {
+    if (!_windowFullScreen) return;
+    _windowFullScreen = false;
+    if (mounted && _fullscreenMode) _exitFullscreen();
+  }
+
+  /// Not using GestureDetector onDoubleTap because it would
+  /// delay every single tap.
+  void _onTapCodes() {
+    final now = DateTime.now();
+    final last = _lastTap;
+    if (isDesktopOS &&
+        last != null &&
+        now.difference(last) < kDoubleTapTimeout) {
+      _lastTap = null;
+      if (_windowFullScreenBeforeTap) {
+        if (_fullscreenMode) _exitFullscreen();
+      } else {
+        _enterFullscreen();
+      }
+      return;
+    }
+    _lastTap = now;
+    _windowFullScreenBeforeTap = _windowFullScreen;
+    _onToggleFill();
+  }
+
+  /// Codes fill the page, the window stays as it is.
+  void _onToggleFill() {
+    if (_fullscreenMode) {
+      _exitFullscreen();
+    } else {
+      _enterFullscreen(window: false);
+    }
   }
 
   void _onToggleFullscreen() {
-    if (_fullscreenMode) {
+    if (_windowFullScreen) {
       _exitFullscreen();
     } else {
       _enterFullscreen();
@@ -461,56 +537,10 @@ class _QrPageState extends State<QrPage> {
     Navigator.of(context).pop();
   }
 
-  /// Mirrors the column logic in [_FlexibleGrid]: 2 rows × 1–3 columns based
-  /// on the current screen aspect ratio.
-  int _maxQrCodesPerFrame() {
-    final size = MediaQuery.of(context).size;
-    final aspectRatio = size.width / size.height;
-    final int columns;
-    if (aspectRatio < 0.8) {
-      columns = 1;
-    } else if (aspectRatio < 1.4) {
-      columns = 2;
-    } else {
-      columns = 3;
-    }
-    return 2 * columns;
-  }
-
   void _cleanup() {
     _listenerDelayTimer?.cancel();
     _acousticSub?.cancel();
     _acousticListener?.stop();
     _qrController.stopAnimation();
   }
-}
-
-/// Sizes the QR box to the largest square that fits, plus the frame counter
-/// row under the code, centered horizontally.
-class _QrBoxLayout extends SingleChildLayoutDelegate {
-  const _QrBoxLayout();
-
-  /// The streaming widget keeps even margins around the code when its box
-  /// is this much taller than wide.
-  static const _counterHeight = 20.0;
-
-  double _width(BoxConstraints constraints) =>
-      (constraints.maxHeight - _counterHeight).clamp(0.0, constraints.maxWidth);
-
-  @override
-  Size getSize(BoxConstraints constraints) =>
-      Size(constraints.maxWidth, _width(constraints) + _counterHeight);
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    final width = _width(constraints);
-    return BoxConstraints.tight(Size(width, width + _counterHeight));
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) =>
-      Offset((size.width - childSize.width) / 2, 0);
-
-  @override
-  bool shouldRelayout(_QrBoxLayout oldDelegate) => false;
 }

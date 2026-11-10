@@ -202,5 +202,9 @@
   "copied": "¡Copiado!",
   "files_settings": "Archivos",
   "show_in_files_app": "Mostrar en la app Archivos",
-  "show_in_files_app_hint": "Permite abrir los archivos recibidos desde la app Archivos y desde el Finder de un Mac conectado."
+  "show_in_files_app_hint": "Permite abrir los archivos recibidos desde la app Archivos y desde el Finder de un Mac conectado.",
+  "qr_tooltip_fps": "Cambiar la velocidad de reproducción",
+  "qr_tooltip_fullscreen": "Pantalla completa",
+  "qr_tooltip_tone_on": "Dejar de detectar el tono de finalización",
+  "qr_tooltip_tone_off": "Detectar el tono de finalización con el micrófono"
 }

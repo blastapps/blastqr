@@ -4,6 +4,7 @@ import 'package:blast_qr/features/home_tabs_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
+import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/received_files_directory.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/selection_bar.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:raptorq_flutter/raptorq_flutter.dart';
+import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +49,8 @@ void main() async {
     SystemUiMode.edgeToEdge,
     overlays: [SystemUiOverlay.top],
   );
+
+  if (isDesktopOS) await windowManager.ensureInitialized();
 
   await AppPreferences.read();
   await syncReceivedFiles().catchError((Object error) {

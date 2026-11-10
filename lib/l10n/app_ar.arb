@@ -250,5 +250,9 @@
   "copied": "تم النسخ!",
   "files_settings": "الملفات",
   "show_in_files_app": "العرض في تطبيق الملفات",
-  "show_in_files_app_hint": "يتيح لك فتح الملفات المستلمة من تطبيق الملفات، ومن Finder على جهاز Mac متصل."
+  "show_in_files_app_hint": "يتيح لك فتح الملفات المستلمة من تطبيق الملفات، ومن Finder على جهاز Mac متصل.",
+  "qr_tooltip_fps": "تغيير سرعة التشغيل",
+  "qr_tooltip_fullscreen": "ملء الشاشة",
+  "qr_tooltip_tone_on": "إيقاف اكتشاف نغمة الاكتمال",
+  "qr_tooltip_tone_off": "اكتشاف نغمة الاكتمال عبر الميكروفون"
 }

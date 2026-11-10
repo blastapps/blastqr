@@ -676,4 +676,16 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get show_in_files_app_hint =>
       '받은 파일을 파일 앱과 연결된 Mac의 Finder에서 열 수 있습니다.';
+
+  @override
+  String get qr_tooltip_fps => '재생 속도 변경';
+
+  @override
+  String get qr_tooltip_fullscreen => '전체 화면';
+
+  @override
+  String get qr_tooltip_tone_on => '완료 알림음 감지 끄기';
+
+  @override
+  String get qr_tooltip_tone_off => '마이크로 완료 알림음 감지';
 }

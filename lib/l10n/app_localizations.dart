@@ -1309,6 +1309,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lets you open received files from the Files app, and from Finder on a connected Mac.'**
   String get show_in_files_app_hint;
+
+  /// No description provided for @qr_tooltip_fps.
+  ///
+  /// In en, this message translates to:
+  /// **'Change playback speed'**
+  String get qr_tooltip_fps;
+
+  /// No description provided for @qr_tooltip_fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get qr_tooltip_fullscreen;
+
+  /// No description provided for @qr_tooltip_tone_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop detecting the completion tone'**
+  String get qr_tooltip_tone_on;
+
+  /// No description provided for @qr_tooltip_tone_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect the completion tone with the microphone'**
+  String get qr_tooltip_tone_off;
 }
 
 class _AppLocalizationsDelegate

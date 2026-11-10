@@ -126,6 +126,7 @@ class FileHeaderWidget extends StatelessWidget {
             child: CircleButton(
               icon: const Icon(Icons.clear),
               onPressed: onTapDismiss,
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
             ),
           ),
         ],

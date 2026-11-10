@@ -90,6 +90,13 @@ class RaptorQrStreamingWidget extends StatefulWidget {
 
   static const double nearlyCompleteFraction = 0.8;
 
+  /// The most codes shown at once in an area of [size]. Fill mode never
+  /// shows fewer.
+  static int maxCodesFor(Size size) {
+    final (columns, rows) = _FlexibleGrid.layout(size, fill: true);
+    return columns * rows;
+  }
+
   const RaptorQrStreamingWidget({
     super.key,
     required this.file,
@@ -135,10 +142,9 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   /// What each grid cell shows, and how many times the controller has told
   /// it to change.
   final List<ui.Image?> _cellImages = [];
-  final List<int?> _cellSeqs = [];
   final List<int> _cellAdvanced = [];
 
-  /// Number of cells in the last layout (1 when not in fill mode).
+  /// Number of cells in the last layout
   int _cellCount = 1;
 
   @override
@@ -243,7 +249,6 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       if (image == null) break; // Rendering is behind: show the rest later.
       _cellImages[cell]?.dispose();
       _cellImages[cell] = image;
-      _cellSeqs[cell] = _nextSeq;
       _cellAdvanced[cell] = advanced;
       _nextSeq++;
       changed = true;
@@ -270,12 +275,10 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   void _resizeCells(int count) {
     while (_cellImages.length > count) {
       _cellImages.removeLast()?.dispose();
-      _cellSeqs.removeLast();
       _cellAdvanced.removeLast();
     }
     while (_cellImages.length < count) {
       _cellImages.add(null);
-      _cellSeqs.add(null);
       _cellAdvanced.add(-1);
     }
   }
@@ -293,7 +296,6 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       image?.dispose();
     }
     _cellImages.clear();
-    _cellSeqs.clear();
     _cellAdvanced.clear();
     _nextSeq = 0;
     _nearlyCompleteReported = false;
@@ -333,67 +335,22 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       behavior: HitTestBehavior.opaque,
       child: LayoutBuilder(
         builder: (context, c) {
-          final qrSize = c.maxWidth > c.maxHeight ? c.maxHeight : c.maxWidth;
-          final hOffset = c.maxWidth > (c.maxHeight - 20) ? 12 : 0;
-          final vOffset = c.maxWidth > (c.maxHeight - 20) ? 20 : 8;
-          final double adaptedPadding = widget.fill ? 8 : 16;
-
-          if (widget.fill) {
-            return _FlexibleGrid(
-              constraints: c,
-              itemBuilder: (gridIndex, totalCount) {
-                // Read by the next tick; cells are filled from there.
-                _cellCount = totalCount;
-                final img = gridIndex < _cellImages.length
-                    ? _cellImages[gridIndex]
-                    : null;
-                // Own layer per code: a change repaints only that code.
-                return RepaintBoundary(
-                  child: CustomPaint(
-                    painter: img != null ? _QrImagePainter(img) : null,
-                  ),
-                );
-              },
-            );
-          }
-
-          _cellCount = 1;
-          final uiImage = _cellImages.isNotEmpty ? _cellImages[0] : null;
-          final seq = _cellSeqs.isNotEmpty ? _cellSeqs[0] : null;
-          final sourceCount = _source?.sourceCount;
-          return Column(
-            children: [
-              Container(
-                padding: EdgeInsets.fromLTRB(16, adaptedPadding, 16, 0),
-                height: qrSize - vOffset,
-                width: qrSize - hOffset,
+          return _FlexibleGrid(
+            constraints: c,
+            fill: widget.fill,
+            itemBuilder: (gridIndex, totalCount) {
+              // Read by the next tick; cells are filled from there.
+              _cellCount = totalCount;
+              final img = gridIndex < _cellImages.length
+                  ? _cellImages[gridIndex]
+                  : null;
+              // Own layer per code: a change repaints only that code.
+              return RepaintBoundary(
                 child: CustomPaint(
-                  painter: uiImage != null ? _QrImagePainter(uiImage) : null,
+                  painter: img != null ? _QrImagePainter(img) : null,
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Frame number / frames the receiver needs (K).
-                    Text(
-                      seq == null || sourceCount == null
-                          ? ''
-                          : '${seq + 1}/$sourceCount',
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    Text(
-                      '${_fps}FPS',
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              );
+            },
           );
         },
       ),
@@ -405,44 +362,73 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
 /// are as large as fits, with a fixed gap, centered as one block so a camera
 /// can frame them all.
 class _FlexibleGrid extends StatelessWidget {
-  const _FlexibleGrid({required this.constraints, required this.itemBuilder});
+  const _FlexibleGrid({
+    required this.constraints,
+    required this.itemBuilder,
+    required this.fill,
+  });
 
-  static const _rows = 2;
   static const _spacing = 16.0;
 
+  /// Outside fill mode, extra codes are only added while each stays at
+  /// least this size.
+  static const _minSide = 320.0;
+
   final BoxConstraints constraints;
+  final bool fill;
   final Widget Function(int index, int totalCount) itemBuilder;
+
+  // The gap is also kept around the block.
+  static double _side(Size size, int columns, int rows) => math.max(
+    0.0,
+    math.min(
+      (size.width - (columns + 1) * _spacing) / columns,
+      (size.height - (rows + 1) * _spacing) / rows,
+    ),
+  );
+
+  static (int, int) layout(Size size, {required bool fill}) =>
+      fill ? _fillLayout(size) : _fitLayout(size);
+
+  /// 2 rows by aspect ratio, unless the [_fitLayout] shows more, which
+  /// happens in tall windows.
+  static (int, int) _fillLayout(Size size) {
+    final aspectRatio = size.width / size.height;
+    final columns = aspectRatio < 0.8 ? 1 : (aspectRatio < 1.4 ? 2 : 3);
+    final fit = _fitLayout(size);
+    return fit.$1 * fit.$2 > columns * 2 ? fit : (columns, 2);
+  }
+
+  /// Most codes that stay at least [_minSide], larger codes on a tie.
+  static (int, int) _fitLayout(Size size) {
+    var best = (1, 1);
+    var bestSide = _side(size, 1, 1);
+    for (var rows = 1; rows <= 2; rows++) {
+      for (var columns = 1; columns <= 3; columns++) {
+        final side = _side(size, columns, rows);
+        if (side < _minSide) continue;
+        final count = columns * rows;
+        final bestCount = best.$1 * best.$2;
+        if (count > bestCount || (count == bestCount && side > bestSide)) {
+          best = (columns, rows);
+          bestSide = side;
+        }
+      }
+    }
+    return best;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final width = constraints.maxWidth;
-    final height = constraints.maxHeight;
-    final aspectRatio = width / height;
-
-    int columns;
-
-    if (aspectRatio < 0.8) {
-      columns = 1;
-    } else if (aspectRatio < 1.4) {
-      columns = 2;
-    } else {
-      columns = 3;
-    }
-
-    // The gap is also kept around the block.
-    final side = math.max(
-      0.0,
-      math.min(
-        (width - (columns + 1) * _spacing) / columns,
-        (height - (_rows + 1) * _spacing) / _rows,
-      ),
-    );
+    final size = constraints.biggest;
+    final (columns, rows) = layout(size, fill: fill);
+    final side = _side(size, columns, rows);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         spacing: _spacing,
         children: [
-          for (var row = 0; row < _rows; row++)
+          for (var row = 0; row < rows; row++)
             Row(
               mainAxisSize: MainAxisSize.min,
               spacing: _spacing,
@@ -450,7 +436,7 @@ class _FlexibleGrid extends StatelessWidget {
                 for (var column = 0; column < columns; column++)
                   SizedBox.square(
                     dimension: side,
-                    child: itemBuilder(row * columns + column, _rows * columns),
+                    child: itemBuilder(row * columns + column, rows * columns),
                   ),
               ],
             ),

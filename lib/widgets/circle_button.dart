@@ -8,6 +8,7 @@ class CircleButton extends StatelessWidget {
     required this.onPressed,
     this.size,
     this.backgroundColor,
+    this.tooltip,
     this.padding = const EdgeInsets.symmetric(horizontal: 4),
   });
 
@@ -15,6 +16,7 @@ class CircleButton extends StatelessWidget {
   final double? size;
   final VoidCallback? onPressed;
   final Color? backgroundColor;
+  final String? tooltip;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -26,6 +28,7 @@ class CircleButton extends StatelessWidget {
         padding: padding,
         child: IconButton(
           onPressed: onPressed,
+          tooltip: tooltip,
           icon: icon,
           style: IconButton.styleFrom(
             backgroundColor: backgroundColor ?? context.color.primaryContainer,
