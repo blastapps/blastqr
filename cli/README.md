@@ -45,7 +45,6 @@ brew install cu-kha/tap/blastqr
 |---|---|
 | `--fps N` | frames per second, 1 to 240 (default 25) |
 | `-u`, `--unicode` | draw with Unicode block characters even if the terminal can show images |
-| `-d`, `--dense` | draw with Unicode quadrant blocks, 2×2 modules per character (see below) |
 | `-c`, `--codes N` | show up to N codes per frame side by side, 1 to 12 (default 1) |
 | `-e`, `--encrypt` | encrypt with a generated code; space shows it in the status line |
 | `-p`, `--password` | encrypt with your own password, asked for at the start |
@@ -63,14 +62,16 @@ In Kitty, Ghostty, iTerm2 and WezTerm the codes are drawn as images. Everywhere
 else, including Terminal.app and the VS Code terminal, they're drawn with
 Unicode half blocks, two modules per character cell.
 
+> [!WARNING]
+> Unicode mode is much slower than images, and the status line shows a
+> warning while it's used. Some terminals also draw fewer frames than are
+> sent: Terminal.app shows only about 15 per second, whatever `--fps` is set
+> to. For full speed, use a terminal that shows images: Ghostty and Kitty
+> have been tested, and Ghostty sent 8 codes at once at 60 fps.
+
 With Unicode, the terminal size sets the QR code size. A full-size code
 (2928 bytes per frame) needs 181×92 cells, so make the window large or the
 font small. A standard 80×24 terminal holds only 112 bytes per frame.
-
-`--dense` packs 2×2 modules into each character instead of 1×2, so a code
-needs half the columns: a full-size code fits in 91×92 cells. The modules
-come out twice as tall as they are wide, so the camera has less to work
-with. Try both on your setup.
 
 `--codes N` shows several different codes at once, like the app's
 multiple-codes mode. Without `--mtu` the codes are sized so that N fit. If

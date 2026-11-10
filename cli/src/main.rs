@@ -31,11 +31,6 @@ struct Args {
     #[arg(short, long)]
     unicode: bool,
 
-    /// Draw with Unicode quadrant blocks: 2×2 modules per character, so codes
-    /// need half the columns. Modules come out tall and narrow.
-    #[arg(short, long)]
-    dense: bool,
-
     /// Show up to this many codes per frame, side by side, each carrying
     /// different data. Without --mtu, codes are sized so this many fit.
     #[arg(short, long, default_value_t = 1, value_parser = clap::value_parser!(u32).range(1..=12))]
@@ -85,9 +80,7 @@ fn main() -> ExitCode {
 
 fn run(args: Args) -> Result<(), String> {
     let term = TermSize::query().map_err(|e| format!("not a terminal: {e}"))?;
-    let backend = if args.dense {
-        Backend::Quadrant
-    } else if args.unicode || !term.has_pixels() {
+    let backend = if args.unicode || !term.has_pixels() {
         Backend::Half
     } else {
         Backend::detect()
@@ -463,7 +456,14 @@ fn play(
         if redraw {
             out.write_all(&renderer.frame(
                 &current,
-                &status(info, shown, fps, measured, hide_password_at.is_some()),
+                &status(
+                    info,
+                    shown,
+                    fps,
+                    measured,
+                    renderer.is_text(),
+                    hide_password_at.is_some(),
+                ),
             ))?;
             out.flush()?;
             redraw = false;
@@ -529,6 +529,7 @@ fn status(
     shown: u64,
     fps: u32,
     measured: Option<u32>,
+    text: bool,
     show_password: bool,
 ) -> String {
     let mut parts = vec![];
@@ -544,16 +545,18 @@ fn status(
     }
     parts.push(format!("{} ({})", info.name, human_size(info.size)));
     parts.push(format!("code {shown} / ~{}", info.source_count));
+    // Text terminals can read frames faster than they redraw (Terminal.app
+    // shows about 15 per second), so a measured rate would overstate it.
     match measured {
-        Some(real) => parts.push(format!("{fps} fps (real {real})")),
-        None => parts.push(format!("{fps} fps")),
+        Some(real) if !text => parts.push(format!("{fps} fps (real {real})")),
+        _ => parts.push(format!("{fps} fps")),
     }
     if info.code.is_some() {
         parts.push("↑↓ speed · space password · q quit".into());
     } else {
         parts.push("↑↓ speed · q quit".into());
     }
-    format!(" {}", parts.join(" · "))
+    parts.join(" · ")
 }
 
 /// Asks a yes/no question on the terminal, even if stdin is a pipe. Without
