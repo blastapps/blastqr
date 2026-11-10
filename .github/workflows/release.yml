@@ -112,7 +112,7 @@ jobs:
             git fetch --force --depth=1 origin \
               "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
             if [ "$(git cat-file -t "$GITHUB_REF_NAME")" = tag ]; then
-              notes=$(git tag -l --format='%(contents:subject)%0a%0a%(contents:body)' "$GITHUB_REF_NAME")
+              notes=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
             fi
           fi
           VERSION="$version" NOTES="$notes" python3 - \
@@ -121,14 +121,19 @@ jobs:
           from xml.sax.saxutils import escape
 
           path = sys.argv[1]
-          paragraphs = [
-              " ".join(p.split())
-              for p in os.environ["NOTES"].split("\n\n")
-              if p.strip()
-          ]
+          def block(p):
+              lines = p.strip().splitlines()
+              if all(l.lstrip().startswith(("- ", "* ")) for l in lines):
+                  items = "".join(
+                      f"          <li>{escape(l.lstrip()[2:].strip())}</li>\n" for l in lines
+                  )
+                  return f"        <ul>\n{items}        </ul>\n"
+              return f"        <p>{escape(' '.join(p.split()))}</p>\n"
+
+          paragraphs = [p for p in os.environ["NOTES"].split("\n\n") if p.strip()]
           entry = f'    <release version="{os.environ["VERSION"]}" date="{datetime.date.today()}"'
           if paragraphs:
-              body = "".join(f"        <p>{escape(p)}</p>\n" for p in paragraphs)
+              body = "".join(block(p) for p in paragraphs)
               entry += f">\n      <description>\n{body}      </description>\n    </release>\n"
           else:
               entry += "/>\n"
@@ -491,7 +496,7 @@ jobs:
             "refs/tags/$GITHUB_REF_NAME:refs/tags/$GITHUB_REF_NAME"
           notes=""
           if [ "$(git cat-file -t "$GITHUB_REF_NAME")" = tag ]; then
-            notes=$(git tag -l --format='%(contents:subject)%0a%0a%(contents:body)' "$GITHUB_REF_NAME")
+            notes=$(git tag -l --format='%(contents)' "$GITHUB_REF_NAME")
           fi
           NOTES="$notes" python3 - > notes.md <<'EOF'
           import os
