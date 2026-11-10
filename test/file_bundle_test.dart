@@ -22,6 +22,67 @@ void main() {
   List<String> names(List<String> paths) =>
       paths.map((p) => p.split(Platform.pathSeparator).last).toList();
 
+  /// A zip whose [count] entries overlap: each entry's local header is
+  /// followed by the next entry's header, down to [data] at the end, so every
+  /// entry's content includes all the ones after it. Each entry claims
+  /// [claimedSize] as its uncompressed size.
+  Uint8List overlappingZip(Uint8List data, int count, {int? claimedSize}) {
+    final b = BytesBuilder();
+    void u16(int v) => b.add([v & 0xFF, v >> 8 & 0xFF]);
+    void u32(int v) => b.add([for (var i = 0; i < 32; i += 8) v >> i & 0xFF]);
+
+    // Entry i starts at offsets[i] and runs to the end of [data].
+    final names = [for (var i = 0; i < count; i++) utf8.encode('f$i')];
+    final offsets = <int>[];
+    final sizes = <int>[];
+    var remaining = data.length;
+    for (var i = count - 1; i >= 0; i--) {
+      sizes.insert(0, remaining);
+      remaining += 30 + names[i].length;
+    }
+    for (var i = 0; i < count; i++) {
+      offsets.add(b.length);
+      u32(0x04034b50);
+      for (final v in [20, 0, 0, 0, 0]) {
+        u16(v);
+      }
+      u32(0);
+      u32(sizes[i]);
+      u32(sizes[i]);
+      u16(names[i].length);
+      u16(0);
+      b.add(names[i]);
+    }
+    b.add(data);
+
+    final cdOffset = b.length;
+    for (var i = 0; i < count; i++) {
+      u32(0x02014b50);
+      for (final v in [20, 20, 0, 0, 0, 0]) {
+        u16(v);
+      }
+      u32(0);
+      u32(sizes[i]);
+      u32(claimedSize ?? sizes[i]);
+      for (final v in [names[i].length, 0, 0, 0, 0]) {
+        u16(v);
+      }
+      u32(0);
+      u32(offsets[i]);
+      b.add(names[i]);
+    }
+    final cdSize = b.length - cdOffset;
+
+    u32(0x06054b50);
+    for (final v in [0, 0, count, count]) {
+      u16(v);
+    }
+    u32(cdSize);
+    u32(cdOffset);
+    u16(0);
+    return b.toBytes();
+  }
+
   test('files round trip through a bundle', () async {
     final onDisk = File('${root.path}/b.txt')..writeAsStringSync('from disk');
     final zip = '${root.path}/bundle.zip';
@@ -75,6 +136,28 @@ void main() {
       ..add(ArchiveFile.bytes('big.txt', bytes('a' * 10000)));
     final zip = File('${root.path}/deflated.zip')
       ..writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+    await expectLater(
+      extractBundle(zip.path, out),
+      throwsA(isA<BundleFormatException>()),
+    );
+    expect(out.listSync(), isEmpty);
+  });
+
+  test('entries sharing data can\'t expand past the zip size', () async {
+    final zip = File('${root.path}/overlap.zip')
+      ..writeAsBytesSync(overlappingZip(bytes('x' * 1000), 20));
+
+    await expectLater(
+      extractBundle(zip.path, out),
+      throwsA(isA<BundleFormatException>()),
+    );
+    expect(out.listSync(), isEmpty);
+  });
+
+  test('entries hiding their size can\'t expand past the zip size', () async {
+    final zip = File('${root.path}/overlap.zip')
+      ..writeAsBytesSync(overlappingZip(bytes('x' * 1000), 20, claimedSize: 0));
 
     await expectLater(
       extractBundle(zip.path, out),
