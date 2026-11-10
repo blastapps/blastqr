@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
 
-  static const String projectUrl = 'https://codeberg.org/cukha/blastqr';
+  static const String projectUrl =
+      'https://codeberg.org/cukha/blastqr/releases';
 
   @override
   State<HelpPage> createState() => _HelpPageState();

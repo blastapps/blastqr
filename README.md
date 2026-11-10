@@ -8,59 +8,84 @@
 <a href="https://f-droid.org/packages/dev.blastapps.blastqr"><img src="docs/f-droid-badge.png" alt="Get it on F-Droid" height="44"/></a>
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/cu-kha/blastqr"><img src="docs/obtainium-badge.png" alt="Get it on Obtainium" height="44"/></a>
 <a href="https://play.google.com/store/apps/details?id=dev.blastapps.blastqr"><img src="docs/google-play-badge.png" alt="Get it on Google Play" height="44"/></a>
-<a href="https://apps.apple.com/app/id6831422458"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" height="44"/></a>
+<a href="https://apps.apple.com/app/id6831422458"><img src="docs/app-store-badge.png" alt="Download on the App Store" height="44"/></a>
+<br/>
+<b><a href="https://codeberg.org/cukha/blastqr/releases/latest">macOS, Windows, Linux and command-line downloads</a></b>
 </p>
+
+<h3 align="center">See blastQR in action</h3>
+<div align="center">
+<details>
+<summary>Show video</summary>
+<video src="https://github.com/cu-kha/blastqr/releases/download/v3.0.5/blastqr-demo.mp4" controls width="360"></video>
+</details>
+</div>
 
 ## Introduction
 
-blastQR is an open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera.
+blastQR is a fully open-source file transfer app and protocol that works completely offline. Data is transferred through sequences of QR codes displayed on a sender device and scanned by a receiver device's camera. It uses [RaptorQ](https://github.com/cberner/raptorq) codes so the receiver can recover the file from any sufficiently large subset of frames.
 
-When using compression and displaying multiple codes, it's fast enough for simple everyday picture and file transfers. It's also especially useful for air-gapped systems (computers that are completely cut off from any network). Transfers can optionally be encrypted with a password to prevent interception.
+It's fast enough for everyday picture and file transfers when using compression and multiple QR codes. During **internet outages or digital blackouts**, files can be broadcast on a large screen for multiple devices to receive. Transfers can optionally be password-encrypted.
 
-The protocol is an open spec so that other software can freely add support for sending and receiving blastQR transfers.
+The protocol is an open specification so that other software can freely implement support for sending and receiving blastQR transfers.
 
 Written in Flutter and Rust and currently available for Linux, Android, iOS, macOS and Windows.
 
 ## Downloads
 
-| Platform | App | Command-line tool |
-|---|---|---|
-| Android | [F-Droid](https://f-droid.org/packages/dev.blastapps.blastqr), [APK](https://github.com/cu-kha/blastqr/releases/latest), [Google Play](https://play.google.com/store/apps/details?id=dev.blastapps.blastqr) | |
-| iOS | [App Store](https://apps.apple.com/app/id6831422458) | |
-| macOS | [DMG](https://github.com/cu-kha/blastqr/releases/latest), [App Store](https://apps.apple.com/app/id6831422458) | [Homebrew](#command-line-tool) |
-| Linux | [Flatpak](https://github.com/cu-kha/blastqr/releases/latest), [Tarball](https://github.com/cu-kha/blastqr/releases/latest) | [Homebrew](#command-line-tool), [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
-| Windows | [Installer](https://github.com/cu-kha/blastqr/releases/latest) | [Binary](https://github.com/cu-kha/blastqr/releases/latest) |
+Downloads for all platforms are on the **[latest release page](https://codeberg.org/cukha/blastqr/releases/latest)**.
 
-Windows can only send for now, because the app has no camera support there.
+<p align="center">
+<img src="assets/download-qr.png" alt="QR code linking to the blastQR releases page" width="112"/><br/>
+<sub>Scan with your phone's camera to open the downloads page</sub>
+</p>
 
 ## Features
 
-<!-- TODO: video -->
-
-- **Works fully offline:** No internet, Wi-Fi, Bluetooth or servers. The only link between devices is the screen and the camera. Your data stays offline.
-- **Runs everywhere:** Android, iOS, macOS, Linux and Windows, plus a command-line tool that can send from a terminal, even over SSH.
-- **Multiple codes on screen:** Shows up to 6 QR codes at once for higher speed. With 6 codes at 30 fps, transfers peak at around 500 kB/s.
+- **Works fully offline:** No internet, Wi-Fi, Bluetooth or servers. Your data stays offline.
+- **One-to-many distribution:** Share the same file with multiple devices simultaneously using a single blastQR broadcast.
+- **Cross-platform:** Android, iOS, macOS, Linux and Windows, plus a command-line tool that can send from a terminal, even over SSH.
+- **Multiple codes on screen:** Shows multiple QR codes at once for higher speed. With 8 codes at 60 fps, transfers peak at around 1.4 MB/s.
 - **Send multiple files in one go:** They're zipped into one transfer and unpacked into separate files on the receiver.
 - **Sound feedback:** The receiver plays a short tone when it has the whole file, and the sender stops automatically when it hears it.
 - **Password encryption:** You can optionally encrypt files with an auto-generated password or a custom one.
-- **File compression:** The app supports lossy and lossless compression of images and files (gzip) for quicker transfers.
-- **No need to catch every code:** Start scanning at any point and keep the camera on the screen until it's done. Blurry or missed codes don't matter.
+- **File compression:** The app supports lossy image compression and lossless compression for files (gzip) for quicker transfers.
+- **Start scanning at any point:**  No need to catch every code, just keep the camera on the screen until it's done. Blurry or missed codes don't matter.
 - **Regular QR scanner:** You can also scan normal QR codes and save them.
+- **Built-in file manager**
+
+*Windows can only send transfers for now, because the app has no camera support there.
+
+## Use cases
+- **Internet outages and digital blackouts:** Broadcast on a large screen so multiple devices can receive data without requiring an internet connection.
+- **Regular file transfers:** As long as the files are not too big. Things that work well: small number of pictures, configuration files, simple git repositories, ROM files, etc.
+- **Sensitive information:** Transfer files without relying on cloud services or network infrastructure. Always enable password encryption for sensitive data, and ensure that the devices involved are not compromised.
+- **Air-gapped systems**: Transfer files between devices without connecting them to a network.
 
 ## Real-world benchmarks
+
+By default, senders play the sequence at 25 fps, and receivers run their camera at 60 fps if available, otherwise 30 fps. Some devices support 120 fps or more, so tuning these settings and the number of QR codes on screen can give much higher speeds.
 
 | Codes on screen | Sender FPS | iPhone 17 | Galaxy S22 | Galaxy S10e |
 |:-:|:-:|--:|--:|--:|
 | 1 | 25 | 64 kB/s · 41.9 s | 59 kB/s · 45.3 s | 65 kB/s · 40.5 s |
-| 1 | 30 | 75 kB/s · 35.3 s | 88 kB/s · 30.3 s | 80 kB/s · 33.3 s |
-| 1 | 60 | 173 kB/s · 15.3 s | – | – |
-| 2 | 25 | – | – | 119 kB/s · 22.3 s |
-| 2 | 30 | 174 kB/s · 15.2 s | 169 kB/s · 15.7 s | 113 kB/s · 23.6 s |
 | 2 | 60 | 284 kB/s · 9.3 s | – | – |
-| 6 | 25 | 384 kB/s · 6.9 s | 222 kB/s · 11.9 s | 172 kB/s · 15.4 s |
-| 6 | 30 | **526 kB/s · 5.0 s** | **364 kB/s · 7.3 s** | – |
+| 6 | 25 | 384 kB/s · 6.9 s | 222 kB/s · 11.9 s | **172 kB/s · 15.4 s** |
+| 6 | 30 | 526 kB/s · 5.0 s | **518 kB/s · 5.1 s** | – |
+| 6 | 60 | 1044 kB/s · 2.5 s | – | – |
+| 8 | 60 | **1402 kB/s · 1.9 s** | – | – |
 
 Each test sent a 2.6 MB file and each result is the best of 4 attempts. The camera preview ran at 60 fps on the iPhone and 30 fps on the Samsung phones.
+
+Videos:<details>
+<summary>iPhone 17, 6 codes 60FPS - 1 MB/s</summary>
+<video src="https://github.com/cu-kha/blastqr/releases/download/v3.0.5/6codes-1042kBps.mp4" controls width="360"></video>
+</details>
+<details>
+
+<summary>iPhone 17, 8 codes 60FPS - 1.4 MB/s</summary>
+<video src="https://github.com/cu-kha/blastqr/releases/download/v3.0.5/8codes-1388kBps.mp4" controls width="360"></video>
+</details>
 
 ## Command-line tool
 
@@ -174,3 +199,9 @@ Bundled third-party components keep their own licenses:
 ## Why another QR code file transfer project?
 
 Sending files over QR codes isn't a new idea, but most of the tools I tried were web apps hosted on a server, which defeats the point of a truly offline, air-gapped transfer. blastQR is a native app that runs entirely on your device. It also adds password encryption and a completion tone that stops the sender automatically, neither of which I'd seen elsewhere.
+
+## App Store and Play Store publishing
+
+blastQR is published on the App Store and Play Store by [Blast Studio Inc.](https://blastapps.dev), an independent app development studio based in Seoul, Korea.
+
+The store versions are built from the tagged releases in this repository.
