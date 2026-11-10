@@ -13,11 +13,11 @@
 <b><a href="https://codeberg.org/cukha/blastqr/releases/latest">macOS, Windows, Linux and command-line downloads</a></b>
 </p>
 
-<h3 align="center">See blastQR in action</h3>
+<h3 align="center">See blastQR in action:</h3>
 <div align="center">
 <details>
 <summary>Show video</summary>
-<video src="https://github.com/cu-kha/blastqr/releases/download/v3.0.5/blastqr-demo.mp4" controls width="360"></video>
+<video src="https://github.com/user-attachments/assets/a5fe3edc-25c7-4d28-9e81-1b80879d7d24" controls width="360"></video>
 </details>
 </div>
 
@@ -77,14 +77,15 @@ By default, senders play the sequence at 25 fps, and receivers run their camera 
 
 Each test sent a 2.6 MB file and each result is the best of 4 attempts. The camera preview ran at 60 fps on the iPhone and 30 fps on the Samsung phones.
 
-Videos:<details>
-<summary>iPhone 17, 6 codes 60FPS - 1 MB/s</summary>
-<video src="https://github.com/cu-kha/blastqr/releases/download/v3.0.5/6codes-1042kBps.mp4" controls width="360"></video>
-</details>
+Videos:
 <details>
+<summary>iPhone 17, 6 codes 60FPS - 1 MB/s</summary>
+<video src="https://github.com/user-attachments/assets/4d1b6e2b-4303-4983-87fe-4ee483b9078e" controls width="360"></video>
+</details>
 
+<details>
 <summary>iPhone 17, 8 codes 60FPS - 1.4 MB/s</summary>
-<video src="https://github.com/cu-kha/blastqr/releases/download/v3.0.5/8codes-1388kBps.mp4" controls width="360"></video>
+<video src="https://github.com/user-attachments/assets/ac253f4d-a613-4e65-9b2c-4960c29ab9e6" controls width="360"></video>
 </details>
 
 ## Command-line tool
