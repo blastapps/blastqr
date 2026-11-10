@@ -1,0 +1,9 @@
+- Faster scanning when receiving multiple codes at once
+- Fixed sound not playing on iOS
+- CLI: draws at up to 240 fps
+- CLI: codes scale up to fill the screen
+- CLI: shows a warning when running in text mode
+- Help page now links to the releases page
+- Releases are now also published on Codeberg
+- Android: added per-CPU builds for F-Droid
+

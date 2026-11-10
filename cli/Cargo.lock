@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "blastqr"
-version = "3.0.5"
+version = "3.0.6"
 dependencies = [
  "base64",
  "blastqr_envelope",
