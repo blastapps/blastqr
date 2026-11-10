@@ -35,8 +35,11 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+        // Gradle rejects abiFilters together with --split-per-abi.
+        if (!project.hasProperty("split-per-abi")) {
+            ndk {
+                abiFilters += listOf("arm64-v8a", "x86_64")
+            }
         }
 
     }
