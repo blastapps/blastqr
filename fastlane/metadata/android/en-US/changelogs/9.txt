@@ -1,0 +1,2 @@
+- Improve UI on desktop and large screen devices
+- Bump rust version to 1.99.1 (fixes App Store builds crashing on iOS, macOS 27)
