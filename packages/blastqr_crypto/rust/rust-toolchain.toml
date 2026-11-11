@@ -1,6 +1,6 @@
 [toolchain]
 # Pin a specific version for reproducible builds.
-channel = "1.93.0"
+channel = "1.99.1"
 
 targets = [
   # Android

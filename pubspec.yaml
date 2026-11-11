@@ -42,7 +42,7 @@ dependencies:
   record: ^6.2.0
   package_info_plus: ^9.0.1
   media_scanner: ^2.2.1
-  raptorq_flutter: ^0.1.0
+  raptorq_flutter: ^0.1.1
   blastqr_crypto:
     path: packages/blastqr_crypto
   share_plus: ^12.0.2
