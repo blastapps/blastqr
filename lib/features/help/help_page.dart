@@ -5,7 +5,7 @@ class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
 
   static const String projectUrl =
-      'https://codeberg.org/cukha/blastqr/releases';
+      'https://codeberg.org/blast/blastqr/releases';
 
   @override
   State<HelpPage> createState() => _HelpPageState();

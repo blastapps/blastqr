@@ -562,13 +562,13 @@ jobs:
               ("https://f-droid.org/packages/dev.blastapps.blastqr", f"{docs}/f-droid-badge.png", "Get it on F-Droid"),
               (f"https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/{os.environ['GITHUB_REPOSITORY']}", f"{docs}/obtainium-badge.png", "Get it on Obtainium"),
               ("https://play.google.com/store/apps/details?id=dev.blastapps.blastqr", f"{docs}/google-play-badge.png", "Get it on Google Play"),
-              ("https://apps.apple.com/app/id6831422458", "https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us", "Download on the App Store"),
+              ("https://apps.apple.com/app/id6831422458", f"{docs}/app-store-badge.png","Download on the App Store"),
           ]
           print('\n<p align="center">')
           for href, src, alt in badges:
               print(f'<a href="{href}"><img src="{src}" alt="{alt}" height="38"/></a>')
           print("</p>")
-          print("\nThe command-line tool can also be installed with `brew install cu-kha/tap/blastqr`.")
+          print("\nThe command-line tool can also be installed with `brew install blastapps/tap/blastqr`.")
           EOF
           cat notes.md
 

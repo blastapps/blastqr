@@ -36,7 +36,7 @@ Pass the files in them instead, as in `blastqr photos/*` above.
 With [Homebrew](https://brew.sh):
 
 ```
-brew install cu-kha/tap/blastqr
+brew install blastapps/tap/blastqr
 ```
 
 ## Options

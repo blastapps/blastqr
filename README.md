@@ -6,11 +6,11 @@
 
 <p align="center">
 <a href="https://f-droid.org/packages/dev.blastapps.blastqr"><img src="docs/f-droid-badge.png" alt="Get it on F-Droid" height="44"/></a>
-<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/cu-kha/blastqr"><img src="docs/obtainium-badge.png" alt="Get it on Obtainium" height="44"/></a>
+<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://codeberg.org/blast/blastqr"><img src="docs/obtainium-badge.png" alt="Get it on Obtainium" height="44"/></a>
 <a href="https://play.google.com/store/apps/details?id=dev.blastapps.blastqr"><img src="docs/google-play-badge.png" alt="Get it on Google Play" height="44"/></a>
 <a href="https://apps.apple.com/app/id6831422458"><img src="docs/app-store-badge.png" alt="Download on the App Store" height="44"/></a>
 <br/>
-<b><a href="https://codeberg.org/cukha/blastqr/releases/latest">macOS, Windows, Linux and command-line downloads</a></b>
+<b><a href="https://codeberg.org/blast/blastqr/releases/latest">macOS, Windows, Linux and command-line downloads</a></b>
 </p>
 
 <h3 align="center">See blastQR in action:</h3>
@@ -33,7 +33,7 @@ Written in Flutter and Rust and currently available for Linux, Android, iOS, mac
 
 ## Downloads
 
-Downloads for all platforms are on the **[latest release page](https://codeberg.org/cukha/blastqr/releases/latest)**.
+Downloads for all platforms are on the **[latest release page](https://codeberg.org/blast/blastqr/releases/latest)**.
 
 <p align="center">
 <img src="assets/download-qr.png" alt="QR code linking to the blastQR releases page" width="112"/><br/>
@@ -98,7 +98,7 @@ The `blastqr` command-line tool is a small Rust program that sends files from a 
 Install it with [Homebrew](https://brew.sh):
 
 ```sh
-brew install cu-kha/tap/blastqr
+brew install blastapps/tap/blastqr
 ```
 
 Then send one or more files:
@@ -144,7 +144,7 @@ You need:
 - On Linux, the GStreamer development packages for the camera (`libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good` on Ubuntu/Debian).
 
 ```sh
-git clone https://codeberg.org/cukha/blastqr.git
+git clone https://codeberg.org/blast/blastqr.git
 cd blastqr
 flutter pub get
 flutter run

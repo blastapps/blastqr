@@ -28,13 +28,13 @@
 
   <launchable type="desktop-id">dev.blastapps.blastqr.desktop</launchable>
 
-  <url type="homepage">https://codeberg.org/cukha/blastqr</url>
-  <url type="bugtracker">https://codeberg.org/cukha/blastqr/issues</url>
-  <url type="vcs-browser">https://codeberg.org/cukha/blastqr</url>
+  <url type="homepage">https://codeberg.org/blast/blastqr</url>
+  <url type="bugtracker">https://codeberg.org/blast/blastqr/issues</url>
+  <url type="vcs-browser">https://codeberg.org/blast/blastqr</url>
 
   <screenshots>
     <screenshot type="default">
-      <image>https://codeberg.org/cukha/blastqr/raw/branch/main/docs/desktop.png</image>
+      <image>https://codeberg.org/blast/blastqr/raw/branch/main/docs/desktop.png</image>
       <caption>Sending a file as QR codes</caption>
     </screenshot>
   </screenshots>

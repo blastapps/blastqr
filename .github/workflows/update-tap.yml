@@ -11,7 +11,7 @@ on:
         required: true
 
 env:
-  TAP_REPO: cu-kha/homebrew-tap
+  TAP_REPO: blastapps/homebrew-tap
   TAG: ${{ github.event.release.tag_name || inputs.tag }}
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
           cat > tap/Formula/blastqr.rb <<EOF
           class Blastqr < Formula
             desc "Send files to the blastQR app as QR codes shown in the terminal"
-            homepage "https://codeberg.org/cukha/blastqr"
+            homepage "https://codeberg.org/blast/blastqr"
             version "$version"
             license "AGPL-3.0-or-later"
 
