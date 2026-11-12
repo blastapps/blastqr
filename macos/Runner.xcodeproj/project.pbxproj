@@ -489,6 +489,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_STYLE = "non-global";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Profile;
@@ -647,6 +648,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRIP_STYLE = "non-global";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
