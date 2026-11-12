@@ -1,5 +1,5 @@
 <p align="center"><img src="docs/logo.jpg" width="120"/></p>
-<h3 align="center">Easy offline file transfers over QR codes</h3>
+<h3 align="center">True offline file transfers over QR codes</h3>
 <p align="center">
 <img src="docs/hero.webp" width="800"/>
 </p>
@@ -37,7 +37,7 @@ Downloads for all platforms are on the **[latest release page](https://codeberg.
 
 <p align="center">
 <img src="assets/download-qr.png" alt="QR code linking to the blastQR releases page" width="112"/><br/>
-<sub>Scan with your phone's camera to open the downloads page</sub>
+<sub>Scan to open the downloads page</sub>
 </p>
 
 ## Features
@@ -187,7 +187,7 @@ Bundled third-party components keep their own licenses:
 - [raptorq](https://github.com/cberner/raptorq), the RaptorQ implementation
 - [zxing-cpp](https://github.com/zxing-cpp/zxing-cpp) and [flutter_zxing](https://github.com/khoren93/flutter_zxing) for QR scanning
 - [RustCrypto](https://github.com/RustCrypto) for Argon2id and ChaCha20-Poly1305
-- [flutter_soloud](https://github.com/alnitak/flutter_soloud) and [record](https://github.com/llfbandit/record) for the completion tone
+- [flutter_soloud](https://github.com/alnitak/flutter_soloud) and [record](https://github.com/llfbandit/record)
 - [flutter_rust_bridge](https://github.com/fzyzcjy/flutter_rust_bridge)
 
 ## Similar projects
