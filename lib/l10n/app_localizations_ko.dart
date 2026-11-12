@@ -688,4 +688,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get qr_tooltip_tone_off => '마이크로 완료 알림음 감지';
+
+  @override
+  String get camera_permission_msg =>
+      'blastQR이 카메라에 접근할 수 없습니다. 파일을 받으려면 카메라 접근을 허용하세요.';
+
+  @override
+  String get enable_camera => '카메라 허용';
 }

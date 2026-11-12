@@ -206,5 +206,7 @@
   "qr_tooltip_fps": "Cambiar la velocidad de reproducción",
   "qr_tooltip_fullscreen": "Pantalla completa",
   "qr_tooltip_tone_on": "Dejar de detectar el tono de finalización",
-  "qr_tooltip_tone_off": "Detectar el tono de finalización con el micrófono"
+  "qr_tooltip_tone_off": "Detectar el tono de finalización con el micrófono",
+  "camera_permission_msg": "blastQR no puede acceder a la cámara. Permite el acceso a la cámara para recibir archivos.",
+  "enable_camera": "Activar cámara"
 }

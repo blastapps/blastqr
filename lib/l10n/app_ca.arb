@@ -205,5 +205,7 @@
   "qr_tooltip_fps": "Canvia la velocitat de reproducció",
   "qr_tooltip_fullscreen": "Pantalla completa",
   "qr_tooltip_tone_on": "Deixa de detectar el to de finalització",
-  "qr_tooltip_tone_off": "Detecta el to de finalització amb el micròfon"
+  "qr_tooltip_tone_off": "Detecta el to de finalització amb el micròfon",
+  "camera_permission_msg": "blastQR no pot accedir a la càmera. Permet l'accés a la càmera per rebre fitxers.",
+  "enable_camera": "Activa la càmera"
 }

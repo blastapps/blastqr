@@ -254,5 +254,7 @@
   "qr_tooltip_fps": "تغيير سرعة التشغيل",
   "qr_tooltip_fullscreen": "ملء الشاشة",
   "qr_tooltip_tone_on": "إيقاف اكتشاف نغمة الاكتمال",
-  "qr_tooltip_tone_off": "اكتشاف نغمة الاكتمال عبر الميكروفون"
+  "qr_tooltip_tone_off": "اكتشاف نغمة الاكتمال عبر الميكروفون",
+  "camera_permission_msg": "لا يمكن لتطبيق blastQR الوصول إلى الكاميرا. اسمح بالوصول إلى الكاميرا لاستلام الملفات.",
+  "enable_camera": "تفعيل الكاميرا"
 }

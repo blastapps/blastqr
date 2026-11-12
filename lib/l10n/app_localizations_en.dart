@@ -709,4 +709,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get qr_tooltip_tone_off =>
       'Detect the completion tone with the microphone';
+
+  @override
+  String get camera_permission_msg =>
+      'blastQR can\'t access the camera. Allow camera access to receive files.';
+
+  @override
+  String get enable_camera => 'Enable camera';
 }

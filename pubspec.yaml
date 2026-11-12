@@ -49,6 +49,7 @@ dependencies:
   url_launcher: ^6.3.3
   image: ^4.8.0
   window_manager: ^0.5.2
+  permission_handler: ^13.0.2
 
 dev_dependencies:
   flutter_test:

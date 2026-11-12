@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
@@ -10,7 +9,14 @@ import 'package:blast_qr/features/scan/decode_stats.dart';
 import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/features/scan/scan_camera.dart';
 import 'package:blast_qr/features/scan/transfer_tracker.dart';
+import 'package:blast_qr/features/scan/widgets/camera_permission_message.dart';
+import 'package:blast_qr/features/scan/widgets/feedback_toggles.dart';
+import 'package:blast_qr/features/scan/widgets/focus_ring.dart';
+import 'package:blast_qr/features/scan/widgets/help_message.dart';
 import 'package:blast_qr/features/scan/widgets/password_sheet.dart';
+import 'package:blast_qr/features/scan/widgets/qr_result_sheet.dart';
+import 'package:blast_qr/features/scan/widgets/received_files_sheet.dart';
+import 'package:blast_qr/features/scan/widgets/scan_progress.dart';
 import 'package:blast_qr/features/scan/widgets/qr_scanner.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
@@ -18,9 +24,7 @@ import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/model/file_extension.dart';
-import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/model/receiving_file_metadata.dart';
-import 'package:blast_qr/model/scanned_qr_code.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
@@ -30,16 +34,13 @@ import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
-import 'package:blast_qr/widgets/file_preview.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
-import 'package:blast_qr/widgets/strike_painter.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 
 class ScanPage extends StatefulWidget {
@@ -67,6 +68,7 @@ class _ScanPageState extends State<ScanPage> {
   int _dataLengthInLastPeriod = 0;
   bool _showsReaderWidget = true;
   bool _cameraLoaded = false;
+  bool _cameraDenied = false;
   bool _showLowSpeedWarning = false;
   DateTime? _lowSpeedStartTime;
   late SoundFeedbackService _soundService;
@@ -166,54 +168,9 @@ class _ScanPageState extends State<ScanPage> {
           surfaceTintColor: Colors.transparent,
           backgroundColor: Colors.transparent,
           leadingWidth: isDesktopOS ? 56 : 104,
-          leading: Row(
-            children: [
-              if (!isDesktopOS)
-                CircleButton(
-                  padding: const EdgeInsetsDirectional.only(start: 8),
-                  tooltip: context.l10n.haptic_feedback,
-                  onPressed: () {
-                    appSettings.updateHapticFeedback(
-                      !appSettings.hapticFeedback,
-                    );
-                  },
-                  icon: CustomPaint(
-                    foregroundPainter: appSettings.hapticFeedback
-                        ? null
-                        : StrikePainter(
-                            color: darkColors.onPrimaryContainer.withValues(
-                              alpha: 0.5,
-                            ),
-                            gapColor: darkColors.primaryContainer,
-                          ),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedSmartPhone03,
-                      color: appSettings.hapticFeedback
-                          ? darkColors.onPrimaryContainer
-                          : darkColors.onPrimaryContainer.withValues(
-                              alpha: 0.5,
-                            ),
-                    ),
-                  ),
-                ),
-              CircleButton(
-                padding: isDesktopOS
-                    ? const EdgeInsetsDirectional.only(start: 8)
-                    : EdgeInsets.zero,
-                tooltip: context.l10n.sound_feedback,
-                onPressed: () {
-                  appSettings.updateSoundFeedback(!appSettings.soundFeedback);
-                },
-                icon: HugeIcon(
-                  icon: appSettings.soundFeedback
-                      ? HugeIcons.strokeRoundedVolumeLow
-                      : HugeIcons.strokeRoundedVolumeOff,
-                  color: appSettings.soundFeedback
-                      ? darkColors.onPrimaryContainer
-                      : darkColors.onPrimaryContainer.withValues(alpha: 0.5),
-                ),
-              ),
-            ],
+          leading: FeedbackToggles(
+            appSettings: appSettings,
+            colors: darkColors,
           ),
           actions: [
             if (!context.useDesktopLayout)
@@ -256,6 +213,9 @@ class _ScanPageState extends State<ScanPage> {
                           onCodes: _handleMultiscan,
                           onCameraChanged: _onCameraChanged,
                           onFrame: DecodeStats.instance.record,
+                          onPermissionChanged: (denied) {
+                            setState(() => _cameraDenied = denied);
+                          },
                         ),
                       ),
                     )
@@ -265,34 +225,19 @@ class _ScanPageState extends State<ScanPage> {
               Positioned(
                 left: tap.dx - 32,
                 top: tap.dy - 32,
-                child: IgnorePointer(
-                  child:
-                      Container(
-                            key: ValueKey(tap),
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 1.5,
-                              ),
-                            ),
-                          )
-                          .animate(
-                            onComplete: (_) {
-                              if (mounted && _focusIndicator == tap) {
-                                setState(() => _focusIndicator = null);
-                              }
-                            },
-                          )
-                          .scale(
-                            begin: const Offset(1.4, 1.4),
-                            duration: 200.ms,
-                            curve: Curves.easeOut,
-                          )
-                          .then(delay: 600.ms)
-                          .fadeOut(duration: 300.ms),
+                child: FocusRing(
+                  key: ValueKey(tap),
+                  onComplete: () {
+                    if (mounted && _focusIndicator == tap) {
+                      setState(() => _focusIndicator = null);
+                    }
+                  },
+                ),
+              ),
+            if (_cameraDenied)
+              Positioned.fill(
+                child: CameraPermissionMessage(
+                  onEnable: () => _readerKey.currentState?.enableCamera(),
                 ),
               ),
             // Top gradient
@@ -310,12 +255,10 @@ class _ScanPageState extends State<ScanPage> {
             Align(
                   alignment: Alignment.topCenter,
                   child: SafeArea(
-                    child: _HelpMessageWidget(
-                      message: context.l10n.scan_help_message,
-                    ),
+                    child: HelpMessage(message: context.l10n.scan_help_message),
                   ),
                 )
-                .animate(target: _isReceivingData ? 0 : 1)
+                .animate(target: _isReceivingData || _cameraDenied ? 0 : 1)
                 .fade(delay: 1.seconds, begin: -0.5)
                 .moveY(
                   delay: 1.seconds,
@@ -325,9 +268,7 @@ class _ScanPageState extends State<ScanPage> {
             Align(
                   alignment: Alignment.topCenter,
                   child: SafeArea(
-                    child: _HelpMessageWidget(
-                      message: context.l10n.low_speed_warning,
-                    ),
+                    child: HelpMessage(message: context.l10n.low_speed_warning),
                   ),
                 )
                 .animate(target: _showLowSpeedWarning ? 1 : 0)
@@ -608,10 +549,12 @@ class _ScanPageState extends State<ScanPage> {
       badgeCount.add();
     }
 
-    _showResultSheet(
-      fileWrappers,
-      elapsedTime,
-      transferredBytes,
+    showReceivedFilesSheet(
+      context,
+      files: fileWrappers,
+      renameController: _renameController,
+      timeInSeconds: elapsedTime,
+      transferredBytes: transferredBytes,
       encrypted: metadata.isEncrypted,
     ).then((discarded) async {
       if (discarded != true && fileWrappers.length == 1) {
@@ -705,140 +648,6 @@ class _ScanPageState extends State<ScanPage> {
     ).then((_) => _reset());
   }
 
-  /// Completes with true if the user discarded the files.
-  Future<bool?> _showResultSheet(
-    List<FileWrapper> files,
-    double timeInSeconds,
-    int transferredBytes, {
-    bool encrypted = false,
-  }) async {
-    final file = files.first;
-    _renameController.text = file.name;
-    final speed = ((transferredBytes / 1000) / timeInSeconds).toStringAsFixed(
-      1,
-    );
-    return showSheet(
-      context: context,
-      title:
-          '${context.l10n.received_in} ${timeInSeconds.toStringAsFixed(1)}s (${speed}kB/s)',
-      body: Column(
-        children: [
-          if (encrypted)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 6,
-                children: [
-                  HugeIcon(
-                    icon: HugeIcons.strokeRoundedSquareLock02,
-                    size: 18,
-                    color: context.color.onSurface,
-                  ),
-                  Text(context.l10n.received_encrypted),
-                ],
-              ),
-            ),
-          if (files.length > 1) ...[
-            FilesPreview(files: files),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(context.l10n.files_count(files.length)),
-            ),
-          ] else ...[
-            GestureDetector(
-              onTap: () {
-                _onTapOpen(file);
-              },
-              child: Container(
-                width: 150,
-                height: 150,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(60),
-                      spreadRadius: 0,
-                      blurRadius: 1,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: file.buildThumbnail(context, size: 150),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: _renameController,
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  suffixIcon: Padding(
-                    padding: const EdgeInsetsGeometry.all(12),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedEdit01,
-                      color: context.color.onSurface,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsetsDirectional.fromSTEB(
-                    48,
-                    0,
-                    0,
-                    8,
-                  ),
-                ),
-                onTap: () {
-                  final dotIndex = _renameController.text.indexOf('.');
-                  final selection = TextSelection(
-                    baseOffset: 0,
-                    extentOffset: dotIndex > 0 ? dotIndex : 0,
-                  );
-                  _renameController.selection = selection;
-                },
-              ),
-            ),
-          ],
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: Row(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      final badgeCount = Provider.of<FileBadgeCount>(
-                        context,
-                        listen: false,
-                      );
-                      for (final f in files) {
-                        badgeCount.subtract();
-                        await f.file.delete();
-                      }
-                      if (mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    },
-                    child: Text(context.l10n.discard),
-                  ),
-                ),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(context.l10n.save),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _handleRegularQRCodeResult(String? text) async {
     setState(() => _shouldScan = false);
     if (_appSettings.hapticFeedback) {
@@ -848,81 +657,7 @@ class _ScanPageState extends State<ScanPage> {
       _soundService.playQRCodeResult();
     }
 
-    final content = text ?? '';
-    showSheet(
-      context: context,
-      title: context.l10n.result,
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 4, 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: context.color.surfaceContainer,
-                border: Border.all(color: context.color.outline),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SelectableText(
-                      content,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    tooltip: context.l10n.copy,
-                    onPressed: () => _copyToClipboard(content),
-                    icon: HugeIcon(
-                      icon: HugeIcons.strokeRoundedCopy01,
-                      color: context.color.primary,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _saveRegularQRCode(content),
-              child: Text(context.l10n.save),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.dismiss),
-            ),
-          ],
-        ),
-      ),
-    ).then((_) {
-      _reset();
-    });
-  }
-
-  void _copyToClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.copied, textAlign: TextAlign.center)),
-    );
-  }
-
-  Future<void> _saveRegularQRCode(String text) async {
-    final navigator = Navigator.of(context);
-    final badgeCount = Provider.of<FileBadgeCount>(context, listen: false);
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      await saveScannedQrCode(text, await qrCodesDirectory());
-      badgeCount.add();
-    } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(error.toString(), textAlign: TextAlign.center)),
-      );
-    }
-    navigator.pop();
+    showQrResultSheet(context, text ?? '').then((_) => _reset());
   }
 
   void _reset() async {
@@ -1087,192 +822,5 @@ class _ScanPageState extends State<ScanPage> {
       unawaited(_cameraController!.setExposureMode(ExposureMode.auto));
       unawaited(_cameraController!.setExposureOffset(0.0));
     }
-  }
-
-  void _onTapOpen(FileWrapper file) async {
-    try {
-      OpenFile.open(file.file.path, type: file.type.mimeType ?? '');
-    } catch (error) {
-      Navigator.of(context).pop();
-      final snackBar = SnackBar(
-        content: Text(error.toString(), textAlign: TextAlign.center),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-  }
-}
-
-class _HelpMessageWidget extends StatelessWidget {
-  const _HelpMessageWidget({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-      child: Container(
-        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(64),
-          color: Colors.black.withAlpha(140),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(75),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 12,
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedInformationCircle,
-              color: Colors.white,
-            ),
-            Flexible(
-              child: Text(message, style: const TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ScanProgressWidget extends StatelessWidget {
-  const ScanProgressWidget({
-    super.key,
-    required this.progress,
-    required this.info,
-    required this.onTapCancel,
-    required this.chunkCount,
-    required this.speed,
-    required this.show,
-  });
-
-  final double progress;
-  final String info;
-  final int chunkCount;
-  final String speed;
-  final bool show;
-  final void Function() onTapCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-          child:
-              Container(
-                    height: 72,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(36),
-                      color: context.color.surface,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(45),
-                          spreadRadius: 0,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-                      child: Row(
-                        spacing: 8,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: CircularProgressIndicator(
-                                  strokeCap: StrokeCap.round,
-                                  value: progress > 1 ? null : progress,
-                                  color: context.color.primary,
-                                  backgroundColor: context.color.outline,
-                                ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: context.color.surface,
-                                ),
-                                width: 44,
-                                height: 44,
-                              ),
-                              Text(
-                                '${(progress.clamp(0, 1) * 100).floor()}%',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Jersey25',
-                                  color: context.color.onSurface,
-                                  height: 1,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                progress > 1
-                                    ? context.l10n.keep_scanning_msg
-                                    : info,
-                                textAlign: TextAlign.end,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontFamily: 'Jersey25',
-                                  color: context.color.onSurface,
-                                  height: 1,
-                                ),
-                              ),
-                              Text(
-                                '$chunkCount | $speed',
-                                style: TextStyle(
-                                  color: context.color.onSurface,
-                                ),
-                                textAlign: TextAlign.end,
-                              ),
-                            ],
-                          ),
-                          IconButton(
-                            onPressed: onTapCancel,
-                            style: IconButton.styleFrom(
-                              minimumSize: const Size(24, 24),
-                              maximumSize: const Size(32, 32),
-                              backgroundColor: context.color.primaryContainer,
-                              foregroundColor: context.color.onSurface,
-                            ),
-                            padding: EdgeInsets.zero,
-                            icon: const Icon(Icons.clear, size: 16),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .animate(target: show ? 1 : 0)
-                  .fade()
-                  .slideY(
-                    begin: 0.75,
-                    end: 0,
-                    duration: 300.ms,
-                    curve: Curves.easeOutBack,
-                  ),
-        ),
-        // The bottom tabs overlap the page on phones; desktop has none.
-        SizedBox(height: max(16, MediaQuery.of(context).padding.bottom - 64)),
-      ],
-    );
   }
 }

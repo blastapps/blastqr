@@ -9,6 +9,8 @@ import 'package:camera/camera.dart' hide ImageFormat;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_zxing/flutter_zxing.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Camera preview that scans every frame for QR codes, using flutter_zxing
 /// only as the decoder. Owning the camera lets us pick its frame rate, zoom
@@ -24,6 +26,7 @@ class QrScanner extends StatefulWidget {
     this.autoRestart = true,
     this.onCameraChanged,
     this.onFrame,
+    this.onPermissionChanged,
   });
 
   final ResolutionPreset resolution;
@@ -51,6 +54,9 @@ class QrScanner extends StatefulWidget {
   /// Every camera frame, after [onCodes], with how long decoding it took, or
   /// with null when it was skipped because every decoder was busy.
   final void Function(Duration? decodeTime, CameraImage image)? onFrame;
+
+  /// Whether camera access is denied. Only iOS, Android and macOS report it.
+  final void Function(bool denied)? onPermissionChanged;
 
   @override
   State<QrScanner> createState() => QrScannerState();
@@ -80,8 +86,27 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   /// one (late frames, a slow initialize) know to do nothing.
   int _generation = 0;
 
+  /// Opening and tearing down cameras run one at a time. On Android all
+  /// cameras share one CameraX session, so disposing an old camera while the
+  /// next one starts also stops the new one's preview, leaving it black.
+  Future<void> _cameraSteps = Future.value();
+
+  Future<void> _runCameraStep(Future<void> Function() step) {
+    final done = _cameraSteps.then((_) => step());
+    _cameraSteps = done.catchError((Object e) {
+      debugPrint('QrScanner: camera step failed: $e');
+    });
+    return done;
+  }
+
   final _decoder = DecodePool();
   bool _closedForLifecycle = false;
+  bool _permissionDenied = false;
+  int _pendingOpens = 0;
+
+  /// Set when the system settings were opened to allow the camera, where the
+  /// user may pick "Ask every time" rather than allowing it outright.
+  bool _askOnReturn = false;
   Codes _results = Codes();
 
   double _zoom = 1.0;
@@ -130,9 +155,10 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        if (_closedForLifecycle) {
+        // Access may have been granted in the system settings meanwhile.
+        if (_closedForLifecycle || _permissionDenied) {
           _closedForLifecycle = false;
-          _open();
+          _reopen();
         }
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
@@ -153,6 +179,61 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     _close();
   }
 
+  // On Android, opening the camera without access asks for it, which pauses
+  // and resumes the app even when it's refused without a prompt. Reopening on
+  // every resume would ask again and again.
+  Future<void> _reopen() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      var status = await Permission.camera.status;
+      if (!mounted || _closedForLifecycle) return;
+      if (!status.isGranted && _askOnReturn) {
+        _askOnReturn = false;
+        status = await _requestPermission();
+        if (status.isGranted) return;
+      }
+      if (!mounted) return;
+      if (!status.isGranted) {
+        _setPermissionDenied(true);
+        return;
+      }
+    }
+    await _open();
+  }
+
+  /// Asks for camera access, or opens the system settings once it can't be
+  /// asked for anymore.
+  Future<void> enableCamera() async {
+    if (Platform.isMacOS) {
+      await launchUrl(_macCameraSettings);
+      return;
+    }
+    final status = await _requestPermission();
+    if (!mounted || status.isGranted) return;
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      _askOnReturn = true;
+      await openAppSettings();
+    }
+  }
+
+  // permission_handler has no macOS implementation.
+  static final _macCameraSettings = Uri.parse(
+    'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera',
+  );
+
+  // The prompt makes the app inactive, and resuming opens the camera. This
+  // only opens it when the prompt didn't, or no prompt was shown.
+  Future<PermissionStatus> _requestPermission() async {
+    final status = await Permission.camera.request();
+    if (mounted &&
+        status.isGranted &&
+        !_closedForLifecycle &&
+        _pendingOpens == 0 &&
+        _controller == null) {
+      unawaited(_open());
+    }
+    return status;
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -161,10 +242,24 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  Future<void> _open() async {
-    await _close();
+  Future<void> _open() {
+    _close();
     final generation = _generation;
+    _pendingOpens++;
+    return _runCameraStep(() async {
+      try {
+        await _openCamera(generation);
+      } finally {
+        _pendingOpens--;
+      }
+    });
+  }
+
+  // Runs as a camera step, so it mustn't wait for _open or _close, which
+  // queue behind it.
+  Future<void> _openCamera(int generation) async {
     bool isCurrent() => mounted && generation == _generation;
+    if (!isCurrent()) return;
 
     final CameraController controller;
     try {
@@ -195,8 +290,9 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
 
     try {
       await controller.initialize();
+      _setPermissionDenied(false);
       if (!isCurrent()) {
-        unawaited(controller.dispose());
+        await _teardown(controller);
         return;
       }
       _controller = controller;
@@ -221,8 +317,28 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       }
     } catch (e) {
       debugPrint('QrScanner: camera setup failed: $e');
-      if (isCurrent()) await _close();
+      if (e is CameraException && _permissionErrors.contains(e.code)) {
+        _setPermissionDenied(true);
+      }
+      if (_controller == controller) {
+        unawaited(_close());
+      } else {
+        await _teardown(controller);
+      }
     }
+  }
+
+  static const _permissionErrors = {
+    'CameraAccessDenied',
+    'CameraAccessDeniedWithoutPrompt',
+    'CameraAccessRestricted',
+    'permission_denied',
+  };
+
+  void _setPermissionDenied(bool denied) {
+    if (denied == _permissionDenied) return;
+    _permissionDenied = denied;
+    if (mounted) widget.onPermissionChanged?.call(denied);
   }
 
   /// The camera follows the phone's physical orientation even though the UI
@@ -267,17 +383,20 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   /// stopping the stream schedules a preview rebuild on a disposed controller.
   /// It also tells [QrScanner.onCameraChanged]. Neither is allowed from
   /// [dispose].
-  Future<void> _close({bool notify = true}) async {
+  Future<void> _close({bool notify = true}) {
     _generation++;
     final controller = _controller;
-    if (controller == null) return;
+    if (controller == null) return Future.value();
     _controller = null;
     _results = Codes();
     if (notify && mounted) {
       setState(() {});
       widget.onCameraChanged?.call(null);
     }
+    return _runCameraStep(() => _teardown(controller));
+  }
 
+  Future<void> _teardown(CameraController controller) async {
     try {
       if (controller.value.isStreamingImages) {
         await controller.stopImageStream().timeout(_teardownTimeout);

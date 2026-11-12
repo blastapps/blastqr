@@ -261,5 +261,7 @@
   "qr_tooltip_fps": "Change playback speed",
   "qr_tooltip_fullscreen": "Full screen",
   "qr_tooltip_tone_on": "Stop detecting the completion tone",
-  "qr_tooltip_tone_off": "Detect the completion tone with the microphone"
+  "qr_tooltip_tone_off": "Detect the completion tone with the microphone",
+  "camera_permission_msg": "blastQR can't access the camera. Allow camera access to receive files.",
+  "enable_camera": "Enable camera"
 }

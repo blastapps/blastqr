@@ -1333,6 +1333,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Detect the completion tone with the microphone'**
   String get qr_tooltip_tone_off;
+
+  /// No description provided for @camera_permission_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'blastQR can\'t access the camera. Allow camera access to receive files.'**
+  String get camera_permission_msg;
+
+  /// No description provided for @enable_camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable camera'**
+  String get enable_camera;
 }
 
 class _AppLocalizationsDelegate

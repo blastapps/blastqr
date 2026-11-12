@@ -721,4 +721,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get qr_tooltip_tone_off => 'اكتشاف نغمة الاكتمال عبر الميكروفون';
+
+  @override
+  String get camera_permission_msg =>
+      'لا يمكن لتطبيق blastQR الوصول إلى الكاميرا. اسمح بالوصول إلى الكاميرا لاستلام الملفات.';
+
+  @override
+  String get enable_camera => 'تفعيل الكاميرا';
 }

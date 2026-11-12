@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   camera_desktop
   desktop_drop
   file_selector_windows
+  permission_handler_windows
   record_windows
   screen_retriever_windows
   share_plus
