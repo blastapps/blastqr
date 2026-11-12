@@ -12,13 +12,14 @@ import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/pick_files.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
@@ -219,23 +220,18 @@ class SendPageState extends State<SendPage> {
     );
   }
 
-  void _pickFileToEncode() async {
-    const XTypeGroup typeGroup = XTypeGroup(label: 'files');
-    final List<XFile> files = await openFiles(
-      acceptedTypeGroups: <XTypeGroup>[typeGroup],
-    );
-    if (files.isNotEmpty && mounted) {
-      _showQrPages(files.map((f) => File(f.path)).toList());
-    }
+  void _pickFileToEncode() => _send(pickFiles().then(_toFileWrappers));
+
+  void _pickMediaToEncode() => _send(_pickMedia().then(_toFileWrappers));
+
+  Future<List<File>> _pickMedia() async {
+    final media = await ImagePicker().pickMultipleMedia();
+    if (media.isEmpty) return const [];
+    return _renamePickedMedia(media);
   }
 
-  void _pickMediaToEncode() async {
-    final picker = ImagePicker();
-    final List<XFile> media = await picker.pickMultipleMedia();
-    if (media.isEmpty) return;
-    final files = await _renamePickedMedia(media);
-    if (mounted) _showQrPages(files);
-  }
+  static Future<List<FileWrapper>> _toFileWrappers(List<File> files) =>
+      Future.wait(files.map((f) => f.toFileWrapper()));
 
   /// On iOS the picker names files `image_picker_<UUID>`, so give them short
   /// camera-style names instead.
@@ -297,24 +293,19 @@ class SendPageState extends State<SendPage> {
       await showFileMissing(context, missing.first.uri.pathSegments.last);
       return;
     }
-    final fileWrappers = await Future.wait(files.map((f) => f.toFileWrapper()));
-    if (!mounted) return;
+    final fileWrappers = await _toFileWrappers(files);
+    if (mounted) await _send(SynchronousFuture(fileWrappers));
+  }
 
-    // Checked before the send options too, so the user isn't asked first.
-    for (final fileWrapper in fileWrappers) {
-      final tooLarge = transferTooLargeMessage(context, fileWrapper.size);
-      if (tooLarge != null) {
-        showFileTooLarge(context, tooLarge);
-        return;
-      }
-    }
+  /// Opens the send sheet right away. Picked files arrive once the picker
+  /// has copied them.
+  Future<void> _send(Future<List<FileWrapper>> files) async {
+    final chosen = await chooseFilesAndSendOptions(context, files);
+    if (chosen == null || !mounted) return;
 
-    final options = await chooseSendOptions(context, fileWrappers);
-    if (options == null || !mounted) return;
-
-    await sendFiles(context, fileWrappers, options);
+    await sendFiles(context, chosen.files, chosen.options);
     if (mounted) {
-      for (final fw in fileWrappers) {
+      for (final fw in chosen.files) {
         _addRecentFile(fw);
       }
     }

@@ -1,23 +1,16 @@
-import 'dart:io';
-
 import 'package:blast_qr/app_settings.dart';
-import 'package:blast_qr/file_bundle.dart';
-import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/features/send/send_options.dart';
-import 'package:blast_qr/features/send/send_plan.dart';
+import 'package:blast_qr/features/send/widgets/preparing_sheet.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
-import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
-import 'package:blast_qr/model/image_compression_settings.dart';
-import 'package:blast_qr/temp_files.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-/// Shows the QR page for [files]. Several files are sent as one bundle,
-/// which the QR page builds. Completes when the QR page is closed.
+/// Prepares [files] for sending with [options] (see [prepareTransfer]) and
+/// shows the QR page for them. Completes when the QR page is closed.
 Future<void> sendFiles(
   BuildContext context,
   List<FileWrapper> files,
@@ -31,62 +24,46 @@ Future<void> sendFiles(
     await showFileMissing(context, files[missing].name);
     return;
   }
-  // Compressing images can bring a bundle under the limit, so such a bundle
-  // is only checked once built.
-  if (files.length == 1 || !files.any(isCompressibleImage)) {
-    final size = files.fold(0, (sum, f) => sum + f.size);
-    final tooLarge = transferTooLargeMessage(context, size);
-    if (tooLarge != null) {
-      await showFileTooLarge(context, tooLarge);
-      return;
-    }
+  // Checked again once prepared, when the real size is known.
+  final tooLarge = transferTooLargeMessage(context, minSendBytes(files));
+  if (tooLarge != null) {
+    await showFileTooLarge(context, tooLarge);
+    return;
   }
+
+  final imageSettings = Provider.of<AppSettings>(
+    context,
+    listen: false,
+  ).imageCompressionSettings;
+  final transfer = await runWithPreparingSheet(
+    context,
+    videoCount: options.compressMedia
+        ? files.where(isCompressibleVideo).length
+        : 0,
+    prepare: (onProgress, cancel) => prepareTransfer(
+      files,
+      options,
+      imageSettings: imageSettings,
+      onProgress: onProgress,
+      cancel: cancel,
+    ),
+  );
+  if (transfer == null || !context.mounted) return;
+  final transferTooLarge = transferTooLargeMessage(
+    context,
+    transfer.bytes.length,
+  );
+  if (transferTooLarge != null) {
+    await showFileTooLarge(context, transferTooLarge);
+    return;
+  }
+
   await Navigator.of(context).push(
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (context) => QrPage(
-        files: files,
-        password: options.password,
-        fileName: options.fileName,
-        compressImages: options.compressImages,
-      ),
+      builder: (context) => QrPage(transfer: transfer),
     ),
   );
-}
-
-/// Zips [files] into a temporary file. Photos are re-encoded first
-/// when [icSettings] is given, as for a single file.
-Future<FileWrapper> createSendBundle(
-  List<FileWrapper> files, {
-  ImageCompressionSettings? icSettings,
-}) async {
-  final entries = <BundleEntry>[];
-  for (final file in files) {
-    if (icSettings != null && isCompressibleImage(file)) {
-      final bytes = await FileQrEncoder.compressImage(
-        await file.file.readAsBytes(),
-        icSettings,
-      );
-      if (bytes != null) {
-        final extension =
-            icSettings.outputFormat.extension ?? file.type.extension;
-        entries.add((
-          name: '${file.nameWithoutExtension}.$extension',
-          path: null,
-          bytes: bytes,
-        ));
-        continue;
-      }
-    }
-    entries.add((name: file.name, path: file.file.path, bytes: null));
-  }
-
-  final directory = Directory('${(await appTempDirectory()).path}/bundles');
-  await directory.create(recursive: true);
-  final timestamp = DateFormat('yyyyMMdd-HHmmss').format(DateTime.now());
-  final path = '${directory.path}/blastqr-$timestamp.zip';
-  await writeBundle(entries, path);
-  return File(path).toFileWrapper();
 }
 
 /// The reason [size] bytes can't be sent with the current QR code size, if

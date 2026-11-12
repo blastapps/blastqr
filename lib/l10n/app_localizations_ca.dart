@@ -100,19 +100,6 @@ class AppLocalizationsCa extends AppLocalizations {
   String get large_file_msg_2 => 'a transferir-se.';
 
   @override
-  String large_file_msg_3(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Vols enviar versions comprimides de menor qualitat d\'aquestes $count imatges?',
-      one:
-          'Vols enviar una versió comprimida de menor qualitat d\'aquesta imatge?',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minutes => 'minuts';
 
   @override
@@ -123,9 +110,6 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get send_large_file => 'Envia igualment';
-
-  @override
-  String get send_compressed_image => 'Envia comprimida';
 
   @override
   String get to_transfer => 'a transferir';
@@ -381,18 +365,15 @@ class AppLocalizationsCa extends AppLocalizations {
       'Mostra tants codis com càpiguen a la pantalla per anar més ràpid';
 
   @override
-  String get images_section => 'Imatges';
+  String get compress_media_by_default => 'Comprimir multimèdia per defecte';
 
   @override
-  String get compress_photos_by_default => 'Comprimir fotos per defecte';
-
-  @override
-  String get compress_photos_by_default_subtitle =>
-      'Activa HD en enviar per mantenir la qualitat original';
+  String get compress_media_by_default_subtitle =>
+      'Fitxers més petits que s\'envien més ràpid, amb menys qualitat';
 
   @override
   String get hd_tooltip =>
-      'Activa-ho per enviar les fotos amb qualitat completa';
+      'Activa-ho per enviar les fotos i els vídeos amb qualitat completa';
 
   @override
   String get camera_section => 'Càmera';
@@ -719,4 +700,75 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get enable_camera => 'Activa la càmera';
+
+  @override
+  String compressing_videos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Comprimint $count vídeos',
+      one: 'Comprimint el vídeo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String time_left_seconds(int seconds) {
+    return 'Queden uns $seconds s';
+  }
+
+  @override
+  String time_left_minutes(int minutes) {
+    return 'Queden uns $minutes min';
+  }
+
+  @override
+  String get preparing_transfer => 'Preparant la transferència...';
+
+  @override
+  String get send_files_title => 'Envia fitxers';
+
+  @override
+  String get photos_and_videos_section => 'Fotos i vídeos';
+
+  @override
+  String get video_quality => 'Qualitat del vídeo';
+
+  @override
+  String get video_quality_hint =>
+      'Els vídeos es comprimeixen a aquesta qualitat quan HD està desactivat';
+
+  @override
+  String get video_quality_original => 'Original';
+
+  @override
+  String get video_quality_low => 'Baixa (540p)';
+
+  @override
+  String get video_quality_lowest => 'Mínima (360p)';
+
+  @override
+  String get video_quality_potato => 'Patata (240p)';
+
+  @override
+  String send_time_seconds(int seconds) {
+    return 'Uns $seconds s per enviar';
+  }
+
+  @override
+  String send_time_minutes(int minutes) {
+    return 'Uns $minutes min per enviar';
+  }
+
+  @override
+  String get stop_sending => 'Vols deixar d\'enviar?';
+
+  @override
+  String get stop_sending_msg => 'El receptor encara no té tot el fitxer.';
+
+  @override
+  String get stop => 'Atura';
+
+  @override
+  String get keep_sending => 'Continua enviant';
 }

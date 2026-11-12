@@ -29,19 +29,10 @@
   "large_file": "Long transfer",
   "large_file_msg_1": "This transfer is large and could take up to",
   "large_file_msg_2": "to transfer.",
-  "large_file_msg_3": "{count, plural, =1{Would you like to send a compressed, lower quality version of this image?} other{Would you like to send compressed, lower quality versions of these {count} images?}}",
-  "@large_file_msg_3": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "minutes": "minutes",
   "image_compression": "Image compression",
   "image_quality": "Quality",
   "send_large_file": "Send anyway",
-  "send_compressed_image": "Send compressed",
   "to_transfer": "to transfer",
   "generating_codes": "Generating codes...",
   "send_help_message": "Scan this QR code using the blastQR app on the device where you want to receive the file",
@@ -132,10 +123,9 @@
   "playback_fps_hint": "20 FPS is the recommended value for best performance on most devices",
   "multi_qr_mode": "Start in fullscreen",
   "multi_qr_mode_subtitle": "Show as many codes as fit on screen for a speed boost",
-  "images_section": "Images",
-  "compress_photos_by_default": "Compress photos by default",
-  "compress_photos_by_default_subtitle": "Turn on HD when sending to keep a photo's full quality",
-  "hd_tooltip": "Enable to send photos in full quality",
+  "compress_media_by_default": "Compress media by default",
+  "compress_media_by_default_subtitle": "Smaller files that send faster, at lower quality",
+  "hd_tooltip": "Enable to send photos and videos in full quality",
   "camera_section": "Camera",
   "camera_resolution_hint": "Most devices will perform better with this setting set to \"High\"",
   "error": "Error",
@@ -263,5 +253,28 @@
   "qr_tooltip_tone_on": "Stop detecting the completion tone",
   "qr_tooltip_tone_off": "Detect the completion tone with the microphone",
   "camera_permission_msg": "blastQR can't access the camera. Allow camera access to receive files.",
-  "enable_camera": "Enable camera"
+  "enable_camera": "Enable camera",
+  "compressing_videos": "{count, plural, =1{Compressing video} other{Compressing {count} videos}}",
+  "@compressing_videos": {"placeholders": {"count": {"type": "int"}}},
+  "time_left_seconds": "About {seconds} s left",
+  "@time_left_seconds": {"placeholders": {"seconds": {"type": "int"}}},
+  "time_left_minutes": "About {minutes} min left",
+  "@time_left_minutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "preparing_transfer": "Preparing transfer...",
+  "send_files_title": "Send files",
+  "photos_and_videos_section": "Photos & videos",
+  "video_quality": "Video quality",
+  "video_quality_hint": "Videos are compressed to this quality when HD is off",
+  "video_quality_original": "Original",
+  "video_quality_low": "Low (540p)",
+  "video_quality_lowest": "Lowest (360p)",
+  "video_quality_potato": "Potato (240p)",
+  "send_time_seconds": "About {seconds} s to send",
+  "@send_time_seconds": {"placeholders": {"seconds": {"type": "int"}}},
+  "send_time_minutes": "About {minutes} min to send",
+  "@send_time_minutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "stop_sending": "Stop sending?",
+  "stop_sending_msg": "The receiver doesn't have the whole file yet.",
+  "stop": "Stop",
+  "keep_sending": "Keep sending"
 }

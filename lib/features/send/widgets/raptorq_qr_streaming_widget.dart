@@ -3,9 +3,8 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/model/file_wrapper.dart';
-import 'package:blast_qr/model/image_compression_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -69,26 +68,25 @@ class RaptorQrStreamingWidgetController with ChangeNotifier {
 
 class RaptorQrStreamingWidget extends StatefulWidget {
   final RaptorQrStreamingWidgetController controller;
-  final FileWrapper file;
+  final PreparedTransfer transfer;
   final int mtu;
   final int fps;
-  final ImageCompressionSettings? imageCompressionSettings;
-
-  final String? password;
-
-  final String? fileName;
-
-  final bool isBundle;
 
   final bool fill;
   final Function()? onTap;
-  final void Function(int)? onStart;
+
+  /// Called once the first codes are ready.
+  final VoidCallback? onStart;
 
   /// Called once per stream when the frames shown reach
   /// [nearlyCompleteFraction] of the frames needed with no loss (K).
   final VoidCallback? onNearlyComplete;
 
   static const double nearlyCompleteFraction = 0.8;
+
+  /// Called once per stream when as many frames as needed with no loss (K)
+  /// have been shown. Before that, the receiver can't have the file.
+  final VoidCallback? onSourceShown;
 
   /// The most codes shown at once in an area of [size]. Fill mode never
   /// shows fewer.
@@ -99,18 +97,15 @@ class RaptorQrStreamingWidget extends StatefulWidget {
 
   const RaptorQrStreamingWidget({
     super.key,
-    required this.file,
+    required this.transfer,
     required this.mtu,
     required this.fps,
     required this.controller,
-    required this.imageCompressionSettings,
-    this.password,
-    this.fileName,
-    this.isBundle = false,
     this.fill = true,
     this.onTap,
     this.onStart,
     this.onNearlyComplete,
+    this.onSourceShown,
   });
 
   @override
@@ -138,6 +133,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   int _nextSeq = 0;
 
   bool _nearlyCompleteReported = false;
+  bool _sourceShownReported = false;
 
   /// What each grid cell shows, and how many times the controller has told
   /// it to change.
@@ -161,7 +157,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
       oldWidget.controller.removeListener(_onControllerTick);
       widget.controller.addListener(_onControllerTick);
     }
-    if (oldWidget.file != widget.file) {
+    if (oldWidget.transfer != widget.transfer) {
       init();
     }
     if (oldWidget.fps != widget.fps) {
@@ -179,20 +175,19 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
 
     debugPrint('Generating QR codes..');
 
+    final transfer = widget.transfer;
     final source = await FileQrEncoder.start(
-      widget.file,
+      transfer.bytes,
       widget.mtu,
-      icSettings: widget.imageCompressionSettings,
-      password: widget.password,
-      fileName: widget.fileName,
-      isBundle: widget.isBundle,
-      onCompressedSize: widget.onStart,
+      gzipped: transfer.gzipped,
+      encrypted: transfer.password != null,
     );
     if (!mounted || generation != _generation) {
       source.dispose();
       return;
     }
     _source = source;
+    widget.onStart?.call();
     _frameSub = source.frames.listen(
       (frame) => _decodeFrame(generation, frame),
     );
@@ -263,12 +258,16 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
 
   void _reportNearlyComplete() {
     final sourceCount = _source?.sourceCount;
-    if (_nearlyCompleteReported || sourceCount == null) return;
+    if (sourceCount == null) return;
     final threshold =
         (sourceCount * RaptorQrStreamingWidget.nearlyCompleteFraction).ceil();
-    if (_nextSeq >= threshold) {
+    if (!_nearlyCompleteReported && _nextSeq >= threshold) {
       _nearlyCompleteReported = true;
       widget.onNearlyComplete?.call();
+    }
+    if (!_sourceShownReported && _nextSeq >= sourceCount) {
+      _sourceShownReported = true;
+      widget.onSourceShown?.call();
     }
   }
 
@@ -299,6 +298,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
     _cellAdvanced.clear();
     _nextSeq = 0;
     _nearlyCompleteReported = false;
+    _sourceShownReported = false;
   }
 
   @override

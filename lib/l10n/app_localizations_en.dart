@@ -99,19 +99,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get large_file_msg_2 => 'to transfer.';
 
   @override
-  String large_file_msg_3(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'Would you like to send compressed, lower quality versions of these $count images?',
-      one:
-          'Would you like to send a compressed, lower quality version of this image?',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minutes => 'minutes';
 
   @override
@@ -122,9 +109,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get send_large_file => 'Send anyway';
-
-  @override
-  String get send_compressed_image => 'Send compressed';
 
   @override
   String get to_transfer => 'to transfer';
@@ -380,17 +364,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show as many codes as fit on screen for a speed boost';
 
   @override
-  String get images_section => 'Images';
+  String get compress_media_by_default => 'Compress media by default';
 
   @override
-  String get compress_photos_by_default => 'Compress photos by default';
+  String get compress_media_by_default_subtitle =>
+      'Smaller files that send faster, at lower quality';
 
   @override
-  String get compress_photos_by_default_subtitle =>
-      'Turn on HD when sending to keep a photo\'s full quality';
-
-  @override
-  String get hd_tooltip => 'Enable to send photos in full quality';
+  String get hd_tooltip => 'Enable to send photos and videos in full quality';
 
   @override
   String get camera_section => 'Camera';
@@ -716,4 +697,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enable_camera => 'Enable camera';
+
+  @override
+  String compressing_videos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Compressing $count videos',
+      one: 'Compressing video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String time_left_seconds(int seconds) {
+    return 'About $seconds s left';
+  }
+
+  @override
+  String time_left_minutes(int minutes) {
+    return 'About $minutes min left';
+  }
+
+  @override
+  String get preparing_transfer => 'Preparing transfer...';
+
+  @override
+  String get send_files_title => 'Send files';
+
+  @override
+  String get photos_and_videos_section => 'Photos & videos';
+
+  @override
+  String get video_quality => 'Video quality';
+
+  @override
+  String get video_quality_hint =>
+      'Videos are compressed to this quality when HD is off';
+
+  @override
+  String get video_quality_original => 'Original';
+
+  @override
+  String get video_quality_low => 'Low (540p)';
+
+  @override
+  String get video_quality_lowest => 'Lowest (360p)';
+
+  @override
+  String get video_quality_potato => 'Potato (240p)';
+
+  @override
+  String send_time_seconds(int seconds) {
+    return 'About $seconds s to send';
+  }
+
+  @override
+  String send_time_minutes(int minutes) {
+    return 'About $minutes min to send';
+  }
+
+  @override
+  String get stop_sending => 'Stop sending?';
+
+  @override
+  String get stop_sending_msg =>
+      'The receiver doesn\'t have the whole file yet.';
+
+  @override
+  String get stop => 'Stop';
+
+  @override
+  String get keep_sending => 'Keep sending';
 }

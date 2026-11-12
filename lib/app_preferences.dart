@@ -1,5 +1,6 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:blast_qr/model/video_quality.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppPreferences {
   static int defaultMtu = 2935;
   static int defaultFps = 25;
+  static const defaultVideoQuality = VideoQuality.lowest;
 
   /// Files up to this size are sent with [smallFileMtu] and [smallFileFps].
   static const smallFileBytes = 30000;
@@ -14,7 +16,7 @@ class AppPreferences {
   static const smallFileFps = 15;
 
   // Named after the setting's old "always compress images" title.
-  static const _compressPhotosKey = 'alwaysCompressImages';
+  static const _compressMediaKey = 'alwaysCompressImages';
 
   static double get defaultCameraZoom => 1.25;
 
@@ -40,7 +42,8 @@ class AppPreferences {
   static bool? _acousticDetection;
   static bool? _multipleQrCodes;
   static bool? _hasSeenMicPrompt;
-  static bool? _compressPhotosByDefault;
+  static bool? _compressMediaByDefault;
+  static VideoQuality? _videoQuality;
   static bool? _showInFilesApp;
 
   static Locale? get locale => _localeId == null ? null : Locale(_localeId!);
@@ -66,7 +69,8 @@ class AppPreferences {
   static bool get acousticDetection => _acousticDetection ?? false;
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
   static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
-  static bool get compressPhotosByDefault => _compressPhotosByDefault ?? true;
+  static bool get compressMediaByDefault => _compressMediaByDefault ?? true;
+  static VideoQuality get videoQuality => _videoQuality ?? defaultVideoQuality;
   static bool get showInFilesApp => _showInFilesApp ?? false;
 
   static Future<void> setLocale(String? localeId) async {
@@ -196,10 +200,16 @@ class AppPreferences {
     _hasSeenMicPrompt = value;
   }
 
-  static Future<void> setCompressPhotosByDefault(bool value) async {
+  static Future<void> setCompressMediaByDefault(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    sp.setBool(_compressPhotosKey, value);
-    _compressPhotosByDefault = value;
+    sp.setBool(_compressMediaKey, value);
+    _compressMediaByDefault = value;
+  }
+
+  static Future<void> setVideoQuality(VideoQuality value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setString('videoQuality', value.name);
+    _videoQuality = value;
   }
 
   static Future<void> setShowInFilesApp(bool value) async {
@@ -235,7 +245,10 @@ class AppPreferences {
     _acousticDetection = sp.getBool('acousticDetection') ?? false;
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
     _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
-    _compressPhotosByDefault = sp.getBool(_compressPhotosKey) ?? true;
+    _compressMediaByDefault = sp.getBool(_compressMediaKey) ?? true;
+    _videoQuality =
+        VideoQuality.values.asNameMap()[sp.getString('videoQuality')] ??
+        defaultVideoQuality;
     _showInFilesApp = sp.getBool('showInFilesApp') ?? false;
   }
 }

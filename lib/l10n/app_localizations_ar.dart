@@ -99,17 +99,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get large_file_msg_2 => 'لنقله.';
 
   @override
-  String large_file_msg_3(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'هل تريد إرسال نسخ مضغوطة وأقل جودة من هذه الصور ($count)؟',
-      one: 'هل تريد إرسال نسخة مضغوطة وأقل جودة من هذه الصورة؟',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minutes => 'دقيقة';
 
   @override
@@ -120,9 +109,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get send_large_file => 'إرسال على أي حال';
-
-  @override
-  String get send_compressed_image => 'إرسال مضغوط';
 
   @override
   String get to_transfer => 'للنقل';
@@ -382,17 +368,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'عرض أكبر عدد ممكن من الرموز على الشاشة لزيادة السرعة';
 
   @override
-  String get images_section => 'الصور';
+  String get compress_media_by_default => 'ضغط الوسائط افتراضيًا';
 
   @override
-  String get compress_photos_by_default => 'ضغط الصور افتراضيًا';
+  String get compress_media_by_default_subtitle =>
+      'ملفات أصغر تُرسل أسرع، بجودة أقل';
 
   @override
-  String get compress_photos_by_default_subtitle =>
-      'فعّل HD عند الإرسال للحفاظ على الجودة الأصلية';
-
-  @override
-  String get hd_tooltip => 'فعّله لإرسال الصور بالجودة الكاملة';
+  String get hd_tooltip => 'فعّله لإرسال الصور ومقاطع الفيديو بالجودة الكاملة';
 
   @override
   String get camera_section => 'الكاميرا';
@@ -728,4 +711,75 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enable_camera => 'تفعيل الكاميرا';
+
+  @override
+  String compressing_videos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'جارٍ ضغط $count من مقاطع الفيديو',
+      one: 'جارٍ ضغط الفيديو',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String time_left_seconds(int seconds) {
+    return 'يتبقى حوالي $seconds ثانية';
+  }
+
+  @override
+  String time_left_minutes(int minutes) {
+    return 'يتبقى حوالي $minutes دقيقة';
+  }
+
+  @override
+  String get preparing_transfer => 'جارٍ تجهيز النقل...';
+
+  @override
+  String get send_files_title => 'إرسال الملفات';
+
+  @override
+  String get photos_and_videos_section => 'الصور ومقاطع الفيديو';
+
+  @override
+  String get video_quality => 'جودة الفيديو';
+
+  @override
+  String get video_quality_hint =>
+      'تُضغط مقاطع الفيديو إلى هذه الجودة عند إيقاف HD';
+
+  @override
+  String get video_quality_original => 'الأصلية';
+
+  @override
+  String get video_quality_low => 'منخفضة (540p)';
+
+  @override
+  String get video_quality_lowest => 'الأدنى (360p)';
+
+  @override
+  String get video_quality_potato => 'بطاطس (240p)';
+
+  @override
+  String send_time_seconds(int seconds) {
+    return 'حوالي $seconds ثانية للإرسال';
+  }
+
+  @override
+  String send_time_minutes(int minutes) {
+    return 'حوالي $minutes دقيقة للإرسال';
+  }
+
+  @override
+  String get stop_sending => 'إيقاف الإرسال؟';
+
+  @override
+  String get stop_sending_msg => 'لم يستلم المستقبِل الملف كاملًا بعد.';
+
+  @override
+  String get stop => 'إيقاف';
+
+  @override
+  String get keep_sending => 'متابعة الإرسال';
 }

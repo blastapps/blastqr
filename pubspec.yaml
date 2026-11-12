@@ -45,6 +45,8 @@ dependencies:
   raptorq_flutter: ^0.1.1
   blastqr_crypto:
     path: packages/blastqr_crypto
+  blastqr_video:
+    path: packages/blastqr_video
   share_plus: ^12.0.2
   url_launcher: ^6.3.3
   image: ^4.8.0

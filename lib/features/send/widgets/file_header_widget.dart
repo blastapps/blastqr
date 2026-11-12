@@ -26,11 +26,13 @@ class FileHeaderWidget extends StatelessWidget {
 
   final String? name;
 
+  static String _kb(int bytes) => '${(bytes / 1000).toStringAsFixed(0)} KB';
+
   @override
   Widget build(BuildContext context) {
     final file = files.first;
     final size = files.fold(0, (sum, f) => sum + f.size);
-    final sizeLabel = '${(size / 1000).toStringAsFixed(0)} KB';
+    final sizeLabel = _kb(size);
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Stack(
@@ -100,16 +102,19 @@ class FileHeaderWidget extends StatelessWidget {
                         softWrap: false,
                       ),
                     ),
-                    if (compressedSize != null && compressedSize != size)
+                    // What's sent also holds the name, and the encryption
+                    // when there's a password, so it's only shown when
+                    // compressing visibly shrank it.
+                    if (compressedSize != null &&
+                        compressedSize! < size &&
+                        _kb(compressedSize!) != sizeLabel)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         spacing: 4,
                         children: [
                           Text(sizeLabel),
                           const Icon(Icons.arrow_forward, size: 14),
-                          Text(
-                            '${(compressedSize! / 1000).toStringAsFixed(0)} KB',
-                          ),
+                          Text(_kb(compressedSize!)),
                         ],
                       )
                     else

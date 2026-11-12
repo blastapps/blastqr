@@ -40,6 +40,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  blastqr_video:
+    dependency: "direct main"
+    description:
+      path: "packages/blastqr_video"
+      relative: true
+    source: path
+    version: "0.1.0"
   boolean_selector:
     dependency: transitive
     description:

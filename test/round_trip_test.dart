@@ -11,6 +11,7 @@ import 'package:blast_qr/file_bundle.dart';
 import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/features/scan/transfer_tracker.dart';
 import 'package:blast_qr/features/send/helpers/file_qr_encoder.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
 import 'package:blast_qr/raptorq/raptorq_decoder.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
@@ -28,8 +29,8 @@ final _cryptoLibraryPath = nativeLibraryPath('rust_lib_blastqr_crypto');
 
 final _skip =
     File(_libraryPath).existsSync() && File(_cryptoLibraryPath).existsSync()
-        ? false
-        : 'RaptorQ or crypto library not built (see top of file)';
+    ? false
+    : 'RaptorQ or crypto library not built (see top of file)';
 
 /// Bytes that don't compress (so gzip is dropped).
 Uint8List _random(int length, {int seed = 1}) {
@@ -63,8 +64,7 @@ void main() {
   /// [receiverPasswords] in order (all on the same received data, like the
   /// app does), counting wrong ones in `wrongAttempts`. With [isBundle],
   /// [content] is a zip that the receiver extracts into `files`.
-  Future<({File file, List<File> files, bool gzipped, int wrongAttempts})>
-  send(
+  Future<({File file, List<File> files, bool gzipped, int wrongAttempts})> send(
     String fileName,
     Uint8List content, {
     bool tryGzip = true,
@@ -154,7 +154,10 @@ void main() {
 
   test('compressible file arrives intact and gzipped', () async {
     final content = utf8.encode('All work and no play. ' * 20000);
-    final (:file, :gzipped, wrongAttempts: _, files: _) = await send('notes.txt', content);
+    final (:file, :gzipped, wrongAttempts: _, files: _) = await send(
+      'notes.txt',
+      content,
+    );
 
     expect(gzipped, isTrue);
     expect(nameOf(file), 'notes.txt');
@@ -163,7 +166,10 @@ void main() {
 
   test('incompressible file arrives intact without gzip', () async {
     final content = _random(300000);
-    final (:file, :gzipped, wrongAttempts: _, files: _) = await send('photo.jpg', content);
+    final (:file, :gzipped, wrongAttempts: _, files: _) = await send(
+      'photo.jpg',
+      content,
+    );
 
     expect(gzipped, isFalse);
     expect(nameOf(file), 'photo.jpg');
@@ -184,7 +190,10 @@ void main() {
   }, skip: _skip);
 
   test('empty file arrives as an empty file', () async {
-    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send('empty.txt', Uint8List(0));
+    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
+      'empty.txt',
+      Uint8List(0),
+    );
 
     expect(nameOf(file), 'empty.txt');
     expect(file.readAsBytesSync(), isEmpty);
@@ -200,17 +209,22 @@ void main() {
     expect(file.readAsBytesSync(), content);
   }, skip: _skip);
 
-  test('large file split into several RaptorQ blocks', () async {
-    // 96-byte symbols: ~6.5 MB spans 2 blocks.
-    final content = _random(6500000, seed: 4);
-    final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
-      'archive.zip',
-      content,
-      mtu: 100,
-      catchRate: 0.8,
-    );
-    expect(file.readAsBytesSync(), content);
-  }, skip: _skip, timeout: const Timeout(Duration(minutes: 5)));
+  test(
+    'large file split into several RaptorQ blocks',
+    () async {
+      // 96-byte symbols: ~6.5 MB spans 2 blocks.
+      final content = _random(6500000, seed: 4);
+      final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
+        'archive.zip',
+        content,
+        mtu: 100,
+        catchRate: 0.8,
+      );
+      expect(file.readAsBytesSync(), content);
+    },
+    skip: _skip,
+    timeout: const Timeout(Duration(minutes: 5)),
+  );
 
   test('a sender-chosen path cannot escape the folder', () async {
     final (:file, gzipped: _, wrongAttempts: _, files: _) = await send(
@@ -305,10 +319,7 @@ void main() {
         tryGzip: false,
         password: 'pw',
       );
-      expect(
-        encrypted.bytes.length,
-        plain.bytes.length + envelopeOverhead(),
-      );
+      expect(encrypted.bytes.length, plain.bytes.length + envelopeOverhead());
       expect(envelopeOverhead(), 52);
     }, skip: _skip);
   });

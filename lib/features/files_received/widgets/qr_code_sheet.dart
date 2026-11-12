@@ -42,7 +42,6 @@ Future<void> showQrCodeSheet(
           ),
         ),
         ListTile(
-          dense: true,
           onTap: () {
             Navigator.of(context).pop();
             Clipboard.setData(ClipboardData(text: code.text));
@@ -59,7 +58,6 @@ Future<void> showQrCodeSheet(
           title: Text(context.l10n.copy),
         ),
         ListTile(
-          dense: true,
           onTap: onDelete,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedDelete01,

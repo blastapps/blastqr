@@ -6,9 +6,9 @@ import 'package:blast_qr/features/files_received/received_items.dart';
 import 'package:blast_qr/features/files_received/save_to_downloads.dart';
 import 'package:blast_qr/features/files_received/widgets/file_options_sheet.dart';
 import 'package:blast_qr/features/files_received/widgets/qr_code_sheet.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/features/send/send_files.dart';
 import 'package:blast_qr/features/send/send_options.dart';
-import 'package:blast_qr/features/send/send_plan.dart';
 import 'package:blast_qr/features/send/widgets/custom_password_sheet.dart';
 import 'package:blast_qr/features/send/widgets/hd_toggle.dart';
 import 'package:blast_qr/file_name_utils.dart';
@@ -101,9 +101,9 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
     );
     if (!mounted) return;
     final hd = ValueNotifier(
-      !Provider.of<AppSettings>(context, listen: false).compressPhotosByDefault,
+      !Provider.of<AppSettings>(context, listen: false).compressMediaByDefault,
     );
-    final showsHd = files.any(isCompressibleImage);
+    final showsHd = files.any(isCompressibleMedia);
     showSheet(
       context: context,
       title: context.l10n.files_selected(files.length),
@@ -117,7 +117,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
           SendTile(
             onTap: () {
               Navigator.of(context).pop();
-              _sendSelectedFiles(files, plainSend(compressImages: !hd.value));
+              _sendSelectedFiles(files, plainSend(compressMedia: !hd.value));
             },
           ),
           SendEncryptedTile(
@@ -125,7 +125,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
               Navigator.of(context).pop();
               _sendSelectedFiles(
                 files,
-                encryptedSend(compressImages: !hd.value),
+                encryptedSend(compressMedia: !hd.value),
               );
             },
             onLongPress: () async {
@@ -135,13 +135,12 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
               _sendSelectedFiles(files, (
                 password: password,
                 fileName: null,
-                compressImages: !hd.value,
+                compressMedia: !hd.value,
               ));
             },
           ),
           if (Platform.isAndroid)
             ListTile(
-              dense: true,
               onTap: () {
                 Navigator.of(context).pop();
                 _saveAllToDownloads(files);
@@ -153,7 +152,6 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
               title: Text(context.l10n.save_to_downloads),
             ),
           ListTile(
-            dense: true,
             onTap: () {
               Navigator.of(context).pop();
               _deleteAllSelected([for (final f in files) f.file]);

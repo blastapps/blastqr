@@ -32,14 +32,11 @@ void main() {
     Future<void> pumpAlert(
       WidgetTester tester, {
       int transferBytes = 2400000,
-      int compressibleImages = 0,
     }) => _pump(
       tester,
       FileTooLargeAlertWidget(
         transferBytes: transferBytes,
-        compressibleImages: compressibleImages,
         onAcknowledge: () {},
-        onRequestCompressedImage: (_) {},
       ),
     );
 
@@ -50,26 +47,11 @@ void main() {
       expect(_text(' 5 minutes '), findsOneWidget);
     });
 
-    testWidgets('only offers sending as is without images', (tester) async {
+    testWidgets('only offers sending anyway', (tester) async {
       await pumpAlert(tester);
 
       expect(find.text('Send anyway'), findsOneWidget);
-      expect(find.text('Send compressed'), findsNothing);
-      expect(_text('lower quality'), findsNothing);
-    });
-
-    testWidgets('offers compressing one image', (tester) async {
-      await pumpAlert(tester, compressibleImages: 1);
-
-      expect(find.text('Send compressed'), findsOneWidget);
-      expect(_text('this image?'), findsOneWidget);
-    });
-
-    testWidgets('offers compressing several images', (tester) async {
-      await pumpAlert(tester, compressibleImages: 3);
-
-      expect(find.text('Send compressed'), findsOneWidget);
-      expect(_text('these 3 images?'), findsOneWidget);
+      expect(find.byType(ElevatedButton), findsNothing);
     });
   });
 
@@ -99,6 +81,20 @@ void main() {
 
       expect(find.text('9000 KB'), findsOneWidget);
       expect(find.text('2500 KB'), findsOneWidget);
+    });
+
+    testWidgets('hides a size that only grew with the name', (tester) async {
+      await _pump(
+        tester,
+        FileHeaderWidget(
+          files: [_pdf(5010000)],
+          compressedSize: 5010180,
+          onTapDismiss: () {},
+        ),
+      );
+
+      expect(find.text('5010 KB'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_forward), findsNothing);
     });
 
     testWidgets('hides an unchanged compressed size', (tester) async {

@@ -1,19 +1,12 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:blast_qr/crypto/transfer_crypto.dart';
 import 'package:blast_qr/features/send/helpers/qr_lookup_table.dart';
 import 'package:blast_qr/model/blast_qrcode_data.dart';
-import 'package:blast_qr/model/file_wrapper.dart';
-import 'package:blast_qr/model/image_compression_settings.dart';
-import 'package:blast_qr/model/transfer_container.dart';
 import 'package:blast_qr/raptorq/raptorq_streaming_encoder.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path/path.dart' as p;
 import 'package:qr/qr.dart';
 
 /// One rendered QR frame. [seq] is its position in the stream (0, 1, 2, ...).
@@ -83,10 +76,6 @@ void _renderWorker(_WorkerInit init) {
     }
   }
   return (moduleCount, pixels);
-}
-
-Uint8List _gzipCompress(Uint8List original) {
-  return gzip.encode(original) as Uint8List;
 }
 
 /// An endless stream of rendered QR frames for one file.
@@ -176,43 +165,6 @@ class QrFrameSource {
   }
 }
 
-/// Builds the transfer object (see [TransferContainer]): the metadata block
-/// with [fileName], then [content], gzipped as a whole if [tryGzip] and only
-/// if that makes it smaller, then encrypted if a [password] is given.
-/// Returns whether gzip was kept.
-Future<({Uint8List bytes, bool gzipped})> buildTransferObject({
-  required String fileName,
-  required Uint8List content,
-  required bool tryGzip,
-  String? password,
-  bool isBundle = false,
-}) async {
-  final metadata = TransferContainer.encodeMetadata(
-    fileName: fileName,
-    isBundle: isBundle,
-  );
-  var bytes = Uint8List(metadata.length + content.length)
-    ..setAll(0, metadata)
-    ..setAll(metadata.length, content);
-
-  var gzipped = false;
-  if (tryGzip) {
-    final compressed = await compute(_gzipCompress, bytes);
-    // Only keep gzip when it helps. This also keeps files near the size
-    // limit from growing past what the u32 header can describe.
-    if (compressed.length < bytes.length) {
-      bytes = compressed;
-      gzipped = true;
-    }
-  }
-  // Encrypt last: compressed ciphertext wouldn't shrink, and the filename
-  // in the metadata ends up encrypted too.
-  if (password != null) {
-    bytes = await TransferCrypto.encrypt(bytes, password);
-  }
-  return (bytes: bytes, gzipped: gzipped);
-}
-
 /// The header shared by every frame of one send, with a new random session
 /// id unless [sessionId] is given.
 Uint8List buildFrameHeader({
@@ -237,63 +189,23 @@ Uint8List buildFrameHeader({
 class FileQrEncoder {
   const FileQrEncoder._();
 
-  /// Prepares [file] for sending and starts an endless frame stream.
+  /// Starts an endless frame stream for [transfer], a transfer object from
+  /// [buildTransferObject].
   ///
   /// The caller must [QrFrameSource.dispose] the result.
   static Future<QrFrameSource> start(
-    FileWrapper file,
+    Uint8List transfer,
     int mtu, {
-    ImageCompressionSettings? icSettings,
-    String? password,
-    String? fileName,
-    bool isBundle = false,
-    void Function(int)? onCompressedSize,
+    required bool gzipped,
+    required bool encrypted,
   }) async {
-    var bytes = await file.file.readAsBytes();
-    var gzipped = !file.type.isPrecompressed;
-    var fileExtension = file.type.extension;
-    var reencoded = false;
-
-    // A re-encoded image takes the output format's extension.
-    if (icSettings != null && file.type.allowsImageCompression) {
-      final compressedImage = await compressImage(bytes, icSettings);
-      if (compressedImage != null) {
-        bytes = compressedImage;
-        gzipped = false;
-        fileExtension = icSettings.outputFormat.extension ?? fileExtension;
-        reencoded = true;
-      }
-    }
-
-    // A renamed file keeps the name as typed, except that a re-encoded image
-    // still takes the output format's extension.
-    final sentName = switch (fileName) {
-      null => '${file.nameWithoutExtension}.$fileExtension',
-      _ when reencoded =>
-        '${p.basenameWithoutExtension(fileName)}.$fileExtension',
-      _ => fileName,
-    };
-
-    final transfer = await buildTransferObject(
-      fileName: sentName,
-      content: bytes,
-      tryGzip: gzipped,
-      password: password,
-      isBundle: isBundle,
-    );
-    bytes = transfer.bytes;
-
-    final actualTransferSize = bytes.length;
-    debugPrint('Compressed file: ${file.size} -> $actualTransferSize');
-    onCompressedSize?.call(actualTransferSize);
-
     final encoder = RaptorqStreamingEncoder(mtu: mtu);
-    await encoder.init(bytes);
+    await encoder.init(transfer);
 
     final header = buildFrameHeader(
-      gzipped: transfer.gzipped,
-      encrypted: password != null,
-      transferLength: actualTransferSize,
+      gzipped: gzipped,
+      encrypted: encrypted,
+      transferLength: transfer.length,
       symbolSize: encoder.symbolSize,
     );
     final qrVersion = pickQrVersion(mtu);
@@ -327,29 +239,5 @@ class FileQrEncoder {
       }
     }
     return 40;
-  }
-
-  static Future<Uint8List?> compressImage(
-    Uint8List bytes,
-    ImageCompressionSettings settings,
-  ) async {
-    try {
-      final compressed = await FlutterImageCompress.compressWithList(
-        bytes,
-        minHeight: settings.minSize,
-        minWidth: settings.minSize,
-        quality: settings.quality,
-        format: settings.outputFormat.toCompressFormat(),
-        keepExif: true,
-      );
-      if (compressed.length >= bytes.length) {
-        debugPrint('Compressed image is not smaller. Sending original');
-        return null;
-      }
-      return compressed;
-    } catch (e) {
-      debugPrint('Image compression failed. Reverting to file compression');
-      return null;
-    }
   }
 }

@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/features/send/send_options.dart';
-import 'package:blast_qr/features/send/send_plan.dart';
 import 'package:blast_qr/features/send/widgets/custom_password_sheet.dart';
 import 'package:blast_qr/features/send/widgets/hd_toggle.dart';
 import 'package:blast_qr/l10n/extension.dart';
@@ -30,7 +30,7 @@ Future<void> showFileOptionsSheet(
   required VoidCallback onDelete,
 }) {
   final hd = ValueNotifier(
-    !Provider.of<AppSettings>(context, listen: false).compressPhotosByDefault,
+    !Provider.of<AppSettings>(context, listen: false).compressMediaByDefault,
   );
   return showSheet(
     context: context,
@@ -41,7 +41,7 @@ Future<void> showFileOptionsSheet(
           file: file,
           detail: DateFormat('yyyy-MM-dd HH:mm:ss').format(file.modified),
           onTapThumbnail: onOpen,
-          thumbnailTrailing: isCompressibleImage(file)
+          thumbnailTrailing: isCompressibleMedia(file)
               ? HdToggle(hd: hd)
               : null,
         ),
@@ -49,13 +49,13 @@ Future<void> showFileOptionsSheet(
         SendTile(
           onTap: () {
             Navigator.of(context).pop();
-            onSend(plainSend(compressImages: !hd.value));
+            onSend(plainSend(compressMedia: !hd.value));
           },
         ),
         SendEncryptedTile(
           onTap: () {
             Navigator.of(context).pop();
-            onSend(encryptedSend(compressImages: !hd.value));
+            onSend(encryptedSend(compressMedia: !hd.value));
           },
           onLongPress: () async {
             Navigator.of(context).pop();
@@ -64,13 +64,12 @@ Future<void> showFileOptionsSheet(
             onSend((
               password: password,
               fileName: null,
-              compressImages: !hd.value,
+              compressMedia: !hd.value,
             ));
           },
         ),
         const _DottedDivider(),
         ListTile(
-          dense: true,
           onTap: onOpen,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedPackageOpen,
@@ -81,7 +80,6 @@ Future<void> showFileOptionsSheet(
         if (onShare != null)
           Builder(
             builder: (tileContext) => ListTile(
-              dense: true,
               onTap: () {
                 final box = tileContext.findRenderObject() as RenderBox;
                 onShare(box.localToGlobal(Offset.zero) & box.size);
@@ -95,7 +93,6 @@ Future<void> showFileOptionsSheet(
           ),
         if (onShowInFileManager != null)
           ListTile(
-            dense: true,
             onTap: onShowInFileManager,
             leading: HugeIcon(
               icon: HugeIcons.strokeRoundedFolderOpen,
@@ -105,7 +102,6 @@ Future<void> showFileOptionsSheet(
           ),
         if (Platform.isAndroid)
           ListTile(
-            dense: true,
             onTap: onSaveToDownloads,
             leading: HugeIcon(
               icon: HugeIcons.strokeRoundedDownload01,
@@ -114,7 +110,6 @@ Future<void> showFileOptionsSheet(
             title: Text(context.l10n.save_to_downloads),
           ),
         ListTile(
-          dense: true,
           onTap: onRename,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedEdit01,
@@ -123,7 +118,6 @@ Future<void> showFileOptionsSheet(
           title: Text(context.l10n.rename),
         ),
         ListTile(
-          dense: true,
           onTap: onDelete,
           leading: HugeIcon(
             icon: HugeIcons.strokeRoundedDelete01,

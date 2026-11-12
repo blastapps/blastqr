@@ -284,12 +284,6 @@ abstract class AppLocalizations {
   /// **'to transfer.'**
   String get large_file_msg_2;
 
-  /// No description provided for @large_file_msg_3.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Would you like to send a compressed, lower quality version of this image?} other{Would you like to send compressed, lower quality versions of these {count} images?}}'**
-  String large_file_msg_3(int count);
-
   /// No description provided for @minutes.
   ///
   /// In en, this message translates to:
@@ -313,12 +307,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send anyway'**
   String get send_large_file;
-
-  /// No description provided for @send_compressed_image.
-  ///
-  /// In en, this message translates to:
-  /// **'Send compressed'**
-  String get send_compressed_image;
 
   /// No description provided for @to_transfer.
   ///
@@ -776,28 +764,22 @@ abstract class AppLocalizations {
   /// **'Show as many codes as fit on screen for a speed boost'**
   String get multi_qr_mode_subtitle;
 
-  /// No description provided for @images_section.
+  /// No description provided for @compress_media_by_default.
   ///
   /// In en, this message translates to:
-  /// **'Images'**
-  String get images_section;
+  /// **'Compress media by default'**
+  String get compress_media_by_default;
 
-  /// No description provided for @compress_photos_by_default.
+  /// No description provided for @compress_media_by_default_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Compress photos by default'**
-  String get compress_photos_by_default;
-
-  /// No description provided for @compress_photos_by_default_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Turn on HD when sending to keep a photo\'s full quality'**
-  String get compress_photos_by_default_subtitle;
+  /// **'Smaller files that send faster, at lower quality'**
+  String get compress_media_by_default_subtitle;
 
   /// No description provided for @hd_tooltip.
   ///
   /// In en, this message translates to:
-  /// **'Enable to send photos in full quality'**
+  /// **'Enable to send photos and videos in full quality'**
   String get hd_tooltip;
 
   /// No description provided for @camera_section.
@@ -1345,6 +1327,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable camera'**
   String get enable_camera;
+
+  /// No description provided for @compressing_videos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Compressing video} other{Compressing {count} videos}}'**
+  String compressing_videos(int count);
+
+  /// No description provided for @time_left_seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'About {seconds} s left'**
+  String time_left_seconds(int seconds);
+
+  /// No description provided for @time_left_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min left'**
+  String time_left_minutes(int minutes);
+
+  /// No description provided for @preparing_transfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing transfer...'**
+  String get preparing_transfer;
+
+  /// No description provided for @send_files_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Send files'**
+  String get send_files_title;
+
+  /// No description provided for @photos_and_videos_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & videos'**
+  String get photos_and_videos_section;
+
+  /// No description provided for @video_quality.
+  ///
+  /// In en, this message translates to:
+  /// **'Video quality'**
+  String get video_quality;
+
+  /// No description provided for @video_quality_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos are compressed to this quality when HD is off'**
+  String get video_quality_hint;
+
+  /// No description provided for @video_quality_original.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get video_quality_original;
+
+  /// No description provided for @video_quality_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low (540p)'**
+  String get video_quality_low;
+
+  /// No description provided for @video_quality_lowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest (360p)'**
+  String get video_quality_lowest;
+
+  /// No description provided for @video_quality_potato.
+  ///
+  /// In en, this message translates to:
+  /// **'Potato (240p)'**
+  String get video_quality_potato;
+
+  /// No description provided for @send_time_seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'About {seconds} s to send'**
+  String send_time_seconds(int seconds);
+
+  /// No description provided for @send_time_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min to send'**
+  String send_time_minutes(int minutes);
+
+  /// No description provided for @stop_sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sending?'**
+  String get stop_sending;
+
+  /// No description provided for @stop_sending_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'The receiver doesn\'t have the whole file yet.'**
+  String get stop_sending_msg;
+
+  /// No description provided for @stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stop;
+
+  /// No description provided for @keep_sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep sending'**
+  String get keep_sending;
 }
 
 class _AppLocalizationsDelegate

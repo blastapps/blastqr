@@ -4,15 +4,14 @@ import 'package:blast_qr/acoustic_ack_listener.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/help/help_page.dart';
-import 'package:blast_qr/features/send/send_files.dart';
-import 'package:blast_qr/features/send/send_plan.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/features/send/widgets/acoustic_success_overlay.dart';
 import 'package:blast_qr/features/send/widgets/file_header_widget.dart';
 import 'package:blast_qr/features/send/widgets/file_too_large_alert_widget.dart';
 import 'package:blast_qr/features/send/widgets/raptorq_qr_streaming_widget.dart';
 import 'package:blast_qr/l10n/extension.dart';
-import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/platform_support.dart';
+import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/password_widgets.dart';
 import 'package:blast_qr/widgets/strike_painter.dart';
@@ -24,24 +23,11 @@ import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 
+/// Shows [transfer] as QR codes, after a prompt if it's large.
 class QrPage extends StatefulWidget {
-  const QrPage({
-    super.key,
-    required this.files,
-    this.password,
-    this.fileName,
-    required this.compressImages,
-  });
+  const QrPage({super.key, required this.transfer});
 
-  /// The files to send. Several are zipped into one bundle first.
-  final List<FileWrapper> files;
-
-  final String? password;
-
-  final String? fileName;
-
-  /// Whether photos are compressed, as chosen with the HD toggle.
-  final bool compressImages;
+  final PreparedTransfer transfer;
 
   @override
   State<QrPage> createState() => _QrPageState();
@@ -51,8 +37,8 @@ class _QrPageState extends State<QrPage> with WindowListener {
   final _qrController = RaptorQrStreamingWidgetController();
   final _qrBoxKey = GlobalKey();
 
-  late final SendPlan _plan;
-  int? _compressedSize;
+  /// Whether the user chose to send a large transfer anyway.
+  bool _acknowledged = false;
 
   static const _fpsOptions = [15, 16, 20, 22, 25, 30];
 
@@ -77,41 +63,31 @@ class _QrPageState extends State<QrPage> with WindowListener {
   bool _completionDetected = false;
   bool _dismissed = false;
 
+  /// Whether enough codes were shown for the receiver to have the file, if
+  /// it caught them all.
+  bool _sourceShown = false;
+
+  /// Closing now would leave the receiver without the file.
+  bool get _closingStopsSend =>
+      _playbackStarted && !_sourceShown && !_completionDetected;
+
+  int get _size => widget.transfer.bytes.length;
+
+  String? get _password => widget.transfer.password;
+
+  bool get _showsWarning =>
+      !_acknowledged &&
+      !widget.transfer.compressed &&
+      _size > largeTransferBytes;
+
   bool get _showsPasswordButton =>
-      !_fullscreenMode && widget.password != null && !_completionDetected;
+      !_fullscreenMode && _password != null && !_completionDetected;
 
   @override
   void initState() {
     super.initState();
     if (isDesktopOS) windowManager.addListener(this);
     WakelockPlus.enable();
-    _plan = SendPlan(
-      widget.files,
-      compressImages: widget.compressImages,
-      zip: _zip,
-    )..addListener(() => setState(() {}));
-  }
-
-  /// Zips the files. The page closes if the bundle is too large to send.
-  Future<FileWrapper> _zip({required bool compressImages}) async {
-    final settings = Provider.of<AppSettings>(
-      context,
-      listen: false,
-    ).imageCompressionSettings;
-    final bundle = await createSendBundle(
-      widget.files,
-      icSettings: compressImages ? settings : null,
-    );
-    if (mounted) {
-      final tooLarge = transferTooLargeMessage(context, bundle.size);
-      if (tooLarge != null) _closeTooLarge(tooLarge);
-    }
-    return bundle;
-  }
-
-  Future<void> _closeTooLarge(String message) async {
-    await showFileTooLarge(context, message);
-    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -120,7 +96,6 @@ class _QrPageState extends State<QrPage> with WindowListener {
       windowManager.removeListener(this);
       if (_windowFullScreen) windowManager.setFullScreen(false);
     }
-    _plan.dispose();
     _listenerDelayTimer?.cancel();
     _acousticSub?.cancel();
     _acousticListener?.dispose();
@@ -145,6 +120,16 @@ class _QrPageState extends State<QrPage> with WindowListener {
   }
 
   Widget _buildScaffold(BuildContext context, Widget qrBox) {
+    return PopScope(
+      canPop: !_closingStopsSend,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _dismiss();
+      },
+      child: _buildPage(context, qrBox),
+    );
+  }
+
+  Widget _buildPage(BuildContext context, Widget qrBox) {
     return Scaffold(
       backgroundColor: context.color.primaryContainer,
       body: SafeArea(
@@ -153,14 +138,13 @@ class _QrPageState extends State<QrPage> with WindowListener {
             : Column(
                 children: [
                   FileHeaderWidget(
-                    files: widget.files,
-                    name: widget.fileName,
+                    files: widget.transfer.files,
+                    name: widget.transfer.isBundle
+                        ? null
+                        : widget.transfer.name,
                     onTapDismiss: _dismiss,
-                    // A bundle's images are compressed when it's built.
-                    compressedSize:
-                        _compressedSize ??
-                        (_plan.isBundle ? _plan.file?.size : null),
-                    encrypted: widget.password != null,
+                    compressedSize: _size,
+                    encrypted: _password != null,
                   ),
                   // The QR box takes what the controls leave, so both stay
                   // visible however wide or short the window is.
@@ -170,7 +154,7 @@ class _QrPageState extends State<QrPage> with WindowListener {
                         Flexible(child: qrBox),
                         // Space is kept while the codes are generated, so the
                         // QR box doesn't shrink when playback starts.
-                        if (!_completionDetected && !_plan.showsWarning)
+                        if (!_completionDetected && !_showsWarning)
                           Visibility(
                             visible: _playbackStarted,
                             maintainSize: true,
@@ -198,46 +182,34 @@ class _QrPageState extends State<QrPage> with WindowListener {
   /// The QR codes, or the large file prompt before they start. Keyed so the
   /// animation keeps running when toggling fullscreen moves it in the tree.
   Widget _buildQrBox(BuildContext context) {
-    final appSettings = Provider.of<AppSettings>(context);
     return Stack(
       key: _qrBoxKey,
       children: [
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: context.color.outline, width: 2),
-            color: _plan.showsWarning
+            color: _showsWarning
                 ? context.color.primaryContainer
                 : Colors.white,
           ),
-          child: _plan.showsWarning
+          child: _showsWarning
               ? FileTooLargeAlertWidget(
-                  transferBytes: _plan.size,
-                  compressibleImages: _plan.compressibleImages,
-                  onAcknowledge: _plan.sendAsIs,
-                  onRequestCompressedImage: (_) => _plan.sendCompressed(),
+                  transferBytes: _size,
+                  onAcknowledge: () => setState(() => _acknowledged = true),
                 )
-              : _plan.file == null
-              ? const Center(child: CircularProgressIndicator.adaptive())
               : Consumer<EncodeSettings>(
                   builder: (context, state, child) {
-                    final mtu = state.mtuFor(_plan.size);
-                    final fps = _fps ?? state.fpsFor(_plan.size);
+                    final mtu = state.mtuFor(_size);
+                    final fps = _fps ?? state.fpsFor(_size);
                     return RaptorQrStreamingWidget(
                       controller: _qrController,
-                      file: _plan.file!,
+                      transfer: widget.transfer,
                       mtu: mtu,
                       fps: fps,
                       fill: _fullscreenMode,
-                      imageCompressionSettings:
-                          _plan.compressImages && !_plan.isBundle
-                          ? appSettings.imageCompressionSettings
-                          : null,
-                      password: widget.password,
-                      fileName: widget.fileName,
-                      isBundle: _plan.isBundle,
                       onTap: _onTapCodes,
-                      onStart: (size) => _onStart(
-                        size,
+                      onSourceShown: () => _sourceShown = true,
+                      onStart: () => _onStart(
                         multipleQrCodes: state.multipleQrCodes,
                         fps: fps,
                         mtu: mtu,
@@ -251,7 +223,7 @@ class _QrPageState extends State<QrPage> with WindowListener {
             child: AcousticSuccessOverlay(
               onKeepShowing: _onKeepShowingQr,
               onDone: _dismiss,
-              password: widget.password,
+              password: _password,
             ),
           ),
       ],
@@ -260,7 +232,7 @@ class _QrPageState extends State<QrPage> with WindowListener {
 
   Widget _buildControls(BuildContext context) {
     final encodeSettings = Provider.of<EncodeSettings>(context);
-    final fps = _fps ?? encodeSettings.fpsFor(_plan.size);
+    final fps = _fps ?? encodeSettings.fpsFor(_size);
     final micOn = Provider.of<AppSettings>(context).acousticDetection;
     final colors = Theme.of(context).colorScheme;
     final iconColor = context.color.onPrimaryContainer;
@@ -335,26 +307,22 @@ class _QrPageState extends State<QrPage> with WindowListener {
           if (_showsPasswordButton)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: PasswordButton(password: widget.password!),
+              child: PasswordButton(password: _password!),
             ),
         ],
       ),
     );
   }
 
-  void _onStart(
-    int size, {
+  void _onStart({
     required bool multipleQrCodes,
     required int fps,
     required int mtu,
   }) {
-    setState(() {
-      _compressedSize = size;
-      _playbackStarted = true;
-    });
+    setState(() => _playbackStarted = true);
     if (multipleQrCodes) _enterFullscreen();
     _startAcousticListener(
-      fileSize: size,
+      fileSize: _size,
       fps: fps,
       mtu: mtu,
       codesPerFrame: RaptorQrStreamingWidget.maxCodesFor(
@@ -418,7 +386,7 @@ class _QrPageState extends State<QrPage> with WindowListener {
 
   void _stepFps(int step) {
     if (!_playbackStarted || _completionDetected) return;
-    final current = _fps ?? context.read<EncodeSettings>().fpsFor(_plan.size);
+    final current = _fps ?? context.read<EncodeSettings>().fpsFor(_size);
     final options = _fpsOptionsWith(current);
     final index = (options.indexOf(current) + step).clamp(
       0,
@@ -530,11 +498,26 @@ class _QrPageState extends State<QrPage> with WindowListener {
     }
   }
 
-  void _dismiss() {
+  Future<void> _dismiss() async {
     if (_dismissed) return;
+    if (_closingStopsSend && !await _confirmStop()) return;
+    if (!mounted || _dismissed) return;
     _dismissed = true;
     _cleanup();
     Navigator.of(context).pop();
+  }
+
+  Future<bool> _confirmStop() async {
+    var stop = false;
+    await showMessage(
+      context: context,
+      title: context.l10n.stop_sending,
+      message: context.l10n.stop_sending_msg,
+      confirmTitle: context.l10n.stop,
+      secondaryTitle: context.l10n.keep_sending,
+      onConfirmTap: () => stop = true,
+    );
+    return stop;
   }
 
   void _cleanup() {

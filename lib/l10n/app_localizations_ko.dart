@@ -99,17 +99,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get large_file_msg_2 => '까지 시간이 걸릴 수 있습니다.';
 
   @override
-  String large_file_msg_3(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '이 이미지 $count개의 압축된 저화질 버전을 전송하시겠습니까?',
-      one: '이 이미지의 압축된 저화질 버전을 전송하시겠습니까?',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String get minutes => '분';
 
   @override
@@ -120,9 +109,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get send_large_file => '그래도 보내기';
-
-  @override
-  String get send_compressed_image => '압축해서 보내기';
 
   @override
   String get to_transfer => '전송';
@@ -368,16 +354,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get multi_qr_mode_subtitle => '화면에 들어가는 만큼 코드를 표시해 속도를 높입니다';
 
   @override
-  String get images_section => '이미지';
+  String get compress_media_by_default => '기본으로 미디어 압축';
 
   @override
-  String get compress_photos_by_default => '기본으로 사진 압축';
+  String get compress_media_by_default_subtitle =>
+      '더 작은 파일로 더 빠르게 보내지만 화질은 낮아집니다';
 
   @override
-  String get compress_photos_by_default_subtitle => '보낼 때 HD를 켜면 원본 화질로 보냅니다';
-
-  @override
-  String get hd_tooltip => '켜면 사진을 원본 화질로 보냅니다';
+  String get hd_tooltip => '켜면 사진과 동영상을 원본 화질로 보냅니다';
 
   @override
   String get camera_section => '카메라';
@@ -695,4 +679,74 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get enable_camera => '카메라 허용';
+
+  @override
+  String compressing_videos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '동영상 $count개 압축 중',
+      one: '동영상 압축 중',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String time_left_seconds(int seconds) {
+    return '약 $seconds초 남음';
+  }
+
+  @override
+  String time_left_minutes(int minutes) {
+    return '약 $minutes분 남음';
+  }
+
+  @override
+  String get preparing_transfer => '전송 준비 중...';
+
+  @override
+  String get send_files_title => '파일 보내기';
+
+  @override
+  String get photos_and_videos_section => '사진 및 동영상';
+
+  @override
+  String get video_quality => '동영상 화질';
+
+  @override
+  String get video_quality_hint => 'HD가 꺼져 있으면 동영상을 이 화질로 압축합니다';
+
+  @override
+  String get video_quality_original => '원본';
+
+  @override
+  String get video_quality_low => '낮음 (540p)';
+
+  @override
+  String get video_quality_lowest => '최저 (360p)';
+
+  @override
+  String get video_quality_potato => '감자 (240p)';
+
+  @override
+  String send_time_seconds(int seconds) {
+    return '보내는 데 약 $seconds초';
+  }
+
+  @override
+  String send_time_minutes(int minutes) {
+    return '보내는 데 약 $minutes분';
+  }
+
+  @override
+  String get stop_sending => '전송을 중지할까요?';
+
+  @override
+  String get stop_sending_msg => '받는 쪽에 아직 파일 전체가 전달되지 않았습니다.';
+
+  @override
+  String get stop => '중지';
+
+  @override
+  String get keep_sending => '계속 보내기';
 }

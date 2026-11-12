@@ -6,6 +6,7 @@ import 'package:blast_qr/features/settings/image_compression_settings_page.dart'
 import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/image_compression_settings.dart';
+import 'package:blast_qr/model/video_quality.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:flutter/material.dart';
@@ -149,7 +150,26 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               );
             },
           ),
-          SettingGroupTitle(title: context.l10n.images_section),
+          SettingGroupTitle(title: context.l10n.photos_and_videos_section),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
+                title: Text(context.l10n.compress_media_by_default),
+                subtitle: Text(
+                  context.l10n.compress_media_by_default_subtitle,
+                ),
+                value: state.compressMediaByDefault,
+                activeTrackColor: context.color.primary,
+                onChanged: (value) {
+                  Provider.of<AppSettings>(
+                    context,
+                    listen: false,
+                  ).updateCompressMediaByDefault(value);
+                },
+              );
+            },
+          ),
           ListTile(
             leading: HugeIcon(
               icon: HugeIcons.strokeRoundedImage01,
@@ -165,20 +185,25 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
           ),
           Consumer<AppSettings>(
             builder: (context, state, child) {
-              return SwitchListTile.adaptive(
-                contentPadding: const EdgeInsetsDirectional.only(start: 16),
-                title: Text(context.l10n.compress_photos_by_default),
-                subtitle: Text(
-                  context.l10n.compress_photos_by_default_subtitle,
+              return ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedVideo01,
+                  color: context.color.onSurface,
                 ),
-                value: state.compressPhotosByDefault,
-                activeTrackColor: context.color.primary,
-                onChanged: (value) {
-                  Provider.of<AppSettings>(
-                    context,
-                    listen: false,
-                  ).updateCompressPhotosByDefault(value);
-                },
+                title: Text(context.l10n.video_quality),
+                subtitle: Text(state.videoQuality.title(context.l10n)),
+                onTap: () => showPickerSheet(
+                  context,
+                  title: context.l10n.video_quality,
+                  message: context.l10n.video_quality_hint,
+                  items: [
+                    for (final quality in VideoQuality.values)
+                      quality.title(context.l10n),
+                  ],
+                  selectedItemIndex: state.videoQuality.index,
+                  onItemTap: (index) =>
+                      state.updateVideoQuality(VideoQuality.values[index]),
+                ),
               );
             },
           ),
@@ -202,12 +227,11 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
         encodeSettings.updateMtu(AppPreferences.defaultMtu);
         encodeSettings.updatePlaybackFps(AppPreferences.defaultFps);
         encodeSettings.updateMultipleQrCodes(false);
-        Provider.of<AppSettings>(
-          context,
-          listen: false,
-        ).updateImageCompressionSettings(
-          ImageCompressionSettings.defaultSettings,
-        );
+        Provider.of<AppSettings>(context, listen: false)
+          ..updateImageCompressionSettings(
+            ImageCompressionSettings.defaultSettings,
+          )
+          ..updateVideoQuality(AppPreferences.defaultVideoQuality);
       },
     );
   }
