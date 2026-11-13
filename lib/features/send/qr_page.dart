@@ -40,7 +40,7 @@ class _QrPageState extends State<QrPage> with WindowListener {
   /// Whether the user chose to send a large transfer anyway.
   bool _acknowledged = false;
 
-  static const _fpsOptions = [15, 16, 20, 22, 25, 30];
+  static const _fpsOptions = [15, 20, 25, 30, 60];
 
   /// Session override of the settings fps, set by the FPS button.
   int? _fps;

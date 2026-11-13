@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
@@ -129,6 +130,7 @@ class FileHeaderWidget extends StatelessWidget {
             height: 48,
             width: 48,
             child: CircleButton(
+              backgroundColor: context.color.surface,
               icon: const Icon(Icons.clear),
               onPressed: onTapDismiss,
               tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
