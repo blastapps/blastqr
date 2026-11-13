@@ -58,8 +58,10 @@ class _QrPageState extends State<QrPage> with WindowListener {
 
   AcousticAckListener? _acousticListener;
   StreamSubscription<void>? _acousticSub;
-  Timer? _listenerDelayTimer;
-  bool _ackArmed = false;
+
+  /// Detections only count from here: the receiver can't have the file
+  /// before every source code was shown.
+  bool _nearlyComplete = false;
   bool _completionDetected = false;
   bool _dismissed = false;
 
@@ -96,7 +98,6 @@ class _QrPageState extends State<QrPage> with WindowListener {
       windowManager.removeListener(this);
       if (_windowFullScreen) windowManager.setFullScreen(false);
     }
-    _listenerDelayTimer?.cancel();
     _acousticSub?.cancel();
     _acousticListener?.dispose();
     WakelockPlus.disable();
@@ -208,12 +209,10 @@ class _QrPageState extends State<QrPage> with WindowListener {
                       fps: fps,
                       fill: _fullscreenMode,
                       onTap: _onTapCodes,
+                      onNearlyComplete: () => _nearlyComplete = true,
                       onSourceShown: () => _sourceShown = true,
-                      onStart: () => _onStart(
-                        multipleQrCodes: state.multipleQrCodes,
-                        fps: fps,
-                        mtu: mtu,
-                      ),
+                      onStart: () =>
+                          _onStart(multipleQrCodes: state.multipleQrCodes),
                     );
                   },
                 ),
@@ -314,68 +313,27 @@ class _QrPageState extends State<QrPage> with WindowListener {
     );
   }
 
-  void _onStart({
-    required bool multipleQrCodes,
-    required int fps,
-    required int mtu,
-  }) {
+  void _onStart({required bool multipleQrCodes}) {
     setState(() => _playbackStarted = true);
     if (multipleQrCodes) _enterFullscreen();
-    _startAcousticListener(
-      fileSize: _size,
-      fps: fps,
-      mtu: mtu,
-      codesPerFrame: RaptorQrStreamingWidget.maxCodesFor(
-        MediaQuery.sizeOf(context),
-      ),
-    );
+    _startAcousticListener();
   }
 
   /// Starts the mic right away, because starting it blocks the main thread
-  /// and would stutter the animation if done mid-transfer. Detections only
-  /// count once the delay has passed.
-  void _startAcousticListener({
-    int? fileSize,
-    int fps = 0,
-    int mtu = 0,
-    int codesPerFrame = 1,
-  }) {
+  /// and would stutter the animation if done mid-transfer.
+  void _startAcousticListener() {
     final appSettings = Provider.of<AppSettings>(context, listen: false);
     if (!appSettings.acousticDetection) return;
-
-    _listenerDelayTimer?.cancel();
-    _ackArmed = false;
 
     if (_acousticListener == null) {
       _acousticListener = AcousticAckListener();
       _acousticSub = _acousticListener!.onDetected.listen((_) {
-        if (!mounted || !_ackArmed) return;
-        _ackArmed = false;
+        if (!mounted || !_nearlyComplete || _completionDetected) return;
         if (_fullscreenMode) _exitFullscreen();
         setState(() => _completionDetected = true);
       });
     }
     _acousticListener!.start();
-
-    if (fileSize != null) {
-      // Estimate earliest possible completion based on actual fps, mtu, and
-      // number of codes displayed per frame, then subtract a 4 s buffer so
-      // we never miss the tone.
-      final bestCaseKBps = fps * mtu * codesPerFrame / 1000.0;
-      debugPrint('Best case speed: $bestCaseKBps kB/s');
-      const bufferSeconds = 4.0;
-      final estimatedSeconds = fileSize / (bestCaseKBps * 1000);
-      final delaySeconds = (estimatedSeconds - bufferSeconds).clamp(
-        0.0,
-        double.infinity,
-      );
-      _listenerDelayTimer = Timer(
-        Duration(milliseconds: (delaySeconds * 1000).round()),
-        () => _ackArmed = true,
-      );
-      return;
-    }
-    _ackArmed = true;
   }
 
   void _cycleFps(int current) {
@@ -407,8 +365,6 @@ class _QrPageState extends State<QrPage> with WindowListener {
       if (!_completionDetected) _startAcousticListener();
     } else {
       appSettings.updateAcousticDetection(false);
-      _listenerDelayTimer?.cancel();
-      _ackArmed = false;
       _acousticListener?.stop();
     }
   }
@@ -424,7 +380,7 @@ class _QrPageState extends State<QrPage> with WindowListener {
 
   void _onKeepShowingQr() {
     setState(() => _completionDetected = false);
-    _startAcousticListener(); // no fileSize → no delay, position unknown
+    _startAcousticListener();
   }
 
   /// [window] also puts the desktop window in full screen.
@@ -521,7 +477,6 @@ class _QrPageState extends State<QrPage> with WindowListener {
   }
 
   void _cleanup() {
-    _listenerDelayTimer?.cancel();
     _acousticSub?.cancel();
     _acousticListener?.stop();
     _qrController.stopAnimation();
