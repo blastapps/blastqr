@@ -24,7 +24,7 @@ Future<void> showFileOptionsSheet(
   required VoidCallback onOpen,
   void Function(Rect origin)? onShare,
   VoidCallback? onShowInFileManager,
-  required VoidCallback onSaveToDownloads,
+  VoidCallback? onSave,
   required VoidCallback onRename,
   required void Function(SendOptions options) onSend,
   required VoidCallback onDelete,
@@ -68,7 +68,7 @@ Future<void> showFileOptionsSheet(
             ));
           },
         ),
-        const _DottedDivider(),
+        const DottedDivider(),
         ListTile(
           onTap: onOpen,
           leading: HugeIcon(
@@ -100,14 +100,20 @@ Future<void> showFileOptionsSheet(
             ),
             title: Text(context.l10n.show_in_file_manager),
           ),
-        if (Platform.isAndroid)
+        if (onSave != null)
           ListTile(
-            onTap: onSaveToDownloads,
+            onTap: onSave,
             leading: HugeIcon(
-              icon: HugeIcons.strokeRoundedDownload01,
+              icon: Platform.isIOS
+                  ? HugeIcons.strokeRoundedFolderAdd
+                  : HugeIcons.strokeRoundedDownload01,
               color: context.color.primary,
             ),
-            title: Text(context.l10n.save_to_downloads),
+            title: Text(
+              Platform.isIOS
+                  ? context.l10n.save_to_files
+                  : context.l10n.save_to_downloads,
+            ),
           ),
         ListTile(
           onTap: onRename,
@@ -171,8 +177,8 @@ class _FilePreview extends StatelessWidget {
   }
 }
 
-class _DottedDivider extends StatelessWidget {
-  const _DottedDivider();
+class DottedDivider extends StatelessWidget {
+  const DottedDivider({super.key});
 
   @override
   Widget build(BuildContext context) {

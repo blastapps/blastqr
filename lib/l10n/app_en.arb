@@ -22,6 +22,15 @@
   "delete_msg": "Are you sure you want to delete this file?",
   "yes_delete": "Yes, delete",
   "save_to_downloads": "Save to Downloads",
+  "save_to_files": "Save to Files",
+  "files_saved": "{count, plural, =1{1 file saved} other{{count} files saved}}",
+  "@files_saved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "file_options": "File options",
   "no_files_msg": "No files yet.",
   "saved_to": "Saved to",

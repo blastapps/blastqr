@@ -78,6 +78,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save_to_downloads => 'Save to Downloads';
 
   @override
+  String get save_to_files => 'Save to Files';
+
+  @override
+  String files_saved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files saved',
+      one: '1 file saved',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get file_options => 'File options';
 
   @override

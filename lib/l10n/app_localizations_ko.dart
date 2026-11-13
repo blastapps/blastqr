@@ -78,6 +78,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get save_to_downloads => '다운로드에 저장';
 
   @override
+  String get save_to_files => '파일에 저장';
+
+  @override
+  String files_saved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 저장됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get file_options => '파일 옵션';
 
   @override

@@ -22,6 +22,8 @@
   "delete_msg": "Segur que vols suprimir aquest fitxer?",
   "yes_delete": "Sí, suprimeix-lo",
   "save_to_downloads": "Desa a Descàrregues",
+  "save_to_files": "Desa a Fitxers",
+  "files_saved": "{count, plural, =1{1 fitxer desat} other{{count} fitxers desats}}",
   "file_options": "Opcions del fitxer",
   "no_files_msg": "Encara no hi ha fitxers.",
   "saved_to": "Desat a",

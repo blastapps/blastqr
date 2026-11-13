@@ -22,6 +22,8 @@
   "delete_msg": "이 파일을 삭제하시겠습니까?",
   "yes_delete": "네, 삭제합니다",
   "save_to_downloads": "다운로드에 저장",
+  "save_to_files": "파일에 저장",
+  "files_saved": "{count, plural, other{파일 {count}개 저장됨}}",
   "file_options": "파일 옵션",
   "no_files_msg": "파일이 아직 없습니다.",
   "saved_to": "저장됨",

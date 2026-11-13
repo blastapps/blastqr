@@ -4,6 +4,7 @@ import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/features/files_received/received_items.dart';
 import 'package:blast_qr/features/files_received/save_to_downloads.dart';
+import 'package:blast_qr/features/files_received/save_to_files.dart';
 import 'package:blast_qr/features/files_received/widgets/file_options_sheet.dart';
 import 'package:blast_qr/features/files_received/widgets/qr_code_sheet.dart';
 import 'package:blast_qr/features/send/prepare_transfer.dart';
@@ -50,11 +51,18 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
           context,
           file,
           onOpen: () => _onTapOpen(file),
-          onShare: isDesktopOS ? null : (origin) => _onTapShare(file, origin),
+          onShare: isDesktopOS ? null : (origin) => _shareFiles([file], origin),
           onShowInFileManager: isDesktopOS
               ? () => _onTapShowInFileManager(file.file)
               : null,
-          onSaveToDownloads: () => _trySaveToDownloads(file.file),
+          onSave: Platform.isAndroid
+              ? () => _trySaveToDownloads(file.file)
+              : Platform.isIOS
+              ? () {
+                  Navigator.of(context).pop();
+                  _saveToFiles([file.file]);
+                }
+              : null,
           onRename: () => _onTapRename(file),
           onSend: (options) => sendFiles(context, [file], options),
           onDelete: () => _onTapDelete(file.file),
@@ -66,7 +74,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
           onDelete: () => _onTapDelete(code.file),
         );
     }
-    if (mounted) selection.clear();
+    _clearSelectionOnPhone();
   }
 
   void _onTapOpen(FileWrapper file) async {
@@ -78,11 +86,14 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
     }
   }
 
-  Future<void> _onTapShare(FileWrapper file, Rect origin) async {
+  Future<void> _shareFiles(List<FileWrapper> files, Rect origin) async {
     try {
       await SharePlus.instance.share(
         ShareParams(
-          files: [XFile(file.file.path, mimeType: file.type.mimeType)],
+          files: [
+            for (final f in files)
+              XFile(f.file.path, mimeType: f.type.mimeType),
+          ],
           sharePositionOrigin: origin,
         ),
       );
@@ -144,6 +155,21 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
               ));
             },
           ),
+          const DottedDivider(),
+          if (!isDesktopOS)
+            Builder(
+              builder: (tileContext) => ListTile(
+                onTap: () {
+                  final box = tileContext.findRenderObject() as RenderBox;
+                  _shareFiles(files, box.localToGlobal(Offset.zero) & box.size);
+                },
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedShare08,
+                  color: context.color.primary,
+                ),
+                title: Text(context.l10n.share),
+              ),
+            ),
           if (Platform.isAndroid)
             ListTile(
               onTap: () {
@@ -155,6 +181,18 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
                 color: context.color.primary,
               ),
               title: Text(context.l10n.save_to_downloads),
+            ),
+          if (Platform.isIOS)
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                _saveToFiles([for (final f in files) f.file]);
+              },
+              leading: HugeIcon(
+                icon: HugeIcons.strokeRoundedFolderAdd,
+                color: context.color.primary,
+              ),
+              title: Text(context.l10n.save_to_files),
             ),
           ListTile(
             onTap: () {
@@ -171,7 +209,12 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
         ],
       ),
     );
-    if (mounted) selection.clear();
+    _clearSelectionOnPhone();
+  }
+
+  /// Desktop keeps it, so arrow keys and shift-click carry on from it.
+  void _clearSelectionOnPhone() {
+    if (mounted && !context.useDesktopLayout) selection.clear();
   }
 
   void _sendSelectedFiles(List<FileWrapper> files, SendOptions options) {
@@ -192,6 +235,15 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
       _showSnackBar(
         '${context.l10n.saved_to} $androidDownloadsPath ($saved/${files.length})',
       );
+    }
+  }
+
+  Future<void> _saveToFiles(List<File> files) async {
+    try {
+      final saved = await saveToFiles(files);
+      if (mounted && saved > 0) _showSnackBar(context.l10n.files_saved(saved));
+    } catch (error) {
+      if (mounted) _showError(error);
     }
   }
 

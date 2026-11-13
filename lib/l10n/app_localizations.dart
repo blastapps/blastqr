@@ -242,6 +242,18 @@ abstract class AppLocalizations {
   /// **'Save to Downloads'**
   String get save_to_downloads;
 
+  /// No description provided for @save_to_files.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Files'**
+  String get save_to_files;
+
+  /// No description provided for @files_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 file saved} other{{count} files saved}}'**
+  String files_saved(int count);
+
   /// No description provided for @file_options.
   ///
   /// In en, this message translates to:

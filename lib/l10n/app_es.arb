@@ -22,6 +22,8 @@
   "delete_msg": "¿Estás seguro de que deseas eliminar este archivo?",
   "yes_delete": "Sí, eliminar",
   "save_to_downloads": "Guardar en Descargas",
+  "save_to_files": "Guardar en Archivos",
+  "files_saved": "{count, plural, =1{1 archivo guardado} other{{count} archivos guardados}}",
   "file_options": "Opciones de archivo",
   "no_files_msg": "Aún no hay archivos.",
   "saved_to": "Guardado en",

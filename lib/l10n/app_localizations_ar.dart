@@ -78,6 +78,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get save_to_downloads => 'حفظ في التنزيلات';
 
   @override
+  String get save_to_files => 'حفظ في الملفات';
+
+  @override
+  String files_saved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حفظ $count ملف',
+      many: 'تم حفظ $count ملفًا',
+      few: 'تم حفظ $count ملفات',
+      two: 'تم حفظ ملفين',
+      one: 'تم حفظ ملف واحد',
+      zero: 'لم يُحفظ أي ملف',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get file_options => 'خيارات الملف';
 
   @override

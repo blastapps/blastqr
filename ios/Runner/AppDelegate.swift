@@ -72,9 +72,44 @@ import UIKit
             result(
               FlutterError(code: "failed", message: error.localizedDescription, details: nil))
           }
+        case "saveToFiles":
+          guard let paths = call.arguments as? [String] else {
+            result(FlutterError(code: "bad_args", message: "Missing paths", details: nil))
+            return
+          }
+          Self.saveToFiles(paths.map { URL(fileURLWithPath: $0) }, result: result)
         default: result(FlutterMethodNotImplemented)
         }
       }
+  }
+
+  // The picker holds its delegate weakly.
+  private static var exportDelegate: ExportDelegate?
+
+  /// Lets the user pick a folder to copy the files into. Returns how many were saved, 0 if cancelled.
+  private static func saveToFiles(_ urls: [URL], result: @escaping FlutterResult) {
+    guard let presenter = topViewController() else {
+      result(FlutterError(code: "no_view", message: "No view to present from", details: nil))
+      return
+    }
+    let picker = UIDocumentPickerViewController(forExporting: urls, asCopy: true)
+    let delegate = ExportDelegate { saved in
+      exportDelegate = nil
+      result(saved)
+    }
+    exportDelegate = delegate
+    picker.delegate = delegate
+    presenter.present(picker, animated: true)
+  }
+
+  private static func topViewController() -> UIViewController? {
+    let window = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap(\.windows)
+      .first { $0.isKeyWindow }
+    var controller = window?.rootViewController
+    while let presented = controller?.presentedViewController { controller = presented }
+    return controller
   }
 
   // Live state of the back wide camera, the one the scanner opens. Reading it
@@ -215,5 +250,21 @@ extension AVCaptureDevice.FocusMode {
     case .continuousAutoFocus: return "continuous"
     @unknown default: return "unknown"
     }
+  }
+}
+
+private final class ExportDelegate: NSObject, UIDocumentPickerDelegate {
+  private let completion: (Int) -> Void
+
+  init(completion: @escaping (Int) -> Void) {
+    self.completion = completion
+  }
+
+  func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+    completion(urls.count)
+  }
+
+  func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+    completion(0)
   }
 }

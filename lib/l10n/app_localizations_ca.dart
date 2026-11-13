@@ -78,6 +78,20 @@ class AppLocalizationsCa extends AppLocalizations {
   String get save_to_downloads => 'Desa a Descàrregues';
 
   @override
+  String get save_to_files => 'Desa a Fitxers';
+
+  @override
+  String files_saved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fitxers desats',
+      one: '1 fitxer desat',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get file_options => 'Opcions del fitxer';
 
   @override

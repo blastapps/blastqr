@@ -22,6 +22,15 @@
   "delete_msg": "هل أنت متأكد من أنك تريد حذف هذا الملف؟",
   "yes_delete": "نعم، احذف",
   "save_to_downloads": "حفظ في التنزيلات",
+  "save_to_files": "حفظ في الملفات",
+  "files_saved": "{count, plural, =0{لم يُحفظ أي ملف} =1{تم حفظ ملف واحد} =2{تم حفظ ملفين} few{تم حفظ {count} ملفات} many{تم حفظ {count} ملفًا} other{تم حفظ {count} ملف}}",
+  "@files_saved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "file_options": "خيارات الملف",
   "no_files_msg": "لا توجد ملفات بعد.",
   "saved_to": "تم الحفظ في",
