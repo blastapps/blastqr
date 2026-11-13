@@ -269,8 +269,10 @@ Future<void> showMessage({
             const SizedBox(height: 8),
             if (secondaryTitle != null)
               OutlinedButton(
-                onPressed:
-                    onSecondaryTap ?? () => Navigator.of(sheetContext).pop(),
+                onPressed: () {
+                  onSecondaryTap?.call();
+                  Navigator.of(sheetContext).pop();
+                },
                 style: secondaryButtonStyle,
                 child: Text(secondaryTitle),
               ),

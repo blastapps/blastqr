@@ -64,7 +64,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.8.0';
 
   @override
-  int get rustContentHash => 542912637;
+  int get rustContentHash => 1500351835;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -80,8 +80,9 @@ abstract class RustLibApi extends BaseApi {
     required String password,
   });
 
-  Future<Uint8List> crateApiCryptoEncryptTransfer({
-    required List<int> plain,
+  Future<void> crateApiCryptoEncryptTransferFile({
+    required String inputPath,
+    required String outputPath,
     required String password,
   });
 
@@ -134,15 +135,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<Uint8List> crateApiCryptoEncryptTransfer({
-    required List<int> plain,
+  Future<void> crateApiCryptoEncryptTransferFile({
+    required String inputPath,
+    required String outputPath,
     required String password,
   }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_list_prim_u_8_loose(plain, serializer);
+          sse_encode_String(inputPath, serializer);
+          sse_encode_String(outputPath, serializer);
           sse_encode_String(password, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
@@ -152,20 +155,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_list_prim_u_8_strict,
-          decodeErrorData: null,
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
         ),
-        constMeta: kCrateApiCryptoEncryptTransferConstMeta,
-        argValues: [plain, password],
+        constMeta: kCrateApiCryptoEncryptTransferFileConstMeta,
+        argValues: [inputPath, outputPath, password],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiCryptoEncryptTransferConstMeta =>
+  TaskConstMeta get kCrateApiCryptoEncryptTransferFileConstMeta =>
       const TaskConstMeta(
-        debugName: "encrypt_transfer",
-        argNames: ["plain", "password"],
+        debugName: "encrypt_transfer_file",
+        argNames: ["inputPath", "outputPath", "password"],
       );
 
   @override
@@ -218,6 +221,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @protected
+  AnyhowException dco_decode_AnyhowException(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return AnyhowException(raw as String);
+  }
+
+  @protected
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as String;
@@ -263,6 +272,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void dco_decode_unit(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return;
+  }
+
+  @protected
+  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_String(deserializer);
+    return AnyhowException(inner);
   }
 
   @protected
@@ -322,6 +338,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   bool sse_decode_bool(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
+  void sse_encode_AnyhowException(
+    AnyhowException self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.message, serializer);
   }
 
   @protected

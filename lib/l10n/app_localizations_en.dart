@@ -125,6 +125,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get send_large_file => 'Send anyway';
 
   @override
+  String get low_memory => 'Too large for this device';
+
+  @override
+  String get low_memory_msg =>
+      'This file is likely too large for this device\'s memory. The app will probably close before the transfer finishes. Try sharing a smaller file.';
+
+  @override
+  String get receive_anyway => 'Receive anyway';
+
+  @override
   String get to_transfer => 'to transfer';
 
   @override

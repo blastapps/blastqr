@@ -126,6 +126,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get send_large_file => 'Enviar de todos modos';
 
   @override
+  String get low_memory => 'Demasiado grande para este dispositivo';
+
+  @override
+  String get low_memory_msg =>
+      'Probablemente este archivo sea demasiado grande para la memoria de este dispositivo. Es probable que la app se cierre antes de que termine la transferencia. Prueba a compartir un archivo más pequeño.';
+
+  @override
+  String get receive_anyway => 'Recibir de todos modos';
+
+  @override
   String get to_transfer => 'para transferir';
 
   @override

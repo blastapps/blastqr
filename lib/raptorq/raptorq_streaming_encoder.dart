@@ -26,7 +26,17 @@ class RaptorqStreamingEncoder {
   RaptorqStreamingEncoder({required this.mtu});
 
   Future<void> init(Uint8List data) async {
-    _encoder = await RaptorQEncoder.newInstance(data: data, mtu: mtu);
+    _setUp(await RaptorQEncoder.newInstance(data: data, mtu: mtu));
+  }
+
+  /// Like [init], with the data in the file at [path], which must not
+  /// change until [dispose].
+  Future<void> initFromFile(String path) async {
+    _setUp(await RaptorQEncoder.fromFile(path: path, mtu: mtu));
+  }
+
+  void _setUp(RaptorQEncoder encoder) {
+    _encoder = encoder;
     _sourceCount = _encoder.sourcePacketCount();
     final oti = _encoder.oti();
     _blockCount = oti.sourceBlocks;

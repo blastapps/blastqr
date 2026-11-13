@@ -126,6 +126,16 @@ class AppLocalizationsCa extends AppLocalizations {
   String get send_large_file => 'Envia igualment';
 
   @override
+  String get low_memory => 'Massa gran per a aquest dispositiu';
+
+  @override
+  String get low_memory_msg =>
+      'Probablement aquest fitxer és massa gran per a la memòria d\'aquest dispositiu. És probable que l\'app es tanqui abans que acabi la transferència. Prova de compartir un fitxer més petit.';
+
+  @override
+  String get receive_anyway => 'Rep igualment';
+
+  @override
   String get to_transfer => 'a transferir';
 
   @override

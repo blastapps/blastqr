@@ -307,6 +307,32 @@ void main() {
       expect(file.readAsBytesSync(), content);
     }, skip: _skip);
 
+    test('a transfer encrypted to a file decrypts to the plain one', () async {
+      final content = utf8.encode('All work and no play. ' * 2000);
+      final path = '${temp.path}/transfer.bin';
+      final written = await writeTransferObject(
+        path,
+        fileName: 'a.txt',
+        content: content,
+        tryGzip: true,
+        password: 'K7M2-QX9P-4RTA',
+      );
+      final plain = await buildTransferObject(
+        fileName: 'a.txt',
+        content: content,
+        tryGzip: true,
+      );
+      final sealed = File(path).readAsBytesSync();
+
+      expect(written.length, sealed.length);
+      expect(written.gzipped, plain.gzipped);
+      expect(
+        await TransferCrypto.decrypt(sealed, 'K7M2-QX9P-4RTA'),
+        plain.bytes,
+      );
+      expect(temp.listSync().map((e) => e.path), [path]);
+    }, skip: _skip);
+
     test('encryption adds a fixed overhead to the transfer', () async {
       final plain = await buildTransferObject(
         fileName: 'a.bin',
@@ -322,6 +348,26 @@ void main() {
       expect(encrypted.bytes.length, plain.bytes.length + envelopeOverhead());
       expect(envelopeOverhead(), 52);
     }, skip: _skip);
+  });
+
+  test('content read from a path matches content passed in memory', () async {
+    final content = utf8.encode('All work and no play. ' * 2000);
+    final path = '${temp.path}/content.txt';
+    File(path).writeAsBytesSync(content);
+    for (final tryGzip in [true, false]) {
+      final fromBytes = await buildTransferObject(
+        fileName: 'a.txt',
+        content: content,
+        tryGzip: tryGzip,
+      );
+      final fromPath = await buildTransferObject(
+        fileName: 'a.txt',
+        contentPath: path,
+        tryGzip: tryGzip,
+      );
+      expect(fromPath.gzipped, fromBytes.gzipped);
+      expect(fromPath.bytes, fromBytes.bytes);
+    }
   });
 
   group('bundle', () {
@@ -388,4 +434,31 @@ void main() {
       expect(files.map(nameOf), ['archive.zip']);
     }, skip: _skip);
   });
+}
+
+/// [writeTransferObject], returned as bytes.
+Future<({Uint8List bytes, bool gzipped})> buildTransferObject({
+  required String fileName,
+  Uint8List? content,
+  String? contentPath,
+  required bool tryGzip,
+  String? password,
+  bool isBundle = false,
+}) async {
+  final directory = await Directory.systemTemp.createTemp('transfer_');
+  try {
+    final file = File('${directory.path}/transfer.bin');
+    final (length: _, :gzipped) = await writeTransferObject(
+      file.path,
+      fileName: fileName,
+      content: content,
+      contentPath: contentPath,
+      tryGzip: tryGzip,
+      password: password,
+      isBundle: isBundle,
+    );
+    return (bytes: await file.readAsBytes(), gzipped: gzipped);
+  } finally {
+    await directory.delete(recursive: true);
+  }
 }

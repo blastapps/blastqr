@@ -177,7 +177,8 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
 
     final transfer = widget.transfer;
     final source = await FileQrEncoder.start(
-      transfer.bytes,
+      transfer.file.path,
+      transfer.length,
       widget.mtu,
       gzipped: transfer.gzipped,
       encrypted: transfer.password != null,

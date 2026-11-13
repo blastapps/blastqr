@@ -44,9 +44,8 @@ FileWrapper _pdf(int size) => _file('doc.pdf', size);
 ({String? name, bool isBundle, Uint8List content}) _receive(
   PreparedTransfer transfer,
 ) {
-  final bytes = transfer.gzipped
-      ? Uint8List.fromList(gzip.decode(transfer.bytes))
-      : transfer.bytes;
+  final file = transfer.file.readAsBytesSync();
+  final bytes = transfer.gzipped ? Uint8List.fromList(gzip.decode(file)) : file;
   final length = ByteData.sublistView(bytes).getUint16(0);
   final metadata = TransferContainer.decodeMetadata(
     bytes.sublist(2, 2 + length),
@@ -154,7 +153,7 @@ void main() {
       final received = _receive(transfer);
 
       expect(transfer.gzipped, isTrue);
-      expect(transfer.bytes.length, lessThan(file.size));
+      expect(transfer.length, lessThan(file.size));
       expect(transfer.compressed, isFalse);
       expect(transfer.name, 'notes.txt');
       expect(received.name, 'notes.txt');

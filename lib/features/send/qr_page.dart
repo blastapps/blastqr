@@ -25,9 +25,16 @@ import 'package:window_manager/window_manager.dart';
 
 /// Shows [transfer] as QR codes, after a prompt if it's large.
 class QrPage extends StatefulWidget {
-  const QrPage({super.key, required this.transfer});
+  const QrPage({
+    super.key,
+    required this.transfer,
+    this.mayRunOutOfMemory = false,
+  });
 
   final PreparedTransfer transfer;
+
+  /// Whether to warn that the app could close for lack of memory.
+  final bool mayRunOutOfMemory;
 
   @override
   State<QrPage> createState() => _QrPageState();
@@ -73,14 +80,17 @@ class _QrPageState extends State<QrPage> with WindowListener {
   bool get _closingStopsSend =>
       _playbackStarted && !_sourceShown && !_completionDetected;
 
-  int get _size => widget.transfer.bytes.length;
+  int get _size => widget.transfer.length;
 
   String? get _password => widget.transfer.password;
 
+  /// Compressed transfers skip it: the user already made them as small as
+  /// they can be.
+  bool get _isLongTransfer =>
+      !widget.transfer.compressed && _size > largeTransferBytes;
+
   bool get _showsWarning =>
-      !_acknowledged &&
-      !widget.transfer.compressed &&
-      _size > largeTransferBytes;
+      !_acknowledged && (_isLongTransfer || widget.mayRunOutOfMemory);
 
   bool get _showsPasswordButton =>
       !_fullscreenMode && _password != null && !_completionDetected;
@@ -196,7 +206,10 @@ class _QrPageState extends State<QrPage> with WindowListener {
           child: _showsWarning
               ? FileTooLargeAlertWidget(
                   transferBytes: _size,
+                  isLongTransfer: _isLongTransfer,
+                  mayRunOutOfMemory: widget.mayRunOutOfMemory,
                   onAcknowledge: () => setState(() => _acknowledged = true),
+                  onCancel: () => Navigator.of(context).pop(),
                 )
               : Consumer<EncodeSettings>(
                   builder: (context, state, child) {

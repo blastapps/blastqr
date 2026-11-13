@@ -22,10 +22,22 @@ Future<void> writeBundle(List<BundleEntry> entries, String outputPath) {
           names.contains,
         );
         names.add(name);
-        final bytes = entry.bytes ?? File(entry.path!).readAsBytesSync();
-        encoder.add(
-          ArchiveFile.bytes(name, bytes)..compression = CompressionType.none,
-        );
+        final bytes = entry.bytes;
+        if (bytes != null) {
+          encoder.add(
+            ArchiveFile.bytes(name, bytes)..compression = CompressionType.none,
+          );
+          continue;
+        }
+        // Streamed in chunks, so large files aren't read into memory.
+        final input = InputFileStream(entry.path!);
+        try {
+          encoder.add(
+            ArchiveFile.stream(name, input)..compression = CompressionType.none,
+          );
+        } finally {
+          input.closeSync();
+        }
       }
       encoder.endEncode();
     } finally {

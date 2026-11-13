@@ -975,10 +975,10 @@ packages:
     dependency: "direct main"
     description:
       name: raptorq_flutter
-      sha256: c43e5f4c53a2980b046385d13fefe88a327dee200f89647fe7374df3b4cdfb48
+      sha256: e1e031cdcb75b4b0eb5da93b467ed99fe3bff1722963dd40239416fb6bed7425
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   receive_sharing_intent:
     dependency: "direct main"
     description:

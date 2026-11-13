@@ -15,7 +15,7 @@
 //! ```
 
 use argon2::{Algorithm, Argon2, Params, Version};
-use chacha20poly1305::aead::{Aead, KeyInit, Payload};
+use chacha20poly1305::aead::{Aead, AeadInPlace, KeyInit, Payload};
 use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce};
 use rand_core::{OsRng, RngCore};
 use zeroize::Zeroizing;
@@ -25,7 +25,8 @@ const KDF_ARGON2ID: u8 = 1;
 const SALT_LEN: usize = 16;
 const NONCE_LEN: usize = 12;
 const TAG_LEN: usize = 16;
-const HEADER_LEN: usize = 8 + SALT_LEN + NONCE_LEN;
+/// Where the ciphertext starts, after the header.
+pub const HEADER_LEN: usize = 8 + SALT_LEN + NONCE_LEN;
 
 /// Bytes the envelope adds to the plaintext.
 pub const ENVELOPE_OVERHEAD: usize = HEADER_LEN + TAG_LEN;
@@ -54,19 +55,37 @@ pub enum EnvelopeError {
 
 /// Encrypts `plain` with a key derived from `password`.
 pub fn encrypt(plain: &[u8], password: &str) -> Vec<u8> {
+    let mut envelope = envelope_for(plain);
+    seal_in_place(&mut envelope, password);
+    envelope
+}
+
+/// Encrypts in place, for data too large to copy: `envelope` holds the
+/// plaintext from [HEADER_LEN] up to its last 16 bytes, and gets the header
+/// and tag written around it. The result is the same as [encrypt]'s.
+///
+/// Panics if `envelope` is shorter than [ENVELOPE_OVERHEAD].
+pub fn seal_in_place(envelope: &mut [u8], password: &str) {
     let mut salt = [0u8; SALT_LEN];
     let mut nonce = [0u8; NONCE_LEN];
     OsRng.fill_bytes(&mut salt);
     OsRng.fill_bytes(&mut nonce);
-    encrypt_with(
-        plain,
+    seal_in_place_with(
+        envelope,
         password,
         DEFAULT_MEMORY_KIB,
         DEFAULT_ITERATIONS,
         DEFAULT_PARALLELISM,
         salt,
         nonce,
-    )
+    );
+}
+
+/// `plain`, with room for the header and tag around it.
+fn envelope_for(plain: &[u8]) -> Vec<u8> {
+    let mut envelope = vec![0; ENVELOPE_OVERHEAD + plain.len()];
+    envelope[HEADER_LEN..HEADER_LEN + plain.len()].copy_from_slice(plain);
+    envelope
 }
 
 /// Decrypts an envelope made by [encrypt].
@@ -106,40 +125,32 @@ pub fn decrypt(envelope: &[u8], password: &str) -> Result<Vec<u8>, EnvelopeError
         .map_err(|_| EnvelopeError::WrongPassword)
 }
 
-fn encrypt_with(
-    plain: &[u8],
+fn seal_in_place_with(
+    envelope: &mut [u8],
     password: &str,
     memory_kib: u32,
     iterations: u8,
     parallelism: u8,
     salt: [u8; SALT_LEN],
     nonce: [u8; NONCE_LEN],
-) -> Vec<u8> {
-    let mut header = Vec::with_capacity(HEADER_LEN);
-    header.push(ENVELOPE_VERSION);
-    header.push(KDF_ARGON2ID);
-    header.extend_from_slice(&memory_kib.to_be_bytes());
-    header.push(iterations);
-    header.push(parallelism);
-    header.extend_from_slice(&salt);
-    header.extend_from_slice(&nonce);
+) {
+    let (header, rest) = envelope.split_at_mut(HEADER_LEN);
+    let (body, tag) = rest.split_at_mut(rest.len() - TAG_LEN);
+    header[0] = ENVELOPE_VERSION;
+    header[1] = KDF_ARGON2ID;
+    header[2..6].copy_from_slice(&memory_kib.to_be_bytes());
+    header[6] = iterations;
+    header[7] = parallelism;
+    header[8..8 + SALT_LEN].copy_from_slice(&salt);
+    header[8 + SALT_LEN..].copy_from_slice(&nonce);
 
     let key = derive_key(password, &salt, memory_kib, iterations, parallelism)
         .expect("default key derivation settings are valid");
     let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_slice()));
-    let sealed = cipher
-        .encrypt(
-            Nonce::from_slice(&nonce),
-            Payload {
-                msg: plain,
-                aad: &header,
-            },
-        )
+    let sealed_tag = cipher
+        .encrypt_in_place_detached(Nonce::from_slice(&nonce), header, body)
         .expect("ChaCha20-Poly1305 encryption can't fail for in-memory data");
-
-    let mut out = header;
-    out.extend_from_slice(&sealed);
-    out
+    tag.copy_from_slice(&sealed_tag);
 }
 
 /// Argon2id key, wiped from memory when dropped. `None` if the settings are
@@ -166,7 +177,36 @@ mod tests {
 
     // Small settings so tests run fast.
     fn seal(plain: &[u8], password: &str) -> Vec<u8> {
-        encrypt_with(plain, password, 64, 1, 1, [7; SALT_LEN], [9; NONCE_LEN])
+        let mut envelope = envelope_for(plain);
+        seal_in_place_with(
+            &mut envelope,
+            password,
+            64,
+            1,
+            1,
+            [7; SALT_LEN],
+            [9; NONCE_LEN],
+        );
+        envelope
+    }
+
+    #[test]
+    fn same_as_one_shot_encryption() {
+        // The format before in-place sealing: header, then the AEAD output.
+        let plain = b"hello world";
+        let env = seal(plain, "pw");
+        let header = &env[..HEADER_LEN];
+        let key = derive_key("pw", &[7; SALT_LEN], 64, 1, 1).unwrap();
+        let sealed = ChaCha20Poly1305::new(Key::from_slice(key.as_slice()))
+            .encrypt(
+                Nonce::from_slice(&[9; NONCE_LEN]),
+                Payload {
+                    msg: plain,
+                    aad: header,
+                },
+            )
+            .unwrap();
+        assert_eq!(&env[HEADER_LEN..], &sealed[..]);
     }
 
     #[test]

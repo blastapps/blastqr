@@ -1,4 +1,5 @@
 import 'package:blast_qr/app_settings.dart';
+import 'package:blast_qr/device_memory.dart';
 import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/features/send/qr_page.dart';
 import 'package:blast_qr/features/send/send_options.dart';
@@ -48,22 +49,27 @@ Future<void> sendFiles(
       cancel: cancel,
     ),
   );
-  if (transfer == null || !context.mounted) return;
-  final transferTooLarge = transferTooLargeMessage(
-    context,
-    transfer.bytes.length,
-  );
-  if (transferTooLarge != null) {
-    await showFileTooLarge(context, transferTooLarge);
-    return;
-  }
+  if (transfer == null) return;
+  try {
+    if (!context.mounted) return;
+    final transferTooLarge = transferTooLargeMessage(context, transfer.length);
+    if (transferTooLarge != null) {
+      await showFileTooLarge(context, transferTooLarge);
+      return;
+    }
 
-  await Navigator.of(context).push(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => QrPage(transfer: transfer),
-    ),
-  );
+    final lowMemory = await mayRunOutOfMemory(transfer.length);
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) =>
+            QrPage(transfer: transfer, mayRunOutOfMemory: lowMemory),
+      ),
+    );
+  } finally {
+    await transfer.delete();
+  }
 }
 
 /// The reason [size] bytes can't be sent with the current QR code size, if

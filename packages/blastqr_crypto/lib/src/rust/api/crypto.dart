@@ -11,17 +11,21 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 /// Bytes the envelope adds to the plaintext.
 int envelopeOverhead() => RustLib.instance.api.crateApiCryptoEnvelopeOverhead();
 
-/// Encrypts `plain` with a key derived from `password` (Argon2id,
-/// 64 MiB, 3 iterations), using ChaCha20-Poly1305.
-Future<Uint8List> encryptTransfer({
-  required List<int> plain,
+/// Encrypts the file at `input_path` into a new file at `output_path`, with
+/// a key derived from `password` (Argon2id, 64 MiB, 3 iterations), using
+/// ChaCha20-Poly1305. Neither is held in memory: the output is
+/// memory-mapped and encrypted in place.
+Future<void> encryptTransferFile({
+  required String inputPath,
+  required String outputPath,
   required String password,
-}) => RustLib.instance.api.crateApiCryptoEncryptTransfer(
-  plain: plain,
+}) => RustLib.instance.api.crateApiCryptoEncryptTransferFile(
+  inputPath: inputPath,
+  outputPath: outputPath,
   password: password,
 );
 
-/// Decrypts an envelope made by [encrypt_transfer].
+/// Decrypts an envelope made by [encrypt_transfer_file].
 Future<Uint8List> decryptTransfer({
   required List<int> envelope,
   required String password,

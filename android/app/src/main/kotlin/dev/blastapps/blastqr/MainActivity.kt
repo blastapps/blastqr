@@ -1,5 +1,6 @@
 package dev.blastapps.blastqr
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.hardware.camera2.CameraCharacteristics
@@ -42,6 +43,14 @@ class MainActivity : FlutterActivity() {
                     "backCameraFpsRanges" -> result.success(backCameraFpsRanges())
                     "deviceModel" -> result.success("${Build.MANUFACTURER} ${Build.MODEL}")
                     else -> result.notImplemented()
+                }
+            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "blastqr/device")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "availableMemory") {
+                    result.success(availableMemory())
+                } else {
+                    result.notImplemented()
                 }
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "blastqr/files")
@@ -125,6 +134,14 @@ class MainActivity : FlutterActivity() {
             ?.use { cursor ->
                 if (cursor.moveToFirst()) cursor.getString(0) else null
             }
+
+    // Android closes background apps to make room, so about half of all
+    // memory is usable even when much less is free right now.
+    private fun availableMemory(): Long {
+        val info = ActivityManager.MemoryInfo()
+        (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(info)
+        return maxOf(info.availMem, info.totalMem / 2)
+    }
 
     // The frame rate ranges apps may request from the first back camera,
     // which is the one the scanner opens.

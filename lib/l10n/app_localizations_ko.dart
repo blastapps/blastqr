@@ -124,6 +124,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get send_large_file => '그래도 보내기';
 
   @override
+  String get low_memory => '이 기기에는 너무 큰 파일';
+
+  @override
+  String get low_memory_msg =>
+      '이 파일은 이 기기의 메모리에 비해 너무 클 가능성이 높습니다. 전송이 끝나기 전에 앱이 종료될 수 있습니다. 더 작은 파일을 공유해 보세요.';
+
+  @override
+  String get receive_anyway => '그래도 받기';
+
+  @override
   String get to_transfer => '전송';
 
   @override

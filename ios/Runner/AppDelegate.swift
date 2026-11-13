@@ -1,6 +1,7 @@
 import AVFoundation
 import Flutter
 import UIKit
+import os
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -47,6 +48,14 @@ import UIKit
         switch call.method {
         case "deviceModel": result(Self.deviceModel())
         case "cameraState": result(Self.cameraState())
+        default: result(FlutterMethodNotImplemented)
+        }
+      }
+    FlutterMethodChannel(name: "blastqr/device", binaryMessenger: registrar.messenger())
+      .setMethodCallHandler { call, result in
+        switch call.method {
+        // How much more memory this app can use before iOS closes it.
+        case "availableMemory": result(Int(os_proc_available_memory()))
         default: result(FlutterMethodNotImplemented)
         }
       }

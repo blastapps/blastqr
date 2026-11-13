@@ -320,6 +320,24 @@ abstract class AppLocalizations {
   /// **'Send anyway'**
   String get send_large_file;
 
+  /// No description provided for @low_memory.
+  ///
+  /// In en, this message translates to:
+  /// **'Too large for this device'**
+  String get low_memory;
+
+  /// No description provided for @low_memory_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is likely too large for this device\'s memory. The app will probably close before the transfer finishes. Try sharing a smaller file.'**
+  String get low_memory_msg;
+
+  /// No description provided for @receive_anyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive anyway'**
+  String get receive_anyway;
+
   /// No description provided for @to_transfer.
   ///
   /// In en, this message translates to:

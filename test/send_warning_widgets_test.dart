@@ -32,11 +32,16 @@ void main() {
     Future<void> pumpAlert(
       WidgetTester tester, {
       int transferBytes = 2400000,
+      bool isLongTransfer = true,
+      bool mayRunOutOfMemory = false,
     }) => _pump(
       tester,
       FileTooLargeAlertWidget(
         transferBytes: transferBytes,
+        isLongTransfer: isLongTransfer,
+        mayRunOutOfMemory: mayRunOutOfMemory,
         onAcknowledge: () {},
+        onCancel: () {},
       ),
     );
 
@@ -45,6 +50,33 @@ void main() {
       await pumpAlert(tester, transferBytes: 7200000);
 
       expect(_text(' 5 minutes '), findsOneWidget);
+    });
+
+    testWidgets('warns about memory along with the time', (tester) async {
+      await pumpAlert(tester, mayRunOutOfMemory: true);
+
+      expect(find.text('Too large for this device'), findsOneWidget);
+      expect(_text('memory'), findsOneWidget);
+      expect(_text('minutes'), findsOneWidget);
+    });
+
+    testWidgets('warns about memory alone for short transfers', (tester) async {
+      await pumpAlert(tester, isLongTransfer: false, mayRunOutOfMemory: true);
+
+      expect(_text('memory'), findsOneWidget);
+      expect(_text('minutes'), findsNothing);
+    });
+
+    testWidgets('makes cancelling the main action when memory may run out', (
+      tester,
+    ) async {
+      await pumpAlert(tester, mayRunOutOfMemory: true);
+
+      expect(find.widgetWithText(ElevatedButton, 'Cancel'), findsOneWidget);
+      expect(
+        find.widgetWithText(OutlinedButton, 'Send anyway'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('only offers sending anyway', (tester) async {

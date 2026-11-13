@@ -189,23 +189,25 @@ Uint8List buildFrameHeader({
 class FileQrEncoder {
   const FileQrEncoder._();
 
-  /// Starts an endless frame stream for [transfer], a transfer object from
-  /// [buildTransferObject].
+  /// Starts an endless frame stream for the transfer object of [length]
+  /// bytes at [path] (see [writeTransferObject]), which must not change
+  /// until the result is disposed.
   ///
   /// The caller must [QrFrameSource.dispose] the result.
   static Future<QrFrameSource> start(
-    Uint8List transfer,
+    String path,
+    int length,
     int mtu, {
     required bool gzipped,
     required bool encrypted,
   }) async {
     final encoder = RaptorqStreamingEncoder(mtu: mtu);
-    await encoder.init(transfer);
+    await encoder.initFromFile(path);
 
     final header = buildFrameHeader(
       gzipped: gzipped,
       encrypted: encrypted,
-      transferLength: transfer.length,
+      transferLength: length,
       symbolSize: encoder.symbolSize,
     );
     final qrVersion = pickQrVersion(mtu);

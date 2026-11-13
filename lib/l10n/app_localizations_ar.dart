@@ -129,6 +129,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get send_large_file => 'إرسال على أي حال';
 
   @override
+  String get low_memory => 'كبير جدًا على هذا الجهاز';
+
+  @override
+  String get low_memory_msg =>
+      'من المرجح أن يكون هذا الملف أكبر من أن تتسع له ذاكرة هذا الجهاز. قد يُغلق التطبيق قبل انتهاء النقل. جرّب مشاركة ملف أصغر.';
+
+  @override
+  String get receive_anyway => 'استلام على أي حال';
+
+  @override
   String get to_transfer => 'للنقل';
 
   @override

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/device_memory.dart';
 import 'package:blast_qr/crypto/transfer_crypto.dart';
 import 'package:blast_qr/extensions/string_extension.dart';
 import 'package:blast_qr/features/scan/decode_stats.dart';
@@ -427,6 +428,33 @@ class _ScanPageState extends State<ScanPage> {
     });
     _latestScanStartTime = DateTime.now();
     debugPrint('Scanning file with: ${_fileMetadata.toString()}');
+    _warnIfLowMemory();
+  }
+
+  /// Pauses scanning to ask whether to go on when the transfer may need more
+  /// memory than this device has. The sender keeps showing new codes, so
+  /// nothing is lost while asking.
+  Future<void> _warnIfLowMemory() async {
+    final metadata = _fileMetadata!;
+    if (!await mayRunOutOfMemory(metadata.size) || !mounted) return;
+    // Another transfer may have started meanwhile.
+    if (!identical(_fileMetadata, metadata)) return;
+    _shouldScan = false;
+    var receive = false;
+    await showMessage(
+      context: context,
+      title: context.l10n.low_memory,
+      message: context.l10n.low_memory_msg,
+      confirmTitle: context.l10n.cancel,
+      secondaryTitle: context.l10n.receive_anyway,
+      onSecondaryTap: () => receive = true,
+    );
+    if (!mounted || !identical(_fileMetadata, metadata)) return;
+    if (receive) {
+      setState(() => _shouldScan = true);
+    } else {
+      _reset();
+    }
   }
 
   /// Drops the current transfer's progress and starts on a new one right
