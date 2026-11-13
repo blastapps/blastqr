@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-<a href="https://f-droid.org/packages/dev.blastapps.blastqr"><img src="docs/f-droid-badge.png" alt="Get it on F-Droid" height="44"/></a>
+<!--<a href="https://f-droid.org/packages/dev.blastapps.blastqr"><img src="docs/f-droid-badge.png" alt="Get it on F-Droid" height="44"/></a>-->
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://codeberg.org/blast/blastqr"><img src="docs/obtainium-badge.png" alt="Get it on Obtainium" height="44"/></a>
 <a href="https://play.google.com/store/apps/details?id=dev.blastapps.blastqr"><img src="docs/google-play-badge.png" alt="Get it on Google Play" height="44"/></a>
 <a href="https://apps.apple.com/app/id6831422458"><img src="docs/app-store-badge.png" alt="Download on the App Store" height="44"/></a>
