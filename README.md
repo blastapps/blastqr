@@ -45,11 +45,11 @@ Downloads for all platforms are on the **[latest release page](https://codeberg.
 - **Works fully offline:** No internet, Wi-Fi, Bluetooth or servers. Your data stays offline.
 - **One-to-many distribution:** Share the same file with multiple devices simultaneously using a single blastQR broadcast.
 - **Cross-platform:** Android, iOS, macOS, Linux and Windows, plus a command-line tool that can send from a terminal, even over SSH.
+- **Password encryption:** You can optionally encrypt files with an auto-generated password or a custom one.
+- **Media compression:** The app supports lossy image compression and video transcoding for quicker transfers.
 - **Multiple codes on screen:** Shows multiple QR codes at once for higher speed. With 8 codes at 60 fps, transfers peak at around 1.4 MB/s.
 - **Send multiple files in one go:** They're zipped into one transfer and unpacked into separate files on the receiver.
 - **Sound feedback:** The receiver plays a short tone when it has the whole file, and the sender stops automatically when it hears it.
-- **Password encryption:** You can optionally encrypt files with an auto-generated password or a custom one.
-- **File compression:** The app supports lossy image compression and lossless compression for files (gzip) for quicker transfers.
 - **Start scanning at any point:**  No need to catch every code, just keep the camera on the screen until it's done. Blurry or missed codes don't matter.
 - **Regular QR scanner:** You can also scan normal QR codes and save them.
 - **Built-in file manager**
