@@ -43,10 +43,10 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
     }
   }
 
-  void showItemOptions(ReceivedItem item) {
+  Future<void> showItemOptions(ReceivedItem item) async {
     switch (item) {
       case ReceivedFile(:final file):
-        showFileOptionsSheet(
+        await showFileOptionsSheet(
           context,
           file,
           onOpen: () => _onTapOpen(file),
@@ -60,8 +60,13 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
           onDelete: () => _onTapDelete(file.file),
         );
       case ReceivedQrCode(:final code):
-        showQrCodeSheet(context, code, onDelete: () => _onTapDelete(code.file));
+        await showQrCodeSheet(
+          context,
+          code,
+          onDelete: () => _onTapDelete(code.file),
+        );
     }
+    if (mounted) selection.clear();
   }
 
   void _onTapOpen(FileWrapper file) async {
@@ -104,7 +109,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
       !Provider.of<AppSettings>(context, listen: false).compressMediaByDefault,
     );
     final showsHd = files.any(isCompressibleMedia);
-    showSheet(
+    await showSheet(
       context: context,
       title: context.l10n.files_selected(files.length),
       body: Column(
@@ -166,6 +171,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
         ],
       ),
     );
+    if (mounted) selection.clear();
   }
 
   void _sendSelectedFiles(List<FileWrapper> files, SendOptions options) {
