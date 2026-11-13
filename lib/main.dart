@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/features/home_tabs_page.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/l10n/app_localizations.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
@@ -53,6 +56,8 @@ void main() async {
   if (isDesktopOS) await windowManager.ensureInitialized();
 
   await AppPreferences.read();
+  // Quick on phones; on Linux it runs ffmpeg once, so it isn't awaited.
+  unawaited(detectVideoCompression());
   await syncReceivedFiles().catchError((Object error) {
     debugPrint('Failed to set up received files: $error');
   });

@@ -1,73 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// What [BlastqrVideo.probe] reads from a video without decoding it.
-class VideoInfo {
-  const VideoInfo({
-    required this.duration,
-    required this.width,
-    required this.height,
-    required this.hasAudio,
-  });
+import 'src/ffmpeg.dart';
+import 'src/types.dart';
 
-  final Duration duration;
+export 'src/types.dart';
 
-  /// The size as displayed, with rotation applied.
-  final int width;
-  final int height;
-
-  final bool hasAudio;
-
-  int get shortSide => min(width, height);
-}
-
-/// How [BlastqrVideo.compress] encodes: H.264 and AAC in an MP4.
-class VideoEncodeSettings {
-  const VideoEncodeSettings({
-    required this.videoBitrate,
-    required this.audioBitrate,
-    required this.shortSide,
-    required this.frameRate,
-    this.audioChannels = 2,
-  });
-
-  /// Bits per second.
-  final int videoBitrate;
-
-  /// Bits per second.
-  final int audioBitrate;
-
-  /// 1 mixes the audio down to mono, which needs half the bitrate.
-  final int audioChannels;
-
-  /// The output's shorter side in pixels. The aspect ratio is kept.
-  final int shortSide;
-
-  /// Frames beyond this rate are dropped.
-  final int frameRate;
-
-  Map<String, Object> toMap() => {
-    'videoBitrate': videoBitrate,
-    'audioBitrate': audioBitrate,
-    'shortSide': shortSide,
-    'frameRate': frameRate,
-    'audioChannels': audioChannels,
-  };
-
-  @override
-  String toString() =>
-      '${shortSide}p ${frameRate}fps, video ${videoBitrate ~/ 1000} kbps, '
-      'audio ${audioBitrate ~/ 1000} kbps${audioChannels == 1 ? ' mono' : ''}';
-}
-
-class VideoCompressionCancelled implements Exception {
-  const VideoCompressionCancelled();
-}
-
+/// Re-encodes videos with the platform's encoder: AVFoundation on iOS and
+/// macOS, Media3 on Android, and ffmpeg on Linux when it's installed.
 class BlastqrVideo {
   const BlastqrVideo._();
 
@@ -76,10 +19,33 @@ class BlastqrVideo {
   static var _nextId = 0;
   static var _listening = false;
 
-  static bool get isSupported =>
-      !kIsWeb && (Platform.isIOS || Platform.isAndroid || Platform.isMacOS);
+  static Future<bool>? _supported;
+  static Ffmpeg? _ffmpeg;
+
+  /// Whether videos can be compressed here. On Linux that needs ffmpeg with
+  /// an H.264 encoder, which is checked once.
+  static Future<bool> isSupported() => _supported ??= _findSupport();
+
+  static Future<bool> _findSupport() async {
+    if (kIsWeb) return false;
+    if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) return true;
+    if (Platform.isLinux) return (_ffmpeg = await Ffmpeg.find()) != null;
+    return false;
+  }
+
+  /// ffmpeg on Linux, null where the platform's own encoder is used.
+  static Future<Ffmpeg?> _ffmpegIfLinux() async {
+    if (kIsWeb || !Platform.isLinux) return null;
+    if (!await isSupported()) {
+      throw PlatformException(code: 'unsupported', message: 'No ffmpeg');
+    }
+    return _ffmpeg;
+  }
 
   static Future<VideoInfo> probe(String path) async {
+    if (await _ffmpegIfLinux() case final ffmpeg?) {
+      return (await ffmpeg.probe(path)).info;
+    }
     final info = await _channel.invokeMapMethod<String, Object?>('probe', path);
     if (info == null) throw PlatformException(code: 'failed');
     return VideoInfo(
@@ -100,6 +66,15 @@ class BlastqrVideo {
     void Function(double progress)? onProgress,
     Future<void>? cancel,
   }) async {
+    if (await _ffmpegIfLinux() case final ffmpeg?) {
+      return ffmpeg.compress(
+        input: input,
+        output: output,
+        settings: settings,
+        onProgress: onProgress,
+        cancel: cancel,
+      );
+    }
     _listen();
     final id = _nextId++;
     if (onProgress != null) _progressCallbacks[id] = onProgress;

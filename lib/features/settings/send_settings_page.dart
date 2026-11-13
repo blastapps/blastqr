@@ -2,6 +2,7 @@ import 'package:blast_qr/acoustic_ack_listener.dart';
 import 'package:blast_qr/app_preferences.dart';
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/features/send/prepare_transfer.dart';
 import 'package:blast_qr/features/settings/image_compression_settings_page.dart';
 import 'package:blast_qr/features/settings/widgets/setting_group_title.dart';
 import 'package:blast_qr/l10n/extension.dart';
@@ -156,9 +157,7 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
               return SwitchListTile.adaptive(
                 contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 title: Text(context.l10n.compress_media_by_default),
-                subtitle: Text(
-                  context.l10n.compress_media_by_default_subtitle,
-                ),
+                subtitle: Text(context.l10n.compress_media_by_default_subtitle),
                 value: state.compressMediaByDefault,
                 activeTrackColor: context.color.primary,
                 onChanged: (value) {
@@ -183,30 +182,31 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
             ),
             onTap: _showImageCompressionSettings,
           ),
-          Consumer<AppSettings>(
-            builder: (context, state, child) {
-              return ListTile(
-                leading: HugeIcon(
-                  icon: HugeIcons.strokeRoundedVideo01,
-                  color: context.color.onSurface,
-                ),
-                title: Text(context.l10n.video_quality),
-                subtitle: Text(state.videoQuality.title(context.l10n)),
-                onTap: () => showPickerSheet(
-                  context,
-                  title: context.l10n.video_quality,
-                  message: context.l10n.video_quality_hint,
-                  items: [
-                    for (final quality in VideoQuality.values)
-                      quality.title(context.l10n),
-                  ],
-                  selectedItemIndex: state.videoQuality.index,
-                  onItemTap: (index) =>
-                      state.updateVideoQuality(VideoQuality.values[index]),
-                ),
-              );
-            },
-          ),
+          if (videoCompressionSupported)
+            Consumer<AppSettings>(
+              builder: (context, state, child) {
+                return ListTile(
+                  leading: HugeIcon(
+                    icon: HugeIcons.strokeRoundedVideo01,
+                    color: context.color.onSurface,
+                  ),
+                  title: Text(context.l10n.video_quality),
+                  subtitle: Text(state.videoQuality.title(context.l10n)),
+                  onTap: () => showPickerSheet(
+                    context,
+                    title: context.l10n.video_quality,
+                    message: context.l10n.video_quality_hint,
+                    items: [
+                      for (final quality in VideoQuality.values)
+                        quality.title(context.l10n),
+                    ],
+                    selectedItemIndex: state.videoQuality.index,
+                    onItemTap: (index) =>
+                        state.updateVideoQuality(VideoQuality.values[index]),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

@@ -23,8 +23,14 @@ const largeTransferBytes = 2500000;
 /// Photos and videos up to this size aren't worth re-encoding.
 const minCompressibleMediaBytes = 400000;
 
-@visibleForTesting
-bool videoCompressionSupported = BlastqrVideo.isSupported;
+/// Set by [detectVideoCompression]. Until then, videos are sent as they are.
+bool videoCompressionSupported = false;
+
+/// Checks once at startup whether videos can be compressed: always on
+/// phones and macOS, on Linux only with ffmpeg.
+Future<void> detectVideoCompression() async {
+  videoCompressionSupported = await BlastqrVideo.isSupported();
+}
 
 bool isCompressibleImage(FileWrapper file) =>
     file.type.allowsImageCompression && file.size > minCompressibleMediaBytes;

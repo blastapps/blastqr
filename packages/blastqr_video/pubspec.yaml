@@ -1,7 +1,7 @@
 name: blastqr_video
 description: >
-  Video re-encoding for BlastQR with the platform's hardware encoder:
-  AVFoundation on iOS and macOS, Media3 Transformer on Android.
+  Video re-encoding for BlastQR with the platform's encoder: AVFoundation on
+  iOS and macOS, Media3 Transformer on Android, ffmpeg on Linux.
 version: 0.1.0
 publish_to: none
 
