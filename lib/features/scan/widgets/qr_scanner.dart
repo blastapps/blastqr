@@ -209,7 +209,12 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     }
     final status = await _requestPermission();
     if (!mounted || status.isGranted) return;
-    if (status.isPermanentlyDenied || status.isRestricted) {
+    final canAskAgain =
+        Platform.isAndroid &&
+        status.isDenied &&
+        await Permission.camera.shouldShowRequestRationale;
+    if (!mounted) return;
+    if (status.isPermanentlyDenied || status.isRestricted || !canAskAgain) {
       _askOnReturn = true;
       await openAppSettings();
     }
