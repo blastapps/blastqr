@@ -134,6 +134,18 @@ Files are encrypted with ChaCha20-Poly1305, and the key is derived from the pass
 
 The transfer format is documented in [docs/protocol.md](docs/protocol.md).
 
+## Verifying the Android APK
+
+The APKs on the release page and on Obtainium can be checked with AppVerifier.
+
+> [!WARNING]
+> This only applies to the release page and Obtainium. Google Play builds are signed by Google and have a different fingerprint.
+
+```
+dev.blastapps.blastqr
+60:E3:A6:C0:63:1D:C3:A0:0C:78:E4:C9:E4:89:B3:03:4F:A9:7D:49:D0:B9:3E:CF:56:B2:33:A8:C3:DD:F6:83
+```
+
 ## Building from source
 
 You need:
