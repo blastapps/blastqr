@@ -1,0 +1,8 @@
+- Video transcoding: videos can be transcoded before sending (#35), and this now works on Linux too (#36)
+- Reduce memory: sending no longer loads the whole file into memory. Files are now encoded straight from disk 
+- iOS: you can now save received files to the Files app
+- Sharing: you can share several received files at once
+- Camera permissions: the app handles camera permission requests better, and the scan page was reworked (#34)
+- QR page: UI improvements. The FPS options now include 60FPS
+- Fix (macOS): audio works again after a change to how the macOS build strips symbols
+
