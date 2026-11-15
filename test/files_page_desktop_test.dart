@@ -26,6 +26,11 @@ void main() {
     final documents = Directory.systemTemp.createTempSync('blastqr_test');
     PathProviderPlatform.instance = _FakePathProvider(documents.path);
     SharedPreferences.setMockInitialValues({});
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('blastqr/open_files'),
+          (call) async => <String>[],
+        );
     received = await receivedFilesDirectory();
     // Newest first: f0, f1, ...
     final now = DateTime.now();
