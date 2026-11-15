@@ -19,12 +19,20 @@ OutputBaseFilename={#OutputName}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+ChangesAssociations=yes
 
 [Tasks]
 Name: desktopicon; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
 
 [Files]
 Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion
+
+; Lists blastQR under "Open with" for every file type, without becoming the
+; default app for any.
+[Registry]
+Root: HKA; Subkey: "Software\Classes\Applications\blastQR.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "blastQR"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Applications\blastQR.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\blastQR.exe"" ""%1"""
+Root: HKA; Subkey: "Software\Classes\*\OpenWithList\blastQR.exe"; Flags: uninsdeletekey
 
 [Icons]
 Name: "{autoprograms}\blastQR"; Filename: "{app}\blastQR.exe"

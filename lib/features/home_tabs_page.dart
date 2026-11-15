@@ -13,6 +13,7 @@ import 'package:blast_qr/file_name_utils.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_extension.dart';
 import 'package:blast_qr/nav_bar_visibility.dart';
+import 'package:blast_qr/opened_files.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/temp_files.dart';
 import 'package:blast_qr/widgets/navigation_tabs.dart';
@@ -27,7 +28,10 @@ import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class HomeTabsPage extends StatefulWidget {
-  const HomeTabsPage({super.key});
+  const HomeTabsPage({super.key, required this.openedFiles});
+
+  /// Files passed from desktop platform "open with..."
+  final List<String> openedFiles;
 
   @override
   State<HomeTabsPage> createState() => _HomeTabsPageState();
@@ -52,6 +56,10 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
   Future<void> initPlatformState() async {
     if (!Platform.isIOS && !Platform.isAndroid) {
       await _clearTempFiles();
+      final pending = Platform.isWindows
+          ? <String>[]
+          : await listenForOpenedFiles(_openFiles);
+      await _openFiles([...widget.openedFiles, ...pending]);
       return;
     }
     final sharing = ReceiveSharingIntent.instance;
@@ -63,6 +71,8 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     final initial = await sharing.getInitialMedia();
     sharing.reset();
     final files = await _takeSharedMedia(initial);
+
+    // Cleanup previous session data keeping shared folder
     await _clearTempFiles(keep: files.firstOrNull?.parent);
     if (mounted && files.isNotEmpty) _showQrPage(files);
   }
@@ -73,6 +83,14 @@ class _HomeTabsPageState extends State<HomeTabsPage> {
     } catch (error) {
       debugPrint('Failed to clear temp files: $error');
     }
+  }
+
+  Future<void> _openFiles(List<String> paths) async {
+    final files = [
+      for (final path in paths)
+        if (await FileSystemEntity.isFile(path)) File(path),
+    ];
+    if (files.isNotEmpty && mounted) _showQrPage(files);
   }
 
   Future<List<File>> _takeSharedMedia(List<SharedMediaFile> media) async {

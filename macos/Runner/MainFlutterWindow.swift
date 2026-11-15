@@ -2,6 +2,8 @@ import Cocoa
 import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
+  private var openedFiles: OpenedFiles?
+
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
     let windowFrame = self.frame
@@ -10,6 +12,10 @@ class MainFlutterWindow: NSWindow {
     self.contentMinSize = NSSize(width: 300, height: 300)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+
+    let openedFiles = OpenedFiles(messenger: flutterViewController.engine.binaryMessenger)
+    (NSApp.delegate as? FlutterAppDelegate)?.addApplicationLifecycleDelegate(openedFiles)
+    self.openedFiles = openedFiles
 
     FlutterMethodChannel(
       name: "blastqr/files", binaryMessenger: flutterViewController.engine.binaryMessenger

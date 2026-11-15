@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 import 'package:raptorq_flutter/raptorq_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Additional licenses
@@ -74,11 +74,13 @@ void main() async {
     },
   );
 
-  runApp(const MyApp());
+  runApp(MyApp(args: args));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.args});
+
+  final List<String> args;
 
   // This widget is the root of your application.
   @override
@@ -110,7 +112,7 @@ class MyApp extends StatelessWidget {
             ),
             themeMode: state.theme,
             locale: state.locale,
-            home: const HomeTabsPage(),
+            home: HomeTabsPage(openedFiles: args),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
           );

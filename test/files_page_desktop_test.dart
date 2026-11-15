@@ -119,7 +119,7 @@ void main() {
   testWidgets('the selection bar shows the count and opens or clears', (
     tester,
   ) async {
-    await pumpPage(tester, home: const HomeTabsPage());
+    await pumpPage(tester, home: const HomeTabsPage(openedFiles: []));
     await tester.tap(find.text('Received'));
     await settle(tester);
     expect(find.byType(SelectionBar), findsNothing);
@@ -161,7 +161,7 @@ void main() {
   }, skip: !isDesktopOS);
 
   testWidgets('back clears the selection instead of leaving', (tester) async {
-    await pumpPage(tester, home: const HomeTabsPage());
+    await pumpPage(tester, home: const HomeTabsPage(openedFiles: []));
     await tester.tap(find.text('Received'));
     await settle(tester);
     await tester.tap(find.text('f1.txt'), kind: PointerDeviceKind.mouse);

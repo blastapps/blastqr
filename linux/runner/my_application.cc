@@ -9,16 +9,46 @@
 
 struct _MyApplication {
   GtkApplication parent_instance;
-  char** dart_entrypoint_arguments;
+  GtkWindow* window;
+  FlMethodChannel* open_files_channel;
+  // Files opened before Dart asked for them; nullptr once it has.
+  GPtrArray* pending_paths;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+// Answers Dart's "ready" with the files opened before it was listening.
+static void open_files_method_call_cb(FlMethodChannel* channel,
+                                      FlMethodCall* method_call,
+                                      gpointer user_data) {
+  MyApplication* self = MY_APPLICATION(user_data);
+  if (g_strcmp0(fl_method_call_get_name(method_call), "ready") != 0) {
+    fl_method_call_respond_not_implemented(method_call, nullptr);
+    return;
+  }
+  g_autoptr(FlValue) paths = fl_value_new_list();
+  if (self->pending_paths != nullptr) {
+    for (guint i = 0; i < self->pending_paths->len; i++) {
+      fl_value_append_take(
+          paths, fl_value_new_string(static_cast<const gchar*>(
+                     g_ptr_array_index(self->pending_paths, i))));
+    }
+    g_clear_pointer(&self->pending_paths, g_ptr_array_unref);
+  }
+  fl_method_call_respond_success(method_call, paths, nullptr);
+}
+
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
+  if (self->window != nullptr) {
+    gtk_window_present(self->window);
+    return;
+  }
+
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
+  self->window = window;
 
   // Use a header bar when running in GNOME as this is the common style used
   // by applications and is the setup most users will be using (e.g. Ubuntu
@@ -55,7 +85,6 @@ static void my_application_activate(GApplication* application) {
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));
@@ -63,26 +92,40 @@ static void my_application_activate(GApplication* application) {
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 
+  g_autoptr(FlPluginRegistrar) registrar =
+      fl_plugin_registry_get_registrar_for_plugin(FL_PLUGIN_REGISTRY(view),
+                                                  "OpenFiles");
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  self->open_files_channel =
+      fl_method_channel_new(fl_plugin_registrar_get_messenger(registrar),
+                            "blastqr/open_files", FL_METHOD_CODEC(codec));
+  fl_method_channel_set_method_call_handler(
+      self->open_files_channel, open_files_method_call_cb, self, nullptr);
+
   gtk_widget_grab_focus(GTK_WIDGET(view));
 }
 
-// Implements GApplication::local_command_line.
-static gboolean my_application_local_command_line(GApplication* application, gchar*** arguments, int* exit_status) {
+// Implements GApplication::open. Files opened in another instance arrive
+// here too, since GApplication hands them to the first one.
+static void my_application_open(GApplication* application, GFile** files,
+                                gint n_files, const gchar* hint) {
   MyApplication* self = MY_APPLICATION(application);
-  // Strip out the first argument as it is the binary name.
-  self->dart_entrypoint_arguments = g_strdupv(*arguments + 1);
+  my_application_activate(application);
 
-  g_autoptr(GError) error = nullptr;
-  if (!g_application_register(application, nullptr, &error)) {
-     g_warning("Failed to register: %s", error->message);
-     *exit_status = 1;
-     return TRUE;
+  g_autoptr(FlValue) paths = fl_value_new_list();
+  for (gint i = 0; i < n_files; i++) {
+    g_autofree gchar* path = g_file_get_path(files[i]);
+    if (path == nullptr) continue;
+    if (self->pending_paths != nullptr) {
+      g_ptr_array_add(self->pending_paths, g_strdup(path));
+    } else {
+      fl_value_append_take(paths, fl_value_new_string(path));
+    }
   }
-
-  g_application_activate(application);
-  *exit_status = 0;
-
-  return TRUE;
+  if (fl_value_get_length(paths) > 0) {
+    fl_method_channel_invoke_method(self->open_files_channel, "open", paths,
+                                    nullptr, nullptr, nullptr);
+  }
 }
 
 // Implements GApplication::startup.
@@ -106,19 +149,22 @@ static void my_application_shutdown(GApplication* application) {
 // Implements GObject::dispose.
 static void my_application_dispose(GObject* object) {
   MyApplication* self = MY_APPLICATION(object);
-  g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
+  g_clear_object(&self->open_files_channel);
+  g_clear_pointer(&self->pending_paths, g_ptr_array_unref);
   G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 
 static void my_application_class_init(MyApplicationClass* klass) {
   G_APPLICATION_CLASS(klass)->activate = my_application_activate;
-  G_APPLICATION_CLASS(klass)->local_command_line = my_application_local_command_line;
+  G_APPLICATION_CLASS(klass)->open = my_application_open;
   G_APPLICATION_CLASS(klass)->startup = my_application_startup;
   G_APPLICATION_CLASS(klass)->shutdown = my_application_shutdown;
   G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
 }
 
-static void my_application_init(MyApplication* self) {}
+static void my_application_init(MyApplication* self) {
+  self->pending_paths = g_ptr_array_new_with_free_func(g_free);
+}
 
 MyApplication* my_application_new() {
   // Set the program name to the application ID, which helps various systems
@@ -127,8 +173,13 @@ MyApplication* my_application_new() {
   // the application to be recognized beyond its binary name.
   g_set_prgname(APPLICATION_ID);
 
+  // Release builds run a single instance: opening files again hands them to
+  // the running one. Debug builds don't, so `flutter run` always starts.
+  GApplicationFlags flags = G_APPLICATION_HANDLES_OPEN;
+#ifndef NDEBUG
+  flags = static_cast<GApplicationFlags>(flags | G_APPLICATION_NON_UNIQUE);
+#endif
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", APPLICATION_ID,
-                                     "flags", G_APPLICATION_NON_UNIQUE,
-                                     nullptr));
+                                     "flags", flags, nullptr));
 }
