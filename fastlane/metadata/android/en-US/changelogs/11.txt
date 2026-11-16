@@ -1,0 +1,4 @@
+- The scan page now shows a graph of transfer speed while a file is received.
+- Grid and code size settings: two new settings under Sending. "Minimum QR code size" sets how small each code can get, and "Max QR codes on screen" caps how many codes show at once.
+- "Open with" on desktop: on macOS, Linux and Windows you can open a file with BlastQR from your file manager to send it.
+- Improved translations
