@@ -73,7 +73,7 @@ By default, senders play the sequence at 25 fps, and receivers run their camera 
 | 6 | 25 | 422 kB/s · 6.3 s | 392 kB/s · 6.8 s | **421 kB/s · 6.3 s** |
 | 6 | 30 | 526 kB/s · 5.0 s | **518 kB/s · 5.1 s** | – |
 | 6 | 60 | 1044 kB/s · 2.5 s | – | – |
-| 8 | 60 | **1402 kB/s · 1.9 s** | – | – |
+| 12 | 60 | **1704 kB/s · 1.6 s** | – | – |
 
 Each test sent a 2.6 MB file and each result is the best of 4 attempts. The camera preview ran at 60 fps on the iPhone and 30 fps on the Samsung phones.
 
