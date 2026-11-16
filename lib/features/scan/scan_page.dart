@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:blast_qr/app_settings.dart';
 import 'package:blast_qr/color_scheme.dart';
-import 'package:blast_qr/device_memory.dart';
 import 'package:blast_qr/crypto/transfer_crypto.dart';
+import 'package:blast_qr/device_memory.dart';
 import 'package:blast_qr/extensions/string_extension.dart';
 import 'package:blast_qr/features/scan/decode_stats.dart';
 import 'package:blast_qr/features/scan/received_file_writer.dart';
@@ -16,9 +16,9 @@ import 'package:blast_qr/features/scan/widgets/focus_ring.dart';
 import 'package:blast_qr/features/scan/widgets/help_message.dart';
 import 'package:blast_qr/features/scan/widgets/password_sheet.dart';
 import 'package:blast_qr/features/scan/widgets/qr_result_sheet.dart';
+import 'package:blast_qr/features/scan/widgets/qr_scanner.dart';
 import 'package:blast_qr/features/scan/widgets/received_files_sheet.dart';
 import 'package:blast_qr/features/scan/widgets/scan_progress.dart';
-import 'package:blast_qr/features/scan/widgets/qr_scanner.dart';
 import 'package:blast_qr/features/settings/settings_page.dart';
 import 'package:blast_qr/file_badge_count.dart';
 import 'package:blast_qr/file_name_utils.dart';
@@ -281,7 +281,7 @@ class _ScanPageState extends State<ScanPage> {
                 ),
             ScanProgressWidget(
               chunkCount: _decodedChunkCount,
-              speed: '${_speed.toStringAsFixed(1)}kB/s',
+              speed: _speed,
               show: _decodedChunkCount > 0,
               info: _statusMessage,
               progress: _progress,
