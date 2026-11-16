@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
@@ -83,20 +84,48 @@ void _renderWorker(_WorkerInit init) {
 /// Frames are generated on demand: the source stays [lookahead] frames ahead
 /// of what the display has used (see [markConsumed]), so memory stays small
 /// however long the transfer runs. Frames can arrive slightly out of order
-/// (two render workers); use [QrPixelData.seq] to order them.
+/// (several render workers); use [QrPixelData.seq] to order them.
 class QrFrameSource {
-  /// Frames kept ready or in progress beyond those already shown. About
-  /// 0.5–4 s of playback depending on fps and grid size.
-  static const int lookahead = 90;
+  static const int _minLookahead = 90;
+  static const int _lookaheadScreens = 15;
 
-  /// One background isolate renders a version-40 frame in ~3–10 ms, which
-  /// can fall short of 6 codes × 30 fps, so two share the work.
-  static const int workerCount = 2;
+  /// One background isolate renders a version-40 frame in ~3-10 ms, which
+  /// can fall short of many codes at a high fps, so several share the work.
+  static const int _baseWorkerCount = 2;
+
+  /// Above this many codes on screen, machines with at least
+  /// [_extraWorkerMinCores] cores get one more worker.
+  static const int _extraWorkerAboveCodes = 6;
+  static const int _extraWorkerMinCores = 8;
+
+  /// Frames kept ready or in progress beyond those already shown: at least
+  /// [_lookaheadScreens] screens of [codesPerScreen] codes.
+  int get lookahead => max(_minLookahead, _lookaheadScreens * codesPerScreen);
+
+  /// Codes shown at once; set by the display when its grid changes.
+  int get codesPerScreen => _codesPerScreen;
+  set codesPerScreen(int value) {
+    if (value == _codesPerScreen) return;
+    _codesPerScreen = value;
+    if (!_extraWorkerAdded &&
+        value > _extraWorkerAboveCodes &&
+        Platform.numberOfProcessors >= _extraWorkerMinCores) {
+      _extraWorkerAdded = true;
+      // Optional: the other workers keep up as well as they can without it.
+      unawaited(_addWorker().catchError((_) {}));
+    }
+    _pump();
+  }
+
+  int _codesPerScreen = 1;
+  bool _extraWorkerAdded = false;
 
   final RaptorqStreamingEncoder _encoder;
-  final List<Isolate> _isolates;
-  final List<SendPort> _workers;
-  final ReceivePort _results;
+  final Uint8List _header;
+  final int _qrVersion;
+  final List<Isolate> _isolates = [];
+  final List<SendPort> _workers = [];
+  final _results = ReceivePort();
   final _frames = StreamController<QrPixelData>();
   final _pending = Queue<Uint8List>();
 
@@ -105,7 +134,7 @@ class QrFrameSource {
   bool _pumping = false;
   bool _disposed = false;
 
-  QrFrameSource._(this._encoder, this._isolates, this._workers, this._results) {
+  QrFrameSource._(this._encoder, this._header, this._qrVersion) {
     _results.listen((message) {
       if (_disposed) return;
       final (seq, moduleCount, pixels) =
@@ -116,7 +145,24 @@ class QrFrameSource {
         pixels: pixels.materialize().asUint8List(),
       ));
     });
-    _pump();
+  }
+
+  Future<void> _addWorker() async {
+    final setup = ReceivePort();
+    final isolate = await Isolate.spawn(_renderWorker, (
+      setup: setup.sendPort,
+      results: _results.sendPort,
+      header: _header,
+      qrVersion: _qrVersion,
+    ));
+    final worker = await setup.first as SendPort;
+    if (_disposed) {
+      worker.send(null);
+      isolate.kill(priority: Isolate.beforeNextEvent);
+      return;
+    }
+    _isolates.add(isolate);
+    _workers.add(worker);
   }
 
   /// Rendered frames, endlessly.
@@ -137,7 +183,9 @@ class QrFrameSource {
     if (_pumping) return;
     _pumping = true;
     try {
-      while (!_disposed && _requested - _consumed < lookahead) {
+      while (!_disposed &&
+          _workers.isNotEmpty &&
+          _requested - _consumed < lookahead) {
         if (_pending.isEmpty) {
           _pending.addAll(await _encoder.nextPackets(32));
           if (_disposed) return;
@@ -213,23 +261,17 @@ class FileQrEncoder {
     final qrVersion = pickQrVersion(mtu);
     debugPrint('Picked QR version: $qrVersion for mtu $mtu');
 
-    final results = ReceivePort();
-    final isolates = <Isolate>[];
-    final workers = <SendPort>[];
-    for (var i = 0; i < QrFrameSource.workerCount; i++) {
-      final setup = ReceivePort();
-      isolates.add(
-        await Isolate.spawn(_renderWorker, (
-          setup: setup.sendPort,
-          results: results.sendPort,
-          header: header,
-          qrVersion: qrVersion,
-        )),
-      );
-      workers.add(await setup.first as SendPort);
+    final source = QrFrameSource._(encoder, header, qrVersion);
+    try {
+      for (var i = 0; i < QrFrameSource._baseWorkerCount; i++) {
+        await source._addWorker();
+      }
+    } catch (_) {
+      source.dispose();
+      rethrow;
     }
-
-    return QrFrameSource._(encoder, isolates, workers, results);
+    source._pump();
+    return source;
   }
 
   /// QR version for an MTU setting: the smallest version that holds the

@@ -224,7 +224,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get disabled => 'Desactivat';
 
   @override
-  String get chunk_length => 'Mida de codi QR';
+  String get chunk_length => 'Bytes per codi QR';
 
   @override
   String get playback_fps => 'Velocitat de reproducció';
@@ -378,6 +378,20 @@ class AppLocalizationsCa extends AppLocalizations {
       '2935 bytes és el valor recomanat per al millor rendiment a la majoria de dispositius';
 
   @override
+  String get min_code_size => 'Mida mínima del codi QR';
+
+  @override
+  String get min_code_size_hint =>
+      'Només es mostren més codis mentre cadascun tingui almenys aquesta mida. Redueix-la perquè hi càpiguen més codis, augmenta-la si el telèfon receptor no els pot llegir.';
+
+  @override
+  String get max_codes => 'Màxim de codis QR a la pantalla';
+
+  @override
+  String get max_codes_hint =>
+      'El màxim de codis que es mostren alhora. Redueix-lo si el telèfon receptor no els pot llegir tots.';
+
+  @override
   String get playback_fps_hint =>
       '20 FPS és el valor recomanat per al millor rendiment a la majoria de dispositius';
 
@@ -450,7 +464,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get file_too_large_for_qr_size_msg =>
-      'Aquest fitxer és massa gran per a la mida de codi QR actual. Augmenta la mida del codi QR a Configuració › Enviament.';
+      'Aquest fitxer és massa gran per als bytes per codi QR actuals. Augmenta Bytes per codi QR a Configuració > Enviament.';
 
   @override
   String get receiving_generic => 'Rebent fitxer...';

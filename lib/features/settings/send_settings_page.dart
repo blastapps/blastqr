@@ -104,6 +104,56 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
           ),
           Consumer<EncodeSettings>(
             builder: (context, state, child) {
+              return ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedQrCode,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.min_code_size),
+                subtitle: Text('${state.minCodeSide} px'),
+                onTap: () {
+                  showSliderSheet(
+                    context,
+                    title: context.l10n.min_code_size,
+                    message: context.l10n.min_code_size_hint,
+                    value: state.minCodeSide,
+                    min: 160,
+                    max: 720,
+                    defaultValue: AppPreferences.defaultMinCodeSide,
+                    onConfirm: state.updateMinCodeSide,
+                  );
+                },
+              );
+            },
+          ),
+          Consumer<EncodeSettings>(
+            builder: (context, state, child) {
+              return ListTile(
+                leading: HugeIcon(
+                  icon: HugeIcons.strokeRoundedGridView,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.max_codes),
+                subtitle: Text('${state.maxCodes}'),
+                onTap: () {
+                  const options = AppPreferences.maxCodesOptions;
+                  showSliderSheet(
+                    context,
+                    title: context.l10n.max_codes,
+                    message: context.l10n.max_codes_hint,
+                    value: state.maxCodes,
+                    min: options.first,
+                    max: options.last,
+                    stops: options,
+                    defaultValue: AppPreferences.defaultMaxCodes,
+                    onConfirm: state.updateMaxCodes,
+                  );
+                },
+              );
+            },
+          ),
+          Consumer<EncodeSettings>(
+            builder: (context, state, child) {
               return SwitchListTile.adaptive(
                 contentPadding: const EdgeInsetsDirectional.only(start: 16),
                 secondary: HugeIcon(
@@ -227,6 +277,8 @@ class _SendSettingsPageState extends State<SendSettingsPage> {
         encodeSettings.updateMtu(AppPreferences.defaultMtu);
         encodeSettings.updatePlaybackFps(AppPreferences.defaultFps);
         encodeSettings.updateMultipleQrCodes(false);
+        encodeSettings.updateMinCodeSide(AppPreferences.defaultMinCodeSide);
+        encodeSettings.updateMaxCodes(AppPreferences.defaultMaxCodes);
         Provider.of<AppSettings>(context, listen: false)
           ..updateImageCompressionSettings(
             ImageCompressionSettings.defaultSettings,

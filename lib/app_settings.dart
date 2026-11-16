@@ -180,11 +180,15 @@ class EncodeSettings extends ChangeNotifier {
   int mtu;
   int playbackFps;
   bool multipleQrCodes;
+  int minCodeSide;
+  int maxCodes;
 
   EncodeSettings()
     : mtu = AppPreferences.mtu,
       playbackFps = AppPreferences.playbackFps,
-      multipleQrCodes = AppPreferences.multipleQrCodes;
+      multipleQrCodes = AppPreferences.multipleQrCodes,
+      minCodeSide = AppPreferences.minCodeSide,
+      maxCodes = AppPreferences.maxCodes;
 
   bool _isSmall(int fileSize) => fileSize <= AppPreferences.smallFileBytes;
 
@@ -212,6 +216,18 @@ class EncodeSettings extends ChangeNotifier {
   void updateMultipleQrCodes(bool value) {
     AppPreferences.setMultipleQrCodes(value);
     multipleQrCodes = value;
+    notifyListeners();
+  }
+
+  void updateMinCodeSide(int value) {
+    AppPreferences.setMinCodeSide(value);
+    minCodeSide = value;
+    notifyListeners();
+  }
+
+  void updateMaxCodes(int value) {
+    AppPreferences.setMaxCodes(value);
+    maxCodes = value;
     notifyListeners();
   }
 }

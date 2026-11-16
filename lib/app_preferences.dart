@@ -8,6 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppPreferences {
   static int defaultMtu = 2935;
   static int defaultFps = 25;
+  static const defaultMinCodeSide = 300;
+  static const defaultMaxCodes = 12;
+
+  /// Code counts a grid of up to 5x5 can show, up to 15.
+  static const maxCodesOptions = [1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15];
   static const defaultVideoQuality = VideoQuality.lowest;
 
   /// Files up to this size are sent with [smallFileMtu] and [smallFileFps].
@@ -41,6 +46,8 @@ class AppPreferences {
   static bool? _soundFeedback;
   static bool? _acousticDetection;
   static bool? _multipleQrCodes;
+  static int? _minCodeSide;
+  static int? _maxCodes;
   static bool? _hasSeenMicPrompt;
   static bool? _compressMediaByDefault;
   static VideoQuality? _videoQuality;
@@ -68,6 +75,8 @@ class AppPreferences {
   static bool get soundFeedback => _soundFeedback ?? true;
   static bool get acousticDetection => _acousticDetection ?? false;
   static bool get multipleQrCodes => _multipleQrCodes ?? false;
+  static int get minCodeSide => _minCodeSide ?? defaultMinCodeSide;
+  static int get maxCodes => _maxCodes ?? defaultMaxCodes;
   static bool get hasSeenMicPrompt => _hasSeenMicPrompt ?? false;
   static bool get compressMediaByDefault => _compressMediaByDefault ?? true;
   static VideoQuality get videoQuality => _videoQuality ?? defaultVideoQuality;
@@ -194,6 +203,18 @@ class AppPreferences {
     _multipleQrCodes = value;
   }
 
+  static Future<void> setMinCodeSide(int value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setInt('minCodeSide', value);
+    _minCodeSide = value;
+  }
+
+  static Future<void> setMaxCodes(int value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setInt('maxCodes', value);
+    _maxCodes = value;
+  }
+
   static Future<void> setHasSeenMicPrompt(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('hasSeenMicPrompt', value);
@@ -244,6 +265,8 @@ class AppPreferences {
     _soundFeedback = sp.getBool('soundFeedback') ?? true;
     _acousticDetection = sp.getBool('acousticDetection') ?? false;
     _multipleQrCodes = sp.getBool('multipleQrCodes') ?? false;
+    _minCodeSide = sp.getInt('minCodeSide') ?? defaultMinCodeSide;
+    _maxCodes = sp.getInt('maxCodes') ?? defaultMaxCodes;
     _hasSeenMicPrompt = sp.getBool('hasSeenMicPrompt') ?? false;
     _compressMediaByDefault = sp.getBool(_compressMediaKey) ?? true;
     _videoQuality =

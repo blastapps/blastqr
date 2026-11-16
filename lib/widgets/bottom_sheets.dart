@@ -122,6 +122,7 @@ class SliderSheet extends StatefulWidget {
     required this.max,
     required this.value,
     required this.defaultValue,
+    this.stops,
   });
 
   final String title;
@@ -131,6 +132,9 @@ class SliderSheet extends StatefulWidget {
   final int max;
   final int value;
   final int defaultValue;
+
+  /// The only values the slider stops at, ascending, from [min] to [max].
+  final List<int>? stops;
 
   @override
   State<SliderSheet> createState() => SliderSheetState();
@@ -143,8 +147,8 @@ class SliderSheetState extends State<SliderSheet> {
   @override
   void initState() {
     super.initState();
-    _value = widget.value;
-    _textController = TextEditingController(text: widget.value.toString());
+    _value = _snap(widget.value);
+    _textController = TextEditingController(text: _value.toString());
   }
 
   @override
@@ -156,10 +160,21 @@ class SliderSheetState extends State<SliderSheet> {
   void _onTextChanged(String text) {
     final parsed = int.tryParse(text);
     if (parsed == null) return;
-    final clamped = parsed.clamp(widget.min, widget.max);
     setState(() {
-      _value = clamped;
+      _value = _snap(parsed);
+      _textController.text = _value.toString();
     });
+  }
+
+  /// The nearest allowed value at or below [value].
+  int _snap(int value) {
+    final clamped = value.clamp(widget.min, widget.max);
+    final stops = widget.stops;
+    if (stops == null) return clamped;
+    return stops.lastWhere(
+      (stop) => stop <= clamped,
+      orElse: () => stops.first,
+    );
   }
 
   void reset() {
@@ -173,7 +188,8 @@ class SliderSheetState extends State<SliderSheet> {
   }
 
   void _onSliderChanged(double val) {
-    final intVal = val.toInt();
+    final stops = widget.stops;
+    final intVal = stops == null ? val.toInt() : stops[val.round()];
     setState(() {
       _value = intVal;
       _textController.text = intVal.toString();
@@ -185,6 +201,7 @@ class SliderSheetState extends State<SliderSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final stops = widget.stops;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,9 +222,10 @@ class SliderSheetState extends State<SliderSheet> {
           padding: const EdgeInsets.all(16),
           child: Slider(
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-            min: widget.min.toDouble(),
-            max: widget.max.toDouble(),
-            value: _value.toDouble(),
+            min: stops == null ? widget.min.toDouble() : 0,
+            max: (stops == null ? widget.max : stops.length - 1).toDouble(),
+            divisions: stops == null ? null : stops.length - 1,
+            value: (stops == null ? _value : stops.indexOf(_value)).toDouble(),
             onChanged: _onSliderChanged,
           ),
         ),
@@ -495,6 +513,7 @@ Future<void> showSliderSheet(
   required int min,
   required int max,
   required int defaultValue,
+  List<int>? stops,
   required void Function(int val) onConfirm,
 }) {
   final sliderKey = GlobalKey<SliderSheetState>();
@@ -521,6 +540,7 @@ Future<void> showSliderSheet(
         min: min,
         max: max,
         defaultValue: defaultValue,
+        stops: stops,
       ),
     ),
   );

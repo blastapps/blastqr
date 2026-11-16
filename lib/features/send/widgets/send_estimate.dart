@@ -51,7 +51,11 @@ class _SendEstimateState extends State<SendEstimate> {
   Widget build(BuildContext context) {
     final encode = Provider.of<EncodeSettings>(context);
     final codes = encode.multipleQrCodes
-        ? RaptorQrStreamingWidget.maxCodesFor(MediaQuery.sizeOf(context))
+        ? RaptorQrStreamingWidget.maxCodesFor(
+            MediaQuery.sizeOf(context),
+            minCodeSide: encode.minCodeSide.toDouble(),
+            maxCodes: encode.maxCodes,
+          )
         : 1;
     final style = TextStyle(color: context.color.secondary);
     return ValueListenableBuilder(

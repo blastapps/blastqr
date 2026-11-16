@@ -223,7 +223,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disabled => 'Disabled';
 
   @override
-  String get chunk_length => 'QR code size';
+  String get chunk_length => 'Bytes per QR code';
 
   @override
   String get playback_fps => 'Playback speed';
@@ -377,6 +377,20 @@ class AppLocalizationsEn extends AppLocalizations {
       '2935 bytes is the recommended value for best performance on most devices';
 
   @override
+  String get min_code_size => 'Minimum QR code size';
+
+  @override
+  String get min_code_size_hint =>
+      'More codes are only shown while each stays at least this size. Lower it to fit more codes, raise it if the receiving phone can\'t read them.';
+
+  @override
+  String get max_codes => 'Max QR codes on screen';
+
+  @override
+  String get max_codes_hint =>
+      'The most codes shown at once. Lower it if the receiving phone can\'t read them all.';
+
+  @override
   String get playback_fps_hint =>
       '20 FPS is the recommended value for best performance on most devices';
 
@@ -448,7 +462,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get file_too_large_for_qr_size_msg =>
-      'This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.';
+      'This file is too large for the current bytes per QR code. Increase Bytes per QR code in Settings > Sending.';
 
   @override
   String get receiving_generic => 'Receiving file...';

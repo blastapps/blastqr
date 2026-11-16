@@ -221,6 +221,8 @@ class _QrPageState extends State<QrPage> with WindowListener {
                       mtu: mtu,
                       fps: fps,
                       fill: _fullscreenMode,
+                      minCodeSide: state.minCodeSide.toDouble(),
+                      maxCodes: state.maxCodes,
                       onTap: _onTapCodes,
                       onNearlyComplete: () => _nearlyComplete = true,
                       onSourceShown: () => _sourceShown = true,

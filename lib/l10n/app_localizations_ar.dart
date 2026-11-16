@@ -227,7 +227,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get disabled => 'معطّل';
 
   @override
-  String get chunk_length => 'حجم رمز QR';
+  String get chunk_length => 'البايتات لكل رمز QR';
 
   @override
   String get playback_fps => 'سرعة التشغيل';
@@ -385,6 +385,20 @@ class AppLocalizationsAr extends AppLocalizations {
       '2935 بايت هي القيمة الموصى بها لأفضل أداء على معظم الأجهزة';
 
   @override
+  String get min_code_size => 'الحد الأدنى لحجم رمز QR';
+
+  @override
+  String get min_code_size_hint =>
+      'لا تُعرض رموز إضافية إلا ما دام كل رمز بهذا الحجم على الأقل. قلّله لعرض رموز أكثر، وزِده إذا لم يتمكن الهاتف المستقبل من قراءتها.';
+
+  @override
+  String get max_codes => 'الحد الأقصى لرموز QR على الشاشة';
+
+  @override
+  String get max_codes_hint =>
+      'أكبر عدد من الرموز يُعرض في آن واحد. قلّله إذا لم يتمكن الهاتف المستقبل من قراءتها كلها.';
+
+  @override
   String get playback_fps_hint =>
       '20 إطارًا في الثانية هي القيمة الموصى بها لأفضل أداء على معظم الأجهزة';
 
@@ -456,7 +470,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get file_too_large_for_qr_size_msg =>
-      'هذا الملف كبير جدًا بالنسبة لحجم رمز QR الحالي. زِد حجم رمز QR من الإعدادات › الإرسال.';
+      'هذا الملف كبير جدًا بالنسبة لعدد البايتات الحالي لكل رمز QR. زِد البايتات لكل رمز QR من الإعدادات > الإرسال.';
 
   @override
   String get receiving_generic => 'جارٍ استلام الملف...';

@@ -503,7 +503,7 @@ abstract class AppLocalizations {
   /// No description provided for @chunk_length.
   ///
   /// In en, this message translates to:
-  /// **'QR code size'**
+  /// **'Bytes per QR code'**
   String get chunk_length;
 
   /// No description provided for @playback_fps.
@@ -776,6 +776,30 @@ abstract class AppLocalizations {
   /// **'2935 bytes is the recommended value for best performance on most devices'**
   String get chunk_length_hint;
 
+  /// No description provided for @min_code_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum QR code size'**
+  String get min_code_size;
+
+  /// No description provided for @min_code_size_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'More codes are only shown while each stays at least this size. Lower it to fit more codes, raise it if the receiving phone can\'t read them.'**
+  String get min_code_size_hint;
+
+  /// No description provided for @max_codes.
+  ///
+  /// In en, this message translates to:
+  /// **'Max QR codes on screen'**
+  String get max_codes;
+
+  /// No description provided for @max_codes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The most codes shown at once. Lower it if the receiving phone can\'t read them all.'**
+  String get max_codes_hint;
+
   /// No description provided for @playback_fps_hint.
   ///
   /// In en, this message translates to:
@@ -899,7 +923,7 @@ abstract class AppLocalizations {
   /// No description provided for @file_too_large_for_qr_size_msg.
   ///
   /// In en, this message translates to:
-  /// **'This file is too large for the current QR code size. Increase the QR code size in Settings › Sending.'**
+  /// **'This file is too large for the current bytes per QR code. Increase Bytes per QR code in Settings > Sending.'**
   String get file_too_large_for_qr_size_msg;
 
   /// No description provided for @receiving_generic.

@@ -221,7 +221,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get disabled => '비활성화';
 
   @override
-  String get chunk_length => 'QR 코드 크기';
+  String get chunk_length => 'QR 코드당 바이트';
 
   @override
   String get playback_fps => '재생 속도';
@@ -368,6 +368,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get chunk_length_hint => '2935바이트는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다';
 
   @override
+  String get min_code_size => '최소 QR 코드 크기';
+
+  @override
+  String get min_code_size_hint =>
+      '각 코드가 이 크기 이상일 때만 코드를 더 표시합니다. 더 많은 코드를 표시하려면 낮추고, 받는 휴대폰이 읽지 못하면 높이세요.';
+
+  @override
+  String get max_codes => '화면의 최대 QR 코드 수';
+
+  @override
+  String get max_codes_hint => '한 번에 표시하는 최대 코드 수입니다. 받는 휴대폰이 모두 읽지 못하면 낮추세요.';
+
+  @override
   String get playback_fps_hint => '20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다';
 
   @override
@@ -435,7 +448,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get file_too_large_for_qr_size_msg =>
-      '현재 QR 코드 크기로는 이 파일을 보낼 수 없습니다. 설정 › 전송 설정에서 QR 코드 크기를 늘려 주세요.';
+      '현재 QR 코드당 바이트로는 이 파일을 보낼 수 없습니다. 설정 > 전송 설정에서 QR 코드당 바이트를 늘려 주세요.';
 
   @override
   String get receiving_generic => '파일 수신 중...';

@@ -73,6 +73,13 @@ class RaptorQrStreamingWidget extends StatefulWidget {
   final int fps;
 
   final bool fill;
+
+  /// Extra codes are only added while each stays at least this size.
+  final double minCodeSide;
+
+  /// The most codes shown at once.
+  final int maxCodes;
+
   final Function()? onTap;
 
   /// Called once the first codes are ready.
@@ -90,8 +97,17 @@ class RaptorQrStreamingWidget extends StatefulWidget {
 
   /// The most codes shown at once in an area of [size]. Fill mode never
   /// shows fewer.
-  static int maxCodesFor(Size size) {
-    final (columns, rows) = _FlexibleGrid.layout(size, fill: true);
+  static int maxCodesFor(
+    Size size, {
+    required double minCodeSide,
+    required int maxCodes,
+  }) {
+    final (columns, rows) = _FlexibleGrid.layout(
+      size,
+      fill: true,
+      minSide: minCodeSide,
+      maxCount: maxCodes,
+    );
     return columns * rows;
   }
 
@@ -102,6 +118,8 @@ class RaptorQrStreamingWidget extends StatefulWidget {
     required this.fps,
     required this.controller,
     this.fill = true,
+    required this.minCodeSide,
+    required this.maxCodes,
     this.onTap,
     this.onStart,
     this.onNearlyComplete,
@@ -234,6 +252,7 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   void _onControllerTick() {
     if (!mounted || _source == null) return;
     _resizeCells(_cellCount);
+    _source!.codesPerScreen = _cellCount;
 
     var changed = false;
     for (var cell = 0; cell < _cellCount; cell++) {
@@ -339,6 +358,8 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
           return _FlexibleGrid(
             constraints: c,
             fill: widget.fill,
+            minSide: widget.minCodeSide,
+            maxCount: widget.maxCodes,
             itemBuilder: (gridIndex, totalCount) {
               // Read by the next tick; cells are filled from there.
               _cellCount = totalCount;
@@ -359,24 +380,30 @@ class _RaptorQrStreamingWidgetState extends State<RaptorQrStreamingWidget>
   }
 }
 
-/// Two rows of 1–3 square codes, by the screen's aspect ratio. The codes
-/// are as large as fits, with a fixed gap, centered as one block so a camera
-/// can frame them all.
+/// A grid of up to 5 rows and 5 columns of square codes, limited by a max
+/// count. The codes are as large as fits, with a fixed gap, centered as one
+/// block so a camera can frame them all.
 class _FlexibleGrid extends StatelessWidget {
   const _FlexibleGrid({
     required this.constraints,
     required this.itemBuilder,
     required this.fill,
+    required this.minSide,
+    required this.maxCount,
   });
 
   static const _spacing = 16.0;
-
-  /// Outside fill mode, extra codes are only added while each stays at
-  /// least this size.
-  static const _minSide = 320.0;
+  static const _maxRows = 5;
+  static const _maxColumns = 5;
 
   final BoxConstraints constraints;
   final bool fill;
+
+  /// Outside fill mode, extra codes are only added while each stays at
+  /// least this size.
+  final double minSide;
+
+  final int maxCount;
   final Widget Function(int index, int totalCount) itemBuilder;
 
   // The gap is also kept around the block.
@@ -388,27 +415,37 @@ class _FlexibleGrid extends StatelessWidget {
     ),
   );
 
-  static (int, int) layout(Size size, {required bool fill}) =>
-      fill ? _fillLayout(size) : _fitLayout(size);
-
-  /// 2 rows by aspect ratio, unless the [_fitLayout] shows more, which
-  /// happens in tall windows.
-  static (int, int) _fillLayout(Size size) {
+  /// Outside fill mode, the most codes up to [maxCount] that stay at least
+  /// [minSide]. Fill mode shows 2 rows by aspect ratio, or more if those fit.
+  static (int, int) layout(
+    Size size, {
+    required bool fill,
+    required double minSide,
+    required int maxCount,
+  }) {
+    final fit = _bestLayout(size, minSide: minSide, maxCount: maxCount);
+    if (!fill) return fit;
     final aspectRatio = size.width / size.height;
     final columns = aspectRatio < 0.8 ? 1 : (aspectRatio < 1.4 ? 2 : 3);
-    final fit = _fitLayout(size);
-    return fit.$1 * fit.$2 > columns * 2 ? fit : (columns, 2);
+    final count = math.min(math.max(columns * 2, fit.$1 * fit.$2), maxCount);
+    return _bestLayout(size, minSide: 0, maxCount: count);
   }
 
-  /// Most codes that stay at least [_minSide], larger codes on a tie.
-  static (int, int) _fitLayout(Size size) {
+  /// Most codes up to [maxCount] that stay at least [minSide], larger codes
+  /// on a tie.
+  static (int, int) _bestLayout(
+    Size size, {
+    required double minSide,
+    required int maxCount,
+  }) {
     var best = (1, 1);
     var bestSide = _side(size, 1, 1);
-    for (var rows = 1; rows <= 2; rows++) {
-      for (var columns = 1; columns <= 3; columns++) {
-        final side = _side(size, columns, rows);
-        if (side < _minSide) continue;
+    for (var rows = 1; rows <= _maxRows; rows++) {
+      for (var columns = 1; columns <= _maxColumns; columns++) {
         final count = columns * rows;
+        if (count > maxCount) continue;
+        final side = _side(size, columns, rows);
+        if (side < minSide) continue;
         final bestCount = best.$1 * best.$2;
         if (count > bestCount || (count == bestCount && side > bestSide)) {
           best = (columns, rows);
@@ -422,7 +459,12 @@ class _FlexibleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = constraints.biggest;
-    final (columns, rows) = layout(size, fill: fill);
+    final (columns, rows) = layout(
+      size,
+      fill: fill,
+      minSide: minSide,
+      maxCount: maxCount,
+    );
     final side = _side(size, columns, rows);
     return Center(
       child: Column(
