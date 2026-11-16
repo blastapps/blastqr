@@ -287,20 +287,6 @@ class _ScanPageState extends State<ScanPage> {
               progress: _progress,
               onTapCancel: _reset,
             ),
-            // Speed bar
-            if (_speed > 0)
-              Padding(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 80,
-                ),
-                child: AnimatedContainer(
-                  duration: 300.milliseconds,
-                  curve: Curves.easeInOut,
-                  height: 3,
-                  width: MediaQuery.of(context).size.width * (_speed / 100),
-                  color: context.color.primary,
-                ),
-              ),
             if (_loadingResult)
               Center(
                 child: Container(
