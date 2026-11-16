@@ -389,14 +389,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get min_code_size_hint =>
-      'لا تُعرض رموز إضافية إلا ما دام كل رمز بهذا الحجم على الأقل. قلّله لعرض رموز أكثر، وزِده إذا لم يتمكن الهاتف المستقبل من قراءتها.';
+      'لا تُعرض رموز إضافية إلا ما دام كل رمز بهذا الحجم على الأقل. قلّله لعرض رموز أكثر، وزِده إذا لم يتمكن الجهاز المستقبل من قراءتها.';
 
   @override
   String get max_codes => 'الحد الأقصى لرموز QR على الشاشة';
 
   @override
   String get max_codes_hint =>
-      'أكبر عدد من الرموز يُعرض في آن واحد. قلّله إذا لم يتمكن الهاتف المستقبل من قراءتها كلها.';
+      'أكبر عدد من الرموز يُعرض في آن واحد. قلّله إذا لم يتمكن الجهاز المستقبل من قراءتها كلها.';
 
   @override
   String get playback_fps_hint =>
@@ -424,7 +424,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get camera_resolution_hint =>
-      'ستعمل معظم الأجهزة بشكل أفضل عند ضبط هذا الإعداد على \"عالية\"';
+      'ستعمل معظم الأجهزة بشكل أفضل عند ضبط هذا الإعداد على \"VeryHigh\"';
 
   @override
   String get error => 'خطأ';
@@ -567,7 +567,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get camera_zoom_hint =>
-      'يتيح التكبير للكاميرا قراءة الرموز من مسافة أبعد يمكنها التركيز عليها. يفيد في الهواتف التي لا تستطيع التركيز عن قرب.';
+      'يتيح التكبير للكاميرا قراءة الرموز من مسافة أبعد يمكنها التركيز عليها. يفيد في الأجهزة التي لا تستطيع التركيز عن قرب.';
 
   @override
   String get crop_camera_preview => 'قص معاينة الكاميرا';
@@ -610,7 +610,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get camera_fps_hint =>
-      'تمنح المعدلات الأعلى الماسح فرصًا أكثر لقراءة كل رمز. تُعرض فقط المعدلات التي يدعمها هذا الهاتف بالدقة الحالية.';
+      'تمنح المعدلات الأعلى الماسح فرصًا أكثر لقراءة كل رمز. تُعرض فقط المعدلات التي يدعمها هذا الجهاز بالدقة الحالية.';
 
   @override
   String get fps_default => 'افتراضي';

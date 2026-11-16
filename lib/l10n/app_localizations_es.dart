@@ -382,14 +382,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get min_code_size_hint =>
-      'Solo se muestran más códigos mientras cada uno tenga al menos este tamaño. Redúcelo para que quepan más códigos, auméntalo si el teléfono receptor no puede leerlos.';
+      'Solo se muestran más códigos mientras cada uno tenga al menos este tamaño. Redúcelo para que quepan más códigos, auméntalo si el dispositivo receptor no puede leerlos.';
 
   @override
   String get max_codes => 'Máximo de códigos QR en pantalla';
 
   @override
   String get max_codes_hint =>
-      'El máximo de códigos que se muestran a la vez. Redúcelo si el teléfono receptor no puede leerlos todos.';
+      'El máximo de códigos que se muestran a la vez. Redúcelo si el dispositivo receptor no puede leerlos todos.';
 
   @override
   String get playback_fps_hint =>
@@ -418,7 +418,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get camera_resolution_hint =>
-      'La mayoría de dispositivos funcionarán mejor con este ajuste en \"High\"';
+      'La mayoría de dispositivos funcionarán mejor con este ajuste en \"VeryHigh\"';
 
   @override
   String get error => 'Error';
@@ -550,7 +550,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get camera_zoom_hint =>
-      'Hacer zoom permite leer los códigos desde más lejos, donde la cámara aún puede enfocar. Ayuda en móviles que no enfocan de cerca.';
+      'Hacer zoom permite leer los códigos desde más lejos, donde la cámara aún puede enfocar. Ayuda en dispositivos que no enfocan de cerca.';
 
   @override
   String get crop_camera_preview => 'Recortar vista de la cámara';
@@ -594,7 +594,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get camera_fps_hint =>
-      'Más fotogramas dan al escáner más oportunidades de leer cada código. Solo se muestran los que admite este móvil con la resolución actual.';
+      'Más fotogramas dan al escáner más oportunidades de leer cada código. Solo se muestran los que admite este dispositivo con la resolución actual.';
 
   @override
   String get fps_default => 'Por defecto';

@@ -372,13 +372,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get min_code_size_hint =>
-      '각 코드가 이 크기 이상일 때만 코드를 더 표시합니다. 더 많은 코드를 표시하려면 낮추고, 받는 휴대폰이 읽지 못하면 높이세요.';
+      '각 코드가 이 크기 이상일 때만 코드를 더 표시합니다. 더 많은 코드를 표시하려면 낮추고, 받는 기기가 읽지 못하면 높이세요.';
 
   @override
   String get max_codes => '화면의 최대 QR 코드 수';
 
   @override
-  String get max_codes_hint => '한 번에 표시하는 최대 코드 수입니다. 받는 휴대폰이 모두 읽지 못하면 낮추세요.';
+  String get max_codes_hint => '한 번에 표시하는 최대 코드 수입니다. 받는 기기가 모두 읽지 못하면 낮추세요.';
 
   @override
   String get playback_fps_hint => '20 FPS는 대부분의 기기에서 최상의 성능을 위한 권장 값입니다';
@@ -404,7 +404,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get camera_resolution_hint =>
-      '대부분의 기기는 이 설정을 \"High\"으로 설정하면 더 잘 작동합니다';
+      '대부분의 기기는 이 설정을 \"VeryHigh\"로 설정하면 더 잘 작동합니다';
 
   @override
   String get error => '오류';
@@ -531,7 +531,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get camera_zoom_hint =>
-      '확대하면 카메라가 초점을 맞출 수 있는 더 먼 거리에서도 코드를 읽을 수 있습니다. 가까이에서 초점을 맞추지 못하는 휴대폰에 도움이 됩니다.';
+      '확대하면 카메라가 초점을 맞출 수 있는 더 먼 거리에서도 코드를 읽을 수 있습니다. 가까이에서 초점을 맞추지 못하는 기기에 도움이 됩니다.';
 
   @override
   String get crop_camera_preview => '카메라 미리보기 자르기';
@@ -573,7 +573,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get camera_fps_hint =>
-      '속도가 높을수록 스캐너가 각 코드를 읽을 기회가 많아집니다. 현재 해상도에서 이 휴대폰이 지원하는 속도만 표시됩니다.';
+      '속도가 높을수록 스캐너가 각 코드를 읽을 기회가 많아집니다. 현재 해상도에서 이 기기가 지원하는 속도만 표시됩니다.';
 
   @override
   String get fps_default => '기본값';

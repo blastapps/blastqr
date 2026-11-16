@@ -381,14 +381,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get min_code_size_hint =>
-      'More codes are only shown while each stays at least this size. Lower it to fit more codes, raise it if the receiving phone can\'t read them.';
+      'More codes are only shown while each stays at least this size. Lower it to fit more codes, raise it if the receiving device can\'t read them.';
 
   @override
   String get max_codes => 'Max QR codes on screen';
 
   @override
   String get max_codes_hint =>
-      'The most codes shown at once. Lower it if the receiving phone can\'t read them all.';
+      'The most codes shown at once. Lower it if the receiving device can\'t read them all.';
 
   @override
   String get playback_fps_hint =>
@@ -416,7 +416,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get camera_resolution_hint =>
-      'Most devices will perform better with this setting set to \"High\"';
+      'Most devices will perform better with this setting set to \"VeryHigh\"';
 
   @override
   String get error => 'Error';
@@ -548,7 +548,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get camera_zoom_hint =>
-      'Zooming in lets the camera read codes from further away, where it can still focus. Helps on phones that can\'t focus up close.';
+      'Zooming in lets the camera read codes from further away, where it can still focus. Helps on devices that can\'t focus up close.';
 
   @override
   String get crop_camera_preview => 'Crop camera preview';
@@ -592,7 +592,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get camera_fps_hint =>
-      'Higher rates give the scanner more chances to read each code. Only the rates this phone supports at the current resolution are listed.';
+      'Higher rates give the scanner more chances to read each code. Only the rates this device supports at the current resolution are listed.';
 
   @override
   String get fps_default => 'Default';

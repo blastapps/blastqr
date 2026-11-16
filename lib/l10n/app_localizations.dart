@@ -785,7 +785,7 @@ abstract class AppLocalizations {
   /// No description provided for @min_code_size_hint.
   ///
   /// In en, this message translates to:
-  /// **'More codes are only shown while each stays at least this size. Lower it to fit more codes, raise it if the receiving phone can\'t read them.'**
+  /// **'More codes are only shown while each stays at least this size. Lower it to fit more codes, raise it if the receiving device can\'t read them.'**
   String get min_code_size_hint;
 
   /// No description provided for @max_codes.
@@ -797,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @max_codes_hint.
   ///
   /// In en, this message translates to:
-  /// **'The most codes shown at once. Lower it if the receiving phone can\'t read them all.'**
+  /// **'The most codes shown at once. Lower it if the receiving device can\'t read them all.'**
   String get max_codes_hint;
 
   /// No description provided for @playback_fps_hint.
@@ -845,7 +845,7 @@ abstract class AppLocalizations {
   /// No description provided for @camera_resolution_hint.
   ///
   /// In en, this message translates to:
-  /// **'Most devices will perform better with this setting set to \"High\"'**
+  /// **'Most devices will perform better with this setting set to \"VeryHigh\"'**
   String get camera_resolution_hint;
 
   /// No description provided for @error.
@@ -1061,7 +1061,7 @@ abstract class AppLocalizations {
   /// No description provided for @camera_zoom_hint.
   ///
   /// In en, this message translates to:
-  /// **'Zooming in lets the camera read codes from further away, where it can still focus. Helps on phones that can\'t focus up close.'**
+  /// **'Zooming in lets the camera read codes from further away, where it can still focus. Helps on devices that can\'t focus up close.'**
   String get camera_zoom_hint;
 
   /// No description provided for @crop_camera_preview.
@@ -1133,7 +1133,7 @@ abstract class AppLocalizations {
   /// No description provided for @camera_fps_hint.
   ///
   /// In en, this message translates to:
-  /// **'Higher rates give the scanner more chances to read each code. Only the rates this phone supports at the current resolution are listed.'**
+  /// **'Higher rates give the scanner more chances to read each code. Only the rates this device supports at the current resolution are listed.'**
   String get camera_fps_hint;
 
   /// No description provided for @fps_default.
