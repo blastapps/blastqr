@@ -93,6 +93,14 @@ class _ScanPageState extends State<ScanPage> {
   DateTime? _steadySince;
   DateTime? _lastReadAt;
 
+  // Disable locked focus if the phone moves nearer or further, detected
+  // by the codes changing size, or if transfer stops.
+  // Either one refocuses at the center, and focus locks again once steady.
+  static const _maxSizeChange = 0.2;
+  static const _maxLockedReadGap = Duration(milliseconds: 400);
+  double? _lockedCodeSize;
+  Timer? _stallTimer;
+
   /// Quick taps in a row; the second restarts the camera.
   int _taps = 0;
   final _sinceLastTap = Stopwatch();
@@ -146,6 +154,7 @@ class _ScanPageState extends State<ScanPage> {
   @override
   void dispose() {
     _speedTimer?.cancel();
+    _stallTimer?.cancel();
     _decoder.dispose();
     DecodeStats.instance.endTransfer();
     _soundService.dispose();
@@ -343,10 +352,15 @@ class _ScanPageState extends State<ScanPage> {
     codes.codes.forEach(_handleScan);
     // After handling, so the codes that start a transfer count towards it.
     DecodeStats.instance.recordCodesRead(codes.codes.length);
-    if (codes.codes.isNotEmpty) _lockFocusOnceSteady();
+    if (codes.codes.isEmpty) return;
+    if (_focusLocked) {
+      _watchLockedFocus(codes.codes);
+    } else {
+      _lockFocusOnceSteady(codes.codes);
+    }
   }
 
-  void _lockFocusOnceSteady() {
+  void _lockFocusOnceSteady(List<Code> codes) {
     final now = DateTime.now();
     final last = _lastReadAt;
     _lastReadAt = now;
@@ -355,6 +369,71 @@ class _ScanPageState extends State<ScanPage> {
     }
     if (_isReceivingData && now.difference(_steadySince!) >= _steadyFor) {
       _lockFocus();
+      if (!_focusLocked) return;
+      _lockedCodeSize = _codeSize(codes);
+      _armStallTimer();
+    }
+  }
+
+  void _watchLockedFocus(List<Code> codes) {
+    final size = _codeSize(codes);
+    final locked = _lockedCodeSize ??= size;
+    if (size != null &&
+        locked != null &&
+        (size / locked - 1).abs() > _maxSizeChange) {
+      _refocusCenter();
+      return;
+    }
+    _armStallTimer();
+  }
+
+  void _armStallTimer() {
+    _stallTimer?.cancel();
+    _stallTimer = Timer(_maxLockedReadGap, () {
+      if (!_focusLocked || !_isReceivingData) return;
+      _refocusCenter();
+    });
+  }
+
+  /// The median code diagonal as a fraction of the frame width, or null
+  /// if the scanner gave no positions.
+  static double? _codeSize(List<Code> codes) {
+    final sizes = <double>[];
+    for (final code in codes) {
+      final p = code.position;
+      if (p == null || p.imageWidth <= 0) continue;
+      final d1 = Offset(
+        (p.bottomRightX - p.topLeftX).toDouble(),
+        (p.bottomRightY - p.topLeftY).toDouble(),
+      ).distance;
+      final d2 = Offset(
+        (p.bottomLeftX - p.topRightX).toDouble(),
+        (p.bottomLeftY - p.topRightY).toDouble(),
+      ).distance;
+      sizes.add((d1 + d2) / 2 / p.imageWidth);
+    }
+    if (sizes.isEmpty) return null;
+    sizes.sort();
+    return sizes[sizes.length ~/ 2];
+  }
+
+  void _refocusCenter() {
+    _stallTimer?.cancel();
+    _focusLocked = false;
+    _lastReadAt = null;
+    _lockedCodeSize = null;
+    final controller = _cameraController;
+    if (controller == null) return;
+    unawaited(controller.setFocusMode(FocusMode.auto).catchError((_) {}));
+    if (controller.value.focusPointSupported) {
+      unawaited(
+        controller.setFocusPoint(const Offset(0.5, 0.5)).catchError((_) {}),
+      );
+    }
+    final size =
+        (_readerKey.currentContext?.findRenderObject() as RenderBox?)?.size;
+    if (mounted && size != null) {
+      setState(() => _focusIndicator = size.center(Offset.zero));
     }
   }
 
@@ -828,8 +907,10 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _unlockFocus() {
+    _stallTimer?.cancel();
     _focusLocked = false;
     _lastReadAt = null;
+    _lockedCodeSize = null;
     if (_cameraController != null && (Platform.isIOS || Platform.isAndroid)) {
       unawaited(_cameraController!.setFocusMode(FocusMode.auto));
       if (_fixedExposure) return;
