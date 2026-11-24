@@ -98,23 +98,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get no_files_msg => 'Aún no hay archivos.';
 
   @override
-  String get saved_to => 'Guardado en';
+  String saved_to(String path) {
+    return 'Guardado en $path';
+  }
 
   @override
-  String get received_in => 'Recibido en';
+  String received_in(String seconds, String speed) {
+    return 'Recibido en ${seconds}s (${speed}kB/s)';
+  }
 
   @override
   String get large_file => 'Transferencia larga';
 
   @override
-  String get large_file_msg_1 =>
-      'Esta transferencia es grande y podría tardar hasta';
+  String large_file_msg(String duration) {
+    return 'Esta transferencia es grande y podría tardar hasta $duration en transferirse.';
+  }
 
   @override
-  String get large_file_msg_2 => 'en transferirse.';
-
-  @override
-  String get minutes => 'minutos';
+  String large_file_duration(int minutes) {
+    return '$minutes minutos';
+  }
 
   @override
   String get image_compression => 'Compresión de imagen';
@@ -134,9 +138,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get receive_anyway => 'Recibir de todos modos';
-
-  @override
-  String get to_transfer => 'para transferir';
 
   @override
   String get generating_codes => 'Generando códigos...';
@@ -290,7 +291,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get select_all => 'Seleccionar todo';
 
   @override
-  String get selected => 'seleccionados';
+  String selected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seleccionados',
+      one: '1 seleccionado',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get delete_files_msg =>

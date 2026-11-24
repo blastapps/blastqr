@@ -24,8 +24,8 @@ class FileTooLargeAlertWidget extends StatelessWidget {
 
   static const _slowestKBps = 24;
 
-  String get _estimateInMinutes =>
-      (transferBytes / 1000 / _slowestKBps / 60).toStringAsFixed(0);
+  int get _estimateInMinutes =>
+      (transferBytes / 1000 / _slowestKBps / 60).round();
 
   @override
   Widget build(BuildContext context) {
@@ -68,23 +68,7 @@ class FileTooLargeAlertWidget extends StatelessWidget {
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
-        if (isLongTransfer)
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium,
-              children: [
-                TextSpan(text: context.l10n.large_file_msg_1),
-                TextSpan(
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                  text: ' $_estimateInMinutes ${context.l10n.minutes} ',
-                ),
-                TextSpan(text: context.l10n.large_file_msg_2),
-              ],
-            ),
-          ),
+        if (isLongTransfer) _buildLongTransferMessage(context),
         const SizedBox(height: 8),
         if (mayRunOutOfMemory)
           ElevatedButton(onPressed: onCancel, child: Text(context.l10n.cancel)),
@@ -93,6 +77,26 @@ class FileTooLargeAlertWidget extends StatelessWidget {
           child: Text(context.l10n.send_large_file),
         ),
       ],
+    );
+  }
+
+  Widget _buildLongTransferMessage(BuildContext context) {
+    final duration = context.l10n.large_file_duration(_estimateInMinutes);
+    final parts = context.l10n.large_file_msg(duration).split(duration);
+    final style = Theme.of(context).textTheme.bodyMedium;
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: style,
+        children: [
+          TextSpan(text: parts.first),
+          TextSpan(
+            text: duration,
+            style: style?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          TextSpan(text: parts.skip(1).join(duration)),
+        ],
+      ),
     );
   }
 }

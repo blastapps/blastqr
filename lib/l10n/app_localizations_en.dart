@@ -98,22 +98,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no_files_msg => 'No files yet.';
 
   @override
-  String get saved_to => 'Saved to';
+  String saved_to(String path) {
+    return 'Saved to $path';
+  }
 
   @override
-  String get received_in => 'Received in';
+  String received_in(String seconds, String speed) {
+    return 'Received in ${seconds}s (${speed}kB/s)';
+  }
 
   @override
   String get large_file => 'Long transfer';
 
   @override
-  String get large_file_msg_1 => 'This transfer is large and could take up to';
+  String large_file_msg(String duration) {
+    return 'This transfer is large and could take up to $duration to transfer.';
+  }
 
   @override
-  String get large_file_msg_2 => 'to transfer.';
-
-  @override
-  String get minutes => 'minutes';
+  String large_file_duration(int minutes) {
+    return '$minutes minutes';
+  }
 
   @override
   String get image_compression => 'Image compression';
@@ -133,9 +138,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receive_anyway => 'Receive anyway';
-
-  @override
-  String get to_transfer => 'to transfer';
 
   @override
   String get generating_codes => 'Generating codes...';
@@ -289,7 +291,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get select_all => 'Select all';
 
   @override
-  String get selected => 'selected';
+  String selected(int count) {
+    return '$count selected';
+  }
 
   @override
   String get delete_files_msg =>

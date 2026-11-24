@@ -134,7 +134,7 @@ class SelectionBar extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      '${controller.count} ${context.l10n.selected}',
+                      context.l10n.selected(controller.count),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: 'Jersey25',

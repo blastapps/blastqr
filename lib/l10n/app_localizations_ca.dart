@@ -98,23 +98,27 @@ class AppLocalizationsCa extends AppLocalizations {
   String get no_files_msg => 'Encara no hi ha fitxers.';
 
   @override
-  String get saved_to => 'Desat a';
+  String saved_to(String path) {
+    return 'Desat a $path';
+  }
 
   @override
-  String get received_in => 'Rebut en';
+  String received_in(String seconds, String speed) {
+    return 'Rebut en ${seconds}s (${speed}kB/s)';
+  }
 
   @override
   String get large_file => 'Transferència llarga';
 
   @override
-  String get large_file_msg_1 =>
-      'Aquesta transferència és gran i podria tardar fins a';
+  String large_file_msg(String duration) {
+    return 'Aquesta transferència és gran i podria tardar fins a $duration a transferir-se.';
+  }
 
   @override
-  String get large_file_msg_2 => 'a transferir-se.';
-
-  @override
-  String get minutes => 'minuts';
+  String large_file_duration(int minutes) {
+    return '$minutes minuts';
+  }
 
   @override
   String get image_compression => 'Compressió d\'imatges';
@@ -134,9 +138,6 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get receive_anyway => 'Rep igualment';
-
-  @override
-  String get to_transfer => 'a transferir';
 
   @override
   String get generating_codes => 'Generant codis...';
@@ -290,7 +291,15 @@ class AppLocalizationsCa extends AppLocalizations {
   String get select_all => 'Seleccionar tot';
 
   @override
-  String get selected => 'seleccionats';
+  String selected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seleccionats',
+      one: '1 seleccionat',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get delete_files_msg =>

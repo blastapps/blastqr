@@ -233,7 +233,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
     if (mounted) {
       selection.clear();
       _showSnackBar(
-        '${context.l10n.saved_to} $androidDownloadsPath ($saved/${files.length})',
+        '${context.l10n.saved_to(androidDownloadsPath)} ($saved/${files.length})',
       );
     }
   }
@@ -252,7 +252,7 @@ mixin ReceivedItemActions<T extends StatefulWidget> on State<T> {
       final path = await saveToDownloads(file);
       if (mounted) {
         Navigator.of(context).pop();
-        _showSnackBar('${context.l10n.saved_to} $path');
+        _showSnackBar(context.l10n.saved_to(path));
       }
     } catch (error) {
       if (mounted) {

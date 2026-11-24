@@ -97,22 +97,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get no_files_msg => '파일이 아직 없습니다.';
 
   @override
-  String get saved_to => '저장됨';
+  String saved_to(String path) {
+    return '$path에 저장됨';
+  }
 
   @override
-  String get received_in => '받은 날짜';
+  String received_in(String seconds, String speed) {
+    return '$seconds초 만에 수신됨 (${speed}kB/s)';
+  }
 
   @override
   String get large_file => '긴 전송';
 
   @override
-  String get large_file_msg_1 => '이 전송은 크기 때문에 최대';
+  String large_file_msg(String duration) {
+    return '이 전송은 크기 때문에 최대 $duration까지 시간이 걸릴 수 있습니다.';
+  }
 
   @override
-  String get large_file_msg_2 => '까지 시간이 걸릴 수 있습니다.';
-
-  @override
-  String get minutes => '분';
+  String large_file_duration(int minutes) {
+    return '$minutes분';
+  }
 
   @override
   String get image_compression => '이미지 압축';
@@ -132,9 +137,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get receive_anyway => '그래도 받기';
-
-  @override
-  String get to_transfer => '전송';
 
   @override
   String get generating_codes => '코드 생성 중...';
@@ -287,7 +289,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get select_all => '전체 선택';
 
   @override
-  String get selected => '선택됨';
+  String selected(int count) {
+    return '$count개 선택됨';
+  }
 
   @override
   String get delete_files_msg => '선택한 파일을 삭제하시겠습니까?';

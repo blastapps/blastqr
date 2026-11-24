@@ -269,14 +269,14 @@ abstract class AppLocalizations {
   /// No description provided for @saved_to.
   ///
   /// In en, this message translates to:
-  /// **'Saved to'**
-  String get saved_to;
+  /// **'Saved to {path}'**
+  String saved_to(String path);
 
   /// No description provided for @received_in.
   ///
   /// In en, this message translates to:
-  /// **'Received in'**
-  String get received_in;
+  /// **'Received in {seconds}s ({speed}kB/s)'**
+  String received_in(String seconds, String speed);
 
   /// No description provided for @large_file.
   ///
@@ -284,23 +284,17 @@ abstract class AppLocalizations {
   /// **'Long transfer'**
   String get large_file;
 
-  /// No description provided for @large_file_msg_1.
+  /// No description provided for @large_file_msg.
   ///
   /// In en, this message translates to:
-  /// **'This transfer is large and could take up to'**
-  String get large_file_msg_1;
+  /// **'This transfer is large and could take up to {duration} to transfer.'**
+  String large_file_msg(String duration);
 
-  /// No description provided for @large_file_msg_2.
+  /// No description provided for @large_file_duration.
   ///
   /// In en, this message translates to:
-  /// **'to transfer.'**
-  String get large_file_msg_2;
-
-  /// No description provided for @minutes.
-  ///
-  /// In en, this message translates to:
-  /// **'minutes'**
-  String get minutes;
+  /// **'{minutes} minutes'**
+  String large_file_duration(int minutes);
 
   /// No description provided for @image_compression.
   ///
@@ -337,12 +331,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Receive anyway'**
   String get receive_anyway;
-
-  /// No description provided for @to_transfer.
-  ///
-  /// In en, this message translates to:
-  /// **'to transfer'**
-  String get to_transfer;
 
   /// No description provided for @generating_codes.
   ///
@@ -635,8 +623,8 @@ abstract class AppLocalizations {
   /// No description provided for @selected.
   ///
   /// In en, this message translates to:
-  /// **'selected'**
-  String get selected;
+  /// **'{count} selected'**
+  String selected(int count);
 
   /// No description provided for @delete_files_msg.
   ///

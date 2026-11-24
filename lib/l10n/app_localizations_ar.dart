@@ -102,22 +102,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get no_files_msg => 'لا توجد ملفات بعد.';
 
   @override
-  String get saved_to => 'تم الحفظ في';
+  String saved_to(String path) {
+    return 'تم الحفظ في $path';
+  }
 
   @override
-  String get received_in => 'تم الاستلام في';
+  String received_in(String seconds, String speed) {
+    return 'تم الاستلام في ${seconds}s (${speed}kB/s)';
+  }
 
   @override
   String get large_file => 'نقل طويل';
 
   @override
-  String get large_file_msg_1 => 'هذا النقل كبير وقد يستغرق ما يصل إلى';
+  String large_file_msg(String duration) {
+    return 'هذا النقل كبير وقد يستغرق ما يصل إلى $duration لنقله.';
+  }
 
   @override
-  String get large_file_msg_2 => 'لنقله.';
-
-  @override
-  String get minutes => 'دقيقة';
+  String large_file_duration(int minutes) {
+    return '$minutes دقيقة';
+  }
 
   @override
   String get image_compression => 'ضغط الصور';
@@ -137,9 +142,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get receive_anyway => 'استلام على أي حال';
-
-  @override
-  String get to_transfer => 'للنقل';
 
   @override
   String get generating_codes => 'جارٍ إنشاء الرموز...';
@@ -293,7 +295,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get select_all => 'تحديد الكل';
 
   @override
-  String get selected => 'محدد';
+  String selected(int count) {
+    return '$count محدد';
+  }
 
   @override
   String get delete_files_msg =>

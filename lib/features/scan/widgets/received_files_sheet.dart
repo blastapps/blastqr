@@ -22,8 +22,7 @@ Future<bool?> showReceivedFilesSheet(
   final speed = ((transferredBytes / 1000) / timeInSeconds).toStringAsFixed(1);
   return showSheet(
     context: context,
-    title:
-        '${context.l10n.received_in} ${timeInSeconds.toStringAsFixed(1)}s (${speed}kB/s)',
+    title: context.l10n.received_in(timeInSeconds.toStringAsFixed(1), speed),
     body: _ReceivedFilesSheet(
       files: files,
       renameController: renameController,
