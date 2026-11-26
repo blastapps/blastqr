@@ -489,9 +489,10 @@ jobs:
           name: macos-dmg
           path: ${{ env.DMG }}
 
+  # Publish whatever built, even if some platforms failed.
   release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [build, flatpak, cli, android, windows, macos]
+    if: ${{ !cancelled() && needs.test.result == 'success' && startsWith(github.ref, 'refs/tags/') }}
+    needs: [test, build, flatpak, cli, android, windows, macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
