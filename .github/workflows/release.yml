@@ -195,6 +195,18 @@ jobs:
           grep -A1 "path: blastqr-linux.tar.gz" $manifest | grep -q "sha256: $sha"
           echo "BUNDLE=blastqr-${GITHUB_REF_NAME//\//-}-linux-${{ matrix.arch }}.flatpak" >> "$GITHUB_ENV"
 
+      # Overlayfs can't rename directories from the image's lower layers, so
+      # updating the preinstalled runtimes fails with "Invalid cross-device
+      # link". Copying the installations moves them to the writable layer.
+      - name: Make preinstalled runtimes updatable
+        run: |
+          for d in /var/lib/flatpak "$HOME/.local/share/flatpak"; do
+            [ -d "$d" ] || continue
+            cp -a "$d" "$d.new"
+            rm -rf "$d"
+            mv "$d.new" "$d"
+          done
+
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           manifest-path: linux/packaging/dev.blastapps.blastqr.yml
