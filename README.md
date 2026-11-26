@@ -169,7 +169,7 @@ RaptorQ comes from the [raptorq_flutter](https://pub.dev/packages/raptorq_flutte
 
 ## Translations
 
-The app is available in:
+The app is available in the following languages:
 
 - Arabic
 - Catalan
@@ -178,7 +178,8 @@ The app is available in:
 - Spanish
 - Russian (thanks to @okbuddy)
 
-Translations are standard Flutter `.arb` files in `lib/l10n/`. To add a language, copy `app_en.arb`, translate the values and run `flutter gen-l10n` (or just `flutter run`). Pull requests with fixes or new languages are very welcome.
+Contributions to translations are very welcome! 
+Translations are standard Flutter `.arb` files in `lib/l10n/`. To add a language, copy `app_en.arb`, translate the values and send it over. You can open an Issue, make a PR or send an email.
 
 ## AI use disclosure
 
