@@ -12,4 +12,5 @@ const languageNames = {
   'en': 'English',
   'es': 'Español',
   'ko': '한국어',
+  'ru': 'Русский',
 };
