@@ -1,0 +1,3 @@
+- Improved auto-focus. The app should be able to find codes easily.
+- Added russian translation thanks to the contribution from @okbuddy 
+
