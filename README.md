@@ -176,6 +176,7 @@ The app is available in:
 - English
 - Korean
 - Spanish
+- Russian (thanks to @okbuddy)
 
 Translations are standard Flutter `.arb` files in `lib/l10n/`. To add a language, copy `app_en.arb`, translate the values and run `flutter gen-l10n` (or just `flutter run`). Pull requests with fixes or new languages are very welcome.
 
