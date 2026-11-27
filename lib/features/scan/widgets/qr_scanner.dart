@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:blast_qr/features/scan/decode_pool.dart';
+import 'package:blast_qr/features/scan/widgets/code_overlay.dart';
 import 'package:blast_qr/features/scan/scan_camera.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:camera/camera.dart' hide ImageFormat;
@@ -22,6 +23,7 @@ class QrScanner extends StatefulWidget {
     required this.onCodes,
     this.fps,
     this.zoom = 1.0,
+    this.progress = 0,
     this.cropPreview = false,
     this.autoRestart = true,
     this.onCameraChanged,
@@ -37,6 +39,8 @@ class QrScanner extends StatefulWidget {
   /// Starting zoom, clamped to what the camera supports. Pinching starts here.
   final double zoom;
 
+  final double progress;
+
   /// Whether the preview fills the box, cutting off the frame's edges, rather
   /// than showing the whole frame.
   final bool cropPreview;
@@ -45,8 +49,9 @@ class QrScanner extends StatefulWidget {
   /// the page isn't scanning, such as when a sheet covers the preview.
   final bool autoRestart;
 
-  /// Codes read from one frame; never empty.
-  final void Function(Codes codes) onCodes;
+  /// Codes read from one frame; never empty. Returns each code with its
+  /// outcome.
+  final List<ScannedCode> Function(Codes codes) onCodes;
 
   /// The camera once it's ready, or null once it's closed.
   final void Function(CameraController? controller)? onCameraChanged;
@@ -107,7 +112,10 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   /// Set when the system settings were opened to allow the camera, where the
   /// user may pick "Ask every time" rather than allowing it outright.
   bool _askOnReturn = false;
-  Codes _results = Codes();
+  List<ScannedCode> _results = const [];
+
+  /// Kept on screen while the outlines fade out after the codes are lost.
+  List<ScannedCode> _lastResults = const [];
 
   double _zoom = 1.0;
   double _minZoom = 1.0;
@@ -393,7 +401,8 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     final controller = _controller;
     if (controller == null) return Future.value();
     _controller = null;
-    _results = Codes();
+    _results = const [];
+    _lastResults = const [];
     if (notify && mounted) {
       setState(() {});
       widget.onCameraChanged?.call(null);
@@ -476,12 +485,12 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
             );
           }
         }
-        widget.onCodes(codes);
+        final results = widget.onCodes(codes);
         if (!mounted) return;
-        setState(() => _results = codes);
-      } else if (_results.codes.isNotEmpty) {
+        setState(() => _results = _lastResults = results);
+      } else if (_results.isNotEmpty) {
         // Take the last outlines off the screen.
-        setState(() => _results = Codes());
+        setState(() => _results = const []);
       }
       widget.onFrame?.call(decodeTime, image);
     } catch (e) {
@@ -497,9 +506,23 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     }
     final preview = CameraPreview(
       controller,
-      child: _results.codes.isEmpty
+      child: _lastResults.isEmpty
           ? null
-          : _CodeOutlineOverlay(codes: _results.codes, controller: controller),
+          : Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: _results.isEmpty ? 0 : 1,
+                duration: _results.isEmpty
+                    ? const Duration(milliseconds: 400)
+                    : Duration.zero,
+                // Holds briefly so a single empty frame doesn't blink.
+                curve: const Interval(0.3, 1),
+                child: CodeOverlay(
+                  codes: _lastResults,
+                  progress: widget.progress,
+                  controller: controller,
+                ),
+              ),
+            ),
     );
     if (!Platform.isAndroid && !Platform.isIOS) {
       return ColoredBox(
@@ -547,66 +570,4 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       },
     );
   }
-}
-
-class _CodeOutlineOverlay extends StatelessWidget {
-  const _CodeOutlineOverlay({required this.codes, required this.controller});
-
-  final List<Code> codes;
-  final CameraController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: RotatedBox(
-        quarterTurns: _quarterTurns(),
-        child: CustomPaint(
-          painter: _CodeOutlinePainter(
-            codes: codes,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Matches flutter_zxing's MultiResultOverlay rotation.
-  int _quarterTurns() {
-    if (!Platform.isAndroid) return 0;
-    return switch (controller.value.deviceOrientation) {
-      DeviceOrientation.portraitUp || DeviceOrientation.portraitDown => 1,
-      DeviceOrientation.landscapeRight => 2,
-      DeviceOrientation.landscapeLeft => 0,
-    };
-  }
-}
-
-class _CodeOutlinePainter extends CustomPainter {
-  _CodeOutlinePainter({required this.codes, required this.color});
-
-  final List<Code> codes;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-    for (final code in codes) {
-      final pos = code.position;
-      if (pos == null) continue;
-      final scale = size.width / pos.imageWidth;
-      final path = Path()
-        ..moveTo(pos.topLeftX * scale, pos.topLeftY * scale)
-        ..lineTo(pos.topRightX * scale, pos.topRightY * scale)
-        ..lineTo(pos.bottomRightX * scale, pos.bottomRightY * scale)
-        ..lineTo(pos.bottomLeftX * scale, pos.bottomLeftY * scale)
-        ..close();
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CodeOutlinePainter oldDelegate) => true;
 }

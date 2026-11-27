@@ -213,6 +213,8 @@
   "camera_zoom_hint": "Zooming in lets the camera read codes from further away, where it can still focus. Helps on devices that can't focus up close.",
   "crop_camera_preview": "Crop camera preview",
   "crop_camera_preview_hint": "Fills the screen but hides the edges.",
+  "progress_on_codes": "Progress overlay",
+  "progress_on_codes_hint": "Shows a progress bar on top of the scanned QR codes.",
   "advanced": "Advanced",
   "allow_video_hdr": "Allow video HDR",
   "allow_video_hdr_hint": "Off by default. HDR can blend two codes into one frame.",

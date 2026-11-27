@@ -1066,6 +1066,18 @@ abstract class AppLocalizations {
   /// **'Fills the screen but hides the edges.'**
   String get crop_camera_preview_hint;
 
+  /// No description provided for @progress_on_codes.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress overlay'**
+  String get progress_on_codes;
+
+  /// No description provided for @progress_on_codes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows a progress bar on top of the scanned QR codes.'**
+  String get progress_on_codes_hint;
+
   /// No description provided for @advanced.
   ///
   /// In en, this message translates to:

@@ -562,6 +562,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fills the screen but hides the edges.';
 
   @override
+  String get progress_on_codes => 'Progress overlay';
+
+  @override
+  String get progress_on_codes_hint =>
+      'Shows a progress bar on top of the scanned QR codes.';
+
+  @override
   String get advanced => 'Advanced';
 
   @override

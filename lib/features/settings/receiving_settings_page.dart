@@ -180,6 +180,22 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
               );
             },
           ),
+          Consumer<AppSettings>(
+            builder: (context, state, child) {
+              return SwitchListTile.adaptive(
+                contentPadding: const EdgeInsetsDirectional.only(start: 16),
+                value: state.progressOnCodes,
+                onChanged: state.updateProgressOnCodes,
+                secondary: HugeIcon(
+                  icon: HugeIcons.strokeRoundedScan,
+                  color: context.color.onSurface,
+                ),
+                title: Text(context.l10n.progress_on_codes),
+                subtitle: Text(context.l10n.progress_on_codes_hint),
+                activeTrackColor: context.color.primary,
+              );
+            },
+          ),
         ],
       ),
     );
@@ -204,6 +220,7 @@ class _ReceivingSettingsPageState extends State<ReceivingSettingsPage> {
         appSettings.updateDebugExposureMs(null);
         appSettings.updateHapticFeedback(false);
         appSettings.updateSoundFeedback(true);
+        appSettings.updateProgressOnCodes(true);
       },
     );
   }

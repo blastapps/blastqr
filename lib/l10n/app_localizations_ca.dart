@@ -569,6 +569,13 @@ class AppLocalizationsCa extends AppLocalizations {
       'Omple la pantalla però amaga les vores.';
 
   @override
+  String get progress_on_codes => 'Superposició de progrés';
+
+  @override
+  String get progress_on_codes_hint =>
+      'Mostra una barra de progrés sobre els codis QR escanejats.';
+
+  @override
   String get advanced => 'Avançat';
 
   @override

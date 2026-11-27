@@ -569,6 +569,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Llena la pantalla pero oculta los bordes.';
 
   @override
+  String get progress_on_codes => 'Superposición de progreso';
+
+  @override
+  String get progress_on_codes_hint =>
+      'Muestra una barra de progreso sobre los códigos QR escaneados.';
+
+  @override
   String get advanced => 'Avanzado';
 
   @override

@@ -544,6 +544,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get crop_camera_preview_hint => '화면을 채우지만 가장자리가 가려집니다.';
 
   @override
+  String get progress_on_codes => '진행률 오버레이';
+
+  @override
+  String get progress_on_codes_hint => '스캔한 QR 코드 위에 진행률 막대를 표시합니다.';
+
+  @override
   String get advanced => '고급';
 
   @override

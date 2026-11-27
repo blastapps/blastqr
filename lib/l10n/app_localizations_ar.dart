@@ -580,6 +580,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get crop_camera_preview_hint => 'تملأ الشاشة لكنها تخفي الأطراف.';
 
   @override
+  String get progress_on_codes => 'تراكب التقدم';
+
+  @override
+  String get progress_on_codes_hint => 'يعرض شريط تقدم فوق رموز QR الممسوحة.';
+
+  @override
   String get advanced => 'متقدم';
 
   @override

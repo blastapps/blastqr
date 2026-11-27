@@ -11,6 +11,7 @@ import 'package:blast_qr/features/scan/received_file_writer.dart';
 import 'package:blast_qr/features/scan/scan_camera.dart';
 import 'package:blast_qr/features/scan/transfer_tracker.dart';
 import 'package:blast_qr/features/scan/widgets/camera_permission_message.dart';
+import 'package:blast_qr/features/scan/widgets/code_overlay.dart';
 import 'package:blast_qr/features/scan/widgets/feedback_toggles.dart';
 import 'package:blast_qr/features/scan/widgets/focus_ring.dart';
 import 'package:blast_qr/features/scan/widgets/help_message.dart';
@@ -218,6 +219,7 @@ class _ScanPageState extends State<ScanPage> {
                           resolution: _cameraResolution,
                           fps: _cameraFps,
                           zoom: appSettings.cameraZoom,
+                          progress: appSettings.progressOnCodes ? _progress : 0,
                           cropPreview: appSettings.cropCameraPreview,
                           autoRestart: _shouldScan,
                           onCodes: _handleMultiscan,
@@ -348,16 +350,17 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
-  void _handleMultiscan(Codes codes) {
-    codes.codes.forEach(_handleScan);
+  List<ScannedCode> _handleMultiscan(Codes codes) {
+    final results = [for (final code in codes.codes) (code, _handleScan(code))];
     // After handling, so the codes that start a transfer count towards it.
     DecodeStats.instance.recordCodesRead(codes.codes.length);
-    if (codes.codes.isEmpty) return;
+    if (codes.codes.isEmpty) return results;
     if (_focusLocked) {
       _watchLockedFocus(codes.codes);
     } else {
       _lockFocusOnceSteady(codes.codes);
     }
+    return results;
   }
 
   void _lockFocusOnceSteady(List<Code> codes) {
@@ -437,14 +440,14 @@ class _ScanPageState extends State<ScanPage> {
     }
   }
 
-  void _handleScan(Code result) {
+  CodeOutcome _handleScan(Code result) {
     if (!_shouldScan) {
-      return;
+      return CodeOutcome.other;
     }
 
     if (_decoder.complete) {
       _shouldScan = false;
-      return;
+      return CodeOutcome.other;
     }
 
     final (:action, :frame) = _tracker.handle(
@@ -455,22 +458,28 @@ class _ScanPageState extends State<ScanPage> {
     switch (action) {
       case ScanAction.foreign:
         _handleRegularQRCodeResult(result.text);
+        return CodeOutcome.other;
       case ScanAction.updateRequired:
         _showUpdateRequired(context.l10n.update_required_msg);
+        return CodeOutcome.rejected;
       case ScanAction.senderUpdateRequired:
         _showUpdateRequired(context.l10n.sender_update_required_msg);
+        return CodeOutcome.rejected;
       case ScanAction.ignore:
-        break;
+        return CodeOutcome.rejected;
       case ScanAction.switchTransfer:
         _restartTransfer();
         _startTransfer(frame!);
         DecodeStats.instance.recordPacket(frame.data);
+        return CodeOutcome.packet;
       case ScanAction.start:
         _startTransfer(frame!);
         DecodeStats.instance.recordPacket(frame.data);
+        return CodeOutcome.packet;
       case ScanAction.decode:
         _decoder.decodeChunk(frame!);
         DecodeStats.instance.recordPacket(frame.data);
+        return CodeOutcome.packet;
     }
   }
 

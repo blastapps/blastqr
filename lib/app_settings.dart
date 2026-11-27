@@ -21,6 +21,7 @@ class AppSettings extends ChangeNotifier {
   int? cameraFps;
   double cameraZoom;
   bool cropCameraPreview;
+  bool progressOnCodes;
   bool debugVideoHdr;
 
   /// Null for the default capped automatic exposure, 0 for uncapped, and
@@ -45,6 +46,7 @@ class AppSettings extends ChangeNotifier {
       cameraFps = AppPreferences.cameraFps,
       cameraZoom = AppPreferences.cameraZoom,
       cropCameraPreview = AppPreferences.cropCameraPreview,
+      progressOnCodes = AppPreferences.progressOnCodes,
       debugVideoHdr = AppPreferences.debugVideoHdr,
       debugExposureMs = AppPreferences.debugExposureMs,
       hapticFeedback = AppPreferences.hapticFeedback,
@@ -113,6 +115,12 @@ class AppSettings extends ChangeNotifier {
   void updateCropCameraPreview(bool value) {
     AppPreferences.setCropCameraPreview(value);
     cropCameraPreview = value;
+    notifyListeners();
+  }
+
+  void updateProgressOnCodes(bool value) {
+    AppPreferences.setProgressOnCodes(value);
+    progressOnCodes = value;
     notifyListeners();
   }
 

@@ -40,6 +40,7 @@ class AppPreferences {
   static int? _cameraFps;
   static double? _cameraZoom;
   static bool? _cropCameraPreview;
+  static bool? _progressOnCodes;
   static bool? _debugVideoHdr;
   static double? _debugExposureMs;
   static bool? _hapticFeedback;
@@ -69,6 +70,7 @@ class AppPreferences {
   static int? get cameraFps => _cameraFps;
   static double get cameraZoom => _cameraZoom ?? defaultCameraZoom;
   static bool get cropCameraPreview => _cropCameraPreview ?? false;
+  static bool get progressOnCodes => _progressOnCodes ?? true;
   static bool get debugVideoHdr => _debugVideoHdr ?? false;
   static double? get debugExposureMs => _debugExposureMs;
   static bool get hapticFeedback => _hapticFeedback ?? false;
@@ -179,6 +181,12 @@ class AppPreferences {
     _cropCameraPreview = value;
   }
 
+  static Future<void> setProgressOnCodes(bool value) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setBool('progressOnCodes', value);
+    _progressOnCodes = value;
+  }
+
   static Future<void> setHapticFeedback(bool value) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setBool('hapticFeedback', value);
@@ -259,6 +267,7 @@ class AppPreferences {
     _cameraFps = sp.getInt('cameraFps');
     _cameraZoom = sp.getDouble('cameraZoom') ?? defaultCameraZoom;
     _cropCameraPreview = sp.getBool('cropCameraPreview') ?? false;
+    _progressOnCodes = sp.getBool('progressOnCodes') ?? true;
     _debugVideoHdr = sp.getBool('debugVideoHdr') ?? false;
     _debugExposureMs = sp.getDouble('debugExposure');
     _hapticFeedback = sp.getBool('hapticFeedback') ?? false;

@@ -162,6 +162,8 @@
   "camera_zoom_hint": "확대하면 카메라가 초점을 맞출 수 있는 더 먼 거리에서도 코드를 읽을 수 있습니다. 가까이에서 초점을 맞추지 못하는 기기에 도움이 됩니다.",
   "crop_camera_preview": "카메라 미리보기 자르기",
   "crop_camera_preview_hint": "화면을 채우지만 가장자리가 가려집니다.",
+  "progress_on_codes": "진행률 오버레이",
+  "progress_on_codes_hint": "스캔한 QR 코드 위에 진행률 막대를 표시합니다.",
   "advanced": "고급",
   "allow_video_hdr": "비디오 HDR 허용",
   "allow_video_hdr_hint": "기본값은 꺼짐입니다. HDR은 두 코드를 한 프레임에 섞을 수 있습니다.",
