@@ -1,0 +1,2 @@
+- An progress bar overlayed on top of the scanned QR codes is now shown. Can be disabled in settings.
+- New fonts for Korean and Cyrillic alphabets.
