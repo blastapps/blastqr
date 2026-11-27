@@ -82,10 +82,9 @@ class _AcousticSuccessOverlayState extends State<AcousticSuccessOverlay>
           const SizedBox(height: 16),
           Text(
             context.l10n.transfer_complete,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: context.color.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: context.color.onSurface),
           ),
           if (_countdown != null) ...[
             const SizedBox(height: 16),

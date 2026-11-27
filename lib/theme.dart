@@ -82,7 +82,6 @@ ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
     style: ElevatedButton.styleFrom(
       textStyle: pixelTextStyle.copyWith(
         fontSize: 22,
-        fontWeight: FontWeight.bold,
         decoration: TextDecoration.underline,
       ),
       minimumSize: const Size.fromHeight(48),
@@ -100,7 +99,6 @@ OutlinedButtonThemeData outlinedButtonTheme(ColorScheme colorScheme) {
     style: OutlinedButton.styleFrom(
       textStyle: pixelTextStyle.copyWith(
         fontSize: 22,
-        fontWeight: FontWeight.bold,
         decoration: TextDecoration.underline,
       ),
       minimumSize: const Size.fromHeight(48),
@@ -135,14 +133,8 @@ TextButtonThemeData textButtonTheme = TextButtonThemeData(
 
 TextTheme textTheme(ColorScheme colorScheme) {
   return TextTheme(
-    titleLarge: pixelTextStyle.copyWith(
-      fontWeight: FontWeight.bold,
-      fontSize: 28,
-    ),
-    titleMedium: pixelTextStyle.copyWith(
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-    ),
+    titleLarge: pixelTextStyle.copyWith(fontSize: 28),
+    titleMedium: pixelTextStyle.copyWith(fontSize: 20),
     titleSmall: TextStyle(
       fontWeight: FontWeight.bold,
       color: colorScheme.secondary,
