@@ -114,9 +114,6 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
   bool _askOnReturn = false;
   List<ScannedCode> _results = const [];
 
-  /// Kept on screen while the outlines fade out after the codes are lost.
-  List<ScannedCode> _lastResults = const [];
-
   double _zoom = 1.0;
   double _minZoom = 1.0;
   double _maxZoom = 1.0;
@@ -402,7 +399,6 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     if (controller == null) return Future.value();
     _controller = null;
     _results = const [];
-    _lastResults = const [];
     if (notify && mounted) {
       setState(() {});
       widget.onCameraChanged?.call(null);
@@ -487,9 +483,9 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
         }
         final results = widget.onCodes(codes);
         if (!mounted) return;
-        setState(() => _results = _lastResults = results);
+        setState(() => _results = results);
       } else if (_results.isNotEmpty) {
-        // Take the last outlines off the screen.
+        // Lets the overlay fade out the last codes.
         setState(() => _results = const []);
       }
       widget.onFrame?.call(decodeTime, image);
@@ -506,23 +502,13 @@ class QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     }
     final preview = CameraPreview(
       controller,
-      child: _lastResults.isEmpty
-          ? null
-          : Positioned.fill(
-              child: AnimatedOpacity(
-                opacity: _results.isEmpty ? 0 : 1,
-                duration: _results.isEmpty
-                    ? const Duration(milliseconds: 400)
-                    : Duration.zero,
-                // Holds briefly so a single empty frame doesn't blink.
-                curve: const Interval(0.3, 1),
-                child: CodeOverlay(
-                  codes: _lastResults,
-                  progress: widget.progress,
-                  controller: controller,
-                ),
-              ),
-            ),
+      child: Positioned.fill(
+        child: CodeOverlay(
+          codes: _results,
+          progress: widget.progress,
+          controller: controller,
+        ),
+      ),
     );
     if (!Platform.isAndroid && !Platform.isIOS) {
       return ColoredBox(
