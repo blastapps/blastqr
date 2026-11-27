@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/model/file_wrapper.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/file_list_row.dart';
 import 'package:blast_qr/widgets/file_list_selection.dart';
 import 'package:blast_qr/widgets/file_list_tile.dart';
@@ -205,7 +206,7 @@ class _RecentHeader extends StatelessWidget {
           Expanded(
             child: Text(
               context.l10n.recent,
-              style: const TextStyle(fontFamily: 'Jersey25', fontSize: 18),
+              style: pixelTextStyle.copyWith(fontSize: 18),
             ),
           ),
           TextButton(

@@ -1,5 +1,6 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/file_list_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -136,8 +137,7 @@ class SelectionBar extends StatelessWidget {
                     child: Text(
                       context.l10n.selected(controller.count),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Jersey25',
+                      style: pixelTextStyle.copyWith(
                         fontSize: 20,
                         color: color,
                       ),

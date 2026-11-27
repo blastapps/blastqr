@@ -1,6 +1,7 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
 import 'package:blast_qr/platform_support.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/blast_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -215,7 +216,7 @@ class SliderSheetState extends State<SliderSheet> {
             onSubmitted: _onTextChanged,
             textAlign: TextAlign.center,
             autofocus: false,
-            style: const TextStyle(fontFamily: 'Jersey25', fontSize: 32),
+            style: pixelTextStyle.copyWith(fontSize: 32),
           ),
         ),
         Padding(

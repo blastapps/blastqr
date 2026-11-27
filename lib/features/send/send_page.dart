@@ -15,6 +15,7 @@ import 'package:blast_qr/model/file_wrapper.dart';
 import 'package:blast_qr/pick_files.dart';
 import 'package:blast_qr/platform_support.dart';
 import 'package:blast_qr/temp_files.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/bottom_sheets.dart';
 import 'package:blast_qr/widgets/circle_button.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
@@ -393,11 +394,7 @@ class _SendCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontFamily: 'Jersey25',
-                      fontSize: 22,
-                      height: 1,
-                    ),
+                    style: pixelTextStyle.copyWith(fontSize: 22, height: 1),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -80,8 +80,7 @@ class _NoPageTransitionsBuilder extends PageTransitionsBuilder {
 ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      textStyle: const TextStyle(
-        fontFamily: 'Jersey25',
+      textStyle: pixelTextStyle.copyWith(
         fontSize: 22,
         fontWeight: FontWeight.bold,
         decoration: TextDecoration.underline,
@@ -99,8 +98,7 @@ ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) {
 OutlinedButtonThemeData outlinedButtonTheme(ColorScheme colorScheme) {
   return OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
-      textStyle: const TextStyle(
-        fontFamily: 'Jersey25',
+      textStyle: pixelTextStyle.copyWith(
         fontSize: 22,
         fontWeight: FontWeight.bold,
         decoration: TextDecoration.underline,
@@ -137,14 +135,12 @@ TextButtonThemeData textButtonTheme = TextButtonThemeData(
 
 TextTheme textTheme(ColorScheme colorScheme) {
   return TextTheme(
-    titleLarge: const TextStyle(
-      fontFamily: 'Jersey25',
+    titleLarge: pixelTextStyle.copyWith(
       fontWeight: FontWeight.bold,
       fontSize: 28,
     ),
-    titleMedium: const TextStyle(
+    titleMedium: pixelTextStyle.copyWith(
       fontWeight: FontWeight.bold,
-      fontFamily: 'Jersey25',
       fontSize: 20,
     ),
     titleSmall: TextStyle(
@@ -177,10 +173,7 @@ SnackBarThemeData snackBarTheme(ColorScheme colorScheme) {
     behavior: SnackBarBehavior.floating,
     width: 160,
     shape: const StadiumBorder(),
-    contentTextStyle: TextStyle(
-      fontFamily: 'Jersey25',
-      color: colorScheme.onPrimary,
-    ),
+    contentTextStyle: pixelTextStyle.copyWith(color: colorScheme.onPrimary),
   );
 }
 
@@ -194,7 +187,7 @@ ChipThemeData chipTheme(ColorScheme colorScheme) {
     }),
     selectedColor: colorScheme.primary,
     checkmarkColor: colorScheme.onPrimary,
-    labelStyle: TextStyle(fontFamily: 'Jersey25', color: colorScheme.onPrimary),
+    labelStyle: pixelTextStyle.copyWith(color: colorScheme.onPrimary),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadiusGeometry.circular(24),
     ),
@@ -205,3 +198,8 @@ extension BrightnessExtension on Brightness {
   Brightness get opposite =>
       this == Brightness.dark ? Brightness.light : Brightness.dark;
 }
+
+const pixelTextStyle = TextStyle(
+  fontFamily: 'Jersey25',
+  fontFamilyFallback: ['BlastQRHangul'],
+);

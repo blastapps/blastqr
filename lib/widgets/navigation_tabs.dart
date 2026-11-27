@@ -1,4 +1,5 @@
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:flutter/material.dart';
 
 class NavigationTabs extends StatelessWidget {
@@ -62,14 +63,8 @@ class NavigationTabs extends StatelessWidget {
                 child: BottomNavigationBar(
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  selectedLabelStyle: const TextStyle(
-                    fontFamily: 'Jersey25',
-                    fontSize: 16,
-                  ),
-                  unselectedLabelStyle: const TextStyle(
-                    fontFamily: 'Jersey25',
-                    fontSize: 16,
-                  ),
+                  selectedLabelStyle: pixelTextStyle.copyWith(fontSize: 16),
+                  unselectedLabelStyle: pixelTextStyle.copyWith(fontSize: 16),
                   useLegacyColorScheme: false,
                   selectedIconTheme: IconThemeData(
                     color: context.color.primary,

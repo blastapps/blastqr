@@ -1,4 +1,5 @@
 import 'package:blast_qr/color_scheme.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:flutter/material.dart';
 
 class SettingGroupTitle extends StatelessWidget {
@@ -12,11 +13,10 @@ class SettingGroupTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
         title,
-        style: TextStyle(
+        style: pixelTextStyle.copyWith(
           color: context.color.primary,
           fontSize: 17,
           fontWeight: FontWeight.w500,
-          fontFamily: 'Jersey25',
         ),
       ),
     );

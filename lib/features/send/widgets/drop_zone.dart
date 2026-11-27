@@ -1,5 +1,6 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
@@ -53,7 +54,7 @@ class DropZone extends StatelessWidget {
               ),
               Text(
                 context.l10n.drop_files,
-                style: const TextStyle(fontFamily: 'Jersey25', fontSize: 28),
+                style: pixelTextStyle.copyWith(fontSize: 28),
               ),
               Text(
                 context.l10n.drop_files_subtitle,

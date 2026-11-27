@@ -28,6 +28,10 @@ void main(List<String> args) async {
     yield LicenseEntryWithLineBreaks(['Jersey 25'], license);
   });
   LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('fonts/DNFBitBit/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['DNF BitBit'], license);
+  });
+  LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('assets/licenses/raptorq.txt');
     yield LicenseEntryWithLineBreaks(['raptorq'], license);
   });

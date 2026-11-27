@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -118,9 +119,8 @@ class _ScanProgressWidgetState extends State<ScanProgressWidget> {
                                   ),
                                   Text(
                                     '${(widget.progress.clamp(0, 1) * 100).floor()}%',
-                                    style: TextStyle(
+                                    style: pixelTextStyle.copyWith(
                                       fontSize: 16,
-                                      fontFamily: 'Jersey25',
                                       color: context.color.onSurface,
                                       height: 1,
                                     ),
@@ -135,9 +135,8 @@ class _ScanProgressWidgetState extends State<ScanProgressWidget> {
                                         ? context.l10n.keep_scanning_msg
                                         : widget.info,
                                     textAlign: TextAlign.end,
-                                    style: TextStyle(
+                                    style: pixelTextStyle.copyWith(
                                       fontSize: 18,
-                                      fontFamily: 'Jersey25',
                                       color: context.color.onSurface,
                                       height: 1,
                                     ),

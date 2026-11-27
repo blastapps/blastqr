@@ -71,10 +71,14 @@ flutter:
   assets:
     - assets/download-qr.png 
     - fonts/Jersey25/OFL.txt
+    - fonts/DNFBitBit/OFL.txt
     - assets/licenses/raptorq.txt
     - assets/licenses/rustcrypto.txt
     - assets/licenses/subtle.txt
   fonts:
     - family: Jersey25
       fonts:
-        - asset: fonts/Jersey25/Jersey25-Regular.ttf
+        - asset: fonts/Jersey25/Jersey25BlastQR-Regular.ttf
+    - family: BlastQRHangul
+      fonts:
+        - asset: fonts/DNFBitBit/BlastQRHangul-Regular.otf

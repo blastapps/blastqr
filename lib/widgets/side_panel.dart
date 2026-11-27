@@ -1,5 +1,6 @@
 import 'package:blast_qr/color_scheme.dart';
 import 'package:blast_qr/l10n/extension.dart';
+import 'package:blast_qr/theme.dart';
 import 'package:blast_qr/widgets/logo_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -130,11 +131,7 @@ class _SidePanelTile extends StatelessWidget {
               Text(
                 label,
                 maxLines: 1,
-                style: TextStyle(
-                  fontFamily: 'Jersey25',
-                  fontSize: 20,
-                  color: color,
-                ),
+                style: pixelTextStyle.copyWith(fontSize: 20, color: color),
               ),
             ],
           ),
