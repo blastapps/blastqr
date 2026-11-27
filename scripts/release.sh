@@ -75,9 +75,5 @@ git commit -q -m "Release $tag"
 git tag -a "$tag" -F "$changelog"
 
 git push -q origin main "$tag"
-# Skips the wait for the Codeberg mirror, so release builds start right away.
-if git remote get-url github >/dev/null 2>&1; then
-  git push -q github main "$tag" || echo "GitHub push failed; the Codeberg mirror will sync it." >&2
-fi
 
 echo "Released $tag (build $build). Publish the GitHub draft once CI is done."
